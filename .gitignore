@@ -31,3 +31,4 @@ __pycache__/
 *.sqlite3
 .mypy_cache/
 .ruff_cache/
+.pytest_cache/
