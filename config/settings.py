@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
+import urllib.parse
 from pathlib import Path
+from typing import Any
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key-not-for-production")
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY", "dev-secret-key-not-for-production"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("true", "1")
@@ -74,12 +79,55 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+URL_BANCO_COMAPRE = os.environ.get("URL_BANCO_POSTGRES", False)
+
+
+def _parse_db_url(url: Any) -> dict:
+    """Faz o parse de uma URL postgres para dict de configuração Django.
+
+    Args:
+        url: URL postgres ou valor falsy.
+
+    Returns:
+        Configuração de banco no formato esperado por ``DATABASES``.
+        Quando ``url`` é vazia, devolve configuração SQLite em memória.
+    """
+    if not url:
+        print("Usando banco em memória")
+        return {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+
+    if isinstance(url, bytes):
+        url = url.decode("utf-8")
+
+    parsed = urllib.parse.urlparse(str(url))
+    print(f"Usando banco: {parsed}")
+    return {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": parsed.path.lstrip("/"),
+        "USER": parsed.username or "postgres",
+        "PASSWORD": parsed.password or "postgres",
+        "HOST": parsed.hostname or "localhost",
+        "PORT": str(parsed.port or 5432),
     }
+
+
+DATABASES = {
+    "default": _parse_db_url(URL_BANCO_COMAPRE),
 }
+
+EXECUTANDO_TESTES = any(
+    arg in ("test", "pytest") for arg in sys.argv
+) or os.getenv("USE_SQLITE_TEST", "").lower() in ("1", "true")
+
+if EXECUTANDO_TESTES:
+    print("Executando banco de testes")
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",
+    }
 
 
 # Password validation
@@ -87,16 +135,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # noqa: E501
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",  # noqa: E501
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",  # noqa: E501
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",  # noqa: E501
     },
 ]
 
