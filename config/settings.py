@@ -81,7 +81,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 URL_BANCO_COMAPRE = os.environ.get("URL_BANCO_POSTGRES", False)
-print(f"URL_BANCO_COMAPRE={URL_BANCO_COMAPRE}")
 
 
 def _parse_db_url(url: Any) -> dict:
@@ -95,7 +94,6 @@ def _parse_db_url(url: Any) -> dict:
         Quando ``url`` é vazia, devolve configuração SQLite em memória.
     """
     if not url:
-        print("Usando banco em memória")
         return {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": ":memory:",
@@ -105,7 +103,6 @@ def _parse_db_url(url: Any) -> dict:
         url = url.decode("utf-8")
 
     parsed = urllib.parse.urlparse(str(url))
-    print(f"Usando banco: {parsed}")
     return {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": parsed.path.lstrip("/"),
@@ -121,16 +118,16 @@ DATABASES = {
 }
 
 EXECUTANDO_TESTES = any(
-    arg in ("test", "pytest") for arg in sys.argv
+    "test" in arg or "pytest" in arg for arg in sys.argv
 ) or os.getenv("USE_SQLITE_TEST", "").lower() in ("1", "true")
 
 if EXECUTANDO_TESTES:
-    print("Executando banco de testes")
     DATABASES["default"] = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": ":memory:",
     }
 
+print(f'----> #### Usando banco { DATABASES["default"]["ENGINE"]} ####')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
