@@ -1,11 +1,11 @@
-# Environments 
-.env 
-.venv 
-env/ 
-venv/ 
-ENV/ 
-env.bak/ 
-venv.bak/ 
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
 # ==========================================
 # IDEs and Text Editors
@@ -40,3 +40,5 @@ coverage.xml
 htmlcov/
 
 docs/_build/
+
+develop-eggs/

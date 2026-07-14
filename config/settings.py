@@ -44,8 +44,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_spectacular",
-    "apps.core",
     "corsheaders",
+    "apps.core",
 ]
 
 MIDDLEWARE = [
@@ -129,7 +129,7 @@ if EXECUTANDO_TESTES:
         "NAME": ":memory:",
     }
 
-print(f'----> #### Usando banco { DATABASES["default"]["ENGINE"]} ####')
+print(f"----> #### Usando banco {DATABASES['default']['ENGINE']} ####")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
