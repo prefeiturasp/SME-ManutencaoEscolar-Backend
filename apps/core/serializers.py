@@ -1,0 +1,1 @@
+"""Serializers da aplicação Core."""
