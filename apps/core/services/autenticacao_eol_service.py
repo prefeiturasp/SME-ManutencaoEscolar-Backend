@@ -6,7 +6,10 @@ from typing import Any
 
 import requests
 
-from apps.core.constants import ENDPOINT_AUTENTICACAO
+from apps.core.constants import (
+    ENDPOINT_AUTENTICACAO,
+    ENDPOINT_USUARIO_EXISTE_CORESSO,
+)
 from apps.core.exceptions import (
     FalhaAutenticacaoError,
     InternalError,
@@ -56,7 +59,7 @@ class AutenticacaoEOLService:
 
         try:
             logger.info("Iniciando autenticação no EOL. Login: %s", login)
-            response = ApiEOLRepository.post(
+            response = ApiEOLRepository.autentica_usuario(
                 url=url,
                 headers=headers,
                 data=data,
@@ -104,6 +107,35 @@ class AutenticacaoEOLService:
                 "Ocorreu um erro interno durante a autenticação. Tente "
                 "novamente em alguns instantes."
             ) from err
+
+    @classmethod
+    def usuario_existe_no_coresso(cls, login: str) -> bool:
+        """
+        Verifica se um usuário está cadastrado no CoreSSO.
+
+        Realiza uma requisição à API de integração do CoreSSO para verificar
+        se o usuário identificado pelo RF ou CPF informado já possui cadastro
+        no sistema.
+
+        Args:
+            login (str):  login: RF (7 dígitos) ou CPF (11 dígitos) do usuário.
+
+        Returns:
+            bool: ``True`` se o usuário existir no CoreSSO (HTTP 200);
+                caso contrário, retorna ``False``.
+        """
+        headers = {
+            "accept": "text/plain",
+            "x-api-eol-key": SME_API_EOL_TOKEN,
+        }
+        files = {
+            "usuario": (None, login),
+        }
+        url = f"{SME_API_EOL_URL}{ENDPOINT_USUARIO_EXISTE_CORESSO}"
+        response = ApiEOLRepository.usuario_existe(
+            url, headers=headers, files=files
+        )
+        return response.status_code == 200
 
     @staticmethod
     def _valida_credenciais(login: str, senha: str) -> None:

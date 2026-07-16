@@ -28,3 +28,20 @@ class ApiEOLRepository:
             data=data,
             timeout=10,
         )
+
+    @classmethod
+    def autentica_usuario(
+        cls, url: str, headers: dict[str, str], data: str
+    ) -> requests.Response:
+        return cls.post(url, headers=headers, data=data)
+
+    @staticmethod
+    def usuario_existe(
+        url: str, headers: dict[str, str], files: dict[str, tuple[None, str]]
+    ) -> requests.Response:
+        return requests.post(
+            url,
+            headers=headers,
+            files=files,
+            timeout=10,
+        )
