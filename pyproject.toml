@@ -62,6 +62,16 @@ django_settings_module = "config.settings"
 
 [tool.coverage.run]
 source = ["apps"]
+omit = [
+    "*/tests/*",
+    "*/tests.py",
+    "*/test_*.py",
+    "*/conftest.py",
+    "apps/*/tests/*",
+    "apps/*/tests.py",
+    "apps/*/test_*.py",
+    "apps/*/migrations/*",
+]
 
 [tool.coverage.report]
 show_missing = true

@@ -9,4 +9,5 @@ pytest>=8.3,<9
 pytest-django>=4.9,<5
 pytest-cov>=5.0,<7
 sphinx>=8.1,<9
-debugpy
+debugpy==1.8,<2
+types-requests==2.32.4.20260107
