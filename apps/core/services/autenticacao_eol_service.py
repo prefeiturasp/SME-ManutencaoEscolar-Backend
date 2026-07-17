@@ -25,7 +25,7 @@ class AutenticacaoEOLService:
     """Serviço para autenticação de usuários no EOL."""
 
     @classmethod
-    def autentica(cls, login: str, senha: str) -> dict[str, Any]:
+    def autentica(cls, login: object, senha: object) -> dict[str, Any]:
         """
         Realiza a autenticação de um usuário no serviço EOL da SME.
 
@@ -34,8 +34,8 @@ class AutenticacaoEOLService:
         processa a resposta retornada.
 
         Args:
-            login (str): Identificador do usuário (RF ou CPF).
-            senha (str): Senha utilizada para autenticação.
+            login (object): Identificador do usuário (RF ou CPF).
+            senha (object): Senha utilizada para autenticação.
 
         Returns:
             dict[str, Any]: Dados retornados pelo EOL após a autenticação
@@ -138,13 +138,13 @@ class AutenticacaoEOLService:
         return response.status_code == 200
 
     @staticmethod
-    def _valida_credenciais(login: str, senha: str) -> None:
+    def _valida_credenciais(login: object, senha: object) -> None:
         """
         Valida os dados de autenticação informados pelo usuário.
 
         Args:
-            login (str): Login do usuário (RF ou CPF).
-            senha (str): Senha do usuário.
+            login (object): Login do usuário (RF ou CPF).
+            senha (object): Senha do usuário.
 
         Raises:
             FalhaAutenticacaoError: Caso o login ou a senha não sejam
@@ -199,14 +199,14 @@ class AutenticacaoEOLService:
 
     @staticmethod
     def _tratar_resposta(
-        response: requests.Response, login: str
+        response: requests.Response, login: object
     ) -> dict[str, Any]:
         """
         Processa a resposta retornada pelo serviço de autenticação EOL.
 
         Args:
             response (requests.Response): Resposta HTTP retornada pela API.
-            login (str): Login utilizado na tentativa de autenticação.
+            login (object): Login utilizado na tentativa de autenticação.
 
         Raises:
             FalhaAutenticacaoError:  Quando as credenciais informadas são

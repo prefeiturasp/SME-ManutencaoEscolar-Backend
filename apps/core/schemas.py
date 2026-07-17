@@ -39,8 +39,8 @@ LOGIN = extend_schema(
                 OpenApiExample(
                     "Sucesso",
                     value={
-                        "token": "eyJhbGciOiJIUzI1NiIs...",
-                        "refresh": "eyJhbGciOiJIUzI1NiIs...",
+                        "token": "token",
+                        "refresh": "refresh",
                         "usuario": {
                             "nome": "João Silva",
                             "rf_cpf": "1234567",
