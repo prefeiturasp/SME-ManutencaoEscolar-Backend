@@ -12,5 +12,5 @@ class AutenticacaoSerializer(serializers.Serializer):
     autenticação e não é retornado na resposta da API.
     """
 
-    login = serializers.CharField(max_length=11)
-    senha = serializers.CharField(write_only=True)
+    login = serializers.CharField(max_length=11, min_length=7, required=True)
+    senha = serializers.CharField(write_only=True, min_length=8, required=True)
