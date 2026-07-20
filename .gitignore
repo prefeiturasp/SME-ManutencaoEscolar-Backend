@@ -42,3 +42,10 @@ htmlcov/
 docs/_build/
 
 develop-eggs/
+
+# ==========================================
+# IA instructions and prompts
+# ==========================================
+specs/
+instructions/
+prompts/
