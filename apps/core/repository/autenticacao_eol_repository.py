@@ -29,6 +29,25 @@ class ApiEOLRepository:
             timeout=10,
         )
 
+    @staticmethod
+    def get(url: str, headers: dict[str, str]) -> requests.Response:
+        """
+        Realiza uma requisição GET ao serviço EOL.
+
+        Args:
+            url (str): URL completa do endpoint.
+            headers (dict[str, str]): Cabeçalhos HTTP enviados na requisição.
+
+        Returns:
+            requests.Response: Resposta HTTP retornada pelo serviço
+                EOL.
+        """
+        return requests.get(
+            url,
+            headers=headers,
+            timeout=10,
+        )
+
     @classmethod
     def autentica_usuario(
         cls, url: str, headers: dict[str, str], data: str

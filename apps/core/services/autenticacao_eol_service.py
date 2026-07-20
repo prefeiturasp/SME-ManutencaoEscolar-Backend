@@ -5,6 +5,7 @@ import logging
 from typing import Any
 
 import requests
+from rest_framework import status
 
 from apps.core.constants import (
     ENDPOINT_AUTENTICACAO,
@@ -218,14 +219,14 @@ class AutenticacaoEOLService:
         Returns:
             dict[str, Any]: Conteúdo da resposta convertido para dicionário.
         """
-        if response.status_code == 401:
+        if response.status_code == status.HTTP_401_UNAUTHORIZED:
             logger.warning("Credenciais inválidas para login: %s", login)
             raise FalhaAutenticacaoError(
                 "Não foi possível autenticar o usuário. Verifique o login e "
                 "a senha informados."
             )
 
-        if response.status_code == 429:
+        if response.status_code == status.HTTP_429_TOO_MANY_REQUESTS:
             logger.warning("Rate limit atingido para login: %s", login)
             raise SmeIntegracaoError(
                 "Foram realizadas muitas tentativas de autenticação. Aguarde "
@@ -256,3 +257,64 @@ class AutenticacaoEOLService:
             ) from err
 
         return response_data
+
+    @classmethod
+    def buscar_cargos(cls, registro_funcional: str) -> str:
+        """Consulta cargos de um servidor na SME pelo RF.
+
+        Args:
+            registro_funcional (str): Registro funcional do servidor.
+
+        Returns:
+            str: Nome do cargo base do servidor.
+
+        Raises:
+            SmeIntegracaoError: Quando a consulta falha.
+        """
+        url = f"{SME_API_EOL_URL}/funcionarios/cargo/{registro_funcional}"
+        headers = cls._obter_headers()
+        response = ApiEOLRepository.get(url=url, headers=headers)
+
+        if response.status_code != status.HTTP_200_OK:
+            logger.error(
+                "Erro ao consultar cargos. Status: %s | Body: %s",
+                response.status_code,
+                response.text,
+            )
+            raise SmeIntegracaoError("Erro ao consultar cargos do servidor")
+
+        dados: list = response.json()
+        cargo: dict = (
+            dados[0] if isinstance(dados, list) and len(dados) >= 1 else {}
+        )
+        nome_cargo: str = cargo.get("cargoBase", "Não informado")
+        return nome_cargo
+
+    @classmethod
+    def dados_usuario(cls, registro_funcional: str) -> dict[str, str]:
+        """Consulta dados de um servidor na SME pelo RF.
+
+        Args:
+            registro_funcional (str): Registro funcional do servidor.
+
+        Returns:
+            dict: Dados do usuário retornados pela API.
+
+        Raises:
+            SmeIntegracaoError: Quando a consulta falha.
+        """
+        url = (
+            f"{SME_API_EOL_URL}/AutenticacaoCOMAPRE/{registro_funcional}/dados"
+        )
+        headers = cls._obter_headers()
+        response = ApiEOLRepository.get(url=url, headers=headers)
+
+        if response.status_code != status.HTTP_200_OK:
+            logger.error(
+                "Erro ao consultar cargos. Status: %s | Body: %s",
+                response.status_code,
+                response.text,
+            )
+            raise SmeIntegracaoError("Erro ao consultar dados do servidor")
+        informacoes: dict = response.json()
+        return informacoes
