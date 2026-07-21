@@ -10,7 +10,7 @@ class FornecedorRepository:
 
     model = Fornecedor
 
-    def create(self, dados: dict[str, Any]) -> Fornecedor:
+    def criar(self, dados: dict[str, Any]) -> Fornecedor:
         fornecedor = self.model(**dados)
         fornecedor.full_clean()
         fornecedor.save()

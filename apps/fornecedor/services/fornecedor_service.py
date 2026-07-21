@@ -23,4 +23,4 @@ class FornecedorService:
         self.repository = repository or FornecedorRepository()
 
     def criar(self, dados: dict[str, Any]) -> Fornecedor:
-        return self.repository.create(dados)
+        return self.repository.criar(dados)
