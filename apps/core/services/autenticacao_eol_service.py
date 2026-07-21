@@ -259,14 +259,14 @@ class AutenticacaoEOLService:
         return response_data
 
     @classmethod
-    def buscar_cargos(cls, registro_funcional: str) -> str:
+    def buscar_cargos(cls, registro_funcional: str) -> dict:
         """Consulta cargos de um servidor na SME pelo RF.
 
         Args:
             registro_funcional (str): Registro funcional do servidor.
 
         Returns:
-            str: Nome do cargo base do servidor.
+            dict: Nome  e código do cargo base do servidor.
 
         Raises:
             SmeIntegracaoError: Quando a consulta falha.
@@ -287,7 +287,10 @@ class AutenticacaoEOLService:
         cargo: dict = (
             dados[0] if isinstance(dados, list) and len(dados) >= 1 else {}
         )
-        nome_cargo: str = cargo.get("cargoBase", "Não informado")
+        nome_cargo = {
+            "nome_cargo": cargo.get("cargoBase", "Não informado"),
+            "codigo_cargo": cargo.get("cdCargoBase", "Não informado"),
+        }
         return nome_cargo
 
     @classmethod

@@ -8,7 +8,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from apps.core.exceptions import (
@@ -19,6 +18,8 @@ from apps.core.exceptions import (
 from apps.core.schemas import LOGIN
 from apps.core.serializers import AutenticacaoSerializer
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
+from apps.core.services.token_service import TokenService
+from apps.usuarios.services.usuario_service import UsuarioService
 
 DADO_NAO_INFORMADO = "Não informado"
 
@@ -64,31 +65,36 @@ class LoginView(TokenObtainPairView):
                 login=login,
                 senha=senha,
             )
-            cargo = AutenticacaoEOLService.buscar_cargos(
+            informaoes_cargo = AutenticacaoEOLService.buscar_cargos(
                 registro_funcional=dados_autenticacao["codigoRf"]
             )
             dados_usuario = AutenticacaoEOLService.dados_usuario(
                 dados_autenticacao["codigoRf"]
             )
-            refresh = RefreshToken()
-            refresh["codigo_rf"] = dados_autenticacao["codigoRf"]
-            refresh["nome"] = dados_autenticacao["nome"]
-            access = refresh.access_token
+            usuario = UsuarioService.sincronizar_usuario(
+                nome=dados_usuario["nome"],
+                email=dados_usuario["email"],
+                registro_funcional=dados_usuario["codigo_rf"],
+                cpf=dados_usuario["cpf"],
+                codigo_cargo=informaoes_cargo["codigo_cargo"],
+                nome_cargo=informaoes_cargo["nome_cargo"],
+            )
+            token = TokenService.gerar_tokens(usuario["id"])
             response = {
-                "refresh": str(refresh),
-                "access": str(access),
+                "refresh": token["refresh"],
+                "access": token["access"],
                 "dados_usuario": {
-                    "nome": dados_autenticacao.get("nome", DADO_NAO_INFORMADO),
-                    "codigo_rf_ou_cpf": dados_autenticacao.get(
+                    "nome": dados_usuario.get("nome", DADO_NAO_INFORMADO),
+                    "codigo_rf_ou_cpf": dados_usuario.get(
                         "codigoRf", DADO_NAO_INFORMADO
                     ),
-                    "cargo": cargo,
                     "diretoria_regional": dados_usuario.get(
                         "dre", DADO_NAO_INFORMADO
                     ),
                     "unidade_educacional": dados_usuario.get(
                         "nomeUe", DADO_NAO_INFORMADO
                     ),
+                    "permissao": dados_usuario["cargo"],
                 },
             }
 
