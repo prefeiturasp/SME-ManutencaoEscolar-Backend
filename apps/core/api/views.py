@@ -93,9 +93,9 @@ class LoginView(TokenObtainPairView):
             }
 
             return Response(response, status=status.HTTP_200_OK)
-        except FalhaAutenticacaoError as exc:
+        except FalhaAutenticacaoError:
             return Response(
-                {"detail": str(exc)},
+                {"detail": "Usuário e/ou senha inválida"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
@@ -105,8 +105,11 @@ class LoginView(TokenObtainPairView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        except InternalError as exc:
+        except InternalError:
             return Response(
-                {"detail": str(exc)},
+                {
+                    "detail": "Parece que estamos com uma instabilidade no "
+                    "momento. Tente entrar novamente daqui a pouco."
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
