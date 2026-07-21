@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "apps.core",
+    "apps.usuarios",
 ]
 
 MIDDLEWARE = [
@@ -154,7 +155,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+AUTH_USER_MODEL = "usuarios.Usuario"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -164,7 +165,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ),
 }
-
+# VERIFICAR ISSO SOBRE BLACK_LIST "rest_framework_simplejwt.token_blacklist"
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
