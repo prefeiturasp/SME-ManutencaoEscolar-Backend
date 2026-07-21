@@ -49,4 +49,4 @@ class Fornecedor(BaseModel):
         ]
 
     def __str__(self) -> str:
-        return f"{self.nome} ({self.cnpj})"
+        return f"{self.nome} - {self.cnpj}"
