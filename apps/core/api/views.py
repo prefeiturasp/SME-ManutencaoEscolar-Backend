@@ -99,9 +99,12 @@ class LoginView(TokenObtainPairView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        except SmeIntegracaoError as exc:
+        except SmeIntegracaoError:
             return Response(
-                {"detail": str(exc)},
+                {
+                    "detail": "Parece que estamos com uma instabilidade no "
+                    "momento. Tente entrar novamente daqui a pouco."
+                },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
