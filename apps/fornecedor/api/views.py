@@ -11,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet
 from apps.fornecedor.models import Fornecedor
 from apps.fornecedor.schemas import FORNECEDOR_SCHEMA
 from apps.fornecedor.serializers import (
-    FornecedorCreateSerializer,
+    FornecedorCriarSerializer,
     FornecedorSerializer,
 )
 from apps.fornecedor.services.fornecedor_service import (
@@ -37,7 +37,7 @@ class FornecedorViewSet(ModelViewSet):
     # ---- serializer por ação ----
     def get_serializer_class(self) -> type[BaseSerializer]:
         if self.action == "create":
-            return FornecedorCreateSerializer
+            return FornecedorCriarSerializer
         return FornecedorSerializer
 
     def perform_create(self, serializer: BaseSerializer) -> None:

@@ -37,7 +37,7 @@ class FornecedorSerializer(serializers.ModelSerializer):
         )
 
 
-class FornecedorCreateSerializer(serializers.ModelSerializer):
+class FornecedorCriarSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de fornecedores."""
 
     class Meta:
