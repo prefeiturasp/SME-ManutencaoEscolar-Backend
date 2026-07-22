@@ -11,7 +11,7 @@ from django.utils import timezone
 class UUIDMixin(models.Model):
     """Mixin para adicionar um campo UUID como chave primária."""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
 
     class Meta:
         abstract = True

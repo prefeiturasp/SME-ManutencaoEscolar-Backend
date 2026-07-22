@@ -20,9 +20,8 @@ def usuario_teste(db):
 
 class TestUUIDMixin:
     def test_uuid_mixin_configura_campo_id_corretamente(self):
-        field = ModelBase._meta.get_field("id")
+        field = ModelBase._meta.get_field("uuid")
         assert isinstance(field, models.UUIDField)
-        assert field.primary_key is True
         assert field.default == uuid.uuid4
         assert field.editable is False
 

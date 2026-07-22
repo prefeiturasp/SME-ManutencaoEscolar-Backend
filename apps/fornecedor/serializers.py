@@ -23,6 +23,7 @@ class FornecedorSerializer(serializers.ModelSerializer):
         model = Fornecedor
         fields = (
             "id",
+            "uuid",
             "nome",
             "cnpj",
             "status",
