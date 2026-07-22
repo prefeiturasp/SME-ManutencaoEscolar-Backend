@@ -117,7 +117,9 @@ class TestValidarFormatoLinkRastreio:
 
     def test_deve_aceitar_link_http(self) -> None:
         """Valida aceitação de link HTTP."""
-        validar_formato_link_rastreio("http://rastreamento.exemplo.com.br")
+        validar_formato_link_rastreio(
+            "http://rastreamento.exemplo.com.br"  # NOSONAR - HTTP
+        )
 
     def test_deve_aceitar_link_https(self) -> None:
         """Valida aceitação de link HTTPS."""
@@ -132,7 +134,7 @@ class TestValidarFormatoLinkRastreio:
         [
             "",  # Vazio
             "www.exemplo.com.br",  # Sem protocolo
-            "ftp://exemplo.com.br",  # Protocolo não suportado
+            "ftp://exemplo.com.br",  # NOSONAR - HTTP
             "https://exemplo link.com.br",  # Com espaço
         ],
     )
