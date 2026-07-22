@@ -12,6 +12,11 @@ class TestFornecedorRepository:
     """Testes para o repositório de fornecedores."""
 
     def test_criar_chama_full_clean_e_save(self, fornecedor_payload_valido):
+        """
+        Retorno dos dados do fornecedor.
+
+        Deve retornar os dados em formato de dicionário.
+        """
         repository = FornecedorRepository()
 
         with (
@@ -20,8 +25,8 @@ class TestFornecedorRepository:
         ):
             fornecedor = repository.criar(fornecedor_payload_valido)
 
-        assert isinstance(fornecedor, Fornecedor)
-        assert fornecedor.nome == fornecedor_payload_valido["nome"]
-        assert fornecedor.cnpj == fornecedor_payload_valido["cnpj"]
+        assert isinstance(fornecedor, dict)
+        assert fornecedor["nome"] == fornecedor_payload_valido["nome"]
+        assert fornecedor["cnpj"] == fornecedor_payload_valido["cnpj"]
         mock_full_clean.assert_called_once_with()
         mock_save.assert_called_once_with()

@@ -6,8 +6,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from rest_framework import status
 
-from apps.fornecedor.models import Fornecedor
-from apps.fornecedor.services.fornecedor_service import (
+from apps.fornecedor.exceptions import (
     FornecedorCnpjDuplicadoError,
 )
 
@@ -32,9 +31,15 @@ def test_criacao_retorna_fornecedor(api_client, fornecedor_payload_valido):
 
     Verifica se o retorno é correto.
     """
-    fornecedor = Fornecedor(**fornecedor_payload_valido)
+    fornecedor = {
+        **fornecedor_payload_valido,
+        "id": 1,
+        "uuid": "7ef06bb8-418f-43d1-bfe8-c392f13a2b1f",
+        "status": True,
+    }
 
     def criar(dados):
+        """Simula o retorno do serviço durante a criação do fornecedor."""
         assert dados == fornecedor_payload_valido
         return fornecedor
 

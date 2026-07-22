@@ -27,6 +27,7 @@ class TestFornecedorSerializer:
 
         assert set(serializer.fields.keys()) == {
             "id",
+            "uuid",
             "nome",
             "cnpj",
             "status",
