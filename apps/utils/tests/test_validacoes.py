@@ -46,7 +46,9 @@ class TestFormataCnpj:
 
     def test_deve_retornar_string_vazia_para_none(self) -> None:
         """Valida retorno vazio quando input é None."""
-        resultado = formata_cnpj(None)
+        resultado = formata_cnpj(
+            None  # NOSONAR - teste explícito de entrada None
+        )
 
         assert resultado == ""
 
