@@ -12,10 +12,16 @@ from .conftest import ModelBase
 User = get_user_model()
 
 
+password = str(uuid.uuid4())
+
+
 @pytest.fixture
 def usuario_teste(db):
     """Fixture que cria um usuário de teste."""
-    return User.objects.create_user(username="teste", password="senha123")
+    return User.objects.create_user(
+        username="teste",
+        password=password,
+    )
 
 
 class TestUUIDMixin:
@@ -45,7 +51,7 @@ class TestAuditMixin:
     ):
         obj = ModelBase.objects.create(nome="Teste", criado_por=usuario_teste)
         novo_usuario = User.objects.create_user(
-            username="novo_usuario", password="senha123"
+            username="novo_usuario", password=password
         )
 
         obj.atualizado_por = novo_usuario
