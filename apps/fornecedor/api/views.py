@@ -8,16 +8,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import ModelViewSet
 
+from apps.fornecedor.exceptions import FornecedorCnpjDuplicadoError
 from apps.fornecedor.models import Fornecedor
 from apps.fornecedor.schemas import FORNECEDOR_SCHEMA
 from apps.fornecedor.serializers import (
     FornecedorCriarSerializer,
     FornecedorSerializer,
 )
-from apps.fornecedor.services.fornecedor_service import (
-    FornecedorCnpjDuplicadoError,
-    FornecedorService,
-)
+from apps.fornecedor.services.fornecedor_service import FornecedorService
 
 
 @FORNECEDOR_SCHEMA
