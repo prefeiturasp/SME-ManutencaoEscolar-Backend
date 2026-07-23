@@ -21,10 +21,6 @@ from apps.core.serializers import (
     LoginResponseSerializer,
 )
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
-from apps.core.services.token_service import TokenService
-from apps.usuarios.services.usuario_service import UsuarioService
-
-DADO_NAO_INFORMADO = "Não informado"
 
 
 class HealthCheckView(APIView):
@@ -65,35 +61,13 @@ class LoginView(TokenObtainPairView):
         login = serializer.validated_data["login"]
         senha = serializer.validated_data["senha"]
         try:
-            dados_autenticacao = AutenticacaoEOLService.autentica(
+            dados_autenticacao = AutenticacaoEOLService.login(
                 login=login,
                 senha=senha,
             )
-            codigo_rf = dados_autenticacao["codigoRf"]
-            informaoes_cargo = AutenticacaoEOLService.buscar_cargos(
-                registro_funcional=codigo_rf
+            response_serializer = LoginResponseSerializer(
+                data=dados_autenticacao
             )
-            dados_usuario = AutenticacaoEOLService.dados_usuario(codigo_rf)
-            dados_usuario["codigo_rf"] = codigo_rf
-            usuario = UsuarioService.sincronizar_usuario(
-                dados_usuario=dados_usuario,
-                dados_cargo=informaoes_cargo,
-            )
-            token = TokenService.gerar_tokens(usuario["id"])
-            dict_usuario = {
-                "refresh": token["refresh"],
-                "access": token["access"],
-                "usuario": {
-                    **usuario,
-                    "diretoria_regional": dados_usuario.get(
-                        "dre", DADO_NAO_INFORMADO
-                    ),
-                    "unidade_educacional": dados_usuario.get(
-                        "nomeUe", DADO_NAO_INFORMADO
-                    ),
-                },
-            }
-            response_serializer = LoginResponseSerializer(data=dict_usuario)
             response_serializer.is_valid(raise_exception=True)
 
             return Response(

@@ -43,4 +43,4 @@ class LoginResponseSerializer(serializers.Serializer):
 
     refresh = serializers.CharField(help_text="Token JWT de atualização.")
     access = serializers.CharField(help_text="Token JWT de acesso.")
-    dados_usuario = UsuarioResponseSerializer
+    usuario = UsuarioResponseSerializer()

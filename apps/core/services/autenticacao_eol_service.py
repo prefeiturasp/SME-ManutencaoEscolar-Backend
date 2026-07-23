@@ -16,9 +16,12 @@ from apps.core.exceptions import (
     SmeIntegracaoError,
 )
 from apps.core.repository.autenticacao_eol_repository import ApiEOLRepository
+from apps.core.services.token_service import TokenService
+from apps.usuarios.services.usuario_service import UsuarioService
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
 
 logger = logging.getLogger(__name__)
+DADO_NAO_INFORMADO = "Não informado"
 
 
 class AutenticacaoEOLService:
@@ -226,8 +229,8 @@ class AutenticacaoEOLService:
             else {}
         )
         informacoes_cargo: dict = {
-            "nome_cargo": cargo.get("cargoBase", "Não informado"),
-            "codigo_cargo": cargo.get("cdCargoBase", "Não informado"),
+            "nome_cargo": cargo.get("cargoBase", DADO_NAO_INFORMADO),
+            "codigo_cargo": cargo.get("cdCargoBase", DADO_NAO_INFORMADO),
         }
         return informacoes_cargo
 
@@ -259,3 +262,32 @@ class AutenticacaoEOLService:
             raise
 
         return response
+
+    @classmethod
+    def login(cls, login: object, senha: object) -> dict[str, Any]:
+        dados_autenticacao = cls.autentica(
+            login=login,
+            senha=senha,
+        )
+        codigo_rf = dados_autenticacao["codigoRf"]
+        informaoes_cargo = cls.buscar_cargos(registro_funcional=codigo_rf)
+        dados_usuario = cls.dados_usuario(codigo_rf)
+        dados_usuario["codigo_rf"] = codigo_rf
+        usuario = UsuarioService.sincronizar_usuario(
+            dados_usuario=dados_usuario,
+            dados_cargo=informaoes_cargo,
+        )
+        token = TokenService.gerar_tokens(usuario["id"])
+        return {
+            "refresh": token["refresh"],
+            "access": token["access"],
+            "usuario": {
+                **usuario,
+                "diretoria_regional": dados_usuario.get(
+                    "dre", DADO_NAO_INFORMADO
+                ),
+                "unidade_educacional": dados_usuario.get(
+                    "nomeUe", DADO_NAO_INFORMADO
+                ),
+            },
+        }
