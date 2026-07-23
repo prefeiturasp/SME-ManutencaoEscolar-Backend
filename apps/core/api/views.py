@@ -33,7 +33,8 @@ class HealthCheckView(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
-        summary="Endpoint de Health Check 2",
+        auth=[],
+        summary="Endpoint de Health Check",
         description=(
             "Retorna o status atual da aplicação para os "
             "orquestradores de cluster."

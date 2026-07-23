@@ -6,53 +6,59 @@ from drf_spectacular.utils import (
     extend_schema,
 )
 
+from apps.core.serializers import (
+    AutenticacaoSerializer,
+    LoginResponseSerializer,
+)
+
 LOGIN = extend_schema(
+    auth=[],
     tags=["Autenticação"],
     summary="Login do usuário",
-    description="Autentica o usuário via CoreSSO e retorna token JWT",
+    description="Autentica o usuário via CoreSSO e retorna token JWT.",
     operation_id="autenticarUsuario",
-    parameters=[],
-    request={
-        "application/json": {
-            "type": "object",
-            "required": ["login", "senha"],
-            "properties": {
-                "login": {
-                    "type": "string",
-                    "description": "RF (7 dígitos) ou CPF (11 dígitos) do "
-                    "usuário",
-                    "example": "1234567",
-                },
-                "senha": {
-                    "type": "string",
-                    "description": "Senha do sistema EOL/CoreSSO",
-                    "format": "password",
-                    "example": "********",
-                },
-            },
-        }
-    },
+    request=AutenticacaoSerializer,
     responses={
-        200: OpenApiResponse(
-            description="Login realizado com sucesso",
-            examples=[
-                OpenApiExample(
-                    "Sucesso",
-                    value={
-                        "token": "token",
-                        "refresh": "refresh",
-                        "usuario": {
-                            "nome": "João Silva",
-                            "rf_cpf": "1234567",
-                            "email": "joao@email.com",
-                            "perfil": "SME",
-                        },
-                    },
-                )
-            ],
-        ),
+        200: LoginResponseSerializer,
         400: OpenApiResponse(description="Dados inválidos"),
         401: OpenApiResponse(description="Credenciais inválidas"),
+        503: OpenApiResponse(description="Instabilidade"),
         500: OpenApiResponse(description="Erro no servidor"),
     },
+    examples=[
+        OpenApiExample(
+            name="Exemplo de autenticação",
+            request_only=True,
+            value={
+                "login": "1234567",
+                "senha": "********",
+            },
+        ),
+        OpenApiExample(
+            name="Login realizado com sucesso",
+            response_only=True,
+            value={
+                "refresh": "<jwt-refresh>",
+                "access": "<jwt-access>",
+                "dados_usuario": {
+                    "id": 1,
+                    "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
+                    "nome": "Fulano da Silva",
+                    "email": "fulano@emial.com",
+                    "registro_funcional": "1234567",
+                    "cpf": "12345678901",
+                    "username": "1234567",
+                    "perfil_acesso": {
+                        "cargo": "DIRETOR DE ESCOLA",
+                        "perfil": {
+                            "codigo": "UE",
+                            "descricao": "Diretor Unidade Educacional",
+                        },
+                    },
+                    "diretoria_regional": "DRE Exemplo",
+                    "unidade_educacional": "EMEF Exemplo",
+                },
+            },
+        ),
+    ],
 )
