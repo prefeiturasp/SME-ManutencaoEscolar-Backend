@@ -4,6 +4,7 @@ from typing import Any
 
 from django.db import transaction
 
+from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models import CargoEOL, Usuario
 
 
@@ -14,24 +15,25 @@ class UsuarioRepository:
     @transaction.atomic
     def atualizar_ou_criar(
         cls,
-        *,
-        nome: str,
-        email: str,
-        registro_funcional: str | None,
-        cpf: str | None,
+        dados_usuario: dict[str, Any],
         codigo_cargo: str,
     ) -> dict[str, Any]:
         """Atualiza ou cria um usuário utilizando RF ou CPF."""
         filtros: dict[str, Any] = {}
+        nome = dados_usuario["nome"]
+        email = dados_usuario["email"]
+        registro_funcional = dados_usuario["codigo_rf"]
+        cpf = dados_usuario["cpf"]
         username = registro_funcional or cpf
         if username is None:
             raise ValueError("É necessário fornecer registro_funcional ou cpf")
 
-        cargo = CargoEOL.objects.get(codigo=codigo_cargo)
-        if registro_funcional:
+        if registro_funcional and len(registro_funcional) == 7:
             filtros["registro_funcional"] = registro_funcional
         else:
-            filtros["cpf"] = cpf
+            filtros["cpf"] = registro_funcional or cpf
+
+        cargo = CargoEOL.objects.get(codigo=codigo_cargo)
         usuario, criado = Usuario.objects.get_or_create(
             defaults={
                 "nome": nome,
@@ -62,6 +64,13 @@ class UsuarioRepository:
             "email": usuario.email,
             "registro_funcional": usuario.registro_funcional,
             "cpf": usuario.cpf,
-            "cargo_id": usuario.cargo_id,
+            "username": usuario.username,
+            "perfil_acesso": {
+                "cargo": usuario.cargo.nome,
+                "perfil": {
+                    "codigo": usuario.perfil,
+                    "descricao": PerfilAcesso(usuario.perfil).label,
+                },
+            },
         }
         return dict_usuario

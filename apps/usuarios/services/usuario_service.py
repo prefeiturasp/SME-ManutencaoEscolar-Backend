@@ -12,24 +12,22 @@ class UsuarioService:
     @classmethod
     def sincronizar_usuario(
         cls,
-        *,
-        nome: str,
-        email: str | None,
-        registro_funcional: str | None,
-        cpf: str | None,
+        dados_usuario: dict[str, Any],
         dados_cargo: dict[str, Any],
     ) -> dict[str, Any]:
         """Sincroniza um usuário retornado pelo EOL."""
-        cargo = CargoEOLRepository.buscar_por_codigo(
-            dados_cargo["codigo_cargo"]
-        )
+        try:
+            codigo_cargo = int(dados_cargo["codigo_cargo"])
+            cargo = CargoEOLRepository.buscar_por_codigo(codigo_cargo)
+        except (TypeError, ValueError):
+            # Essa parte é temporária, para conseguir logar enquanto não temos
+            # usuários com cargos
+            cargo = CargoEOLRepository.buscar_por_codigo(3360)
+
         if cargo is None:
             raise ValueError("Cargo não encontrado")
 
         return UsuarioRepository.atualizar_ou_criar(
-            nome=nome,
-            email=email or "",
-            registro_funcional=registro_funcional,
-            cpf=cpf,
-            codigo_cargo=cargo["codigo"],
+            dados_usuario=dados_usuario,
+            codigo_cargo=str(cargo["codigo"]),
         )

@@ -16,7 +16,10 @@ from apps.core.exceptions import (
     SmeIntegracaoError,
 )
 from apps.core.schemas import LOGIN
-from apps.core.serializers import AutenticacaoSerializer
+from apps.core.serializers import (
+    AutenticacaoSerializer,
+    LoginResponseSerializer,
+)
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
 from apps.core.services.token_service import TokenService
 from apps.usuarios.services.usuario_service import UsuarioService
@@ -49,12 +52,12 @@ class HealthCheckView(APIView):
         return Response({"status": "ok"})
 
 
-@LOGIN
 class LoginView(TokenObtainPairView):
     """View responsavel por autenticação."""
 
     permission_classes = [AllowAny]
 
+    @LOGIN
     def post(self, request: Request) -> Response:
         serializer = AutenticacaoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -65,39 +68,36 @@ class LoginView(TokenObtainPairView):
                 login=login,
                 senha=senha,
             )
+            codigo_rf = dados_autenticacao["codigoRf"]
             informaoes_cargo = AutenticacaoEOLService.buscar_cargos(
-                registro_funcional=dados_autenticacao["codigoRf"]
+                registro_funcional=codigo_rf
             )
-            dados_usuario = AutenticacaoEOLService.dados_usuario(
-                dados_autenticacao["codigoRf"]
-            )
+            dados_usuario = AutenticacaoEOLService.dados_usuario(codigo_rf)
+            dados_usuario["codigo_rf"] = codigo_rf
             usuario = UsuarioService.sincronizar_usuario(
-                nome=dados_usuario["nome"],
-                email=dados_usuario["email"],
-                registro_funcional=dados_usuario["codigo_rf"],
-                cpf=dados_usuario["cpf"],
+                dados_usuario=dados_usuario,
                 dados_cargo=informaoes_cargo,
             )
             token = TokenService.gerar_tokens(usuario["id"])
-            response = {
+            dict_usuario = {
                 "refresh": token["refresh"],
                 "access": token["access"],
-                "dados_usuario": {
-                    "nome": dados_usuario.get("nome", DADO_NAO_INFORMADO),
-                    "codigo_rf_ou_cpf": dados_usuario.get(
-                        "codigoRf", DADO_NAO_INFORMADO
-                    ),
+                "usuario": {
+                    **usuario,
                     "diretoria_regional": dados_usuario.get(
                         "dre", DADO_NAO_INFORMADO
                     ),
                     "unidade_educacional": dados_usuario.get(
                         "nomeUe", DADO_NAO_INFORMADO
                     ),
-                    "permissao": dados_usuario["cargo"],
                 },
             }
+            response_serializer = LoginResponseSerializer(data=dict_usuario)
+            response_serializer.is_valid(raise_exception=True)
 
-            return Response(response, status=status.HTTP_200_OK)
+            return Response(
+                response_serializer.validated_data, status=status.HTTP_200_OK
+            )
         except FalhaAutenticacaoError:
             return Response(
                 {"detail": "Usuário e/ou senha inválida"},

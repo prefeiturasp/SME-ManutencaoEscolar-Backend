@@ -56,4 +56,9 @@ class Migration(migrations.Migration):
         ("usuarios", "0001_initial"),
     ]
 
-    operations = []
+    operations = [
+        migrations.RunPython(
+            popular_cargos_eol,
+            remover_cargos_eol,
+        ),
+    ]

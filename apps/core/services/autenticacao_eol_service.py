@@ -219,6 +219,7 @@ class AutenticacaoEOLService:
             )
             raise
 
+        # No futuro, se retornar lista vazia, retorna FalhaAutenticacaoError
         cargo: dict = (
             response[0]
             if isinstance(response, list) and len(response) >= 1
