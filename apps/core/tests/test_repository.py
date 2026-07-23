@@ -53,13 +53,16 @@ class TestApiEOLRepository:
     def test_autentica_usuario_chama_metodo_post(self, mock_post):
         """Deve delegar a chamada de autenticação para o método post."""
         mock_response = Mock(spec=requests.Response)
+        mock_response.status_code = 200
+        mock_response.ok = True
+        mock_response.json.return_value = {"token": "fake-token"}
         mock_post.return_value = mock_response
 
         resultado = ApiEOLRepository.autentica_usuario(
             url=self.URL, headers=self.HEADERS, data=self.DATA
         )
 
-        assert resultado == mock_response
+        assert resultado == {"token": "fake-token"}
         mock_post.assert_called_once_with(
             self.URL, headers=self.HEADERS, data=self.DATA
         )
@@ -139,28 +142,6 @@ class TestApiEOLRepository:
 
 class TestApiEOLRepositoryIntegracao:
     """Testes que verificam a integração entre os métodos."""
-
-    URL = "https://api.exemplo/api/autenticacao"
-    HEADERS = {"Content-Type": "application/json"}
-    DATA = '{"login": "1234567", "senha": "senha123"}'
-
-    @patch("apps.core.repository.autenticacao_eol_repository.requests.post")
-    def test_autentica_usuario_usa_mesmo_comportamento_do_post(
-        self, mock_post
-    ):
-        """O método autentica_usuario com o mesmo comportamento do post."""
-        mock_response = Mock(spec=requests.Response)
-        mock_post.return_value = mock_response
-
-        resultado_post = ApiEOLRepository.post(
-            url=self.URL, headers=self.HEADERS, data=self.DATA
-        )
-        resultado_autentica = ApiEOLRepository.autentica_usuario(
-            url=self.URL, headers=self.HEADERS, data=self.DATA
-        )
-
-        assert resultado_post == resultado_autentica
-        assert mock_post.call_count == 2
 
     def test_metodo_post_aceita_parametros_nomeados(self):
         """Os parâmetros devem ser passados como keyword arguments."""

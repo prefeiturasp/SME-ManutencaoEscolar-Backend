@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import pytest
 
 from apps.core.api.views import HealthCheckView, LoginView
@@ -16,10 +18,30 @@ def test_healthcheck_retorna_ok(api_factory):
 
 @pytest.mark.django_db
 def test_login_retorna_payload_autenticado(api_factory, monkeypatch):
-    """Deve retornar o payload recebido do service."""
+    """Deve retornar o payload autenticado."""
+    dados = {
+        "refresh": "refresh-token",
+        "access": "access-token",
+        "usuario": {
+            "id": 1,
+            "uuid": UUID("2e7d7d7d-9b8b-4c92-9b3b-123456789abc"),
+            "nome": "João da Silva",
+            "email": "joao.silva@sme.prefeitura.sp.gov.br",
+            "registro_funcional": "1234567",
+            "cpf": "12345678901",
+            "username": "1234567",
+            "perfil_acesso": {
+                "cargo": "DIRETOR DE ESCOLA",
+                "perfil": {
+                    "codigo": "UE",
+                    "descricao": "Diretor Unidade Educacional",
+                },
+            },
+        },
+    }
     monkeypatch.setattr(
-        "apps.core.api.views.AutenticacaoEOLService.autentica",
-        classmethod(lambda cls, login, senha: {"token": "abc"}),
+        "apps.core.api.views.AutenticacaoEOLService.login",
+        classmethod(lambda cls, login, senha: dados),
     )
 
     request = api_factory.post(
@@ -34,4 +56,5 @@ def test_login_retorna_payload_autenticado(api_factory, monkeypatch):
     response = LoginView.as_view()(request)
 
     assert response.status_code == 200
-    assert response.data == {"token": "abc"}
+    print(response.data)
+    assert response.data == dados
