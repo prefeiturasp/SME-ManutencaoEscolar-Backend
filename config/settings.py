@@ -179,6 +179,23 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Sistema de Manutenção Escolar",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "APPEND_COMPONENTS": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": (
+                    "Informe o token JWT no formato: `Bearer <token>`."
+                ),
+            }
+        }
+    },
+    "SECURITY": [
+        {
+            "BearerAuth": [],
+        }
+    ],
 }
 
 # Internationalization
