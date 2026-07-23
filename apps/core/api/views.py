@@ -76,8 +76,7 @@ class LoginView(TokenObtainPairView):
                 email=dados_usuario["email"],
                 registro_funcional=dados_usuario["codigo_rf"],
                 cpf=dados_usuario["cpf"],
-                codigo_cargo=informaoes_cargo["codigo_cargo"],
-                nome_cargo=informaoes_cargo["nome_cargo"],
+                dados_cargo=informaoes_cargo,
             )
             token = TokenService.gerar_tokens(usuario["id"])
             response = {

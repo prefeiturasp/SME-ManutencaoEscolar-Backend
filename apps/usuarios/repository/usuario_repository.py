@@ -19,7 +19,7 @@ class UsuarioRepository:
         email: str,
         registro_funcional: str | None,
         cpf: str | None,
-        cargo: CargoEOL,
+        codigo_cargo: str,
     ) -> dict[str, Any]:
         """Atualiza ou cria um usuário utilizando RF ou CPF."""
         filtros: dict[str, Any] = {}
@@ -27,11 +27,11 @@ class UsuarioRepository:
         if username is None:
             raise ValueError("É necessário fornecer registro_funcional ou cpf")
 
+        cargo = CargoEOL.objects.get(codigo=codigo_cargo)
         if registro_funcional:
             filtros["registro_funcional"] = registro_funcional
         else:
             filtros["cpf"] = cpf
-
         usuario, criado = Usuario.objects.get_or_create(
             defaults={
                 "nome": nome,

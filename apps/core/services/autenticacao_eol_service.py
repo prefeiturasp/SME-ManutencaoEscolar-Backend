@@ -5,7 +5,6 @@ import logging
 from typing import Any
 
 import requests
-from rest_framework import status
 
 from apps.core.constants import (
     ENDPOINT_AUTENTICACAO,
@@ -65,9 +64,8 @@ class AutenticacaoEOLService:
                 headers=headers,
                 data=data,
             )
-            response_data = cls._tratar_resposta(response, login)
             logger.info("Usuário autenticado com sucesso: %s", login)
-            return response_data
+            return response
 
         except requests.exceptions.Timeout:
             logger.error("Timeout na autenticação para login: %s", login)
@@ -198,66 +196,6 @@ class AutenticacaoEOLService:
             "Content-Type": "application/json-patch+json",
         }
 
-    @staticmethod
-    def _tratar_resposta(
-        response: requests.Response, login: object
-    ) -> dict[str, Any]:
-        """
-        Processa a resposta retornada pelo serviço de autenticação EOL.
-
-        Args:
-            response (requests.Response): Resposta HTTP retornada pela API.
-            login (object): Login utilizado na tentativa de autenticação.
-
-        Raises:
-            FalhaAutenticacaoError:  Quando as credenciais informadas são
-                inválidas (HTTP 401).
-            SmeIntegracaoError: Quando o limite de tentativas é excedido
-                (HTTP 429), ocorre qualquer outro erro retornado pela API ou
-                a resposta possui formato inválido.
-
-        Returns:
-            dict[str, Any]: Conteúdo da resposta convertido para dicionário.
-        """
-        if response.status_code == status.HTTP_401_UNAUTHORIZED:
-            logger.warning("Credenciais inválidas para login: %s", login)
-            raise FalhaAutenticacaoError(
-                "Não foi possível autenticar o usuário. Verifique o login e "
-                "a senha informados."
-            )
-
-        if response.status_code == status.HTTP_429_TOO_MANY_REQUESTS:
-            logger.warning("Rate limit atingido para login: %s", login)
-            raise SmeIntegracaoError(
-                "Foram realizadas muitas tentativas de autenticação. Aguarde "
-                "alguns minutos antes de tentar novamente."
-            )
-
-        if not response.ok:
-            logger.error(
-                "Erro HTTP %s ao autenticar usuário %s. Resposta: %s",
-                response.status_code,
-                login,
-                response.text[:200],
-            )
-            raise SmeIntegracaoError(
-                "Não foi possível concluir a autenticação no momento."
-            )
-
-        try:
-            response_data: dict[str, Any] = response.json()
-        except ValueError as err:
-            logger.exception(
-                "Resposta inválida do EOL para login %s: %s",
-                login,
-                str(err),
-            )
-            raise SmeIntegracaoError(
-                "O serviço de autenticação retornou uma resposta inválida."
-            ) from err
-
-        return response_data
-
     @classmethod
     def buscar_cargos(cls, registro_funcional: str) -> dict:
         """Consulta cargos de um servidor na SME pelo RF.
@@ -273,25 +211,24 @@ class AutenticacaoEOLService:
         """
         url = f"{SME_API_EOL_URL}/funcionarios/cargo/{registro_funcional}"
         headers = cls._obter_headers()
-        response = ApiEOLRepository.get(url=url, headers=headers)
-
-        if response.status_code != status.HTTP_200_OK:
-            logger.error(
-                "Erro ao consultar cargos. Status: %s | Body: %s",
-                response.status_code,
-                response.text,
+        try:
+            response = ApiEOLRepository.buscar_cargos(url=url, headers=headers)
+        except SmeIntegracaoError:
+            logging.exception(
+                "Erro ao consultar cargos",
             )
-            raise SmeIntegracaoError("Erro ao consultar cargos do servidor")
+            raise
 
-        dados: list = response.json()
         cargo: dict = (
-            dados[0] if isinstance(dados, list) and len(dados) >= 1 else {}
+            response[0]
+            if isinstance(response, list) and len(response) >= 1
+            else {}
         )
-        nome_cargo = {
+        informacoes_cargo: dict = {
             "nome_cargo": cargo.get("cargoBase", "Não informado"),
             "codigo_cargo": cargo.get("cdCargoBase", "Não informado"),
         }
-        return nome_cargo
+        return informacoes_cargo
 
     @classmethod
     def dados_usuario(cls, registro_funcional: str) -> dict[str, str]:
@@ -310,14 +247,14 @@ class AutenticacaoEOLService:
             f"{SME_API_EOL_URL}/AutenticacaoCOMAPRE/{registro_funcional}/dados"
         )
         headers = cls._obter_headers()
-        response = ApiEOLRepository.get(url=url, headers=headers)
-
-        if response.status_code != status.HTTP_200_OK:
-            logger.error(
-                "Erro ao consultar cargos. Status: %s | Body: %s",
-                response.status_code,
-                response.text,
+        try:
+            response = ApiEOLRepository.obter_dados_usuarios(
+                url=url, headers=headers
             )
-            raise SmeIntegracaoError("Erro ao consultar dados do servidor")
-        informacoes: dict = response.json()
-        return informacoes
+        except SmeIntegracaoError:
+            logging.exception(
+                "Erro ao consultar dados do servidor",
+            )
+            raise
+
+        return response

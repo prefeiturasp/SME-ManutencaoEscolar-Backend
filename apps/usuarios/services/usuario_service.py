@@ -1,6 +1,8 @@
 """_summary_."""
 
-from apps.usuarios.models import CargoEOL
+from typing import Any
+
+from apps.usuarios.repository.cargo_repository import CargoEOLRepository
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
 
 
@@ -15,21 +17,19 @@ class UsuarioService:
         email: str | None,
         registro_funcional: str | None,
         cpf: str | None,
-        codigo_cargo: int,
-        nome_cargo: str,
-    ) -> dict:
+        dados_cargo: dict[str, Any],
+    ) -> dict[str, Any]:
         """Sincroniza um usuário retornado pelo EOL."""
-        cargo, _ = CargoEOL.objects.get_or_create(
-            codigo=codigo_cargo,
-            defaults={
-                "nome": nome_cargo,
-            },
+        cargo = CargoEOLRepository.buscar_por_codigo(
+            dados_cargo["codigo_cargo"]
         )
+        if cargo is None:
+            raise ValueError("Cargo não encontrado")
 
         return UsuarioRepository.atualizar_ou_criar(
             nome=nome,
             email=email or "",
             registro_funcional=registro_funcional,
             cpf=cpf,
-            cargo=cargo,
+            codigo_cargo=cargo["codigo"],
         )
