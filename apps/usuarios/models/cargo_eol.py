@@ -1,17 +1,8 @@
 """_summary_."""
 
-import datetime
-
 from django.db import models
 
-
-class PerfilAcesso(models.TextChoices):
-    """Perfis de acesso disponíveis no sistema."""
-
-    UE = "UE", "Unidade Escolar"
-    DRE = "DRE", "Diretoria Regional de Educação"
-    SME = "SME", "SME / GME"
-    EMPRESA = "EMPRESA", "Empresa"
+from apps.usuarios.constants import PerfilAcesso
 
 
 class CargoEOL(models.Model):
@@ -21,17 +12,14 @@ class CargoEOL(models.Model):
     Cada cargo pertence a um único perfil de acesso.
     """
 
-    codigo = models.PositiveIntegerField(
-        unique=True,
-        verbose_name="Código do Cargo",
-    )
+    codigo = models.CharField(unique=True)
 
     nome = models.CharField(
         max_length=255,
     )
 
     perfil = models.CharField(
-        max_length=20,
+        max_length=70,
         choices=PerfilAcesso.choices,
     )
     ativo = models.BooleanField(default=True)
@@ -44,12 +32,26 @@ class CargoEOL(models.Model):
     def __str__(self) -> str:
         return f"{self.codigo} - {self.nome}"
 
-    def finalizar_cargo(self) -> None:
+    def desativar_cargo(self) -> None:
         self.ativo = False
-        self.data_final = datetime.date.today()
-        self.save()
+        self.save(update_fields=["ativo"])
 
     def ativar_cargo(self) -> None:
         self.ativo = True
-        self.data_inicial = datetime.date.today()
-        self.save()
+        self.save(update_fields=["ativo"])
+
+    @property
+    def eh_perfil_ue(self) -> bool:
+        return self.perfil == PerfilAcesso.UE
+
+    @property
+    def eh_perfil_dre(self) -> bool:
+        return self.perfil == PerfilAcesso.DRE
+
+    @property
+    def eh_perfil_sme(self) -> bool:
+        return self.perfil == PerfilAcesso.SME
+
+    @property
+    def eh_perfil_empresa(self) -> bool:
+        return self.perfil == PerfilAcesso.EMPRESA

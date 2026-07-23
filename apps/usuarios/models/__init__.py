@@ -1,4 +1,4 @@
-from .cargo_eol import CargoEOL, PerfilAcesso
+from .cargo_eol import CargoEOL
 from .usuario import Usuario
 
-__all__ = ["CargoEOL", "Usuario", "PerfilAcesso"]
+__all__ = ["CargoEOL", "Usuario"]
