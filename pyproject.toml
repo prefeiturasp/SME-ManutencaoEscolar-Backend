@@ -61,20 +61,21 @@ ignore_missing_imports = true
 django_settings_module = "config.settings"
 
 [tool.coverage.run]
+branch = true
 source = ["apps"]
 omit = [
+    "*/migrations/*",
     "*/tests/*",
-    "*/tests.py",
-    "*/test_*.py",
-    "*/conftest.py",
-    "apps/*/tests/*",
-    "apps/*/tests.py",
-    "apps/*/test_*.py",
-    "apps/*/migrations/*",
+    "*/site-packages/*",
+    "manage.py",
+    "setup.py",
 ]
 
 [tool.coverage.report]
+precision = 2
 show_missing = true
+skip_covered = false
+skip_empty = true
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"

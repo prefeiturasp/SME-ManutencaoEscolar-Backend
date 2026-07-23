@@ -51,8 +51,8 @@ create-app: ## Cria um novo app. Uso: make create-app app=nome_do_app
 test: ## Roda a suíte de testes com o pytest. Opcional: path=caminho/do/teste
 	$(EXEC) pytest $(path)
 
-coverage: ## Roda os testes e gera o relatório de cobertura em HTML na pasta htmlcov/
-	$(EXEC) pytest --cov --cov-report=html
+coverage: ## Roda os testes, gera o relatório de cobertura em HTML na pasta htmlcov/ e abre o relatório no navegador.
+	$(EXEC) pytest --cov --cov-report=html && xdg-open htmlcov/index.html
 
 # ==========================================
 # Qualidade de Código (Linting/Tipagem)
