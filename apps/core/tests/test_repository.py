@@ -6,6 +6,8 @@ import requests
 from apps.core.exceptions import FalhaAutenticacaoError, SmeIntegracaoError
 from apps.core.repository.autenticacao_eol_repository import ApiEOLRepository
 
+URL = "http://teste"
+
 
 class TestApiEOLRepository:
     """Testes para a classe ApiEOLRepository."""
@@ -146,14 +148,14 @@ class TestApiEOLRepository:
         mock_get.return_value = response
 
         resultado = ApiEOLRepository.get(
-            url="http://teste",
+            url=URL,
             headers={"Authorization": "Bearer token"},
         )
 
         assert resultado is response
 
         mock_get.assert_called_once_with(
-            "http://teste",
+            URL,
             headers={"Authorization": "Bearer token"},
             timeout=10,
         )
@@ -167,14 +169,14 @@ class TestApiEOLRepository:
         mock_get.return_value = response
 
         resultado = ApiEOLRepository.buscar_cargos(
-            url="http://teste",
+            url=URL,
             headers={},
         )
 
         assert resultado == [{"cargoBase": "Diretor"}]
 
         mock_get.assert_called_once_with(
-            url="http://teste",
+            url=URL,
             headers={},
         )
 
@@ -193,12 +195,12 @@ class TestApiEOLRepository:
             match="Erro ao consultar cargos do servidor",
         ):
             ApiEOLRepository.buscar_cargos(
-                url="http://teste",
+                url=URL,
                 headers={},
             )
 
         mock_get.assert_called_once_with(
-            url="http://teste",
+            url=URL,
             headers={},
         )
 
@@ -211,14 +213,14 @@ class TestApiEOLRepository:
         mock_get.return_value = response
 
         resultado = ApiEOLRepository.obter_dados_usuarios(
-            url="http://teste",
+            url=URL,
             headers={},
         )
 
         assert resultado == {"nome": "João"}
 
         mock_get.assert_called_once_with(
-            url="http://teste",
+            url=URL,
             headers={},
         )
 
@@ -237,7 +239,7 @@ class TestApiEOLRepository:
             match="Erro ao consultar dados do servidor",
         ):
             ApiEOLRepository.obter_dados_usuarios(
-                url="http://teste",
+                url=URL,
                 headers={},
             )
 
