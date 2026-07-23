@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
+from apps.core.exceptions import FalhaAutenticacaoError, SmeIntegracaoError
 from apps.core.repository.autenticacao_eol_repository import ApiEOLRepository
 
 
@@ -138,6 +139,147 @@ class TestApiEOLRepository:
             ApiEOLRepository.post(
                 url=self.URL, headers=self.HEADERS, data=self.DATA
             )
+
+    @patch("apps.core.repository.autenticacao_eol_repository.requests.get")
+    def test_get(self, mock_get):
+        response = Mock()
+        mock_get.return_value = response
+
+        resultado = ApiEOLRepository.get(
+            url="http://teste",
+            headers={"Authorization": "Bearer token"},
+        )
+
+        assert resultado is response
+
+        mock_get.assert_called_once_with(
+            "http://teste",
+            headers={"Authorization": "Bearer token"},
+            timeout=10,
+        )
+
+    @patch.object(ApiEOLRepository, "get")
+    def test_buscar_cargos(self, mock_get):
+        response = Mock()
+        response.status_code = 200
+        response.json.return_value = [{"cargoBase": "Diretor"}]
+
+        mock_get.return_value = response
+
+        resultado = ApiEOLRepository.buscar_cargos(
+            url="http://teste",
+            headers={},
+        )
+
+        assert resultado == [{"cargoBase": "Diretor"}]
+
+        mock_get.assert_called_once_with(
+            url="http://teste",
+            headers={},
+        )
+
+        response.json.assert_called_once()
+
+    @patch.object(ApiEOLRepository, "get")
+    def test_buscar_cargos_erro(self, mock_get):
+        response = Mock()
+        response.status_code = 500
+        response.text = "Erro interno"
+
+        mock_get.return_value = response
+
+        with pytest.raises(
+            SmeIntegracaoError,
+            match="Erro ao consultar cargos do servidor",
+        ):
+            ApiEOLRepository.buscar_cargos(
+                url="http://teste",
+                headers={},
+            )
+
+        mock_get.assert_called_once_with(
+            url="http://teste",
+            headers={},
+        )
+
+    @patch.object(ApiEOLRepository, "get")
+    def test_obter_dados_usuario(self, mock_get):
+        response = Mock()
+        response.status_code = 200
+        response.json.return_value = {"nome": "João"}
+
+        mock_get.return_value = response
+
+        resultado = ApiEOLRepository.obter_dados_usuarios(
+            url="http://teste",
+            headers={},
+        )
+
+        assert resultado == {"nome": "João"}
+
+        mock_get.assert_called_once_with(
+            url="http://teste",
+            headers={},
+        )
+
+        response.json.assert_called_once()
+
+    @patch.object(ApiEOLRepository, "get")
+    def test_obter_dados_usuario_erro(self, mock_get):
+        response = Mock()
+        response.status_code = 500
+        response.text = "Erro interno"
+
+        mock_get.return_value = response
+
+        with pytest.raises(
+            SmeIntegracaoError,
+            match="Erro ao consultar dados do servidor",
+        ):
+            ApiEOLRepository.obter_dados_usuarios(
+                url="http://teste",
+                headers={},
+            )
+
+    def test_tratar_resposta_200(self):
+        response = Mock()
+        response.status_code = 200
+        response.json.return_value = {"ok": True}
+
+        resultado = ApiEOLRepository._tratar_resposta(response)
+
+        assert resultado == {"ok": True}
+
+    def test_tratar_resposta_401(self):
+        response = Mock()
+        response.status_code = 401
+
+        with pytest.raises(FalhaAutenticacaoError):
+            ApiEOLRepository._tratar_resposta(response)
+
+    def test_tratar_resposta_429(self):
+        response = Mock()
+        response.status_code = 429
+
+        with pytest.raises(SmeIntegracaoError):
+            ApiEOLRepository._tratar_resposta(response)
+
+    def test_tratar_resposta_500(self):
+        response = Mock()
+        response.status_code = 500
+        response.ok = False
+        response.text = "Erro"
+
+        with pytest.raises(SmeIntegracaoError):
+            ApiEOLRepository._tratar_resposta(response)
+
+    def test_tratar_resposta_json_invalido(self):
+        response = Mock()
+        response.status_code = 200
+        response.json.side_effect = ValueError()
+
+        with pytest.raises(SmeIntegracaoError):
+            ApiEOLRepository._tratar_resposta(response)
 
 
 class TestApiEOLRepositoryIntegracao:
