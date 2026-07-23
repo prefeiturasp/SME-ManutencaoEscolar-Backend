@@ -24,10 +24,18 @@ class AutenticacaoSerializer(serializers.Serializer):
     )
     senha = serializers.CharField(
         write_only=True,
-        min_length=8,
+        min_length=3,
         required=True,
         help_text="Senha do sistema EOL/CoreSSO.",
     )
+
+    def validate_login(self, value: str) -> str:
+        if len(value) not in {7, 11}:
+            raise serializers.ValidationError(
+                "O login deve ser um RF com 7 dígitos ou um CPF com 11 "
+                "dígitos."
+            )
+        return value
 
 
 class LoginResponseSerializer(serializers.Serializer):
