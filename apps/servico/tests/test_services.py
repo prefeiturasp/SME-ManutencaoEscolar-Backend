@@ -1,30 +1,91 @@
-"""Serviços de Serviço."""
+"""Testes do serviço de domínio Serviço."""
 
-from typing import Any
+from unittest.mock import Mock, patch
+
+import pytest
 
 from apps.servico.constants import ServicoErrorMessages
 from apps.servico.exceptions import ServicoJaCadastradoError
 from apps.servico.repository.servico_repository import ServicoRepository
+from apps.servico.services.servico_service import ServicoService
 
 
-class ServicoService:
-    """Orquestra as regras de negócio relacionadas a Serviço."""
+class TestServicoService:
+    """Testes para ServicoService."""
 
-    def __init__(self, repository: ServicoRepository | None = None):
-        """Inicializa o serviço com o repositório informado ou o padrão."""
-        self.repository = repository or ServicoRepository()
+    def test_deve_utilizar_repository_informado(self):
+        """Deve armazenar o repositório recebido."""
+        repository = Mock(spec=ServicoRepository)
 
-    def criar(self, dados: dict[str, Any]) -> dict[str, Any]:
-        """Cria um serviço e retorna seus dados serializados."""
-        dados_normalizados = dados.copy()
-        nome = dados_normalizados["nome"].strip()
+        service = ServicoService(repository=repository)
 
-        if self.repository.existe_por_nome(nome):
-            raise ServicoJaCadastradoError(
-                title=ServicoErrorMessages.NOME_JA_CADASTRADO_TITULO,
-                detail=ServicoErrorMessages.NOME_JA_CADASTRADO,
+        assert service.repository is repository
+
+    @patch("apps.servico.services.servico_service.ServicoRepository")
+    def test_deve_criar_repository_padrao(
+        self,
+        mock_repository_class,
+    ):
+        """Deve criar o repositório padrão quando não informado."""
+        repository = mock_repository_class.return_value
+
+        service = ServicoService()
+
+        assert service.repository is repository
+        mock_repository_class.assert_called_once_with()
+
+    def test_deve_normalizar_nome_e_criar_servico(self):
+        """Deve retirar espaços do nome antes da criação."""
+        repository = Mock(spec=ServicoRepository)
+        repository.existe_por_nome.return_value = False
+        repository.criar.return_value = {
+            "nome": "Pintura",
+            "status": True,
+        }
+
+        service = ServicoService(repository)
+        dados = {
+            "nome": "  Pintura  ",
+            "status": True,
+        }
+
+        resultado = service.criar(dados)
+
+        repository.existe_por_nome.assert_called_once_with("Pintura")
+        repository.criar.assert_called_once_with(
+            {
+                "nome": "Pintura",
+                "status": True,
+            }
+        )
+        assert resultado == {
+            "nome": "Pintura",
+            "status": True,
+        }
+
+        # Confirma que o dicionário original não foi alterado.
+        assert dados["nome"] == "  Pintura  "
+
+    def test_deve_lancar_erro_quando_nome_ja_existir(self):
+        """Não deve criar serviço quando o nome estiver cadastrado."""
+        repository = Mock(spec=ServicoRepository)
+        repository.existe_por_nome.return_value = True
+
+        service = ServicoService(repository)
+
+        with pytest.raises(ServicoJaCadastradoError) as exc_info:
+            service.criar(
+                {
+                    "nome": " Pintura ",
+                    "status": True,
+                }
             )
 
-        dados_normalizados["nome"] = nome
+        assert (
+            exc_info.value.title
+            == ServicoErrorMessages.NOME_JA_CADASTRADO_TITULO
+        )
+        assert exc_info.value.detail == ServicoErrorMessages.NOME_JA_CADASTRADO
 
-        return self.repository.criar(dados_normalizados)
+        repository.existe_por_nome.assert_called_once_with("Pintura")
+        repository.criar.assert_not_called()

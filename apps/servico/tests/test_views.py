@@ -1,60 +1,102 @@
-"""Views DRF do domínio Serviço."""
+"""Testes das views da aplicação Serviço."""
 
+from unittest.mock import MagicMock
+
+import pytest
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework import mixins, status, viewsets
-from rest_framework.exceptions import APIException
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.permissions import AllowAny
 
-from apps.servico.constants import ServicoErrorMessages
+from apps.servico.api.views import (
+    ServicoInstabilidadeError,
+    ServicoViewSet,
+)
 from apps.servico.exceptions import ServicoJaCadastradoError
-from apps.servico.models import Servico
-from apps.servico.schemas import SERVICO_SCHEMA
 from apps.servico.serializers import ServicoCriarSerializer
-from apps.servico.services.servico_service import ServicoService
 
 
-class ServicoInstabilidadeError(APIException):
-    """Erro de instabilidade durante o cadastro do serviço."""
+class TestServicoViewSet:
+    """Testes para ServicoViewSet."""
 
-    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    default_detail = {
-        "title": "Erro",
-        "detail": ServicoErrorMessages.INSTABILIDADE,
-    }
-    default_code = "servico_instabilidade"
+    def setup_method(self):
+        """Configura a view e o serializer usados nos testes."""
+        self.view = ServicoViewSet()
+        self.view.service = MagicMock()
 
+        self.serializer = MagicMock()
+        self.serializer.validated_data = {
+            "nome": "Pintura",
+            "status": True,
+        }
 
-@SERVICO_SCHEMA
-class ServicoViewSet(
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-):
-    """View responsável pelo cadastro de serviços."""
+    def test_deve_retornar_serializer_de_criacao_na_action_create(self):
+        """Deve usar o serializer de criação no cadastro."""
+        self.view.action = "create"
 
-    permission_classes = [AllowAny]
-    queryset = Servico.objects.all()
-    serializer_class = ServicoCriarSerializer
+        serializer_class = self.view.get_serializer_class()
 
-    def __init__(self, **kwargs):
-        """Inicializa a view com o serviço de domínio."""
-        super().__init__(**kwargs)
-        self.service = ServicoService()
+        assert serializer_class is ServicoCriarSerializer
 
-    def perform_create(self, serializer):
-        """Delega a criação ao serviço de domínio."""
-        try:
-            servico = self.service.criar(serializer.validated_data)
-        except ServicoJaCadastradoError as exc:
-            raise DRFValidationError(
-                {
-                    "title": exc.title,
-                    "detail": exc.detail,
-                }
-            ) from exc
-        except DjangoValidationError as exc:
-            raise DRFValidationError(exc.message_dict) from exc
-        except Exception as exc:
-            raise ServicoInstabilidadeError() from exc
+    def test_deve_retornar_serializer_padrao_em_outra_action(self):
+        """Deve retornar o serializer configurado para outra ação."""
+        self.view.action = "list"
 
-        serializer.instance = servico
+        serializer_class = self.view.get_serializer_class()
+
+        assert serializer_class is ServicoCriarSerializer
+
+    def test_deve_delegar_criacao_ao_service(self):
+        """Deve delegar a criação e atribuir a instância."""
+        servico = MagicMock()
+        self.view.service.criar.return_value = servico
+
+        self.view.perform_create(self.serializer)
+
+        self.view.service.criar.assert_called_once_with(
+            self.serializer.validated_data
+        )
+        assert self.serializer.instance is servico
+
+    def test_deve_converter_erro_de_servico_duplicado(self):
+        """Deve converter erro de duplicidade em erro do DRF."""
+        self.view.service.criar.side_effect = ServicoJaCadastradoError(
+            title="Serviço já cadastrado",
+            detail="Já existe um serviço com esse nome.",
+        )
+
+        with pytest.raises(DRFValidationError) as exc_info:
+            self.view.perform_create(self.serializer)
+
+        assert exc_info.value.detail["title"] == "Serviço já cadastrado"
+        assert (
+            exc_info.value.detail["detail"]
+            == "Já existe um serviço com esse nome."
+        )
+
+    def test_deve_converter_validation_error_com_message_dict(self):
+        """Deve converter erro Django contendo dicionário."""
+        self.view.service.criar.side_effect = DjangoValidationError(
+            {"nome": ["Nome inválido."]}
+        )
+
+        with pytest.raises(DRFValidationError) as exc_info:
+            self.view.perform_create(self.serializer)
+
+        assert "nome" in exc_info.value.detail
+
+    def test_deve_converter_validation_error_com_messages(self):
+        """Deve converter erro Django contendo lista de mensagens."""
+        self.view.service.criar.side_effect = DjangoValidationError(
+            ["Dados inválidos."]
+        )
+
+        with pytest.raises(DRFValidationError) as exc_info:
+            self.view.perform_create(self.serializer)
+
+        assert "Dados inválidos." in str(exc_info.value.detail)
+
+    def test_deve_converter_erro_inesperado_em_instabilidade(self):
+        """Deve retornar instabilidade para erro inesperado."""
+        self.view.service.criar.side_effect = RuntimeError("Erro inesperado")
+
+        with pytest.raises(ServicoInstabilidadeError):
+            self.view.perform_create(self.serializer)
