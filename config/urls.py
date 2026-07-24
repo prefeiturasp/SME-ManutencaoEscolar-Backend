@@ -41,4 +41,5 @@ urlpatterns = [
     ),
     path(BASE_URL_API, include("apps.core.api.urls")),
     path(BASE_URL_API, include("apps.fornecedor.api.urls")),
+    path(BASE_URL_API, include("apps.servico.api.urls")),
 ]

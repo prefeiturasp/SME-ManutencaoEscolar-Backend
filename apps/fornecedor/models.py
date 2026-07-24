@@ -34,7 +34,7 @@ class Fornecedor(BaseModel):
     )
     logradouro = models.CharField(max_length=255)
     numero = models.CharField(max_length=30)
-    complemento = models.CharField(max_length=255, blank=True)
+    complemento = models.CharField(max_length=255, blank=True, default="")
     cidade = models.CharField(max_length=100)
     estado = models.CharField(max_length=2, choices=EstadoChoices.choices)
 
