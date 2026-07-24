@@ -42,8 +42,7 @@ class TestAutenticacaoEOLService:
         mock_response = Mock(spec=requests.Response)
         mock_response.status_code = 200
         mock_response.ok = True
-        mock_response.json.return_value = response_data
-        mock_autentica_usuario.return_value = mock_response
+        mock_autentica_usuario.return_value = response_data
 
         resultado = AutenticacaoEOLService.autentica(
             self.LOGIN_VALIDO, self.SENHA_VALIDA
@@ -152,7 +151,10 @@ class TestAutenticacaoEOLService:
         mock_response = Mock(spec=requests.Response)
         mock_response.status_code = 401
         mock_response.ok = False
-        mock_autentica_usuario.return_value = mock_response
+        mock_autentica_usuario.side_effect = FalhaAutenticacaoError(
+            "Não foi possível autenticar o usuário. Verifique o login e "
+            "a senha informados."
+        )
 
         with pytest.raises(
             FalhaAutenticacaoError,
@@ -177,7 +179,9 @@ class TestAutenticacaoEOLService:
         mock_response = Mock(spec=requests.Response)
         mock_response.status_code = 429
         mock_response.ok = False
-        mock_autentica_usuario.return_value = mock_response
+        mock_autentica_usuario.side_effect = SmeIntegracaoError(
+            "O servidor está com muitas tentativas de autenticação"
+        )
 
         # Act & Assert
         with pytest.raises(
@@ -203,7 +207,10 @@ class TestAutenticacaoEOLService:
         mock_response.status_code = 500
         mock_response.ok = False
         mock_response.text = "Internal Server Error"
-        mock_autentica_usuario.return_value = mock_response
+        mock_autentica_usuario.side_effect = SmeIntegracaoError(
+            "Não foi possível concluir a autenticação. Tente novamente "
+            "mais tarde"
+        )
 
         with pytest.raises(
             SmeIntegracaoError,
@@ -229,7 +236,9 @@ class TestAutenticacaoEOLService:
         mock_response.status_code = 200
         mock_response.ok = True
         mock_response.json.side_effect = ValueError("Invalid JSON")
-        mock_autentica_usuario.return_value = mock_response
+        mock_autentica_usuario.side_effect = SmeIntegracaoError(
+            "resposta inválida"
+        )
 
         with pytest.raises(SmeIntegracaoError, match="resposta inválida"):
             AutenticacaoEOLService.autentica(
@@ -570,65 +579,212 @@ class TestObterHeaders:
             AutenticacaoEOLService._obter_headers()
 
 
-class TestTratarResposta:
-    """Testes específicos para o método _tratar_resposta."""
+class TestBuscaCargos:
+    LOGIN_VALIDO = "1234567"
+    SENHA_VALIDA = "senha123"
+    TOKEN = "fake-token"
+    URL_BASE = "https://api.exemplo"
 
-    LOGIN = "1234567"
+    """Testes específicos para o método buscar_cargos."""
 
-    def test_tratar_resposta_sucesso(self):
-        """Deve retornar os dados JSON quando a resposta é bem-sucedida."""
-        response_data = {"nome": "Teste", "rf": self.LOGIN}
-        mock_response = Mock(spec=requests.Response)
-        mock_response.status_code = 200
-        mock_response.ok = True
-        mock_response.json.return_value = response_data
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
+        "buscar_cargos"
+    )
+    def test_busca_cargos_sucesso(self, mock_busca_cargos):
+        cargos = [
+            {
+                "cargoBase": "Diretor",
+                "cdCargoBase": "3360",
+            }
+        ]
 
-        resultado = AutenticacaoEOLService._tratar_resposta(
-            mock_response, self.LOGIN
+        mock_busca_cargos.return_value = cargos
+
+        resultado = AutenticacaoEOLService.buscar_cargos("1234456")
+
+        assert resultado == {
+            "nome_cargo": "Diretor",
+            "codigo_cargo": "3360",
+        }
+        mock_busca_cargos.assert_called_once()
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
+        "buscar_cargos"
+    )
+    def test_busca_cargos_propaga_erro(self, mock_busca_cargos):
+        mock_busca_cargos.side_effect = SmeIntegracaoError("Erro EOL")
+
+        with pytest.raises(SmeIntegracaoError):
+            AutenticacaoEOLService.buscar_cargos("1234456")
+
+
+class TestDadosUsuarios:
+    """Testes específicos para o método dados_usuario."""
+
+    LOGIN_VALIDO = "1234567"
+    SENHA_VALIDA = "senha123"
+    TOKEN = "fake-token"
+    URL_BASE = "https://api.exemplo"
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
+        "obter_dados_usuarios"
+    )
+    def test_dados_usuario(self, mock_usuario):
+        retorno = {
+            "id": 1,
+            "nome": "João",
+        }
+
+        mock_usuario.return_value = retorno
+
+        resultado = AutenticacaoEOLService.dados_usuario("1234567")
+
+        assert resultado == retorno
+
+        mock_usuario.assert_called_once()
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
+        "obter_dados_usuarios"
+    )
+    def test_dados_usuario_propaga_erro(self, mock_usuario):
+        mock_usuario.side_effect = SmeIntegracaoError("Erro")
+
+        with pytest.raises(SmeIntegracaoError):
+            AutenticacaoEOLService.dados_usuario("")
+
+
+class TestLogin:
+    """Testes específicos para o método login."""
+
+    LOGIN_VALIDO = "1234567"
+    SENHA_VALIDA = "senha123"
+    TOKEN = "fake-token"
+    URL_BASE = "https://api.exemplo"
+
+    @pytest.mark.django_db
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.TokenService."
+        "gerar_tokens",
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.UsuarioService."
+        "sincronizar_usuario",
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
+        "dados_usuario",
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
+        "buscar_cargos",
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
+        "autentica",
+    )
+    def test_login_sucesso(
+        self,
+        mock_autentica,
+        mock_buscar_cargos,
+        mock_dados_usuario,
+        mock_sincronizar_usuario,
+        mock_gerar_token,
+    ):
+        mock_autentica.return_value = {
+            "nome": "João",
+            "codigoRf": "1234567",
+            "cpf": "12345678901",
+        }
+
+        mock_dados_usuario.return_value = {
+            "id": 1,
+            "nome": "João",
+            "email": "joao@email.com",
+            "cpf": "12345678901",
+        }
+
+        mock_gerar_token.return_value = {
+            "refresh": "refresh",
+            "access": "access_token",
+        }
+
+        resultado = AutenticacaoEOLService.login(
+            self.LOGIN_VALIDO,
+            self.SENHA_VALIDA,
         )
 
-        assert resultado == response_data
+        assert "refresh" in resultado
+        assert "access" in resultado
+        assert "usuario" in resultado
 
-    def test_tratar_resposta_erro_401(self):
-        """Deve lançar FalhaAutenticacaoError para status 401."""
-        mock_response = Mock(spec=requests.Response)
-        mock_response.status_code = 401
+        mock_autentica.assert_called_once()
+        mock_dados_usuario.assert_called_once()
+        mock_gerar_token.assert_called_once()
 
-        with pytest.raises(
-            FalhaAutenticacaoError,
-            match="Não foi possível autenticar o usuário",
-        ):
-            AutenticacaoEOLService._tratar_resposta(mock_response, self.LOGIN)
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
+        "autentica"
+    )
+    def test_login_propaga_falha_autenticacao(
+        self,
+        mock_autentica,
+    ):
+        mock_autentica.side_effect = FalhaAutenticacaoError("Erro")
 
-    def test_tratar_resposta_erro_429(self):
-        """Deve lançar SmeIntegracaoError para status 429."""
-        mock_response = Mock(spec=requests.Response)
-        mock_response.status_code = 429
-
-        with pytest.raises(
-            SmeIntegracaoError, match="muitas tentativas de autenticação"
-        ):
-            AutenticacaoEOLService._tratar_resposta(mock_response, self.LOGIN)
-
-    def test_tratar_resposta_erro_500(self):
-        """Deve lançar SmeIntegracaoError para outros erros HTTP."""
-        mock_response = Mock(spec=requests.Response)
-        mock_response.status_code = 500
-        mock_response.ok = False
-        mock_response.text = "Erro interno"
-
-        with pytest.raises(
-            SmeIntegracaoError,
-            match="Não foi possível concluir a autenticação",
-        ):
-            AutenticacaoEOLService._tratar_resposta(mock_response, self.LOGIN)
-
-    def test_tratar_resposta_json_invalido(self):
-        """Deve lançar SmeIntegracaoError quando o JSON é inválido."""
-        mock_response = Mock(spec=requests.Response)
-        mock_response.status_code = 200
-        mock_response.ok = True
-        mock_response.json.side_effect = ValueError("JSON inválido")
-
-        with pytest.raises(SmeIntegracaoError, match="resposta inválida"):
-            AutenticacaoEOLService._tratar_resposta(mock_response, self.LOGIN)
+        with pytest.raises(FalhaAutenticacaoError):
+            AutenticacaoEOLService.login(
+                self.LOGIN_VALIDO,
+                self.SENHA_VALIDA,
+            )

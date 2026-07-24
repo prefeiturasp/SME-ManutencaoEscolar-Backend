@@ -3,7 +3,10 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
+from apps.core.exceptions import FalhaAutenticacaoError, SmeIntegracaoError
 from apps.core.repository.autenticacao_eol_repository import ApiEOLRepository
+
+URL = "https://teste"
 
 
 class TestApiEOLRepository:
@@ -53,13 +56,16 @@ class TestApiEOLRepository:
     def test_autentica_usuario_chama_metodo_post(self, mock_post):
         """Deve delegar a chamada de autenticação para o método post."""
         mock_response = Mock(spec=requests.Response)
+        mock_response.status_code = 200
+        mock_response.ok = True
+        mock_response.json.return_value = {"token": "fake-token"}
         mock_post.return_value = mock_response
 
         resultado = ApiEOLRepository.autentica_usuario(
             url=self.URL, headers=self.HEADERS, data=self.DATA
         )
 
-        assert resultado == mock_response
+        assert resultado == {"token": "fake-token"}
         mock_post.assert_called_once_with(
             self.URL, headers=self.HEADERS, data=self.DATA
         )
@@ -136,31 +142,150 @@ class TestApiEOLRepository:
                 url=self.URL, headers=self.HEADERS, data=self.DATA
             )
 
+    @patch("apps.core.repository.autenticacao_eol_repository.requests.get")
+    def test_get(self, mock_get):
+        response = Mock()
+        mock_get.return_value = response
+
+        resultado = ApiEOLRepository.get(
+            url=URL,
+            headers={"Authorization": "Bearer token"},
+        )
+
+        assert resultado is response
+
+        mock_get.assert_called_once_with(
+            URL,
+            headers={"Authorization": "Bearer token"},
+            timeout=10,
+        )
+
+    @patch.object(ApiEOLRepository, "get")
+    def test_buscar_cargos(self, mock_get):
+        response = Mock()
+        response.status_code = 200
+        response.json.return_value = [{"cargoBase": "Diretor"}]
+
+        mock_get.return_value = response
+
+        resultado = ApiEOLRepository.buscar_cargos(
+            url=URL,
+            headers={},
+        )
+
+        assert resultado == [{"cargoBase": "Diretor"}]
+
+        mock_get.assert_called_once_with(
+            url=URL,
+            headers={},
+        )
+
+        response.json.assert_called_once()
+
+    @patch.object(ApiEOLRepository, "get")
+    def test_buscar_cargos_erro(self, mock_get):
+        response = Mock()
+        response.status_code = 500
+        response.text = "Erro interno"
+
+        mock_get.return_value = response
+
+        with pytest.raises(
+            SmeIntegracaoError,
+            match="Erro ao consultar cargos do servidor",
+        ):
+            ApiEOLRepository.buscar_cargos(
+                url=URL,
+                headers={},
+            )
+
+        mock_get.assert_called_once_with(
+            url=URL,
+            headers={},
+        )
+
+    @patch.object(ApiEOLRepository, "get")
+    def test_obter_dados_usuario(self, mock_get):
+        response = Mock()
+        response.status_code = 200
+        response.json.return_value = {"nome": "João"}
+
+        mock_get.return_value = response
+
+        resultado = ApiEOLRepository.obter_dados_usuarios(
+            url=URL,
+            headers={},
+        )
+
+        assert resultado == {"nome": "João"}
+
+        mock_get.assert_called_once_with(
+            url=URL,
+            headers={},
+        )
+
+        response.json.assert_called_once()
+
+    @patch.object(ApiEOLRepository, "get")
+    def test_obter_dados_usuario_erro(self, mock_get):
+        response = Mock()
+        response.status_code = 500
+        response.text = "Erro interno"
+
+        mock_get.return_value = response
+
+        with pytest.raises(
+            SmeIntegracaoError,
+            match="Erro ao consultar dados do servidor",
+        ):
+            ApiEOLRepository.obter_dados_usuarios(
+                url=URL,
+                headers={},
+            )
+
+    def test_tratar_resposta_200(self):
+        response = Mock()
+        response.status_code = 200
+        response.json.return_value = {"ok": True}
+
+        resultado = ApiEOLRepository._tratar_resposta(response)
+
+        assert resultado == {"ok": True}
+
+    def test_tratar_resposta_401(self):
+        response = Mock()
+        response.status_code = 401
+
+        with pytest.raises(FalhaAutenticacaoError):
+            ApiEOLRepository._tratar_resposta(response)
+
+    def test_tratar_resposta_429(self):
+        response = Mock()
+        response.status_code = 429
+
+        with pytest.raises(SmeIntegracaoError):
+            ApiEOLRepository._tratar_resposta(response)
+
+    def test_tratar_resposta_500(self):
+        response = Mock()
+        response.status_code = 500
+        response.ok = False
+        response.text = "Erro"
+
+        with pytest.raises(SmeIntegracaoError):
+            ApiEOLRepository._tratar_resposta(response)
+
+    def test_tratar_resposta_json_invalido(self):
+        response = Mock()
+        response.status_code = 200
+        response.json.side_effect = ValueError()
+
+        with pytest.raises(SmeIntegracaoError):
+            ApiEOLRepository._tratar_resposta(response)
+
 
 class TestApiEOLRepositoryIntegracao:
     """Testes que verificam a integração entre os métodos."""
-
-    URL = "https://api.exemplo/api/autenticacao"
-    HEADERS = {"Content-Type": "application/json"}
-    DATA = '{"login": "1234567", "senha": "senha123"}'
-
-    @patch("apps.core.repository.autenticacao_eol_repository.requests.post")
-    def test_autentica_usuario_usa_mesmo_comportamento_do_post(
-        self, mock_post
-    ):
-        """O método autentica_usuario com o mesmo comportamento do post."""
-        mock_response = Mock(spec=requests.Response)
-        mock_post.return_value = mock_response
-
-        resultado_post = ApiEOLRepository.post(
-            url=self.URL, headers=self.HEADERS, data=self.DATA
-        )
-        resultado_autentica = ApiEOLRepository.autentica_usuario(
-            url=self.URL, headers=self.HEADERS, data=self.DATA
-        )
-
-        assert resultado_post == resultado_autentica
-        assert mock_post.call_count == 2
 
     def test_metodo_post_aceita_parametros_nomeados(self):
         """Os parâmetros devem ser passados como keyword arguments."""
