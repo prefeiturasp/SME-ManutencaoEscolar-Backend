@@ -16,9 +16,12 @@ from apps.core.exceptions import (
     SmeIntegracaoError,
 )
 from apps.core.repository.autenticacao_eol_repository import ApiEOLRepository
+from apps.core.services.token_service import TokenService
+from apps.usuarios.services.usuario_service import UsuarioService
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
 
 logger = logging.getLogger(__name__)
+DADO_NAO_INFORMADO = "Não informado"
 
 
 class AutenticacaoEOLService:
@@ -64,9 +67,8 @@ class AutenticacaoEOLService:
                 headers=headers,
                 data=data,
             )
-            response_data = cls._tratar_resposta(response, login)
             logger.info("Usuário autenticado com sucesso: %s", login)
-            return response_data
+            return response
 
         except requests.exceptions.Timeout:
             logger.error("Timeout na autenticação para login: %s", login)
@@ -197,62 +199,95 @@ class AutenticacaoEOLService:
             "Content-Type": "application/json-patch+json",
         }
 
-    @staticmethod
-    def _tratar_resposta(
-        response: requests.Response, login: object
-    ) -> dict[str, Any]:
-        """
-        Processa a resposta retornada pelo serviço de autenticação EOL.
+    @classmethod
+    def buscar_cargos(cls, registro_funcional: str) -> dict:
+        """Consulta cargos de um servidor na SME pelo RF.
 
         Args:
-            response (requests.Response): Resposta HTTP retornada pela API.
-            login (object): Login utilizado na tentativa de autenticação.
-
-        Raises:
-            FalhaAutenticacaoError:  Quando as credenciais informadas são
-                inválidas (HTTP 401).
-            SmeIntegracaoError: Quando o limite de tentativas é excedido
-                (HTTP 429), ocorre qualquer outro erro retornado pela API ou
-                a resposta possui formato inválido.
+            registro_funcional (str): Registro funcional do servidor.
 
         Returns:
-            dict[str, Any]: Conteúdo da resposta convertido para dicionário.
+            dict: Nome  e código do cargo base do servidor.
+
+        Raises:
+            SmeIntegracaoError: Quando a consulta falha.
         """
-        if response.status_code == 401:
-            logger.warning("Credenciais inválidas para login: %s", login)
-            raise FalhaAutenticacaoError(
-                "Não foi possível autenticar o usuário. Verifique o login e "
-                "a senha informados."
-            )
-
-        if response.status_code == 429:
-            logger.warning("Rate limit atingido para login: %s", login)
-            raise SmeIntegracaoError(
-                "Foram realizadas muitas tentativas de autenticação. Aguarde "
-                "alguns minutos antes de tentar novamente."
-            )
-
-        if not response.ok:
-            logger.error(
-                "Erro HTTP %s ao autenticar usuário %s. Resposta: %s",
-                response.status_code,
-                login,
-                response.text[:200],
-            )
-            raise SmeIntegracaoError(
-                "Não foi possível concluir a autenticação no momento."
-            )
-
+        url = f"{SME_API_EOL_URL}/funcionarios/cargo/{registro_funcional}"
+        headers = cls._obter_headers()
         try:
-            response_data: dict[str, Any] = response.json()
-        except ValueError as err:
-            logger.exception(
-                "Resposta inválida do EOL para login %s: %s",
-                login,
-                str(err),
+            response = ApiEOLRepository.buscar_cargos(url=url, headers=headers)
+        except SmeIntegracaoError:
+            logging.exception(
+                "Erro ao consultar cargos",
             )
-            raise SmeIntegracaoError(
-                "O serviço de autenticação retornou uma resposta inválida."
-            ) from err
+            raise
 
-        return response_data
+        # No futuro, se retornar lista vazia, retorna FalhaAutenticacaoError
+        cargo: dict = (
+            response[0]
+            if isinstance(response, list) and len(response) >= 1
+            else {}
+        )
+        informacoes_cargo: dict = {
+            "nome_cargo": cargo.get("cargoBase", DADO_NAO_INFORMADO),
+            "codigo_cargo": cargo.get("cdCargoBase", DADO_NAO_INFORMADO),
+        }
+        return informacoes_cargo
+
+    @classmethod
+    def dados_usuario(cls, registro_funcional: str) -> dict[str, str]:
+        """Consulta dados de um servidor na SME pelo RF.
+
+        Args:
+            registro_funcional (str): Registro funcional do servidor.
+
+        Returns:
+            dict: Dados do usuário retornados pela API.
+
+        Raises:
+            SmeIntegracaoError: Quando a consulta falha.
+        """
+        url = (
+            f"{SME_API_EOL_URL}/AutenticacaoCOMAPRE/{registro_funcional}/dados"
+        )
+        headers = cls._obter_headers()
+        try:
+            response = ApiEOLRepository.obter_dados_usuarios(
+                url=url, headers=headers
+            )
+        except SmeIntegracaoError:
+            logging.exception(
+                "Erro ao consultar dados do servidor",
+            )
+            raise
+
+        return response
+
+    @classmethod
+    def login(cls, login: object, senha: object) -> dict[str, Any]:
+        dados_autenticacao = cls.autentica(
+            login=login,
+            senha=senha,
+        )
+        codigo_rf = dados_autenticacao["codigoRf"]
+        informaoes_cargo = cls.buscar_cargos(registro_funcional=codigo_rf)
+        dados_usuario = cls.dados_usuario(codigo_rf)
+        dados_usuario["codigo_rf"] = codigo_rf
+        usuario = UsuarioService.sincronizar_usuario(
+            dados_usuario=dados_usuario,
+            dados_cargo=informaoes_cargo,
+        )
+        token = TokenService.gerar_tokens(usuario["id"])
+        return {
+            "refresh": token["refresh"],
+            "access": token["access"],
+            "usuario": {
+                **usuario,
+                "diretoria_regional": dados_usuario.get(
+                    "dre", DADO_NAO_INFORMADO
+                ),
+                "unidade_educacional": dados_usuario.get(
+                    "nomeUe", DADO_NAO_INFORMADO
+                ),
+            },
+        }

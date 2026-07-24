@@ -7,6 +7,9 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
+from apps.usuarios.constants import PerfilAcesso
+from apps.usuarios.models.cargo_eol import CargoEOL
+
 from .conftest import ModelBase
 
 User = get_user_model()
@@ -16,11 +19,21 @@ password = str(uuid.uuid4())
 
 
 @pytest.fixture
-def usuario_teste(db):
+def cargo_teste(db):
+    """Fixture que cria um cargo de teste.."""
+    return CargoEOL.objects.create(
+        codigo=999999,
+        nome="CARGO IMPORTANTE",
+        perfil=PerfilAcesso.UE,
+        ativo=True,
+    )
+
+
+@pytest.fixture
+def usuario_teste(db, cargo_teste):
     """Fixture que cria um usuário de teste."""
     return User.objects.create_user(
-        username="teste",
-        password=password,
+        username="teste", password=password, cargo=cargo_teste
     )
 
 
@@ -47,11 +60,11 @@ class TestTimestampMixin:
 class TestAuditMixin:
     @pytest.mark.django_db
     def test_criado_por_no_save_nao_e_alterado_por_atualizacoes_posteriores(
-        self, usuario_teste
+        self, usuario_teste, cargo_teste
     ):
         obj = ModelBase.objects.create(nome="Teste", criado_por=usuario_teste)
         novo_usuario = User.objects.create_user(
-            username="novo_usuario", password=password
+            username="novo_usuario", password=password, cargo=cargo_teste
         )
 
         obj.atualizado_por = novo_usuario

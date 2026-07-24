@@ -8,9 +8,18 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
+from apps.core.exceptions import (
+    FalhaAutenticacaoError,
+    InternalError,
+    SmeIntegracaoError,
+)
 from apps.core.schemas import LOGIN
-from apps.core.serializers import AutenticacaoSerializer
+from apps.core.serializers import (
+    AutenticacaoSerializer,
+    LoginResponseSerializer,
+)
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
 
 
@@ -20,7 +29,8 @@ class HealthCheckView(APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
-        summary="Endpoint de Health Check 2",
+        auth=[],
+        summary="Endpoint de Health Check",
         description=(
             "Retorna o status atual da aplicação para os "
             "orquestradores de cluster."
@@ -39,19 +49,50 @@ class HealthCheckView(APIView):
         return Response({"status": "ok"})
 
 
-@LOGIN
-class LoginView(APIView):
+class LoginView(TokenObtainPairView):
     """View responsavel por autenticação."""
 
     permission_classes = [AllowAny]
 
+    @LOGIN
     def post(self, request: Request) -> Response:
         serializer = AutenticacaoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        login = serializer.validated_data["login"]
+        senha = serializer.validated_data["senha"]
+        try:
+            dados_autenticacao = AutenticacaoEOLService.login(
+                login=login,
+                senha=senha,
+            )
+            response_serializer = LoginResponseSerializer(
+                data=dados_autenticacao
+            )
+            response_serializer.is_valid(raise_exception=True)
 
-        dados_autenticacao = AutenticacaoEOLService.autentica(
-            login=serializer.validated_data["login"],
-            senha=serializer.validated_data["senha"],
-        )
+            return Response(
+                response_serializer.validated_data, status=status.HTTP_200_OK
+            )
+        except FalhaAutenticacaoError:
+            return Response(
+                {"detail": "Usuário e/ou senha inválida"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
-        return Response(dados_autenticacao, status=status.HTTP_200_OK)
+        except SmeIntegracaoError:
+            return Response(
+                {
+                    "detail": "Parece que estamos com uma instabilidade no "
+                    "momento. Tente entrar novamente daqui a pouco."
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        except InternalError:
+            return Response(
+                {
+                    "detail": "Parece que estamos com uma instabilidade no "
+                    "momento. Tente entrar novamente daqui a pouco."
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -41,6 +41,10 @@ migrate: ## Aplica as migrações ao banco de dados Postgres
 shell: ## Abre o shell interativo do Django
 	$(EXEC) python manage.py shell
 
+create-app: ## Cria um novo app. Uso: make create-app app=nome_do_app
+	@if [ -z "$(app)" ]; then echo "Erro: Informe o nome do app. Ex: make create-app app=core"; exit 1; fi
+	bash scripts/criar_novo_app.sh $(app)
+
 # ==========================================
 # Testes e Cobertura
 # ==========================================
@@ -76,5 +80,3 @@ bash: ## Abre um terminal interativo (Bash) dentro do container backend
 
 terminal: ## Alias para o comando bash (Abre o terminal dentro do container)
 	$(EXEC) bash
-
-

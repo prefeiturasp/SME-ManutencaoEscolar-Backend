@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 import sys
 import urllib.parse
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "apps.core",
+    "apps.usuarios",
     "apps.fornecedor",
 ]
 
@@ -154,9 +156,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+AUTH_USER_MODEL = "usuarios.Usuario"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+}
+# VERIFICAR ISSO SOBRE BLACK_LIST "rest_framework_simplejwt.token_blacklist"
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 SPECTACULAR_SETTINGS = {
@@ -164,6 +180,23 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Sistema de Manutenção Escolar",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "APPEND_COMPONENTS": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": (
+                    "Informe o token JWT no formato: `Bearer <token>`."
+                ),
+            }
+        }
+    },
+    "SECURITY": [
+        {
+            "BearerAuth": [],
+        }
+    ],
 }
 
 # Internationalization
