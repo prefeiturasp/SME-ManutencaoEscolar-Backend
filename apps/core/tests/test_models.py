@@ -20,7 +20,7 @@ password = str(uuid.uuid4())
 
 @pytest.fixture
 def cargo_teste(db):
-    """_summary_."""
+    """Fixture que cria um cargo de teste.."""
     return CargoEOL.objects.create(
         codigo=999999,
         nome="CARGO IMPORTANTE",

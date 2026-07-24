@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Constantes do app usuarios."""
 
 from django.db import models
 

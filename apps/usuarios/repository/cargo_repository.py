@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Repositório dos cargos do EOL."""
 
 from typing import Any
 

@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Serializer do app usuarios."""
 
 from rest_framework import serializers
 

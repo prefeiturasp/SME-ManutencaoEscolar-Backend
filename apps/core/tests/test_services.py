@@ -580,8 +580,21 @@ class TestObterHeaders:
 
 
 class TestBuscaCargos:
+    LOGIN_VALIDO = "1234567"
+    SENHA_VALIDA = "senha123"
+    TOKEN = "fake-token"
+    URL_BASE = "https://api.exemplo"
+
     """Testes específicos para o método buscar_cargos."""
 
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
     @patch(
         "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
         "buscar_cargos"
@@ -605,6 +618,14 @@ class TestBuscaCargos:
         mock_busca_cargos.assert_called_once()
 
     @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
         "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
         "buscar_cargos"
     )
@@ -618,6 +639,19 @@ class TestBuscaCargos:
 class TestDadosUsuarios:
     """Testes específicos para o método dados_usuario."""
 
+    LOGIN_VALIDO = "1234567"
+    SENHA_VALIDA = "senha123"
+    TOKEN = "fake-token"
+    URL_BASE = "https://api.exemplo"
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
     @patch(
         "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
         "obter_dados_usuarios"
@@ -637,6 +671,14 @@ class TestDadosUsuarios:
         mock_usuario.assert_called_once()
 
     @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
         "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
         "obter_dados_usuarios"
     )
@@ -652,23 +694,44 @@ class TestLogin:
 
     LOGIN_VALIDO = "1234567"
     SENHA_VALIDA = "senha123"
+    TOKEN = "fake-token"
+    URL_BASE = "https://api.exemplo"
 
     @pytest.mark.django_db
     @patch(
-        "apps.core.services.autenticacao_eol_service.TokenService.gerar_tokens"
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.TokenService."
+        "gerar_tokens",
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.UsuarioService."
+        "sincronizar_usuario",
     )
     @patch(
         "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
-        "dados_usuario"
+        "dados_usuario",
     )
     @patch(
         "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
-        "autentica"
+        "buscar_cargos",
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
+        "autentica",
     )
     def test_login_sucesso(
         self,
         mock_autentica,
+        mock_buscar_cargos,
         mock_dados_usuario,
+        mock_sincronizar_usuario,
         mock_gerar_token,
     ):
         mock_autentica.return_value = {
@@ -702,6 +765,14 @@ class TestLogin:
         mock_dados_usuario.assert_called_once()
         mock_gerar_token.assert_called_once()
 
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
     @patch(
         "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
         "autentica"

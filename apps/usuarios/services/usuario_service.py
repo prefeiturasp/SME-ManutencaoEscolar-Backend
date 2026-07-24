@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Service do app usuarios."""
 
 from typing import Any
 

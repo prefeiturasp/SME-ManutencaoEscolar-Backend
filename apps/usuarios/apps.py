@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Configuração da aplicação Usuarios."""
 
 from django.apps import AppConfig
 

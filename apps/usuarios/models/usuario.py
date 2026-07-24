@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Modelo referentes aos usuarios do sistema."""
 
 import uuid
 

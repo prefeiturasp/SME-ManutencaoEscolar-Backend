@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Modelo referentes ao cargos que tem acesso ao sistema."""
 
 from django.db import models
 
