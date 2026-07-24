@@ -577,3 +577,143 @@ class TestObterHeaders:
             ),
         ):
             AutenticacaoEOLService._obter_headers()
+
+
+class TestBuscaCargos:
+    """Testes específicos para o método buscar_cargos."""
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
+        "buscar_cargos"
+    )
+    def test_busca_cargos_sucesso(self, mock_busca_cargos):
+        cargos = [
+            {
+                "cargoBase": "Diretor",
+                "cdCargoBase": "3360",
+            }
+        ]
+
+        mock_busca_cargos.return_value = cargos
+
+        resultado = AutenticacaoEOLService.buscar_cargos("1234456")
+
+        assert resultado == {
+            "nome_cargo": "Diretor",
+            "codigo_cargo": "3360",
+        }
+        mock_busca_cargos.assert_called_once()
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
+        "buscar_cargos"
+    )
+    def test_busca_cargos_propaga_erro(self, mock_busca_cargos):
+        mock_busca_cargos.side_effect = SmeIntegracaoError("Erro EOL")
+
+        with pytest.raises(SmeIntegracaoError):
+            AutenticacaoEOLService.buscar_cargos("1234456")
+
+
+class TestDadosUsuarios:
+    """Testes específicos para o método dados_usuario."""
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
+        "obter_dados_usuarios"
+    )
+    def test_dados_usuario(self, mock_usuario):
+        retorno = {
+            "id": 1,
+            "nome": "João",
+        }
+
+        mock_usuario.return_value = retorno
+
+        resultado = AutenticacaoEOLService.dados_usuario("1234567")
+
+        assert resultado == retorno
+
+        mock_usuario.assert_called_once()
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.ApiEOLRepository."
+        "obter_dados_usuarios"
+    )
+    def test_dados_usuario_propaga_erro(self, mock_usuario):
+        mock_usuario.side_effect = SmeIntegracaoError("Erro")
+
+        with pytest.raises(SmeIntegracaoError):
+            AutenticacaoEOLService.dados_usuario("")
+
+
+class TestLogin:
+    """Testes específicos para o método login."""
+
+    LOGIN_VALIDO = "1234567"
+    SENHA_VALIDA = "senha123"
+
+    @pytest.mark.django_db
+    @patch(
+        "apps.core.services.autenticacao_eol_service.TokenService.gerar_tokens"
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
+        "dados_usuario"
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
+        "autentica"
+    )
+    def test_login_sucesso(
+        self,
+        mock_autentica,
+        mock_dados_usuario,
+        mock_gerar_token,
+    ):
+        mock_autentica.return_value = {
+            "nome": "João",
+            "codigoRf": "1234567",
+            "cpf": "12345678901",
+        }
+
+        mock_dados_usuario.return_value = {
+            "id": 1,
+            "nome": "João",
+            "email": "joao@email.com",
+            "cpf": "12345678901",
+        }
+
+        mock_gerar_token.return_value = {
+            "refresh": "refresh",
+            "access": "access_token",
+        }
+
+        resultado = AutenticacaoEOLService.login(
+            self.LOGIN_VALIDO,
+            self.SENHA_VALIDA,
+        )
+
+        assert "refresh" in resultado
+        assert "access" in resultado
+        assert "usuario" in resultado
+
+        mock_autentica.assert_called_once()
+        mock_dados_usuario.assert_called_once()
+        mock_gerar_token.assert_called_once()
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
+        "autentica"
+    )
+    def test_login_propaga_falha_autenticacao(
+        self,
+        mock_autentica,
+    ):
+        mock_autentica.side_effect = FalhaAutenticacaoError("Erro")
+
+        with pytest.raises(FalhaAutenticacaoError):
+            AutenticacaoEOLService.login(
+                self.LOGIN_VALIDO,
+                self.SENHA_VALIDA,
+            )

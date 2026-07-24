@@ -1,4 +1,5 @@
 import pytest
+from rest_framework import serializers
 
 from apps.core.serializers import AutenticacaoSerializer
 
@@ -37,3 +38,13 @@ class TestAutenticacaoSerializer:
         serializer = AutenticacaoSerializer(data=payload)
 
         assert not serializer.is_valid()
+
+    def test_validate_login_invalido(self):
+        serializer = AutenticacaoSerializer()
+
+        with pytest.raises(
+            serializers.ValidationError,
+            match="O login deve ser um RF com 7 dígitos ou um CPF com 11 "
+            "dígitos.",
+        ):
+            serializer.validate_login("123456")

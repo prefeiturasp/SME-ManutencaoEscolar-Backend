@@ -6,7 +6,7 @@ import requests
 from apps.core.exceptions import FalhaAutenticacaoError, SmeIntegracaoError
 from apps.core.repository.autenticacao_eol_repository import ApiEOLRepository
 
-URL = "http://teste"
+URL = "https://teste"
 
 
 class TestApiEOLRepository:
