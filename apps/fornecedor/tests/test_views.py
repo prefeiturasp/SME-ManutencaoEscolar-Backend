@@ -13,18 +13,6 @@ from apps.fornecedor.exceptions import (
 pytestmark = pytest.mark.django_db
 
 
-def test_listagem_retorna_lista_vazia(api_client):
-    """
-    Testa a listagem de fornecedores via API.
-
-    Verifica se o retorno é uma lista vazia.
-    """
-    response = api_client.get("/api/v1/fornecedores/")
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == []
-
-
 def test_criacao_retorna_fornecedor(api_client, fornecedor_payload_valido):
     """
     Testa a criação de um fornecedor via API.

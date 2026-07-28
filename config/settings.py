@@ -31,9 +31,17 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("true", "1")
-ALLOWED_HOSTS = [
-    h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
-]
+
+
+def _parse_csv(value: str) -> list[str]:
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = _parse_csv(os.getenv("DJANGO_ALLOWED_HOSTS", ""))
+
+# ``ALLOWED_HOSTS`` controla o header Host; CORS depende das origens abaixo.
+CORS_ALLOW_ALL_ORIGINS = "*" in ALLOWED_HOSTS
+CORS_ALLOWED_ORIGINS = [] if CORS_ALLOW_ALL_ORIGINS else ALLOWED_HOSTS
 
 SME_API_EOL_URL = os.environ.get("SME_API_EOL_URL", "")
 SME_API_EOL_TOKEN = os.environ.get("SME_API_EOL_TOKEN", "")
@@ -58,13 +66,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
