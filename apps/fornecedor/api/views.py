@@ -27,6 +27,7 @@ class FornecedorViewSet(ModelViewSet):
 
     permission_classes = [AllowAny]
     queryset = Fornecedor.objects.all()
+    http_method_names = ["post"]
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -36,7 +37,7 @@ class FornecedorViewSet(ModelViewSet):
     def get_serializer_class(self) -> type[BaseSerializer]:
         if self.action == "create":
             return FornecedorCriarSerializer
-        return FornecedorSerializer
+        return FornecedorSerializer  # pragma: no cover
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         try:
