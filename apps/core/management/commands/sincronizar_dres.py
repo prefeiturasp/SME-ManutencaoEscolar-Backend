@@ -20,17 +20,16 @@ class Command(BaseCommand):
 
     def handle(self, *args: object, **options: object) -> None:
         """Executa a sincronização."""
-        api_url = (
-            SME_API_EOL_URL.rstrip("/") + "/abrangencia/nome-abreviacao-dres"
-        )
+        base_url = (SME_API_EOL_URL or "").strip()
+        token = (SME_API_EOL_TOKEN or "").strip()
 
-        token = SME_API_EOL_TOKEN
-
-        if not api_url or not token:
+        if not base_url or not token:
             raise CommandError(
                 """As variáveis SME_API_EOL_URL
                 e SME_API_EOL_TOKEN devem estar configuradas."""
             )
+
+        api_url = base_url.rstrip("/") + "/abrangencia/nome-abreviacao-dres"
 
         headers = {
             "x-api-eol-key": token,
@@ -80,7 +79,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Sincronização concluída: {criadas} criadas "
-                f"e {atualizadas} atualizadas."
+                f"Sincronização concluída: {criadas} criada(s) "
+                f"e {atualizadas} atualizada(s)."
             )
         )
