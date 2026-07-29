@@ -30,3 +30,4 @@ repos:
           - psycopg2-binary
           - django-cors-headers
           - types-requests
+          - celery

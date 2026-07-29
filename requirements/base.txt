@@ -7,3 +7,5 @@ psycopg[binary]>=3.2,<4
 django-cors-headers>=4.4,<5
 djangorestframework-simplejwt>=5.5,<6
 requests>=2.31,<2.33
+celery[redis]>=5.4,<6
+flower>=2.0,<3
