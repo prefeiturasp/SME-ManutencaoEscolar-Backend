@@ -37,7 +37,7 @@ def _parse_csv(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-ALLOWED_HOSTS = _parse_csv(os.getenv("DJANGO_ALLOWED_HOSTS", ""))
+ALLOWED_HOSTS = _parse_csv(os.environ.get("DJANGO_ALLOWED_HOSTS", ""))
 
 # ``ALLOWED_HOSTS`` controla o header Host; CORS depende das origens abaixo.
 CORS_ALLOW_ALL_ORIGINS = "*" in ALLOWED_HOSTS
