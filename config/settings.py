@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "apps.usuarios",
     "apps.fornecedor",
     "apps.servico",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -251,6 +252,8 @@ CELERY_TASK_SERIALIZER = "json"
 
 CELERY_RESULT_SERIALIZER = "json"
 
-CELERY_TIMEZONE = "America/Sao_Paulo"
+CELERY_TIMEZONE = TIME_ZONE
 
-CELERY_ENABLE_UTC = False
+CELERY_ENABLE_UTC = USE_TZ
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"

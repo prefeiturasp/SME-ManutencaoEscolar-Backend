@@ -31,3 +31,4 @@ repos:
           - django-cors-headers
           - types-requests
           - celery
+          - django_celery_beat
