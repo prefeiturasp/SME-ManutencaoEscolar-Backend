@@ -140,8 +140,8 @@ services:
       celery
       -A config
       beat
+      --scheduler django_celery_beat.schedulers:DatabaseScheduler
       --loglevel=${CELERY_LOG_LEVEL:-INFO}
-      --schedule=/var/run/celery/celerybeat-schedule
 
     env_file:
       - .env
