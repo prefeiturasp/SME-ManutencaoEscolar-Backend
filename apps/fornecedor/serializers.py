@@ -49,6 +49,7 @@ class FornecedorCriarSerializer(serializers.ModelSerializer):
             "nome",
             "cnpj",
             "razao_social",
+            "status",
             "link_rastreio",
             "cep",
             "logradouro",
