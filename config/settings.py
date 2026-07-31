@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "apps.usuarios",
     "apps.fornecedor",
     "apps.servico",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -137,7 +138,7 @@ DATABASES = {
 
 EXECUTANDO_TESTES = any(
     "test" in arg or "pytest" in arg for arg in sys.argv
-) or os.getenv("USE_SQLITE_TEST", "").lower() in ("1", "true")
+) or os.environ.get("USE_SQLITE_TEST", "").lower() in ("1", "true")
 
 if EXECUTANDO_TESTES:
     DATABASES["default"] = {
@@ -240,3 +241,23 @@ LOGGING = {
         "level": "WARNING",
     },
 }
+
+#
+KEYDB_HOST = os.environ.get("KEYDB_HOST", "")
+KEYDB_PORT = os.environ.get("KEYDB_PORT", "")
+KEYDB_HOST_PORT = os.environ.get("KEYDB_HOST_PORT", "")
+FLOWER_PORT = os.environ.get("FLOWER_PORT", "")
+FLOWER_HOST_PORT = os.environ.get("FLOWER_HOST_PORT", "")
+
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "")
+
+CELERY_CONCURRENCY = os.environ.get("CELERY_BROKER_URL", "")
+CELERY_LOG_LEVEL = os.environ.get("CELERY_LOG_LEVEL", "")
+
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = USE_TZ
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"

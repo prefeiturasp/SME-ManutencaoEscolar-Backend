@@ -74,8 +74,119 @@ services:
     ports:
       - "${POSTGRES_HOST_PORT:-5432}:5432"
 
+  keydb:
+    image: eqalpha/keydb:latest
+    container_name: keydb
+
+    command: keydb-server /etc/keydb/keydb.conf --appendonly yes
+    env_file:
+      - .env
+
+    ports:
+      - "${KEYDB_HOST_PORT:-6379}:6379"
+
+    volumes:
+      - keydb_data:/data
+
+    healthcheck:
+      test: ["CMD", "keydb-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    restart: unless-stopped
+    networks:
+      - backend_network
+
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+
+    container_name: celery-worker
+
+    command: >
+      celery
+      -A config
+      worker
+      --loglevel=${CELERY_LOG_LEVEL:-INFO}
+      --concurrency=${CELERY_CONCURRENCY:-4}
+
+    env_file:
+      - .env
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keydb:
+        condition: service_healthy
+
+    volumes:
+      - .:/app
+
+    restart: unless-stopped
+    networks:
+      - backend_network
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+
+    container_name: celery-beat
+
+    command: >
+      celery
+      -A config
+      beat
+      --scheduler django_celery_beat.schedulers:DatabaseScheduler
+      --loglevel=${CELERY_LOG_LEVEL:-INFO}
+
+    env_file:
+      - .env
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keydb:
+        condition: service_healthy
+
+    volumes:
+      - .:/app
+
+    restart: unless-stopped
+    networks:
+      - backend_network
+
+  flower:
+    image: mher/flower
+
+    container_name: flower
+
+    command: >
+      celery
+      --broker=${CELERY_BROKER_URL}
+      flower
+      --port=${FLOWER_HOST_PORT:-5555}
+
+    ports:
+      - "${FLOWER_HOST_PORT:-5555}:5555"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keydb:
+        condition: service_healthy
+
+    restart: unless-stopped
+    networks:
+      - backend_network
+
+
 volumes:
   postgres_data:
+  keydb_data:
 
 networks:
   backend_network:
