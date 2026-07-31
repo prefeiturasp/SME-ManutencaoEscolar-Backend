@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Task do app core."""
 
 from time import sleep
 

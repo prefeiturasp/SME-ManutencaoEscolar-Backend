@@ -246,6 +246,7 @@ LOGGING = {
 KEYDB_HOST = os.environ.get("KEYDB_HOST", "")
 KEYDB_PORT = os.environ.get("KEYDB_PORT", "")
 KEYDB_HOST_PORT = os.environ.get("KEYDB_HOST_PORT", "")
+FLOWER_PORT = os.environ.get("FLOWER_PORT", "")
 FLOWER_HOST_PORT = os.environ.get("FLOWER_HOST_PORT", "")
 
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "")
