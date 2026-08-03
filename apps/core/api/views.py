@@ -52,7 +52,9 @@ class HealthCheckView(APIView):
 class LoginView(TokenObtainPairView):
     """View responsavel por autenticação."""
 
-    permission_classes = [AllowAny]
+    # TokenObtainPairView herda de TokenViewBase, que define permission_classes
+    # como uma tupla
+    permission_classes: tuple = (AllowAny,)
 
     @LOGIN
     def post(self, request: Request) -> Response:
