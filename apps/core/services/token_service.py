@@ -3,6 +3,7 @@
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken, Token
 
+from apps.core.exceptions import TokenInvalidoError
 from apps.core.repository.token_repository import TokenRepository
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
@@ -61,3 +62,33 @@ class TokenService:
 
         except TokenError:
             raise TokenError from None
+
+    @classmethod
+    def logout(cls, usuario_id: int, refresh_token: Token) -> None:
+        """Realiza o logout do usuário revogando o refresh token.
+
+        Valida se o refresh token pertence ao usuário autenticado e, em
+        seguida, adiciona o token à blacklist para impedir sua reutilização
+        na geração de novos access tokens.
+
+        Args:
+            usuario_id (int): Identificador do usuário autenticado.
+            refresh_token (Token): Refresh token enviado pelo cliente.
+
+        Raises:
+            TokenInvalidoError: Se o refresh token for inválido, já tiver
+                sido revogado ou não pertencer ao usuário autenticado.
+        """
+        try:
+            token = RefreshToken(refresh_token)
+            if token["user_id"] != usuario_id:
+                raise TokenInvalidoError(
+                    title="Logout não realizado.",
+                    detail="O token não pertence ao usuário autenticado.",
+                )
+            token.blacklist()
+        except TokenError as exc:
+            raise TokenInvalidoError(
+                title="Logout não realizado.",
+                detail="O refresh token é inválido ou já foi revogado.",
+            ) from exc
