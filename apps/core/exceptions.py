@@ -17,3 +17,14 @@ class SmeIntegracaoError(Exception):
     """Problema na integração com a SME."""
 
     pass
+
+
+class TokenInvalidoError(Exception):
+    """Problema na geração de token JWT."""
+
+    def __init__(self, title: str, detail: str) -> None:
+        """Inicializa a exceção com título e descrição."""
+        self.title = title
+        self.detail = detail
+
+        super().__init__(detail)
