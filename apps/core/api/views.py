@@ -1,14 +1,22 @@
 """Views da API da aplicação Core."""
 
+from tokenize import TokenError
+from typing import Any
+
 from drf_spectacular.utils import (
     extend_schema,
 )
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import (
+    AllowAny,
+)
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 from apps.core.exceptions import (
     FalhaAutenticacaoError,
@@ -17,10 +25,13 @@ from apps.core.exceptions import (
 )
 from apps.core.schemas import LOGIN
 from apps.core.serializers import (
+    AtualizarTokenSerializer,
     AutenticacaoSerializer,
     LoginResponseSerializer,
 )
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
+from apps.core.services.token_service import TokenService
+from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 
 
 class HealthCheckView(APIView):
@@ -98,3 +109,28 @@ class LoginView(TokenObtainPairView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class AtualizarTokenView(TokenRefreshView):
+    """View responsavel por atualização de token."""
+
+    # TokenRefreshView herda de TokenViewBase, que define permission_classes
+    # como uma tupla
+    permission_classes: tuple = (AllowAny,)
+
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = AtualizarTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            TokenService.atualizar_token(serializer.validated_data["refresh"])
+        except TokenError:
+            return Response(
+                {"detail": "Refresh token inválido."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        except UsuarioNaoEncontradoError as exc:
+            return Response(
+                {"detail": exc.detail},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        return super().post(request, *args, **kwargs)
