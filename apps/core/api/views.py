@@ -9,6 +9,7 @@ from drf_spectacular.utils import (
 from rest_framework import status
 from rest_framework.permissions import (
     AllowAny,
+    IsAuthenticated,
 )
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -22,12 +23,14 @@ from apps.core.exceptions import (
     FalhaAutenticacaoError,
     InternalError,
     SmeIntegracaoError,
+    TokenInvalidoError,
 )
 from apps.core.schemas import LOGIN
 from apps.core.serializers import (
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
     LoginResponseSerializer,
+    LogoutSerializer,
 )
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
 from apps.core.services.token_service import TokenService
@@ -134,3 +137,34 @@ class AtualizarTokenView(TokenRefreshView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         return super().post(request, *args, **kwargs)
+
+
+class LogoutView(APIView):
+    """View responsável por realizar o logout do usuário autenticado."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        id_usuario = request.user.id
+
+        if id_usuario is None:
+            return Response(
+                {"detail": "Usuário autenticado inválido."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        try:
+            TokenService.logout(
+                id_usuario, serializer.validated_data["refresh"]
+            )
+        except TokenInvalidoError as exc:
+            return Response(
+                {"detail": exc.detail},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        return Response(
+            {"detail": "Logout realizado com sucesso."},
+            status=status.HTTP_205_RESET_CONTENT,
+        )

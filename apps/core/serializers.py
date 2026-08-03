@@ -50,3 +50,9 @@ class AtualizarTokenSerializer(serializers.Serializer):
     """Valida os dados da requisição de atualização de token."""
 
     refresh = serializers.CharField(required=True)
+
+
+class LogoutSerializer(serializers.Serializer):
+    """Valida os dados da requisição de logout do sistema."""
+
+    refresh = serializers.CharField(required=True)
