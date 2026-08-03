@@ -74,3 +74,19 @@ class UsuarioRepository:
             },
         }
         return dict_usuario
+
+    @staticmethod
+    def usuario_existe_por_id(usuario_id: int) -> bool:
+        """Verifica se existe um usuário ativo com o identificador informado.
+
+        Args:
+            usuario_id (int): Identificador único do usuário.
+
+        Returns:
+            bool: ``True`` se existir um usuário ativo com o identificador
+            informado; caso contrário, ``False``.
+        """
+        return Usuario.objects.filter(
+            id=usuario_id,
+            is_active=True,
+        ).exists()
