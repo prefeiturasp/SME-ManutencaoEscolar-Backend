@@ -4,9 +4,10 @@ from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
 
+pytestmark = pytest.mark.django_db
+
 
 class TestUsuarioRepository:
-    @pytest.mark.django_db
     def test_atualizar_ou_criar_novo_usuario_rf(
         self,
     ):
@@ -28,7 +29,6 @@ class TestUsuarioRepository:
         cargo = CargoEOL.objects.get(codigo="3360")
         assert usuario.cargo == cargo
 
-    @pytest.mark.django_db
     def test_atualizar_ou_criar_utiliza_cpf_quando_rf_invalido(self):
         cargo = CargoEOL.objects.get(codigo="3360")
 
@@ -47,7 +47,6 @@ class TestUsuarioRepository:
         assert resultado["id"] == usuario.id
         assert usuario.cargo == cargo
 
-    @pytest.mark.django_db
     def test_atualizar_ou_criar_atualiza_usuario_existente(self):
         cargo = CargoEOL.objects.get(codigo="3360")
 
@@ -75,7 +74,6 @@ class TestUsuarioRepository:
         assert usuario.nome == "Nome Novo"
         assert usuario.email == "novo@email.com"
 
-    @pytest.mark.django_db
     def test_atualizar_ou_criar_sem_rf_e_sem_cpf(self):
         with pytest.raises(
             ValueError,
@@ -90,3 +88,34 @@ class TestUsuarioRepository:
                 },
                 codigo_cargo="1",
             )
+
+    def test_usuario_existe_por_id_retorna_true_para_usuario_ativo(self):
+        cargo = CargoEOL.objects.get(codigo="3360")
+
+        usuario = Usuario.objects.create(
+            registro_funcional="1234567",
+            username="1234567",
+            nome="João",
+            email="joao@email.com",
+            cargo=cargo,
+            is_active=True,
+        )
+
+        assert UsuarioRepository.usuario_existe_por_id(usuario.id) is True
+
+    def test_usuario_existe_por_id_retorna_false_para_usuario_inativo(self):
+        cargo = CargoEOL.objects.get(codigo="3360")
+
+        usuario = Usuario.objects.create(
+            registro_funcional="1234567",
+            username="1234567",
+            nome="João",
+            email="joao@email.com",
+            cargo=cargo,
+            is_active=False,
+        )
+
+        assert UsuarioRepository.usuario_existe_por_id(usuario.id) is False
+
+    def test_usuario_existe_por_id_retorna_false_para_id_inexistente(self):
+        assert UsuarioRepository.usuario_existe_por_id(99999) is False
