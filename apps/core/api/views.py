@@ -8,7 +8,6 @@ from drf_spectacular.utils import (
 from rest_framework import status
 from rest_framework.permissions import (
     AllowAny,
-    IsAuthenticated,
 )
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -141,8 +140,6 @@ class AtualizarTokenView(TokenRefreshView):
 
 class LogoutView(APIView):
     """View responsável por realizar o logout do usuário autenticado."""
-
-    permission_classes = [IsAuthenticated]
 
     def post(self, request: Request) -> Response:
         serializer = LogoutSerializer(data=request.data)

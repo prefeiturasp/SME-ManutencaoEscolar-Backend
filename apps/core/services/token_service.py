@@ -1,5 +1,7 @@
 """Serviço para geração de tokens JWT."""
 
+import logging
+
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken, Token
 
@@ -7,6 +9,8 @@ from apps.core.exceptions import TokenInvalidoError
 from apps.core.repository.token_repository import TokenRepository
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
+
+logger = logging.getLogger(__name__)
 
 
 class TokenService:
@@ -60,7 +64,8 @@ class TokenService:
                     "associado a um usuário válido.",
                 )
 
-        except TokenError:
+        except TokenError as exc:
+            logger.error("Erro ao atulizar token: %s", exc)
             raise TokenError from None
 
     @classmethod
@@ -83,7 +88,7 @@ class TokenService:
             token = RefreshToken(refresh_token)
             usuario = UsuarioRepository.usuario_existe_por_id(usuario_id)
 
-            if token["user_id"] != usuario_id or usuario is False:
+            if int(token["user_id"]) != usuario_id or usuario is False:
                 raise TokenInvalidoError(
                     title="Logout não realizado.",
                     detail="O token não pertence ao usuário autenticado.",
