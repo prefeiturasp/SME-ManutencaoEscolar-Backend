@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 from apps.usuarios.constants import PerfilAcesso
@@ -57,23 +58,7 @@ class UsuarioRepository:
                 ]
             )
 
-        dict_usuario = {
-            "id": usuario.id,
-            "uuid": usuario.uuid,
-            "nome": usuario.nome,
-            "email": usuario.email,
-            "registro_funcional": usuario.registro_funcional,
-            "cpf": usuario.cpf,
-            "username": usuario.username,
-            "perfil_acesso": {
-                "cargo": usuario.cargo.nome,
-                "perfil": {
-                    "codigo": usuario.perfil,
-                    "descricao": PerfilAcesso(usuario.perfil).label,
-                },
-            },
-        }
-        return dict_usuario
+        return cls._retorna_usuario_em_dicionario(usuario)
 
     @staticmethod
     def usuario_existe_por_id(usuario_id: int) -> bool:
@@ -90,3 +75,64 @@ class UsuarioRepository:
             id=usuario_id,
             is_active=True,
         ).exists()
+
+    @classmethod
+    def busca_usuario_existe_por_usermane(cls, username: str) -> dict:
+        """Busca um usuário pelo nome de usuário.
+
+        Recupera um usuário a partir do campo ``username`` e retorna seus
+        dados em formato de dicionário..
+
+        Args:
+            username (str): RF ou CPF utilizado para localizar o usuário.
+
+        Raises:
+            ObjectDoesNotExist: Caso não exista um usuário com o ``username``
+            informado.
+
+        Returns:
+            dict: Dicionário contendo os dados do usuário e suas informações
+        de perfil de acesso.
+        """
+        try:
+            usuario = Usuario.objects.get(username=username)
+            return cls._retorna_usuario_em_dicionario(usuario)
+
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist from None
+
+    @staticmethod
+    def _retorna_usuario_em_dicionario(usuario: Usuario) -> dict:
+        """Transforma um objeto ``Usuario`` para um dicionário.
+
+        Args:
+            usuario (Usuario): Instância do usuário a ser convertida.
+
+        Returns:
+            dict: Dicionário contendo os seguintes dados:
+
+            - ``id``: Identificador do usuário.
+            - ``uuid``: UUID do usuário.
+            - ``nome``: Nome completo.
+            - ``email``: Endereço de e-mail.
+            - ``registro_funcional``: Registro funcional.
+            - ``cpf``: CPF do usuário.
+            - ``username``: Nome de usuário.
+            - ``perfil_acesso``: Informações do cargo e perfil de acesso.
+        """
+        return {
+            "id": usuario.id,
+            "uuid": usuario.uuid,
+            "nome": usuario.nome,
+            "email": usuario.email,
+            "registro_funcional": usuario.registro_funcional,
+            "cpf": usuario.cpf,
+            "username": usuario.username,
+            "perfil_acesso": {
+                "cargo": usuario.cargo.nome,
+                "perfil": {
+                    "codigo": usuario.perfil,
+                    "descricao": PerfilAcesso(usuario.perfil).label,
+                },
+            },
+        }
