@@ -227,6 +227,10 @@ SPECTACULAR_SETTINGS = {
             "BearerAuth": [],
         }
     ],
+    "SWAGGER_UI_SETTINGS": {
+        "tagsSorter": "alpha",
+        "operationsSorter": "alpha",
+    },
 }
 
 # Internationalization
