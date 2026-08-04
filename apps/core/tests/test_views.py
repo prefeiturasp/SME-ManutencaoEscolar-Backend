@@ -1,16 +1,28 @@
 from uuid import UUID
 
 import pytest
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.test import force_authenticate
+from rest_framework_simplejwt.exceptions import TokenError
 
-from apps.core.api.views import HealthCheckView, LoginView
+from apps.core.api.views import (
+    AtualizarTokenView,
+    HealthCheckView,
+    LoginView,
+    LogoutView,
+)
 from apps.core.exceptions import (
     FalhaAutenticacaoError,
     InternalError,
     SmeIntegracaoError,
+    TokenInvalidoError,
 )
+from apps.usuarios.exceptions import UsuarioNaoEncontradoError
+
+pytestmark = pytest.mark.django_db
 
 
-@pytest.mark.django_db
 def test_healthcheck_retorna_ok(api_factory):
     """Deve retornar status da aplicação."""
     request = api_factory.get("/api/v1/health/")
@@ -21,7 +33,6 @@ def test_healthcheck_retorna_ok(api_factory):
     assert response.data == {"status": "ok"}
 
 
-@pytest.mark.django_db
 def test_login_retorna_payload_autenticado(api_factory, monkeypatch):
     """Deve retornar o payload autenticado."""
     dados = {
@@ -65,7 +76,6 @@ def test_login_retorna_payload_autenticado(api_factory, monkeypatch):
     assert response.data == dados
 
 
-@pytest.mark.django_db
 def test_login_retorna_401_quando_credenciais_invalidas(
     api_factory, monkeypatch
 ):
@@ -94,7 +104,6 @@ def test_login_retorna_401_quando_credenciais_invalidas(
     assert response.data["detail"] == "Usuário e/ou senha inválida"
 
 
-@pytest.mark.django_db
 def test_login_retorna_503_quando_eol_esta_indisponivel(
     api_factory, monkeypatch
 ):
@@ -128,7 +137,6 @@ def test_login_retorna_503_quando_eol_esta_indisponivel(
     }
 
 
-@pytest.mark.django_db
 def test_login_retorna_500_quando_ocorre_erro_interno(
     api_factory, monkeypatch
 ):
@@ -160,3 +168,155 @@ def test_login_retorna_500_quando_ocorre_erro_interno(
             "Tente entrar novamente daqui a pouco."
         )
     }
+
+
+def test_atualizar_token_retorna_tokens(api_factory, monkeypatch):
+    """Deve atualizar o token com sucesso."""
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.atualizar_token",
+        classmethod(lambda cls, refresh: None),
+    )
+
+    monkeypatch.setattr(
+        "rest_framework_simplejwt.views.TokenRefreshView.post",
+        lambda self, request, *args, **kwargs: Response(
+            {"access": "novo-access"},
+            status=status.HTTP_200_OK,
+        ),
+    )
+
+    request = api_factory.post(
+        "/token/refresh/",
+        {"refresh": "refresh-token"},
+        format="json",
+    )
+
+    response = AtualizarTokenView.as_view()(request)
+
+    assert response.status_code == 200
+    assert response.data == {"access": "novo-access"}
+
+
+def test_atualizar_token_retorna_401_quando_token_invalido(
+    api_factory, monkeypatch
+):
+    """Deve retornar 401 quando o refresh token for inválido."""
+
+    def mock_atualizar_token(cls, refresh):
+        raise TokenError("Token inválido")
+
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.atualizar_token",
+        classmethod(mock_atualizar_token),
+    )
+
+    request = api_factory.post(
+        "/token/refresh/",
+        {"refresh": "refresh-token"},
+        format="json",
+    )
+
+    response = AtualizarTokenView.as_view()(request)
+
+    assert response.status_code == 401
+    assert response.data == {"detail": "Refresh token inválido."}
+
+
+def test_atualizar_token_retorna_401_quando_usuario_nao_existe(
+    api_factory, monkeypatch
+):
+    """Deve retornar 401 quando o usuário do token não existir."""
+
+    def mock_atualizar_token(cls, refresh):
+        raise UsuarioNaoEncontradoError(
+            title="Erro",
+            detail="Usuário não encontrado.",
+        )
+
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.atualizar_token",
+        classmethod(mock_atualizar_token),
+    )
+
+    request = api_factory.post(
+        "/token/refresh/",
+        {"refresh": "refresh-token"},
+        format="json",
+    )
+
+    response = AtualizarTokenView.as_view()(request)
+
+    assert response.status_code == 401
+    assert response.data == {"detail": "Usuário não encontrado."}
+
+
+def test_logout_retorna_205(api_factory, monkeypatch, usuario_ativo):
+    """Deve realizar logout com sucesso."""
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.logout",
+        classmethod(lambda cls, usuario_ativo, refresh: None),
+    )
+
+    request = api_factory.post(
+        "/logout/",
+        {"refresh": "refresh-token"},
+        format="json",
+    )
+
+    force_authenticate(request, user=usuario_ativo)
+
+    request.user = usuario_ativo
+    response = LogoutView.as_view()(request)
+
+    assert response.status_code == 205
+    assert response.data == {"detail": "Logout realizado com sucesso."}
+
+
+def test_logout_retorna_401_quando_usuario_invalido(
+    api_factory, usuario_ativo
+):
+    """Deve retornar 401 quando o usuário autenticado for inválido."""
+    request = api_factory.post(
+        "/logout/",
+        {"refresh": "refresh-token"},
+        format="json",
+    )
+    force_authenticate(request, user=usuario_ativo)
+    usuario_ativo.id = None
+    request.user = usuario_ativo
+
+    response = LogoutView.as_view()(request)
+
+    assert response.status_code == 401
+    assert response.data == {"detail": "Usuário autenticado inválido."}
+
+
+def test_logout_retorna_401_quando_token_invalido(
+    api_factory, monkeypatch, usuario_inativo
+):
+    """Deve retornar 401 quando o refresh token for inválido."""
+
+    def mock_logout(cls, usuario_inativo, refresh):
+        raise TokenInvalidoError(
+            title="Erro",
+            detail="Token inválido.",
+        )
+
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.logout",
+        classmethod(mock_logout),
+    )
+
+    request = api_factory.post(
+        "/logout/",
+        {"refresh": "refresh-token"},
+        format="json",
+    )
+
+    force_authenticate(request, user=usuario_inativo)
+    request.user = usuario_inativo
+
+    response = LogoutView.as_view()(request)
+
+    assert response.status_code == 401
+    assert response.data == {"detail": "Token inválido."}

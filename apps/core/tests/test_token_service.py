@@ -7,6 +7,8 @@ from apps.core.exceptions import TokenInvalidoError
 from apps.core.services.token_service import TokenService
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 
+pytestmark = pytest.mark.django_db
+
 
 class TestTokenService:
     @patch("apps.core.services.token_service.TokenRepository.gerar_tokens")
@@ -71,13 +73,14 @@ class TestTokenService:
             TokenService.atualizar_token("refresh-token")
 
     @patch("apps.core.services.token_service.RefreshToken")
-    def test_logout_com_sucesso(self, mock_refresh_token):
+    def test_logout_com_sucesso(self, mock_refresh_token, usuario_ativo):
+        id_usuario = usuario_ativo.id
         token = MagicMock()
-        token.__getitem__.return_value = 10
+        token.__getitem__.return_value = id_usuario
 
         mock_refresh_token.return_value = token
 
-        TokenService.logout(10, "refresh-token")
+        TokenService.logout(id_usuario, "refresh-token")
 
         token.blacklist.assert_called_once()
 
