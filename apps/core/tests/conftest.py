@@ -43,7 +43,7 @@ def django_test_db_setup(django_db_setup, django_db_blocker):
 
 @pytest.fixture
 def cargo_perfil_diretor():
-    """_summary_."""
+    """Fixture do cargo de diretor de unidade escolar."""
     return CargoEOL.objects.create(
         codigo="9999",
         nome="Diretor",
@@ -53,7 +53,7 @@ def cargo_perfil_diretor():
 
 @pytest.fixture
 def usuario_ativo(cargo_perfil_diretor):
-    """_summary_."""
+    """Fixture de usuario ativo."""
     return Usuario.objects.create(
         username="9876543219",
         nome="João da Silva",
@@ -66,7 +66,7 @@ def usuario_ativo(cargo_perfil_diretor):
 
 @pytest.fixture
 def usuario_inativo(cargo_perfil_diretor):
-    """_summary_."""
+    """Fixture de usuario inativo."""
     return Usuario.objects.create(
         username="9876543211",
         nome="Pedro da Silva",
