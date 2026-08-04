@@ -2,6 +2,9 @@
 
 from typing import Any
 
+from django.core.exceptions import ObjectDoesNotExist
+
+from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 from apps.usuarios.repository.cargo_repository import CargoEOLRepository
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
 
@@ -31,3 +34,34 @@ class UsuarioService:
             dados_usuario=dados_usuario,
             codigo_cargo=str(cargo["codigo"]),
         )
+
+    @classmethod
+    def obter_usuario_por_rf_cpf(cls, rf_ou_cpf: str) -> dict:
+        """Obtenha um usuário pelo registro funcional ou CPF.
+
+        Busca um usuário utilizando o registro funcional ou CPF informado
+        (armazenado no campo ``username``) e retorna seus dados em formato
+        de dicionário.
+
+        Args:
+            rf_ou_cpf (str): Registro funcional ou CPF do usuário.
+
+        Raises:
+            UsuarioNaoEncontradoError: Caso não exista um usuário ativo
+                correspondente ao registro funcional ou CPF informado.
+
+
+        Returns:
+            dict: Dicionário contendo os dados do usuário e suas informações
+            de perfil de acesso.
+        """
+        try:
+            usuario = UsuarioRepository.busca_usuario_existe_por_usermane(
+                rf_ou_cpf
+            )
+            return usuario
+        except ObjectDoesNotExist:
+            raise UsuarioNaoEncontradoError(
+                title="Usuário não encontrado.",
+                detail="Usuário não está na base de dados ou está inativado",
+            ) from None
