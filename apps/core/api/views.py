@@ -1,6 +1,5 @@
 """Views da API da aplicação Core."""
 
-from tokenize import TokenError
 from typing import Any
 
 from drf_spectacular.utils import (
@@ -14,6 +13,7 @@ from rest_framework.permissions import (
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,

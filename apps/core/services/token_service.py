@@ -81,7 +81,9 @@ class TokenService:
         """
         try:
             token = RefreshToken(refresh_token)
-            if token["user_id"] != usuario_id:
+            usuario = UsuarioRepository.usuario_existe_por_id(usuario_id)
+
+            if token["user_id"] != usuario_id or usuario is False:
                 raise TokenInvalidoError(
                     title="Logout não realizado.",
                     detail="O token não pertence ao usuário autenticado.",
