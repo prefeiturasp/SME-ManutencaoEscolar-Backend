@@ -24,7 +24,7 @@ from apps.core.exceptions import (
     SmeIntegracaoError,
     TokenInvalidoError,
 )
-from apps.core.schemas import LOGIN
+from apps.core.schemas import ATUALIZA_TOKEN, LOGIN, LOGOUT
 from apps.core.serializers import (
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
@@ -120,6 +120,7 @@ class AtualizarTokenView(TokenRefreshView):
     # como uma tupla
     permission_classes: tuple = (AllowAny,)
 
+    @ATUALIZA_TOKEN
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = AtualizarTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -141,6 +142,7 @@ class AtualizarTokenView(TokenRefreshView):
 class LogoutView(APIView):
     """View responsável por realizar o logout do usuário autenticado."""
 
+    @LOGOUT
     def post(self, request: Request) -> Response:
         serializer = LogoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

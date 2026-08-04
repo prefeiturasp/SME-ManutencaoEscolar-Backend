@@ -49,10 +49,19 @@ class LoginResponseSerializer(serializers.Serializer):
 class AtualizarTokenSerializer(serializers.Serializer):
     """Valida os dados da requisição de atualização de token."""
 
-    refresh = serializers.CharField(required=True)
+    refresh = serializers.CharField(
+        required=True,
+        help_text="Refresh token JWT obtido durante a autenticação do "
+        "usuário. Será utilizado para gerar um novo access token.",
+    )
 
 
 class LogoutSerializer(serializers.Serializer):
     """Valida os dados da requisição de logout do sistema."""
 
-    refresh = serializers.CharField(required=True)
+    refresh = serializers.CharField(
+        required=True,
+        help_text="Refresh token JWT que será revogado durante o processo de "
+        "logout. Após a revogação, o token não poderá mais ser utilizado para "
+        "obter novos access tokens.",
+    )
