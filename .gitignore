@@ -42,9 +42,3 @@ htmlcov/
 docs/_build/
 
 develop-eggs/
-
-.specs/
-instructions/
-prompts/
-CLAUDE.md
-.claude/

@@ -49,19 +49,16 @@ SME_API_EOL_TOKEN = os.environ.get("SME_API_EOL_TOKEN", "")
 # Application definition
 
 INSTALLED_APPS = [
-    # Apps do Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Terceiros
     "rest_framework",
     "django_filters",
     "drf_spectacular",
     "corsheaders",
-    # Apps do projeto
     "apps.core",
     "apps.usuarios",
     "apps.fornecedor",

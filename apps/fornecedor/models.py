@@ -4,7 +4,7 @@ from django.db import models
 
 from apps.core.constants import EstadoChoices
 from apps.core.models.mixins import BaseModel
-from apps.utils.validacoes import (
+from apps.core.validacoes import (
     apenas_digitos_validator,
     cnpj_formato_validacao,
     link_formato_validacao,
