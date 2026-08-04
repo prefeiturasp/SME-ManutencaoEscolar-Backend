@@ -42,7 +42,7 @@ class Fornecedor(BaseModel):
         db_table = "fornecedor"
         verbose_name = "Fornecedor"
         verbose_name_plural = "Fornecedores"
-        ordering = ["nome"]
+        ordering = ["-status", "-id"]
         indexes = [
             models.Index(fields=["cnpj"]),
             models.Index(fields=["status"]),
