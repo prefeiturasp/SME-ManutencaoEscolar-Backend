@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperação de senha</title>
+</head>
+<body>
+
+    <p>Olá, <strong>{{ nome }}</strong></p>
+
+    <p>Você acionou a opção "Esqueci minha senha". Para concluir esta operação, basta clicar no botão abaixo ou copiar o endereço do link e colar no seu navegador.</p>
+    <p style="color: red;">Atenção, o link é válido por apenas 6 horas. Após esse período, você deverá fazer uma nova solicitação.</p>
+    <p>O seu login de acesso continua o mesmo: {{ username }}</p>
+
+    <p>Clique no botão abaixo e defina uma nova senha:</p>
+
+    <p style="text-align:left;margin:32px 0;">
+        <a
+            href="{{ url }}"
+            style="
+                background:#0d6efd;
+                color:#ffffff;
+                text-decoration:none;
+                padding:12px 24px;
+                border-radius:4px;
+                display:inline-block;
+            "
+        >
+            Redefinir senha
+        </a>
+    </p>
+
+    <p>Ou, utilize o link:  <a href="{{ url }}">{{ url }}</a></p>
+
+</body>
+</html>
