@@ -32,3 +32,4 @@ repos:
           - types-requests
           - celery
           - django_celery_beat
+          - django-filter

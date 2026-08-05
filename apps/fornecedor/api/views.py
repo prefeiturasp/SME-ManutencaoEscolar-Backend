@@ -1,14 +1,19 @@
-"""Views DRF do domínio Fornecedor (finas: validam e delegam ao service)."""
+"""Views DRF do domínio Fornecedor.
+
+Responsáveis pela validação e delegação ao serviço.
+"""
 
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import ModelViewSet
 
 from apps.fornecedor.exceptions import FornecedorCnpjDuplicadoError
+from apps.fornecedor.filters import FornecedorFilter
 from apps.fornecedor.models import Fornecedor
 from apps.fornecedor.schemas import FORNECEDOR_SCHEMA
 from apps.fornecedor.serializers import (
@@ -27,7 +32,9 @@ class FornecedorViewSet(ModelViewSet):
 
     permission_classes = [AllowAny]
     queryset = Fornecedor.objects.all()
-    http_method_names = ["post"]
+    http_method_names = ["post", "get"]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = FornecedorFilter
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
