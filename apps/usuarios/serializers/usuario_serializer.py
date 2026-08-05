@@ -63,7 +63,7 @@ class RecuperarSenhaSerializer(serializers.Serializer):
 
     registro_funcional_ou_cpf = serializers.CharField(
         required=True,
-        max_length=20,
+        max_length=11,
         trim_whitespace=True,
         help_text="Registro funcional ou CPF do usuário.",
     )
