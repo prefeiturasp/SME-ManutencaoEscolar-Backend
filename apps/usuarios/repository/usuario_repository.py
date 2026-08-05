@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
@@ -77,25 +78,43 @@ class UsuarioRepository:
         ).exists()
 
     @classmethod
-    def busca_usuario_existe_por_usermane(cls, username: str) -> dict:
-        """Busca um usuário pelo nome de usuário.
-
-        Recupera um usuário a partir do campo ``username`` e retorna seus
-        dados em formato de dicionário..
+    def _consulta_por_username(cls, username: str) -> Usuario:
+        """Recupera um usuário pelo username.
 
         Args:
-            username (str): RF ou CPF utilizado para localizar o usuário.
+            username (str): Username do usuário (RF ou CPF).
 
+        Raises:
+            ObjectDoesNotExist: Caso não exista um usuário com o username
+                informado.
+
+        Returns:
+            Usuario: Instância do usuário encontrado.
+        """
+        try:
+            return Usuario.objects.get(username=username)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist from None
+
+    @classmethod
+    def busca_usuario_por_usermane(cls, username: str) -> dict:
+        """Busca um usuário pelo nome de usuário.
+
+        Recupera um usuário a partir do campo ``username`` e e retorna seus
+        dados em formato de dicionário.
+
+        Args:
+            username (str): Username de usuário (RF ou CPF) utilizado para
+                localizar.
         Raises:
             ObjectDoesNotExist: Caso não exista um usuário com o ``username``
             informado.
 
         Returns:
-            dict: Dicionário contendo os dados do usuário e suas informações
-        de perfil de acesso.
+            dict: Dados do usuário e suas informações de perfil de acesso.
         """
         try:
-            usuario = Usuario.objects.get(username=username)
+            usuario = cls._consulta_por_username(username)
             return cls._retorna_usuario_em_dicionario(usuario)
 
         except ObjectDoesNotExist:
@@ -136,3 +155,18 @@ class UsuarioRepository:
                 },
             },
         }
+
+    @classmethod
+    def gerar_token_recuperar_senha(cls, username: str) -> dict:
+        """_summary_.
+
+        Args:
+            username (str): _description_
+
+        Returns:
+            dict: _description_
+        """
+        usuario = cls._consulta_por_username(username)
+        token_generator = PasswordResetTokenGenerator()
+        token = token_generator.make_token(usuario)
+        return {"token_recuperacao": token}
