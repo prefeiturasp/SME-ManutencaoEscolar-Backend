@@ -3,7 +3,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from apps.utils.validacoes import (
+from apps.core.validacoes import (
     CepInvalidoError,
     CnpjInvalidoError,
     LinkRastreioInvalidoError,

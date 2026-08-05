@@ -42,7 +42,3 @@ htmlcov/
 docs/_build/
 
 develop-eggs/
-
-specs/
-instructions/
-prompts/
