@@ -103,9 +103,12 @@ def test_listagem_retorna_fornecedores_cadastrados(
 
     response = api_client.get("/api/v1/fornecedores/")
 
+    dados = response.json()
+
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]["nome"] == fornecedor_payload_valido["nome"]
+    assert dados["count"] == 1
+    assert len(dados["results"]) == 1
+    assert dados["results"][0]["nome"] == fornecedor_payload_valido["nome"]
 
 
 def test_listagem_filtra_por_nome(api_client, fornecedor_payload_valido):
@@ -119,16 +122,28 @@ def test_listagem_filtra_por_nome(api_client, fornecedor_payload_valido):
         }
     )
 
-    response = api_client.get("/api/v1/fornecedores/", {"nome": "Exemplo"})
+    response = api_client.get(
+        "/api/v1/fornecedores/",
+        {"nome": "Exemplo"},
+    )
+
+    dados = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]["nome"] == fornecedor_payload_valido["nome"]
+    assert dados["count"] == 1
+    assert len(dados["results"]) == 1
+    assert dados["results"][0]["nome"] == fornecedor_payload_valido["nome"]
 
 
-def test_listagem_filtra_por_status(api_client, fornecedor_payload_valido):
+def test_listagem_filtra_por_status(
+    api_client,
+    fornecedor_payload_valido,
+):
     """Testa se a listagem filtra fornecedores pelo status."""
-    Fornecedor.objects.create(**fornecedor_payload_valido, status=True)
+    Fornecedor.objects.create(
+        **fornecedor_payload_valido,
+        status=True,
+    )
     Fornecedor.objects.create(
         **{
             **fornecedor_payload_valido,
@@ -137,8 +152,15 @@ def test_listagem_filtra_por_status(api_client, fornecedor_payload_valido):
         }
     )
 
-    response = api_client.get("/api/v1/fornecedores/", {"status": "false"})
+    response = api_client.get(
+        "/api/v1/fornecedores/",
+        {"status": "false"},
+    )
+
+    dados = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]["status"] is False
+    assert dados["count"] == 1
+    assert len(dados["results"]) == 1
+    assert dados["results"][0]["status"] is False
+    assert dados["results"][0]["cnpj"] == "98765432109876"
