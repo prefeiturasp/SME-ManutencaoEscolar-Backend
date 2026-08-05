@@ -16,7 +16,7 @@ class Servico(BaseModel):
         db_table = "servico"
         verbose_name = "Serviço"
         verbose_name_plural = "Serviços"
-        ordering = ["-id"]
+        ordering = ["-status", "-id"]
         indexes = [models.Index(fields=["status"])]
         constraints = [
             models.UniqueConstraint(

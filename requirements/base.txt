@@ -10,3 +10,4 @@ requests>=2.31,<2.33
 celery[redis]>=5.4,<6
 flower>=2.0,<3
 django-celery-beat>=2.8,<2.9
+django-filter==25.2
