@@ -1,12 +1,20 @@
 """Service do app usuarios."""
 
+import logging
+from smtplib import SMTPException
 from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 
+from apps.core.exceptions import EnvioEmailError
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 from apps.usuarios.repository.cargo_repository import CargoEOLRepository
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
+from config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class UsuarioService:
@@ -56,12 +64,66 @@ class UsuarioService:
             de perfil de acesso.
         """
         try:
-            usuario = UsuarioRepository.busca_usuario_existe_por_usermane(
-                rf_ou_cpf
-            )
+            usuario = UsuarioRepository.busca_usuario_por_usermane(rf_ou_cpf)
             return usuario
         except ObjectDoesNotExist:
             raise UsuarioNaoEncontradoError(
                 title="Usuário não encontrado.",
                 detail="Usuário não está na base de dados ou está inativado",
             ) from None
+
+    @staticmethod
+    def enviar_email_recuperacao_senha(usuario: dict) -> None:
+        """Envia um e-mail de recuperação de senha para o usuário.
+
+        Gera um token de recuperação de senha, monta o link para redefinição
+        de senha, renderiza o template HTML e envia o e-mail para o endereço
+        cadastrado do usuário.
+
+        Args:
+            usuario (dict):  Dicionário contendo os dados do usuário. Deve
+                possuir, no mínimo, as chaves ``nome``, ``email`` e
+                ``username``.
+        """
+        token = UsuarioRepository.gerar_token_recuperar_senha(
+            usuario["username"]
+        )
+
+        link = (
+            f"{settings.FRONTEND_URL}/recuperar-senha/"
+            f"{token['token_recuperacao']}"
+        )
+
+        context = {
+            "nome": usuario["nome"],
+            "url": link,
+            "username": usuario["username"],
+        }
+
+        html = render_to_string(
+            "usuarios/recuperar_senha.html",
+            context,
+        )
+
+        email = EmailMessage(
+            subject="Recuperação de senha",
+            body=html,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[usuario["email"]],
+        )
+
+        email.content_subtype = "html"
+        try:
+            email.send()
+        except SMTPException as exc:
+            logger.exception(
+                "Erro ao enviar e-mail de recuperação de senha para '%s'.",
+                usuario["username"],
+            )
+            raise EnvioEmailError(
+                title="Falha no envio do e-mail.",
+                detail=(
+                    "Não foi possível enviar o e-mail de recuperação de senha."
+                    "Tente novamente em alguns instantes."
+                ),
+            ) from exc
