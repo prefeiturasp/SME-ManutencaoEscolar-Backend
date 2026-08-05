@@ -82,6 +82,7 @@ FORNECEDOR_SCHEMA = extend_schema_view(
             ),
         ],
     ),
+    retrieve=extend_schema(exclude=True),
     create=extend_schema(
         tags=["Fornecedor"],
         summary="Cria um novo fornecedor",
