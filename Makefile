@@ -20,6 +20,9 @@ down: ## Para e remove todos os containers, redes e volumes locais
 build: ## Reconstrói as imagens do Docker (necessário após alterar pacotes/requirements)
 	$(DC) build
 
+build-sem-cache: ## Reconstrói as imagens do Docker (necessário após alterar pacotes/requirements) sem cache
+	$(DC) build --no-cache
+
 logs: ## Visualiza os logs dos containers em tempo real
 	$(DC) logs -f
 

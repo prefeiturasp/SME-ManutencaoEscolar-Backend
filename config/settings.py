@@ -47,24 +47,44 @@ SME_API_EOL_URL = os.environ.get("SME_API_EOL_URL", "")
 SME_API_EOL_TOKEN = os.environ.get("SME_API_EOL_TOKEN", "")
 
 # Application definition
-
-INSTALLED_APPS = [
+# ==========================================
+# APPS DO DJANGO (Framework)
+# ==========================================
+APPS_DJANGO = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+]
+# ==========================================
+# APPS DE TERCEIROS (Pacotes pip)
+# ==========================================
+APPS_TERCEIROS = [
     "rest_framework",
     "django_filters",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "corsheaders",
+    "django_celery_beat",
+]
+
+# ==========================================
+# APPS DO PROJETO (Domínio de negócio)
+# ==========================================
+APPS_PROJETO = [
     "apps.core",
     "apps.usuarios",
     "apps.fornecedor",
     "apps.servico",
-    "django_celery_beat",
 ]
+
+# ==========================================
+# INSTALLED_APPS Final
+# ==========================================
+INSTALLED_APPS = APPS_DJANGO + APPS_TERCEIROS + APPS_PROJETO
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -182,8 +202,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": False,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
@@ -209,6 +229,10 @@ SPECTACULAR_SETTINGS = {
             "BearerAuth": [],
         }
     ],
+    "SWAGGER_UI_SETTINGS": {
+        "tagsSorter": "alpha",
+        "operationsSorter": "alpha",
+    },
 }
 
 # Internationalization

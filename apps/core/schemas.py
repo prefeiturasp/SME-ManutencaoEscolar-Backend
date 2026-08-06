@@ -7,13 +7,18 @@ from drf_spectacular.utils import (
 )
 
 from apps.core.serializers import (
+    AtualizarTokenSerializer,
     AutenticacaoSerializer,
     LoginResponseSerializer,
+    LogoutSerializer,
 )
+
+TAG_AUTENTICACAO = "Autenticação"
+REFRESH_JWT = "<jwt-refresh>"
 
 LOGIN = extend_schema(
     auth=[],
-    tags=["Autenticação"],
+    tags=[TAG_AUTENTICACAO],
     summary="Login do usuário",
     description="Autentica o usuário via CoreSSO e retorna token JWT.",
     operation_id="autenticarUsuario",
@@ -38,7 +43,7 @@ LOGIN = extend_schema(
             name="Login realizado com sucesso",
             response_only=True,
             value={
-                "refresh": "<jwt-refresh>",
+                "refresh": REFRESH_JWT,
                 "access": "<jwt-access>",
                 "dados_usuario": {
                     "id": 1,
@@ -58,6 +63,102 @@ LOGIN = extend_schema(
                     "diretoria_regional": "DRE Exemplo",
                     "unidade_educacional": "EMEF Exemplo",
                 },
+            },
+        ),
+    ],
+)
+
+
+ATUALIZA_TOKEN = extend_schema(
+    tags=[TAG_AUTENTICACAO],
+    summary="Renovar tokens JWT",
+    description="Atualiza o token do usuário e retorna token JWT.",
+    operation_id="atualizaTokenUsuario",
+    request=AtualizarTokenSerializer,
+    responses={
+        200: OpenApiResponse(description="Credenciais validas"),
+        401: OpenApiResponse(
+            description="Refresh token inválido, expirado, "
+            "revogado ou associado a um usuário inexistente ou inativo."
+        ),
+    },
+    examples=[
+        OpenApiExample(
+            name="Exemplo atualização de token",
+            request_only=True,
+            value={"refresh": REFRESH_JWT},
+        ),
+        OpenApiExample(
+            name="Token atualizado com sucesso",
+            response_only=True,
+            status_codes=[200],
+            value={
+                "refresh": REFRESH_JWT,
+                "access": "<jwt-access>",
+            },
+        ),
+        OpenApiExample(
+            name="Token inválido ou usuário inválido",
+            response_only=True,
+            status_codes=[401],
+            value={"detail": "Mensagem"},
+        ),
+    ],
+)
+
+
+LOGOUT = extend_schema(
+    tags=[TAG_AUTENTICACAO],
+    summary="Realizar logout",
+    description="Realiza o logout do usuário autenticado revogando o refresh"
+    " token informado",
+    operation_id="logoutUsuario",
+    request=LogoutSerializer,
+    responses={
+        200: OpenApiResponse(
+            description="Credenciais validasLogout realizado com sucesso"
+        ),
+        401: OpenApiResponse(
+            description="Usuário autenticado inválido ou refresh token"
+            "inválido, revogado ou não pertencente ao usuário autenticado."
+        ),
+    },
+    examples=[
+        OpenApiExample(
+            name="Exemplo Logout",
+            request_only=True,
+            value={"refresh": REFRESH_JWT},
+        ),
+        OpenApiExample(
+            name="Logout realizado com sucesso",
+            response_only=True,
+            status_codes=[205],
+            value={
+                "detail": "Logout realizado com sucesso.",
+            },
+        ),
+        OpenApiExample(
+            name="Refresh token inválido",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "detail": ("O refresh token é inválido ou já foi revogado."),
+            },
+        ),
+        OpenApiExample(
+            name="Token não pertence ao usuário",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "detail": ("O token não pertence ao usuário autenticado."),
+            },
+        ),
+        OpenApiExample(
+            name="Usuário autenticado inválido",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "detail": "Usuário autenticado inválido.",
             },
         ),
     ],

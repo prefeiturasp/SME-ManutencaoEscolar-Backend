@@ -35,3 +35,14 @@ class LinkRastreioInvalidoError(ValueError):
     """Levantado quando um link de rastreio não obedece ao formato esperado."""
 
     pass
+
+
+class TokenInvalidoError(Exception):
+    """Problema na geração de token JWT."""
+
+    def __init__(self, title: str, detail: str) -> None:
+        """Inicializa a exceção com título e descrição."""
+        self.title = title
+        self.detail = detail
+
+        super().__init__(detail)
