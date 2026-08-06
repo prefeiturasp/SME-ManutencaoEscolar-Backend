@@ -5,6 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
 
     container_name: sme_manutencao_escolar_backend
 

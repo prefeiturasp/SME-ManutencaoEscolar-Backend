@@ -2,9 +2,7 @@
 
 from rest_framework import serializers
 
-from apps.fornecedor.constants import FornecedorErrorMessages
-from apps.fornecedor.models import Fornecedor
-from apps.utils.validacoes import (
+from apps.core.validacoes import (
     CepInvalidoError,
     CnpjInvalidoError,
     LinkRastreioInvalidoError,
@@ -12,6 +10,8 @@ from apps.utils.validacoes import (
     validar_formato_cnpj,
     validar_formato_link_rastreio,
 )
+from apps.fornecedor.constants import FornecedorErrorMessages
+from apps.fornecedor.models import Fornecedor
 
 
 class FornecedorSerializer(serializers.ModelSerializer):

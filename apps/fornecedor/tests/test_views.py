@@ -9,6 +9,7 @@ from rest_framework import status
 from apps.fornecedor.exceptions import (
     FornecedorCnpjDuplicadoError,
 )
+from apps.fornecedor.models import Fornecedor
 
 pytestmark = pytest.mark.django_db
 
@@ -92,3 +93,74 @@ def test_criacao_mapeia_validation_error_do_django(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["nome"][0] == "nome inválido"
+
+
+def test_listagem_retorna_fornecedores_cadastrados(
+    api_client, fornecedor_payload_valido
+):
+    """Testa se a listagem retorna os fornecedores cadastrados."""
+    Fornecedor.objects.create(**fornecedor_payload_valido)
+
+    response = api_client.get("/api/v1/fornecedores/")
+
+    dados = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert dados["count"] == 1
+    assert len(dados["results"]) == 1
+    assert dados["results"][0]["nome"] == fornecedor_payload_valido["nome"]
+
+
+def test_listagem_filtra_por_nome(api_client, fornecedor_payload_valido):
+    """Testa se a listagem filtra fornecedores pelo nome."""
+    Fornecedor.objects.create(**fornecedor_payload_valido)
+    Fornecedor.objects.create(
+        **{
+            **fornecedor_payload_valido,
+            "nome": "Outro Fornecedor",
+            "cnpj": "98765432109876",
+        }
+    )
+
+    response = api_client.get(
+        "/api/v1/fornecedores/",
+        {"nome": "Exemplo"},
+    )
+
+    dados = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert dados["count"] == 1
+    assert len(dados["results"]) == 1
+    assert dados["results"][0]["nome"] == fornecedor_payload_valido["nome"]
+
+
+def test_listagem_filtra_por_status(
+    api_client,
+    fornecedor_payload_valido,
+):
+    """Testa se a listagem filtra fornecedores pelo status."""
+    Fornecedor.objects.create(
+        **fornecedor_payload_valido,
+        status=True,
+    )
+    Fornecedor.objects.create(
+        **{
+            **fornecedor_payload_valido,
+            "cnpj": "98765432109876",
+            "status": False,
+        }
+    )
+
+    response = api_client.get(
+        "/api/v1/fornecedores/",
+        {"status": "false"},
+    )
+
+    dados = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert dados["count"] == 1
+    assert len(dados["results"]) == 1
+    assert dados["results"][0]["status"] is False
+    assert dados["results"][0]["cnpj"] == "98765432109876"
