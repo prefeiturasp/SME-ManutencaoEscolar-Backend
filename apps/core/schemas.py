@@ -70,7 +70,6 @@ LOGIN = extend_schema(
 
 
 ATUALIZA_TOKEN = extend_schema(
-    auth=[],
     tags=[TAG_AUTENTICACAO],
     summary="Renovar tokens JWT",
     description="Atualiza o token do usuário e retorna token JWT.",

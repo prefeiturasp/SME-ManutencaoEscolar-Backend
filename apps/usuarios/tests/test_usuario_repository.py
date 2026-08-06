@@ -1,5 +1,6 @@
 import pytest
 
+from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
@@ -119,3 +120,49 @@ class TestUsuarioRepository:
 
     def test_usuario_existe_por_id_retorna_false_para_id_inexistente(self):
         assert UsuarioRepository.usuario_existe_por_id(99999) is False
+
+    def test_retorna_username_usuario(self):
+        cargo = CargoEOL.objects.get(codigo="3360")
+
+        usuario = Usuario.objects.create(
+            username="1234567",
+            registro_funcional="1234567",
+            nome="João da Silva",
+            email="joao@email.com",
+            cargo=cargo,
+            is_active=True,
+        )
+
+        resultado = UsuarioRepository.retorna_username_usuario(usuario.id)
+
+        assert resultado == {"usuario": "1234567"}
+
+    def test_retorna_username_usuario_lanca_excecao_quando_usuario_nao_existe(
+        self,
+    ):
+        with pytest.raises(UsuarioNaoEncontradoError) as exc:
+            UsuarioRepository.retorna_username_usuario(99999)
+
+        assert exc.value.title == "Usuário não encontrado."
+        assert (
+            exc.value.detail
+            == "Não foi encontrado um usuário ativo com o identificador "
+            "informado."
+        )
+
+    def test_retorna_username_usuario_lanca_excecao_quando_usuario_inativo(
+        self,
+    ):
+        cargo = CargoEOL.objects.get(codigo="3360")
+
+        usuario = Usuario.objects.create(
+            username="1234567",
+            registro_funcional="1234567",
+            nome="João da Silva",
+            email="joao@email.com",
+            cargo=cargo,
+            is_active=False,
+        )
+
+        with pytest.raises(UsuarioNaoEncontradoError):
+            UsuarioRepository.retorna_username_usuario(usuario.id)

@@ -31,5 +31,6 @@ repos:
           - django-cors-headers
           - types-requests
           - celery
+          - django-filter
           - django-celery-beat
           - djangorestframework-simplejwt

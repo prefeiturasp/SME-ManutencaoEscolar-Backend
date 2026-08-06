@@ -4,7 +4,6 @@ import pytest
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.test import force_authenticate
-from rest_framework_simplejwt.exceptions import TokenError
 
 from apps.core.api.views import (
     AtualizarTokenView,
@@ -174,7 +173,12 @@ def test_atualizar_token_retorna_tokens(api_factory, monkeypatch):
     """Deve atualizar o token com sucesso."""
     monkeypatch.setattr(
         "apps.core.api.views.TokenService.atualizar_token",
-        classmethod(lambda cls, refresh: None),
+        classmethod(lambda cls, refresh: {"username": "1234567"}),
+    )
+
+    monkeypatch.setattr(
+        "apps.core.api.views.AutenticacaoEOLService.usuario_existe_no_coresso",
+        classmethod(lambda cls, username: True),
     )
 
     monkeypatch.setattr(
@@ -203,7 +207,10 @@ def test_atualizar_token_retorna_401_quando_token_invalido(
     """Deve retornar 401 quando o refresh token for inválido."""
 
     def mock_atualizar_token(cls, refresh):
-        raise TokenError("Token inválido")
+        raise TokenInvalidoError(
+            title="Token não atualizado.",
+            detail="O refresh token é inválido ou já foi revogado.",
+        )
 
     monkeypatch.setattr(
         "apps.core.api.views.TokenService.atualizar_token",
@@ -320,3 +327,33 @@ def test_logout_retorna_401_quando_token_invalido(
 
     assert response.status_code == 401
     assert response.data == {"detail": "Token inválido."}
+
+
+def test_atualizar_token_retorna_401_quando_usuario_nao_autorizado(
+    api_factory, monkeypatch
+):
+    """Deve retornar 401 quando o usuário for inválido."""
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.atualizar_token",
+        classmethod(
+            lambda cls, refresh: {
+                "username": "1234567",
+            }
+        ),
+    )
+
+    monkeypatch.setattr(
+        "apps.core.api.views.AutenticacaoEOLService.usuario_existe_no_coresso",
+        classmethod(lambda cls, username: False),
+    )
+
+    request = api_factory.post(
+        "/token/refresh/",
+        {"refresh": "refresh-token"},
+        format="json",
+    )
+
+    response = AtualizarTokenView.as_view()(request)
+
+    assert response.status_code == 401
+    assert response.data == {"detail": "Usuário não autorizado."}

@@ -27,7 +27,7 @@ class TestTokenService:
 
     @patch(
         "apps.core.services.token_service.UsuarioRepository."
-        "usuario_existe_por_id"
+        "retorna_username_usuario"
     )
     @patch("apps.core.services.token_service.RefreshToken")
     def test_atualizar_token_com_sucesso(
@@ -39,7 +39,7 @@ class TestTokenService:
         token.__getitem__.return_value = 10
 
         mock_refresh_token.return_value = token
-        mock_usuario_existe.return_value = True
+        mock_usuario_existe.return_value = {"usermame": "username"}
 
         TokenService.atualizar_token("refresh-token")
 
@@ -66,10 +66,10 @@ class TestTokenService:
             TokenService.atualizar_token("refresh-token")
 
     @patch("apps.core.services.token_service.RefreshToken")
-    def test_atualizar_token_token_invalido(self, mock_refresh_token):
+    def test_atualizar_token_com_token_invalido(self, mock_refresh_token):
         mock_refresh_token.side_effect = TokenError("token inválido")
 
-        with pytest.raises(TokenError):
+        with pytest.raises(TokenInvalidoError):
             TokenService.atualizar_token("refresh-token")
 
     @patch("apps.core.services.token_service.RefreshToken")
