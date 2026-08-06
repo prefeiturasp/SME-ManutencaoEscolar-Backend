@@ -7,6 +7,7 @@ from apps.core.api.views import (
     HealthCheckView,
     LoginView,
     LogoutView,
+    RedefinirSenhaView,
 )
 
 urlpatterns = [
@@ -14,4 +15,9 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("refresh-token/", AtualizarTokenView.as_view(), name="refresh-token"),
     path("logout/", LogoutView.as_view(), name="logout"),
+    path(
+        "redefinir-senha/",
+        RedefinirSenhaView.as_view(),
+        name="redefinir-senha",
+    ),
 ]

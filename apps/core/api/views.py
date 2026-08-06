@@ -18,12 +18,13 @@ from rest_framework_simplejwt.views import (
 )
 
 from apps.core.exceptions import (
+    EnvioEmailError,
     FalhaAutenticacaoError,
     InternalError,
     SmeIntegracaoError,
     TokenInvalidoError,
 )
-from apps.core.schemas import ATUALIZA_TOKEN, LOGIN, LOGOUT
+from apps.core.schemas import ATUALIZA_TOKEN, LOGIN, LOGOUT, REDEFINIR_SENHA
 from apps.core.serializers import (
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
@@ -33,6 +34,10 @@ from apps.core.serializers import (
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
 from apps.core.services.token_service import TokenService
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
+from apps.usuarios.serializers.usuario_serializer import (
+    RecuperarSenhaSerializer,
+)
+from apps.usuarios.services.usuario_service import UsuarioService
 
 
 class HealthCheckView(APIView):
@@ -173,3 +178,38 @@ class LogoutView(APIView):
             {"detail": "Logout realizado com sucesso."},
             status=status.HTTP_205_RESET_CONTENT,
         )
+
+
+class RedefinirSenhaView(APIView):
+    """View responsável por realizar o recuperar senha do usuário."""
+
+    permission_classes = [AllowAny]
+
+    @REDEFINIR_SENHA
+    def post(self, request: Request) -> Response:
+        serializer = RecuperarSenhaSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rf_ou_cpf = serializer.validated_data["registro_funcional_ou_cpf"]
+        try:
+            usuario = UsuarioService.obter_usuario_por_rf_cpf(rf_ou_cpf)
+            UsuarioService.enviar_email_recuperacao_senha(usuario)
+        except UsuarioNaoEncontradoError:
+            return Response(
+                {"detail": "Não existe usuário com este CPF ou RF"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except EnvioEmailError as exc:
+            return Response(
+                {"detail": exc.detail},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        parte_local, dominio = usuario["email"].rsplit("@", 1)
+        quantidade_letras_visiveis = 3
+
+        email_mascarado = (
+            f"{parte_local[:quantidade_letras_visiveis]}"
+            f"{'*' * (len(parte_local) - quantidade_letras_visiveis)}"
+            f"@{dominio}"
+        )
+
+        return Response({"email": email_mascarado}, status=status.HTTP_200_OK)

@@ -12,6 +12,9 @@ from apps.core.serializers import (
     LoginResponseSerializer,
     LogoutSerializer,
 )
+from apps.usuarios.serializers.usuario_serializer import (
+    RecuperarSenhaSerializer,
+)
 
 TAG_AUTENTICACAO = "Autenticação"
 REFRESH_JWT = "<jwt-refresh>"
@@ -68,7 +71,6 @@ LOGIN = extend_schema(
     ],
 )
 
-
 ATUALIZA_TOKEN = extend_schema(
     tags=[TAG_AUTENTICACAO],
     summary="Renovar tokens JWT",
@@ -105,7 +107,6 @@ ATUALIZA_TOKEN = extend_schema(
         ),
     ],
 )
-
 
 LOGOUT = extend_schema(
     tags=[TAG_AUTENTICACAO],
@@ -159,6 +160,79 @@ LOGOUT = extend_schema(
             status_codes=[401],
             value={
                 "detail": "Usuário autenticado inválido.",
+            },
+        ),
+    ],
+)
+
+REDEFINIR_SENHA = extend_schema(
+    auth=[],
+    tags=[TAG_AUTENTICACAO],
+    summary="Solicitar recuperação de senha",
+    description=(
+        "Solicita a recuperação de senha de um usuário a partir do "
+        "registro funcional ou CPF. Caso o usuário seja encontrado, "
+        "um e-mail contendo o link para redefinição da senha será enviado."
+    ),
+    operation_id="solicitarRecuperacaoSenha",
+    request=RecuperarSenhaSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=(
+                "Solicitação processada com sucesso. Retorna o endereço "
+                "de e-mail mascarado para o qual a mensagem de "
+                "recuperação foi enviada."
+            ),
+            response={
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "mar********@email.com",
+                    },
+                },
+            },
+        ),
+        404: OpenApiResponse(
+            description="Não existe usuário cadastrado com o CPF ou registro "
+            "funcional informado."
+        ),
+        503: OpenApiResponse(
+            description="Não foi possível enviar o e-mail de recuperação de "
+            "senha."
+        ),
+    },
+    examples=[
+        OpenApiExample(
+            name="Solicitação de recuperação de senha",
+            request_only=True,
+            value={
+                "registro_funcional_ou_cpf": "1234567",
+            },
+        ),
+        OpenApiExample(
+            name="Recuperação solicitada com sucesso",
+            response_only=True,
+            status_codes=["200"],
+            value={
+                "email": "mar********@email.com",
+            },
+        ),
+        OpenApiExample(
+            name="Usuário não encontrado",
+            response_only=True,
+            status_codes=["404"],
+            value={
+                "detail": "Não existe usuário com este CPF ou RF",
+            },
+        ),
+        OpenApiExample(
+            name="Falha ao enviar e-mail",
+            response_only=True,
+            status_codes=["503"],
+            value={
+                "detail": "Não foi possível enviar o e-mail de recuperação de"
+                " senha.",
             },
         ),
     ],
