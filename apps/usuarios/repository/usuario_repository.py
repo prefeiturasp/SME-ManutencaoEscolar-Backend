@@ -5,6 +5,7 @@ from typing import Any
 from django.db import transaction
 
 from apps.usuarios.constants import PerfilAcesso
+from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 from apps.usuarios.models import CargoEOL, Usuario
 
 
@@ -90,3 +91,35 @@ class UsuarioRepository:
             id=usuario_id,
             is_active=True,
         ).exists()
+
+    @staticmethod
+    def retorna_username_usuario(usuario_id: int) -> dict[str, str]:
+        """Retorna o username de um usuário ativo.
+
+        Args:
+            usuario_id (int): Identificador único do usuário.
+
+        Returns:
+            dict[str, str]: Dicionário contendo o username do usuário.
+
+        Raises:
+            UsuarioNaoEncontradoError: Se não existir um usuário ativo com o
+                identificador informado.
+        """
+        username = (
+            Usuario.objects.filter(
+                id=usuario_id,
+                is_active=True,
+            )
+            .values_list("username", flat=True)
+            .first()
+        )
+
+        if username is None:
+            raise UsuarioNaoEncontradoError(
+                title="Usuário não encontrado.",
+                detail="Não foi encontrado um usuário ativo com o "
+                "identificador informado.",
+            )
+
+        return {"usuario": username}

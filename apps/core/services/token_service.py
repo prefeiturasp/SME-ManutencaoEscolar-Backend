@@ -34,7 +34,7 @@ class TokenService:
         return TokenRepository.gerar_tokens(id_usuario)
 
     @classmethod
-    def atualizar_token(cls, refresh_token: Token) -> None:
+    def atualizar_token(cls, refresh_token: Token) -> dict:
         """Valida um refresh token e verifica se o usuário associado existe.
 
         O método valida o refresh token informado e verifica se o usuário
@@ -43,6 +43,9 @@ class TokenService:
 
         Args:
             refresh_token (Token): Refresh token enviado pelo cliente.
+
+        Returns:
+            dict[str, str]: Dicionário contendo o username do usuário.
 
         Raises:
             UsuarioNaoEncontradoError: Se o usuário associado ao token não
@@ -55,18 +58,20 @@ class TokenService:
 
             usuario_id = refresh["user_id"]
 
-            usuario = UsuarioRepository.usuario_existe_por_id(usuario_id)
+            return UsuarioRepository.retorna_username_usuario(usuario_id)
 
-            if usuario is False:
-                raise UsuarioNaoEncontradoError(
-                    title="Falha ao atualizar o token",
-                    detail="O token informado é inválido ou não está mais "
-                    "associado a um usuário válido.",
-                )
-
+        except UsuarioNaoEncontradoError:
+            raise UsuarioNaoEncontradoError(
+                title="Usuário não encontrado.",
+                detail="O token informado é inválido ou não está mais "
+                "associado a um usuário válido.",
+            ) from None
         except TokenError as exc:
             logger.error("Erro ao atulizar token: %s", exc)
-            raise TokenError from None
+            raise TokenInvalidoError(
+                title="Token não atualizado.",
+                detail="O refresh token é inválido ou já foi revogado.",
+            ) from exc
 
     @classmethod
     def logout(cls, usuario_id: int, refresh_token: Token) -> None:

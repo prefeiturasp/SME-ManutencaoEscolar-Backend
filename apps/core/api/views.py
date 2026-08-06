@@ -12,7 +12,6 @@ from rest_framework.permissions import (
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -116,17 +115,24 @@ class LoginView(TokenObtainPairView):
 class AtualizarTokenView(TokenRefreshView):
     """View responsavel por atualização de token."""
 
-    # TokenRefreshView herda de TokenViewBase, que define permission_classes
-    # como uma tupla
-    permission_classes: tuple = (AllowAny,)
-
     @ATUALIZA_TOKEN
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = AtualizarTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            TokenService.atualizar_token(serializer.validated_data["refresh"])
-        except TokenError:
+            dados_usuario = TokenService.atualizar_token(
+                serializer.validated_data["refresh"]
+            )
+            usuario_existe = AutenticacaoEOLService.usuario_existe_no_coresso(
+                dados_usuario["username"]
+            )
+            if usuario_existe is False:
+                return Response(
+                    {"detail": "Usuário não autorizado."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+
+        except TokenInvalidoError:
             return Response(
                 {"detail": "Refresh token inválido."},
                 status=status.HTTP_401_UNAUTHORIZED,
