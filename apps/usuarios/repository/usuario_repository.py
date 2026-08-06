@@ -122,4 +122,4 @@ class UsuarioRepository:
                 "identificador informado.",
             )
 
-        return {"usuario": username}
+        return {"username": username}

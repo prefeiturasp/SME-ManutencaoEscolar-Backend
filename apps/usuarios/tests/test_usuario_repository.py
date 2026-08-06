@@ -135,7 +135,7 @@ class TestUsuarioRepository:
 
         resultado = UsuarioRepository.retorna_username_usuario(usuario.id)
 
-        assert resultado == {"usuario": "1234567"}
+        assert resultado == {"username": "1234567"}
 
     def test_retorna_username_usuario_lanca_excecao_quando_usuario_nao_existe(
         self,
