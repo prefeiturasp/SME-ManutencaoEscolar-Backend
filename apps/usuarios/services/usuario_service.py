@@ -1,14 +1,11 @@
 """Service do app usuarios."""
 
 import logging
-from smtplib import SMTPException
 from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
 
-from apps.core.exceptions import EnvioEmailError
+from apps.core.services.email_service import EmailService
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 from apps.usuarios.repository.cargo_repository import CargoEOLRepository
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
@@ -94,36 +91,15 @@ class UsuarioService:
             f"{token['token_recuperacao']}"
         )
 
-        context = {
+        contexto = {
             "nome": usuario["nome"],
             "url": link,
             "username": usuario["username"],
         }
 
-        html = render_to_string(
-            "usuarios/recuperar_senha.html",
-            context,
+        EmailService.enviar(
+            assunto="Recuperação de senha",
+            template="usuarios/recuperar_senha.html",
+            contexto=contexto,
+            destinatarios=[usuario["email"]],
         )
-
-        email = EmailMessage(
-            subject="Recuperação de senha",
-            body=html,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[usuario["email"]],
-        )
-
-        email.content_subtype = "html"
-        try:
-            email.send()
-        except SMTPException as exc:
-            logger.exception(
-                "Erro ao enviar e-mail de recuperação de senha para '%s'.",
-                usuario["username"],
-            )
-            raise EnvioEmailError(
-                title="Falha no envio do e-mail.",
-                detail=(
-                    "Não foi possível enviar o e-mail de recuperação de senha."
-                    "Tente novamente em alguns instantes."
-                ),
-            ) from exc
