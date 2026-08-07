@@ -1,8 +1,15 @@
 import pytest
+from rest_framework.test import APIRequestFactory
 
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
+
+
+@pytest.fixture
+def api_factory():
+    """Fixture que fornece uma instância do APIRequestFactory do DRF."""
+    return APIRequestFactory()
 
 
 @pytest.fixture
