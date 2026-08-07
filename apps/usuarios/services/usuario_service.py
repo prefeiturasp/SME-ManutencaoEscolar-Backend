@@ -83,14 +83,18 @@ class UsuarioService:
     def enviar_email_recuperacao_senha(usuario: dict) -> None:
         """Envia um e-mail de recuperação de senha para o usuário.
 
-        Gera um token de recuperação de senha, monta o link para redefinição
-        de senha, renderiza o template HTML e envia o e-mail para o endereço
+        Gera um token de recuperação de senha, monta o link para
+        redefinição de senha e solicita o envio assíncrono de um e-mail
+        HTML contendo as instruções de recuperação para o endereço
         cadastrado do usuário.
 
         Args:
             usuario (dict):  Dicionário contendo os dados do usuário. Deve
                 possuir, no mínimo, as chaves ``nome``, ``email`` e
                 ``username``.
+        Raises:
+            EnvioEmailError: Caso ocorra uma falha ao solicitar o envio do
+                e-mail de recuperação de senha.
         """
         token = UsuarioRepository.gerar_token_recuperar_senha(
             usuario["username"]

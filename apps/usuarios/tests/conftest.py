@@ -23,6 +23,7 @@ def usuario_ativo(cargo_perfil_diretor):
         nome="João da Silva",
         registro_funcional=None,
         cpf="9876543219",
+        email="joao@email.com",
         cargo=cargo_perfil_diretor,
         is_active=True,
     )
@@ -36,6 +37,7 @@ def usuario_inativo(cargo_perfil_diretor):
         nome="Pedro da Silva",
         registro_funcional=None,
         cpf="9876543211",
+        email="joao@email.com",
         cargo=cargo_perfil_diretor,
         is_active=False,
     )
