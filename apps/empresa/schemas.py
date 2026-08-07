@@ -1,4 +1,4 @@
-"""Schemas para a API de Fornecedor."""
+"""Schemas para a API de Empresa."""
 
 from drf_spectacular.utils import (
     OpenApiExample,
@@ -8,16 +8,16 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 
-from apps.fornecedor.serializers import (
-    FornecedorCriarSerializer,
-    FornecedorSerializer,
+from apps.empresa.serializers import (
+    EmpresaCriarSerializer,
+    EmpresaSerializer,
 )
 
-_FORNECEDOR_EXEMPLO_ENTRADA = {
-    "nome": "Fornecedor Exemplo",
+_EMPRESA_EXEMPLO_ENTRADA = {
+    "nome": "Empresa Exemplo",
     "cnpj": "12345678000195",
     "status": True,
-    "razao_social": "Fornecedor Exemplo LTDA",
+    "razao_social": "Empresa Exemplo LTDA",
     "link_rastreio": "https://www.exemplo.com/rastreio",
     "cep": "12345678",
     "logradouro": "Rua Exemplo",
@@ -27,31 +27,31 @@ _FORNECEDOR_EXEMPLO_ENTRADA = {
     "estado": "SP",
 }
 
-_FORNECEDOR_EXEMPLO_SAIDA = {
+_EMPRESA_EXEMPLO_SAIDA = {
     "id": 1,
     "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
-    **_FORNECEDOR_EXEMPLO_ENTRADA,
+    **_EMPRESA_EXEMPLO_ENTRADA,
 }
 
-FORNECEDOR_SCHEMA = extend_schema_view(
+EMPRESA_SCHEMA = extend_schema_view(
     list=extend_schema(
-        tags=["Fornecedor"],
-        summary="Lista os fornecedores",
-        description="Retorna a lista de fornecedores cadastrados no sistema.",
-        operation_id="listarFornecedores",
+        tags=["Empresa"],
+        summary="Lista as empresas",
+        description="Retorna a lista de empresas cadastradas no sistema.",
+        operation_id="listarEmpresas",
         parameters=[
             OpenApiParameter(
                 name="nome",
                 type=str,
                 description=(
-                    "Filtra fornecedores cujo nome contenha o valor informado."
+                    "Filtra empresas cujo nome contenha o valor informado."
                 ),
             ),
             OpenApiParameter(
                 name="razao_social",
                 type=str,
                 description=(
-                    "Filtra fornecedores cuja razão social contenha o "
+                    "Filtra empresas cuja razão social contenha o "
                     "valor informado."
                 ),
             ),
@@ -59,38 +59,38 @@ FORNECEDOR_SCHEMA = extend_schema_view(
                 name="cnpj",
                 type=str,
                 description=(
-                    "Filtra fornecedores cujo CNPJ contenha o valor informado."
+                    "Filtra empresas cujo CNPJ contenha o valor informado."
                 ),
             ),
             OpenApiParameter(
                 name="status",
                 type=bool,
-                description="Filtra fornecedores pelo status (ativo/inativo).",
+                description="Filtra empresas pelo status (ativo/inativo).",
             ),
         ],
         responses={
-            200: FornecedorSerializer(many=True),
+            200: EmpresaSerializer(many=True),
             401: OpenApiResponse(description="Credenciais inválidas"),
             503: OpenApiResponse(description="Instabilidade"),
             500: OpenApiResponse(description="Erro no servidor"),
         },
         examples=[
             OpenApiExample(
-                name="Lista de fornecedores",
+                name="Lista de empresas",
                 response_only=True,
-                value=[_FORNECEDOR_EXEMPLO_SAIDA],
+                value=[_EMPRESA_EXEMPLO_SAIDA],
             ),
         ],
     ),
     retrieve=extend_schema(exclude=True),
     create=extend_schema(
-        tags=["Fornecedor"],
-        summary="Cria um novo fornecedor",
-        description="Adiciona um novo fornecedor ao sistema.",
-        operation_id="cadastrarFornecedor",
-        request=FornecedorCriarSerializer,
+        tags=["Empresa"],
+        summary="Cria uma nova empresa",
+        description="Adiciona uma nova empresa ao sistema.",
+        operation_id="cadastrarEmpresa",
+        request=EmpresaCriarSerializer,
         responses={
-            201: OpenApiResponse(description="Fornecedor criado com sucesso"),
+            201: OpenApiResponse(description="Empresa criada com sucesso"),
             400: OpenApiResponse(description="Dados inválidos"),
             401: OpenApiResponse(description="Credenciais inválidas"),
             503: OpenApiResponse(description="Instabilidade"),
@@ -98,14 +98,14 @@ FORNECEDOR_SCHEMA = extend_schema_view(
         },
         examples=[
             OpenApiExample(
-                name="Exemplo de cadastro de fornecedor",
+                name="Exemplo de cadastro de empresa",
                 request_only=True,
-                value=_FORNECEDOR_EXEMPLO_ENTRADA,
+                value=_EMPRESA_EXEMPLO_ENTRADA,
             ),
             OpenApiExample(
-                name="Fornecedor cadastrado com sucesso",
+                name="Empresa criada com sucesso",
                 response_only=True,
-                value=_FORNECEDOR_EXEMPLO_SAIDA,
+                value=_EMPRESA_EXEMPLO_SAIDA,
             ),
         ],
     ),
