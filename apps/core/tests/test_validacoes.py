@@ -1,4 +1,4 @@
-"""Testes para funções e validadores em apps.utils.validacoes."""
+"""Testes para funções e validadores em apps.core.validacoes."""
 
 import pytest
 from django.core.exceptions import ValidationError

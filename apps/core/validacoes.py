@@ -4,7 +4,7 @@ import re
 
 from django.core.validators import RegexValidator
 
-from apps.utils.exceptions import (
+from apps.core.exceptions import (
     CepInvalidoError,
     CnpjInvalidoError,
     LinkRastreioInvalidoError,

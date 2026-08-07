@@ -2,10 +2,12 @@
 
 from rest_framework import serializers
 
-from apps.core.validacoes import (
+from apps.core.exceptions import (
     CepInvalidoError,
     CnpjInvalidoError,
     LinkRastreioInvalidoError,
+)
+from apps.core.validacoes import (
     validar_formato_cep,
     validar_formato_cnpj,
     validar_formato_link_rastreio,
