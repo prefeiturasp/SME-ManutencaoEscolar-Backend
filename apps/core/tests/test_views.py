@@ -408,16 +408,16 @@ def test_redefinir_senha_usuario_nao_encontrado(
 ):
     """Deve retornar 404 quando o usuário não existir."""
 
-    def raise_envio_email_error(*args, **kwargs):
-        raise EnvioEmailError(
-            title="Erro ao enviar e-mail.",
-            detail="Parece que estamos com uma instabilidade no momento. "
-            "Tente novamnete daqui a pouco",
+    def raise_usuario_nao_encontado_error(*args, **kwargs):
+        raise UsuarioNaoEncontradoError(
+            title="Usuário não encontrado.",
+            detail="Verifique se o RF ou CPF digitados estão corretos e "
+            "tente novamente",
         )
 
     monkeypatch.setattr(
         "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
-        classmethod(raise_envio_email_error),
+        classmethod(raise_usuario_nao_encontado_error),
     )
 
     request = api_factory.post(
@@ -430,12 +430,12 @@ def test_redefinir_senha_usuario_nao_encontrado(
 
     response = RedefinirSenhaView.as_view()(request)
 
-    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
     assert response.data == {
-        "title": "Erro ao enviar e-mail.",
-        "detail": "Parece que estamos com uma instabilidade no momento. "
-        "Tente novamnete daqui a pouco",
+        "title": "Usuário não encontrado.",
+        "detail": "Verifique se o RF ou CPF digitados estão corretos e "
+        "tente novamente",
     }
 
 
@@ -485,6 +485,13 @@ def test_redefinir_senha_erro_envio_email(
         "username": "1234567",
     }
 
+    def raise_enio_email_error(*args, **kwargs):
+        raise EnvioEmailError(
+            title="Erro ao enviar e-mail.",
+            detail="Parece que estamos com uma instabilidade no momento. "
+            "Tente novamnete daqui a pouco",
+        )
+
     monkeypatch.setattr(
         "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
         classmethod(lambda cls, _: usuario),
@@ -492,14 +499,7 @@ def test_redefinir_senha_erro_envio_email(
 
     monkeypatch.setattr(
         "apps.usuarios.api.views.UsuarioService.enviar_email_recuperacao_senha",
-        staticmethod(
-            lambda usuario: (_ for _ in ()).throw(
-                EnvioEmailError(
-                    title="Erro ao enviar e-mail.",
-                    detail="Instabilidade no serviço.",
-                )
-            )
-        ),
+        staticmethod(raise_enio_email_error),
     )
 
     request = api_factory.post(
@@ -516,7 +516,8 @@ def test_redefinir_senha_erro_envio_email(
 
     assert response.data == {
         "title": "Erro ao enviar e-mail.",
-        "detail": "Instabilidade no serviço.",
+        "detail": "Parece que estamos com uma instabilidade no momento. "
+        "Tente novamnete daqui a pouco",
     }
 
 
