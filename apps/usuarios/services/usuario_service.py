@@ -61,7 +61,7 @@ class UsuarioService:
             de perfil de acesso.
         """
         try:
-            usuario = UsuarioRepository.busca_usuario_por_usermane(rf_ou_cpf)
+            usuario = UsuarioRepository.busca_usuario_por_username(rf_ou_cpf)
             return usuario
         except ObjectDoesNotExist:
             raise UsuarioNaoEncontradoError(

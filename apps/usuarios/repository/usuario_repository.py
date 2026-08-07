@@ -130,7 +130,7 @@ class UsuarioRepository:
             raise ObjectDoesNotExist from None
 
     @classmethod
-    def busca_usuario_por_usermane(cls, username: str) -> dict:
+    def busca_usuario_por_username(cls, username: str) -> dict:
         """Busca um usuário pelo nome de usuário.
 
         Recupera um usuário a partir do campo ``username`` e e retorna seus
