@@ -56,4 +56,4 @@ class EnvioEmailError(Exception):
         self.title = title
         self.detail = detail
 
-        super().__init__(detail)
+        super().__init__(title, detail)

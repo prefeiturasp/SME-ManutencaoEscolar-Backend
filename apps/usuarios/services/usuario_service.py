@@ -5,6 +5,7 @@ from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
 
+from apps.core.exceptions import EnvioEmailError
 from apps.core.services.email_service import EmailService
 from apps.usuarios.exceptions import (
     EmailUsuarioNaoEncontradoError,
@@ -67,7 +68,7 @@ class UsuarioService:
             usuario = UsuarioRepository.busca_usuario_por_username(rf_ou_cpf)
             if usuario["email"] is None or not usuario["email"].strip():
                 raise EmailUsuarioNaoEncontradoError(
-                    title="Email não encontrado.",
+                    title="E-mail não encontrado.",
                     detail="Não foi encontrado e-mail para esse RF ou CPF.",
                 )
             return usuario
@@ -105,10 +106,20 @@ class UsuarioService:
             "url": link,
             "username": usuario["username"],
         }
-
-        EmailService.enviar(
-            assunto="Recuperação de senha",
-            template="recuperar_senha.html",
-            contexto=contexto,
-            destinatarios=[usuario["email"]],
-        )
+        try:
+            EmailService.enviar(
+                assunto="Recuperação de senha",
+                template="recuperar_senha.html",
+                contexto=contexto,
+                destinatarios=[usuario["email"]],
+            )
+        except Exception:
+            logger.exception(
+                "Erro ao enviar e-mail para o usuário '%s'.",
+                usuario["username"],
+            )
+            raise EnvioEmailError(
+                title="Erro ao enviar e-mail.",
+                detail="Parece que estamos com uma instabilidade no momento. "
+                "Tente novamnete daqui a pouco",
+            ) from None

@@ -208,7 +208,7 @@ class RedefinirSenhaView(APIView):
             )
         except EnvioEmailError as exc:
             return Response(
-                {"detail": exc.detail},
+                {"title": exc.title, "detail": exc.detail},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         parte_local, dominio = usuario["email"].rsplit("@", 1)
