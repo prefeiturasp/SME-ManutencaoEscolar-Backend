@@ -10,14 +10,19 @@ from apps.core.api.views import (
     HealthCheckView,
     LoginView,
     LogoutView,
+    RedefinirSenhaView,
 )
 from apps.core.exceptions import (
+    EnvioEmailError,
     FalhaAutenticacaoError,
     InternalError,
     SmeIntegracaoError,
     TokenInvalidoError,
 )
-from apps.usuarios.exceptions import UsuarioNaoEncontradoError
+from apps.usuarios.exceptions import (
+    EmailUsuarioNaoEncontradoError,
+    UsuarioNaoEncontradoError,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -357,3 +362,174 @@ def test_atualizar_token_retorna_401_quando_usuario_nao_autorizado(
 
     assert response.status_code == 401
     assert response.data == {"detail": "Usuário não autorizado."}
+
+
+def test_redefinir_senha_retorna_email_mascarado(
+    api_factory,
+    monkeypatch,
+):
+    """Deve enviar o e-mail de recuperação e retornar o e-mail mascarado."""
+    usuario = {
+        "nome": "João da Silva",
+        "email": "joaodasilva@email.com",
+        "username": "1234567",
+    }
+
+    monkeypatch.setattr(
+        "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
+        classmethod(lambda cls, _: usuario),
+    )
+
+    monkeypatch.setattr(
+        "apps.usuarios.api.views.UsuarioService.enviar_email_recuperacao_senha",
+        staticmethod(lambda usuario: None),
+    )
+
+    request = api_factory.post(
+        "/usuarios/redefinir-senha/",
+        {
+            "registro_funcional_ou_cpf": "1234567",
+        },
+        format="json",
+    )
+
+    response = RedefinirSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_200_OK
+
+    assert response.data == {
+        "email": "joa********@email.com",
+    }
+
+
+def test_redefinir_senha_usuario_nao_encontrado(
+    api_factory,
+    monkeypatch,
+):
+    """Deve retornar 404 quando o usuário não existir."""
+    monkeypatch.setattr(
+        "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
+        classmethod(
+            lambda cls, _: (_ for _ in ()).throw(
+                UsuarioNaoEncontradoError(
+                    title="Usuário não encontrado.",
+                    detail="Usuário inexistente.",
+                )
+            )
+        ),
+    )
+
+    request = api_factory.post(
+        "/usuarios/redefinir-senha/",
+        {
+            "registro_funcional_ou_cpf": "1234567",
+        },
+        format="json",
+    )
+
+    response = RedefinirSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    assert response.data == {
+        "title": "Usuário não encontrado.",
+        "detail": "Usuário inexistente.",
+    }
+
+
+def test_redefinir_senha_email_nao_encontrado(
+    api_factory,
+    monkeypatch,
+):
+    """Deve retornar 404 quando o usuário não possuir e-mail."""
+    monkeypatch.setattr(
+        "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
+        classmethod(
+            lambda cls, _: (_ for _ in ()).throw(
+                EmailUsuarioNaoEncontradoError(
+                    title="E-mail não encontrado.",
+                    detail="Usuário sem e-mail.",
+                )
+            )
+        ),
+    )
+
+    request = api_factory.post(
+        "/usuarios/redefinir-senha/",
+        {
+            "registro_funcional_ou_cpf": "1234567",
+        },
+        format="json",
+    )
+
+    response = RedefinirSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    assert response.data == {
+        "title": "E-mail não encontrado.",
+        "detail": "Usuário sem e-mail.",
+    }
+
+
+def test_redefinir_senha_erro_envio_email(
+    api_factory,
+    monkeypatch,
+):
+    """Deve retornar 503 quando ocorrer erro ao enviar o e-mail."""
+    usuario = {
+        "nome": "João",
+        "email": "joao@email.com",
+        "username": "1234567",
+    }
+
+    monkeypatch.setattr(
+        "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
+        classmethod(lambda cls, _: usuario),
+    )
+
+    monkeypatch.setattr(
+        "apps.usuarios.api.views.UsuarioService.enviar_email_recuperacao_senha",
+        staticmethod(
+            lambda usuario: (_ for _ in ()).throw(
+                EnvioEmailError(
+                    title="Erro ao enviar e-mail.",
+                    detail="Instabilidade no serviço.",
+                )
+            )
+        ),
+    )
+
+    request = api_factory.post(
+        "/usuarios/redefinir-senha/",
+        {
+            "registro_funcional_ou_cpf": "1234567",
+        },
+        format="json",
+    )
+
+    response = RedefinirSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+
+    assert response.data == {
+        "title": "Erro ao enviar e-mail.",
+        "detail": "Instabilidade no serviço.",
+    }
+
+
+def test_redefinir_senha_payload_invalido(
+    api_factory,
+):
+    """Deve retornar 400 quando o payload for inválido."""
+    request = api_factory.post(
+        "/usuarios/redefinir-senha/",
+        {},
+        format="json",
+    )
+
+    response = RedefinirSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    assert "registro_funcional_ou_cpf" in response.data
