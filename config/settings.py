@@ -299,3 +299,6 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = f"Manutenção Escolar <{EMAIL_HOST_USER}>"
+
+# Token de redefinição de senha expira em 6h
+PASSWORD_RESET_TIMEOUT = 21600

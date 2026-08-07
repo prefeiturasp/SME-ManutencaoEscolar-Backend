@@ -87,8 +87,8 @@ class UsuarioService:
         )
 
         link = (
-            f"{settings.FRONTEND_URL}/redefinir-senha/"
-            f"{token['token_recuperacao']}"
+            f"{settings.FRONTEND_URL}/redefinir-senha/?id="
+            f"{usuario['username']}&token={token['token_recuperacao']}"
         )
 
         contexto = {
@@ -99,7 +99,7 @@ class UsuarioService:
 
         EmailService.enviar(
             assunto="Recuperação de senha",
-            template="usuarios/recuperar_senha.html",
+            template="recuperar_senha.html",
             contexto=contexto,
             destinatarios=[usuario["email"]],
         )
