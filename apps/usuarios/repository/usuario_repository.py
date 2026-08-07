@@ -108,7 +108,7 @@ class UsuarioRepository:
                 "identificador informado.",
             )
 
-        return {"usuario": username}
+        return {"username": username}
 
     @classmethod
     def _consulta_por_username(cls, username: str) -> Usuario:

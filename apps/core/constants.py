@@ -3,7 +3,7 @@
 from django.db import models
 
 ENDPOINT_AUTENTICACAO = "/v1/autenticacao"
-ENDPOINT_USUARIO_EXISTE_CORESSO = "/api/AutenticacaoSgp/UsuarioExisteCoreSSO"
+ENDPOINT_USUARIO_EXISTE_CORESSO = "/AutenticacaoSgp/UsuarioExisteCoreSSO"
 
 
 class EstadoChoices(models.TextChoices):
