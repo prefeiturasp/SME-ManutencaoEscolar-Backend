@@ -32,14 +32,23 @@ def enviar_email_task(
     destinatarios: list[str],
     anexos: list[dict] | None = None,
 ) -> None:
-    """_summary_.
+    """Envie um e-mail HTML de forma assíncrona.
+
+    Renderiza o template informado utilizando o contexto recebido,
+    adiciona anexos (quando informados) e realiza o envio do e-mail.
+
+    Em caso de falha durante o envio, a task será reexecutada
+    automaticamente pelo Celery conforme a política de retry
+    configurada.
 
     Args:
-        assunto (str): _description_
-        template (str): _description_
-        contexto (dict): _description_
-        destinatarios (list[str]): _description_
-        anexos (list[dict] | None, optional): _description_. Defaults to None.
+        assunto (str): Assunto do e-mail.
+        template (str): Caminho do template HTML.
+        contexto (dict): Dados utilizados na renderização do template.
+        destinatarios (list[str]): Lista de destinatários.
+        anexos (list[dict] | None, optional): Lista de anexos. Cada
+            anexo deve possuir as chaves ``nome``, ``conteudo`` e
+            ``tipo_conteudo``. Defaults to ``None``.
     """
     html = render_to_string(
         template,

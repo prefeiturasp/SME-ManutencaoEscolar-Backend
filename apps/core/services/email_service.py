@@ -14,15 +14,19 @@ class EmailService:
         destinatarios: list[str],
         anexos: list[dict] | None = None,
     ) -> None:
-        """_summary_.
+        """Solicite o envio assíncrono de um e-mail HTML.
+
+        Encaminha a solicitação para uma task do Celery responsável
+        por renderizar o template e realizar o envio do e-mail.
 
         Args:
-            assunto (str): _description_
-            template (str): _description_
-            contexto (dict): _description_
-            destinatarios (list[str]): _description_
-            anexos (list[dict] | None, optional): _description_.
-                Defaults to None.
+            assunto (str): Assunto do e-mail.
+            template (str): Caminho do template HTML.
+            contexto (dict): Dados utilizados na renderização do template.
+            destinatarios (list[str]): Lista de destinatários.
+            anexos (list[dict] | None, optional):Lista de anexos. Cada
+                anexo deve possuir as chaves ``nome``, ``conteudo`` e
+                ``tipo_conteudo``. Defaults to ``None``.
         """
         anexos = anexos or []
 
