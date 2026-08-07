@@ -87,7 +87,7 @@ class UsuarioService:
         )
 
         link = (
-            f"{settings.FRONTEND_URL}/recuperar-senha/"
+            f"{settings.FRONTEND_URL}/redefinir-senha/"
             f"{token['token_recuperacao']}"
         )
 
