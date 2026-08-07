@@ -6,7 +6,10 @@ from typing import Any
 from django.core.exceptions import ObjectDoesNotExist
 
 from apps.core.services.email_service import EmailService
-from apps.usuarios.exceptions import UsuarioNaoEncontradoError
+from apps.usuarios.exceptions import (
+    EmailUsuarioNaoEncontradoError,
+    UsuarioNaoEncontradoError,
+)
 from apps.usuarios.repository.cargo_repository import CargoEOLRepository
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
 from config import settings
@@ -62,11 +65,17 @@ class UsuarioService:
         """
         try:
             usuario = UsuarioRepository.busca_usuario_por_username(rf_ou_cpf)
+            if usuario["email"] is None or not usuario["email"].strip():
+                raise EmailUsuarioNaoEncontradoError(
+                    title="Email não encontrado.",
+                    detail="Não foi encontrado e-mail para esse RF ou CPF.",
+                )
             return usuario
         except ObjectDoesNotExist:
             raise UsuarioNaoEncontradoError(
                 title="Usuário não encontrado.",
-                detail="Usuário não está na base de dados ou está inativado",
+                detail="Verifique se o RF ou CPF digitados estão corretos e "
+                "tente novamente",
             ) from None
 
     @staticmethod

@@ -33,7 +33,10 @@ from apps.core.serializers import (
 )
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
 from apps.core.services.token_service import TokenService
-from apps.usuarios.exceptions import UsuarioNaoEncontradoError
+from apps.usuarios.exceptions import (
+    EmailUsuarioNaoEncontradoError,
+    UsuarioNaoEncontradoError,
+)
 from apps.usuarios.serializers.usuario_serializer import (
     RecuperarSenhaSerializer,
 )
@@ -193,9 +196,14 @@ class RedefinirSenhaView(APIView):
         try:
             usuario = UsuarioService.obter_usuario_por_rf_cpf(rf_ou_cpf)
             UsuarioService.enviar_email_recuperacao_senha(usuario)
-        except UsuarioNaoEncontradoError:
+        except UsuarioNaoEncontradoError as exc:
             return Response(
-                {"detail": "Não existe usuário com este CPF ou RF"},
+                {"title": exc.title, "detail": exc.detail},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except EmailUsuarioNaoEncontradoError as exc:
+            return Response(
+                {"title": exc.title, "detail": exc.detail},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except EnvioEmailError as exc:
