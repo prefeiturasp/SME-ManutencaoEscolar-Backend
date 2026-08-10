@@ -17,6 +17,7 @@ from apps.core.serializers import (
 
 TAG_AUTENTICACAO = "Autenticação"
 REFRESH_JWT = "<jwt-refresh>"
+SENHA = "********"
 
 LOGIN = extend_schema(
     auth=[],
@@ -38,7 +39,7 @@ LOGIN = extend_schema(
             request_only=True,
             value={
                 "login": "1234567",
-                "senha": "********",
+                "senha": SENHA,
             },
         ),
         OpenApiExample(
@@ -267,8 +268,8 @@ ALTERAR_SENHA = extend_schema(
             value={
                 "registro_funcional_ou_cpf": "1234567",
                 "token": "<token-recuperacao>",
-                "senha": "********",
-                "confirmacao_senha": "********",
+                "senha": SENHA,
+                "confirmacao_senha": SENHA,
             },
         ),
         OpenApiExample(
