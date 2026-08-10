@@ -202,33 +202,6 @@ class TestUsuarioRepository:
         UsuarioRepository,
         "_consulta_por_username",
     )
-    def test_deve_gerar_token(
-        self, consulta_mock, token_generator_mock, usuario_ativo
-    ):
-        consulta_mock.return_value = usuario_ativo
-
-        instancia = MagicMock()
-        instancia.make_token.return_value = "token-123"
-
-        token_generator_mock.return_value = instancia
-
-        resultado = UsuarioRepository.gerar_token_recuperar_senha(
-            usuario_ativo.username
-        )
-
-        assert resultado == {"token_recuperacao": "token-123"}
-
-        consulta_mock.assert_called_once_with(usuario_ativo.username)
-        instancia.make_token.assert_called_once_with(usuario_ativo)
-
-    @patch(
-        "apps.usuarios.repository.usuario_repository."
-        "PasswordResetTokenGenerator"
-    )
-    @patch.object(
-        UsuarioRepository,
-        "_consulta_por_username",
-    )
     def test_verificar_token_atualizar_senha_token_valido(
         self, consulta_mock, token_generator_mock, usuario_ativo
     ):

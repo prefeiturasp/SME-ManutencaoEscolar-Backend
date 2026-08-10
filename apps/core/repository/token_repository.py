@@ -1,5 +1,7 @@
-"""Repositório para gerenciamento de tokens JWT."""
+"""Repositório para gerenciamento de tokens JWT e recuperação de senha."""
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.db.models import ObjectDoesNotExist
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.usuarios.models.usuario import Usuario
@@ -28,3 +30,28 @@ class TokenRepository:
             "refresh": str(refresh),
             "access": str(refresh.access_token),
         }
+
+    @classmethod
+    def gerar_token_recuperar_senha(cls, username: str) -> dict:
+        """Gera um token para recuperação de senha do usuário.
+
+        Busca o usuário pelo nome de usuário e gera um token de recuperação
+        de senha utilizando o ``PasswordResetTokenGenerator`` do Django.
+
+        Args:
+            username (str):  Nome de usuário utilizado para localizar o
+                usuário que terá o token de recuperação gerado.
+
+
+        Returns:
+            dict: Dicionário contendo o token de recuperação na chave
+                ``token_recuperacao``.
+        """
+        try:
+            usuario = Usuario.objects.get(username=username)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist from None
+
+        token_generator = PasswordResetTokenGenerator()
+        token = token_generator.make_token(usuario)
+        return {"token_recuperacao": token}

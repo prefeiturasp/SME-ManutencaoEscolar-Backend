@@ -9,6 +9,7 @@ from apps.core.exceptions import (
     EnvioEmailError,
     TokenInvalidoError,
 )
+from apps.core.repository.token_repository import TokenRepository
 from apps.core.services.email_service import EmailService
 from apps.usuarios.exceptions import (
     EmailUsuarioNaoEncontradoError,
@@ -99,7 +100,7 @@ class UsuarioService:
             EnvioEmailError: Caso ocorra uma falha ao solicitar o envio do
                 e-mail de recuperação de senha.
         """
-        token = UsuarioRepository.gerar_token_recuperar_senha(
+        token = TokenRepository.gerar_token_recuperar_senha(
             usuario["username"]
         )
 
