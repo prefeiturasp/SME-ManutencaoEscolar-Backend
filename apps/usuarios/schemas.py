@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Esquemas OpenAPI para os endpoints de usuarios."""
 
 from drf_spectacular.utils import (
     OpenApiExample,

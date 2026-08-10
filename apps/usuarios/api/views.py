@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Views da API da aplicação Usuarios."""
 
 from rest_framework import status
 from rest_framework.decorators import action

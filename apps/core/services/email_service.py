@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Serviço para gerenciar envio de e-mail."""
 
 from apps.core.tasks import enviar_email_task
 

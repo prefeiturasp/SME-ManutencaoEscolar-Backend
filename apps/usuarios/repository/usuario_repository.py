@@ -191,13 +191,19 @@ class UsuarioRepository:
 
     @classmethod
     def gerar_token_recuperar_senha(cls, username: str) -> dict:
-        """_summary_.
+        """Gera um token para recuperação de senha do usuário.
+
+        Busca o usuário pelo nome de usuário e gera um token de recuperação
+        de senha utilizando o ``PasswordResetTokenGenerator`` do Django.
 
         Args:
-            username (str): _description_
+            username (str):  Nome de usuário utilizado para localizar o
+                usuário que terá o token de recuperação gerado.
+
 
         Returns:
-            dict: _description_
+            dict: Dicionário contendo o token de recuperação na chave
+                ``token_recuperacao``.
         """
         usuario = cls._consulta_por_username(username)
         token_generator = PasswordResetTokenGenerator()
