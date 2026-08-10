@@ -5,15 +5,15 @@ from unittest.mock import patch
 import pytest
 from rest_framework.exceptions import ValidationError
 
+from apps.core.exceptions import (
+    CepInvalidoError,
+    CnpjInvalidoError,
+    LinkRastreioInvalidoError,
+)
 from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.serializers import (
     EmpresaCriarSerializer,
     EmpresaSerializer,
-)
-from apps.utils.exceptions import (
-    CepInvalidoError,
-    CnpjInvalidoError,
-    LinkRastreioInvalidoError,
 )
 
 pytestmark = pytest.mark.django_db

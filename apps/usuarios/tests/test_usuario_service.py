@@ -2,7 +2,14 @@ from unittest.mock import patch
 
 import pytest
 
+from apps.core.exceptions import EnvioEmailError
+from apps.usuarios.exceptions import (
+    EmailUsuarioNaoEncontradoError,
+    UsuarioNaoEncontradoError,
+)
 from apps.usuarios.services.usuario_service import UsuarioService
+
+pytestmark = pytest.mark.django_db
 
 
 class TestUsuarioService:
@@ -108,3 +115,112 @@ class TestUsuarioService:
                 dados_usuario={},
                 dados_cargo={"codigo_cargo": "3360"},
             )
+
+    def test_deve_retornar_usuario(self, usuario_ativo, usuario_ativo_dict):
+        """Deve retornar os dados do usuário."""
+        resultado = UsuarioService.obter_usuario_por_rf_cpf(usuario_ativo.cpf)
+        assert resultado == usuario_ativo_dict
+
+    def test_deve_lancar_erro_quando_email_nao_existir(self, usuario_ativo):
+        """Deve lançar erro quando o usuário não possuir e-mail."""
+        usuario_ativo.email = ""
+        usuario_ativo.save()
+
+        with pytest.raises(
+            EmailUsuarioNaoEncontradoError,
+        ):
+            UsuarioService.obter_usuario_por_rf_cpf(usuario_ativo.cpf)
+
+    def test_deve_lancar_erro_quando_usuario_nao_existir(
+        self,
+    ):
+        """Deve lançar erro quando o usuário não existir."""
+        with pytest.raises(
+            UsuarioNaoEncontradoError,
+        ):
+            UsuarioService.obter_usuario_por_rf_cpf("1111111")
+
+    @patch("apps.usuarios.services.usuario_service.EmailService.enviar")
+    @patch(
+        "apps.usuarios.services.usuario_service.UsuarioRepository."
+        "gerar_token_recuperar_senha"
+    )
+    @patch("apps.usuarios.services.usuario_service.settings")
+    def test_deve_enviar_email(
+        self,
+        settings_mock,
+        gerar_token_mock,
+        enviar_email_mock,
+        usuario_ativo_dict,
+    ):
+        """Deve enviar o e-mail de recuperação."""
+        settings_mock.FRONTEND_URL = "https://frontend"
+        username = usuario_ativo_dict["username"]
+        token = "redefir-senha"
+
+        gerar_token_mock.return_value = {
+            "token_recuperacao": token,
+        }
+
+        UsuarioService.enviar_email_recuperacao_senha(
+            usuario_ativo_dict,
+        )
+
+        gerar_token_mock.assert_called_once_with(username)
+
+        enviar_email_mock.assert_called_once_with(
+            assunto="Recuperação de senha",
+            template="recuperar_senha.html",
+            contexto={
+                "nome": usuario_ativo_dict["nome"],
+                "url": (
+                    f"https://frontend/redefinir-senha/?id={username}&"
+                    f"token={token}"
+                ),
+                "username": username,
+            },
+            destinatarios=[
+                usuario_ativo_dict["email"],
+            ],
+        )
+
+    @patch("apps.usuarios.services.usuario_service.logger")
+    @patch("apps.usuarios.services.usuario_service.EmailService.enviar")
+    @patch(
+        "apps.usuarios.services.usuario_service.UsuarioRepository."
+        "gerar_token_recuperar_senha"
+    )
+    @patch("apps.usuarios.services.usuario_service.settings")
+    def test_deve_lancar_erro_quando_envio_falhar(
+        self,
+        settings_mock,
+        gerar_token_mock,
+        enviar_email_mock,
+        logger_mock,
+        usuario_ativo_dict,
+    ):
+        """Deve lançar EnvioEmailError quando ocorrer erro no envio."""
+        settings_mock.FRONTEND_URL = "https://frontend"
+        username = usuario_ativo_dict["username"]
+        token = "redefir-senha"
+
+        gerar_token_mock.return_value = {
+            "token_recuperacao": token,
+        }
+
+        UsuarioService.enviar_email_recuperacao_senha(
+            usuario_ativo_dict,
+        )
+        gerar_token_mock.assert_called_once_with(username)
+        enviar_email_mock.side_effect = Exception()
+        with pytest.raises(
+            EnvioEmailError,
+        ):
+            UsuarioService.enviar_email_recuperacao_senha(
+                usuario_ativo_dict,
+            )
+
+        logger_mock.exception.assert_called_once_with(
+            "Erro ao enviar e-mail para o usuário '%s'.",
+            username,
+        )

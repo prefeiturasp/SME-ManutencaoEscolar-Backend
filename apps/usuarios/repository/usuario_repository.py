@@ -2,6 +2,8 @@
 
 from typing import Any
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 from apps.usuarios.constants import PerfilAcesso
@@ -58,23 +60,7 @@ class UsuarioRepository:
                 ]
             )
 
-        dict_usuario = {
-            "id": usuario.id,
-            "uuid": usuario.uuid,
-            "nome": usuario.nome,
-            "email": usuario.email,
-            "registro_funcional": usuario.registro_funcional,
-            "cpf": usuario.cpf,
-            "username": usuario.username,
-            "perfil_acesso": {
-                "cargo": usuario.cargo.nome,
-                "perfil": {
-                    "codigo": usuario.perfil,
-                    "descricao": PerfilAcesso(usuario.perfil).label,
-                },
-            },
-        }
-        return dict_usuario
+        return cls._retorna_usuario_em_dicionario(usuario)
 
     @staticmethod
     def usuario_existe_por_id(usuario_id: int) -> bool:
@@ -123,3 +109,99 @@ class UsuarioRepository:
             )
 
         return {"username": username}
+
+    @classmethod
+    def _consulta_por_username(cls, username: str) -> Usuario:
+        """Recupera um usuário pelo username.
+
+        Args:
+            username (str): Username do usuário (RF ou CPF).
+
+        Raises:
+            ObjectDoesNotExist: Caso não exista um usuário com o username
+                informado.
+
+        Returns:
+            Usuario: Instância do usuário encontrado.
+        """
+        try:
+            return Usuario.objects.get(username=username)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist from None
+
+    @classmethod
+    def busca_usuario_por_username(cls, username: str) -> dict:
+        """Busca um usuário pelo nome de usuário.
+
+        Recupera um usuário a partir do campo ``username`` e e retorna seus
+        dados em formato de dicionário.
+
+        Args:
+            username (str): Username de usuário (RF ou CPF) utilizado para
+                localizar.
+        Raises:
+            ObjectDoesNotExist: Caso não exista um usuário com o ``username``
+            informado.
+
+        Returns:
+            dict: Dados do usuário e suas informações de perfil de acesso.
+        """
+        usuario = cls._consulta_por_username(username)
+        return cls._retorna_usuario_em_dicionario(usuario)
+
+    @staticmethod
+    def _retorna_usuario_em_dicionario(usuario: Usuario) -> dict:
+        """Transforma um objeto ``Usuario`` para um dicionário.
+
+        Args:
+            usuario (Usuario): Instância do usuário a ser convertida.
+
+        Returns:
+            dict: Dicionário contendo os seguintes dados:
+
+            - ``id``: Identificador do usuário.
+            - ``uuid``: UUID do usuário.
+            - ``nome``: Nome completo.
+            - ``email``: Endereço de e-mail.
+            - ``registro_funcional``: Registro funcional.
+            - ``cpf``: CPF do usuário.
+            - ``username``: Nome de usuário.
+            - ``perfil_acesso``: Informações do cargo e perfil de acesso.
+        """
+        return {
+            "id": usuario.id,
+            "uuid": usuario.uuid,
+            "nome": usuario.nome,
+            "email": usuario.email,
+            "registro_funcional": usuario.registro_funcional,
+            "cpf": usuario.cpf,
+            "username": usuario.username,
+            "perfil_acesso": {
+                "cargo": usuario.cargo.nome,
+                "perfil": {
+                    "codigo": usuario.perfil,
+                    "descricao": PerfilAcesso(usuario.perfil).label,
+                },
+            },
+        }
+
+    @classmethod
+    def gerar_token_recuperar_senha(cls, username: str) -> dict:
+        """Gera um token para recuperação de senha do usuário.
+
+        Busca o usuário pelo nome de usuário e gera um token de recuperação
+        de senha utilizando o ``PasswordResetTokenGenerator`` do Django.
+
+        Args:
+            username (str):  Nome de usuário utilizado para localizar o
+                usuário que terá o token de recuperação gerado.
+
+
+        Returns:
+            dict: Dicionário contendo o token de recuperação na chave
+                ``token_recuperacao``.
+        """
+        usuario = cls._consulta_por_username(username)
+        token_generator = PasswordResetTokenGenerator()
+        token = token_generator.make_token(usuario)
+        return {"token_recuperacao": token}
