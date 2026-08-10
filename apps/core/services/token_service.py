@@ -1,4 +1,4 @@
-"""Serviço para geração de tokens JWT."""
+"""Serviço para geração de tokens JWT e recuperação de senha."""
 
 import logging
 

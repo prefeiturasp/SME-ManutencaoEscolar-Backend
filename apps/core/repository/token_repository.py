@@ -12,6 +12,26 @@ class TokenRepository:
     """Repositório responsável pela geração de tokens de autenticação."""
 
     @classmethod
+    def _consulta_por_username(cls, username: str) -> Usuario:
+        """Recupera um usuário pelo username.
+
+        Args:
+            username (str): Nome de usuário utilizado para localizar
+                o usuário.
+
+        Returns:
+            Usuario: Usuário encontrado.
+
+        Raises:
+            ObjectDoesNotExist: Quando não existe usuário com o
+                username informado.
+        """
+        try:
+            return Usuario.objects.get(username=username)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist from None
+
+    @classmethod
     def gerar_tokens(cls, usuario_id: int) -> dict[str, str]:
         """Gera um par de tokens (refresh e access) para um usuário específico.
 
@@ -48,10 +68,7 @@ class TokenRepository:
             dict: Dicionário contendo o token de recuperação na chave
                 ``token_recuperacao``.
         """
-        try:
-            usuario = Usuario.objects.get(username=username)
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist from None
+        usuario = cls._consulta_por_username(username)
 
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(usuario)
@@ -72,10 +89,7 @@ class TokenRepository:
         Raises:
             TokenInvalidoError: Se o token for inválido ou expirado.
         """
-        try:
-            usuario = Usuario.objects.get(username=username)
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist from None
+        usuario = cls._consulta_por_username(username)
         token_generator = PasswordResetTokenGenerator()
         if not token_generator.check_token(usuario, token):
             raise TokenInvalidoError(
@@ -100,9 +114,6 @@ class TokenRepository:
             username (str): Nome de usuário utilizado para localizar o usuário.
             senha (str): Nova senha que será definida para o usuário.
         """
-        try:
-            usuario = Usuario.objects.get(username=username)
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist from None
+        usuario = cls._consulta_por_username(username)
         usuario.set_password(senha)
         usuario.save(update_fields=["password"])
