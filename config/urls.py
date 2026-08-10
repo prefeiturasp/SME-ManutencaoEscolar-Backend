@@ -40,7 +40,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path(BASE_URL_API, include("apps.core.api.urls")),
-    path(BASE_URL_API, include("apps.fornecedor.api.urls")),
+    path(BASE_URL_API, include("apps.empresa.api.urls")),
     path(BASE_URL_API, include("apps.servico.api.urls")),
     path(BASE_URL_API, include("apps.usuarios.api.urls")),
 ]

@@ -1,4 +1,4 @@
-"""Fixtures compartilhadas para os testes do app Fornecedor."""
+"""Fixtures compartilhadas para os testes do app Empresa."""
 
 import pytest
 from rest_framework.test import APIClient
@@ -11,12 +11,12 @@ def api_client():
 
 
 @pytest.fixture
-def fornecedor_payload_valido():
-    """Payload válido para criação de fornecedor."""
+def empresa_payload_valido():
+    """Payload válido para criação de empresa."""
     return {
-        "nome": "Fornecedor Exemplo",
+        "nome": "Empresa Exemplo",
         "cnpj": "12345678901234",
-        "razao_social": "Fornecedor Exemplo LTDA",
+        "razao_social": "Empresa Exemplo LTDA",
         "link_rastreio": "https://www.exemplo.com/rastreio",
         "cep": "12345678",
         "logradouro": "Rua Exemplo",

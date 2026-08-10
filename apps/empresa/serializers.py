@@ -1,4 +1,4 @@
-"""Serializers da aplicação Fornecedor."""
+"""Serializers da aplicação Empresa."""
 
 from rest_framework import serializers
 
@@ -12,17 +12,17 @@ from apps.core.validacoes import (
     validar_formato_cnpj,
     validar_formato_link_rastreio,
 )
-from apps.fornecedor.constants import FornecedorErrorMessages
-from apps.fornecedor.models import Fornecedor
+from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.models import Empresa
 
 
-class FornecedorSerializer(serializers.ModelSerializer):
-    """Serializa o fornecedor para listagem e detalhes."""
+class EmpresaSerializer(serializers.ModelSerializer):
+    """Serializa a empresa para listagem e detalhes."""
 
     class Meta:
-        """Configuração do serializer de fornecedor."""
+        """Configuração do serializer de empresa."""
 
-        model = Fornecedor
+        model = Empresa
         fields = (
             "id",
             "uuid",
@@ -40,13 +40,13 @@ class FornecedorSerializer(serializers.ModelSerializer):
         )
 
 
-class FornecedorCriarSerializer(serializers.ModelSerializer):
-    """Serializa o cadastro de fornecedores."""
+class EmpresaCriarSerializer(serializers.ModelSerializer):
+    """Serializa o cadastro de empresas."""
 
     class Meta:
-        """Configuração do serializer de fornecedor."""
+        """Configuração do serializer de empresa."""
 
-        model = Fornecedor
+        model = Empresa
         fields = (
             "nome",
             "cnpj",
@@ -67,7 +67,7 @@ class FornecedorCriarSerializer(serializers.ModelSerializer):
             validar_formato_cnpj(value)
         except CnpjInvalidoError:
             raise serializers.ValidationError(
-                FornecedorErrorMessages.CNPJ_INVALIDO
+                EmpresaErrorMessages.CNPJ_INVALIDO
             ) from None
         return value
 
@@ -77,7 +77,7 @@ class FornecedorCriarSerializer(serializers.ModelSerializer):
             validar_formato_cep(value)
         except CepInvalidoError:
             raise serializers.ValidationError(
-                FornecedorErrorMessages.CEP_INVALIDO
+                EmpresaErrorMessages.CEP_INVALIDO
             ) from None
         return value
 
@@ -88,6 +88,6 @@ class FornecedorCriarSerializer(serializers.ModelSerializer):
                 validar_formato_link_rastreio(value)
             except LinkRastreioInvalidoError:
                 raise serializers.ValidationError(
-                    FornecedorErrorMessages.LINK_RASTREIO_INVALIDO
+                    EmpresaErrorMessages.LINK_RASTREIO_INVALIDO
                 ) from None
         return value
