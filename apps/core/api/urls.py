@@ -3,6 +3,7 @@
 from django.urls import path
 
 from apps.core.api.views import (
+    AlterarSenhaView,
     AtualizarTokenView,
     HealthCheckView,
     LoginView,
@@ -19,5 +20,10 @@ urlpatterns = [
         "redefinir-senha/",
         RedefinirSenhaView.as_view(),
         name="redefinir-senha",
+    ),
+    path(
+        "alterar-senha/",
+        AlterarSenhaView.as_view(),
+        name="alterar-senha",
     ),
 ]

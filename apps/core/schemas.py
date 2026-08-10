@@ -11,8 +11,6 @@ from apps.core.serializers import (
     AutenticacaoSerializer,
     LoginResponseSerializer,
     LogoutSerializer,
-)
-from apps.usuarios.serializers.usuario_serializer import (
     RecuperarSenhaSerializer,
 )
 
