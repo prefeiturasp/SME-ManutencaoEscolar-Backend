@@ -259,7 +259,7 @@ class AlterarSenhaView(APIView):
             )
         except SmeIntegracaoError as exc:
             return Response(
-                {"title": "Erro ao alterar senha", "detail": exc},
+                {"title": "Erro ao alterar senha", "detail": str(exc)},
                 status=status.HTTP_502_BAD_GATEWAY,
             )
 
