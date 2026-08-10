@@ -6,8 +6,13 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
+from apps.core.exceptions import (
+    TokenInvalidoError,
+)
 from apps.usuarios.constants import PerfilAcesso
-from apps.usuarios.exceptions import UsuarioNaoEncontradoError
+from apps.usuarios.exceptions import (
+    UsuarioNaoEncontradoError,
+)
 from apps.usuarios.models import CargoEOL, Usuario
 
 
@@ -209,3 +214,47 @@ class UsuarioRepository:
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(usuario)
         return {"token_recuperacao": token}
+
+    @classmethod
+    def verificar_token_atualizar_senha(
+        cls,
+        username: str,
+        token: str,
+    ) -> None:
+        """Altera a senha de um usuário a partir de token de recuperação.
+
+        Args:
+            username (str): Nome de usuário (RF ou CPF) do usuário.
+            token (str): Token de recuperação de senha enviado por e-mail.
+
+        Raises:
+            TokenInvalidoError: Se o token for inválido ou expirado.
+        """
+        usuario = cls._consulta_por_username(username)
+        token_generator = PasswordResetTokenGenerator()
+        if not token_generator.check_token(usuario, token):
+            raise TokenInvalidoError(
+                title="Token inválido.",
+                detail=(
+                    "O token de recuperação de senha é inválido ou expirou."
+                ),
+            )
+
+    @classmethod
+    def invalidar_token_recuperacao_senha(
+        cls, username: str, senha: str
+    ) -> None:
+        """Invalida o token de recuperação de senha do usuário.
+
+        Atualiza a senha do usuário utilizando o mecanismo de hash do Django.
+        A alteração do campo `password` faz com que tokens de recuperação
+        previamente gerados pelo `PasswordResetTokenGenerator` deixem de ser
+        válidos.
+
+        Args:
+            username (str): Nome de usuário utilizado para localizar o usuário.
+            senha (str): Nova senha que será definida para o usuário.
+        """
+        usuario = cls._consulta_por_username(username)
+        usuario.set_password(senha)
+        usuario.save(update_fields=["password"])
