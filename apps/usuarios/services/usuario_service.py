@@ -157,7 +157,7 @@ class UsuarioService:
             ) from None
         except TokenInvalidoError:
             raise TokenInvalidoError(
-                title="Token inválido.",
+                title="O link está expirado!",
                 detail="Por segurança, o link de redefinição tem validade de "
                 "6 horas. Solicite um novo para redefinir sua senha.",
             ) from None
