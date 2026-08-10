@@ -7,6 +7,7 @@ import pytest
 import requests
 
 from apps.core.constants import (
+    ENDPOINT_ALTERAR_SENHA_CORESSO,
     ENDPOINT_USUARIO_EXISTE_CORESSO,
 )
 from apps.core.exceptions import (
@@ -468,6 +469,125 @@ class TestAutenticacaoEOLService:
         assert headers.get("x-api-eol-key") == self.TOKEN
         assert headers.get("Content-Type") == "application/json-patch+json"
         assert headers.get("accept") == "application/json"
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service."
+        "ApiEOLRepository.alterar_senha",
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service."
+        "UsuarioRepository.invalidar_token_recuperacao_senha",
+    )
+    def test_alterar_senha_no_coresso_sucesso(
+        self,
+        mock_invalidar_token,
+        mock_alterar_senha,
+    ):
+        """Deve alterar a senha e invalidar o token de recuperação."""
+        mock_alterar_senha.return_value = None
+
+        login = self.LOGIN_VALIDO
+        nova_senha = "nova-senha"
+
+        AutenticacaoEOLService.alterar_senha_no_coresso(
+            login=login,
+            nova_senha=nova_senha,
+        )
+
+        mock_alterar_senha.assert_called_once_with(
+            f"{self.URL_BASE}{ENDPOINT_ALTERAR_SENHA_CORESSO}",
+            headers={
+                "accept": "text/plain",
+                "x-api-eol-key": self.TOKEN,
+            },
+            files={
+                "Usuario": (None, login),
+                "Senha": (None, nova_senha),
+            },
+        )
+
+        mock_invalidar_token.assert_called_once_with(
+            login,
+            nova_senha,
+        )
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service."
+        "ApiEOLRepository.alterar_senha",
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service."
+        "UsuarioRepository.invalidar_token_recuperacao_senha",
+    )
+    def test_alterar_senha_no_coresso_erro_integracao(
+        self,
+        mock_invalidar_token,
+        mock_alterar_senha,
+    ):
+        """Deve lançar SmeIntegracaoError."""
+        mock_alterar_senha.side_effect = SmeIntegracaoError(
+            "Erro ao alterar a senha no servidor."
+        )
+
+        with pytest.raises(SmeIntegracaoError):
+            AutenticacaoEOLService.alterar_senha_no_coresso(
+                login=self.LOGIN_VALIDO,
+                nova_senha="nova-senha",
+            )
+
+        mock_alterar_senha.assert_called_once()
+        mock_invalidar_token.assert_not_called()
+
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",
+        URL_BASE,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service.SME_API_EOL_TOKEN",
+        TOKEN,
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service."
+        "ApiEOLRepository.alterar_senha",
+    )
+    @patch(
+        "apps.core.services.autenticacao_eol_service."
+        "UsuarioRepository.invalidar_token_recuperacao_senha",
+    )
+    def test_alterar_senha_no_coresso_falha_autenticacao(
+        self,
+        mock_invalidar_token,
+        mock_alterar_senha,
+    ):
+        """Deve lançar FalhaAutenticacaoError."""
+        mock_alterar_senha.side_effect = FalhaAutenticacaoError(
+            "Usuário ou senha incorretos."
+        )
+
+        with pytest.raises(FalhaAutenticacaoError):
+            AutenticacaoEOLService.alterar_senha_no_coresso(
+                login=self.LOGIN_VALIDO,
+                nova_senha="nova-senha",
+            )
+
+        mock_alterar_senha.assert_called_once()
+        mock_invalidar_token.assert_not_called()
 
 
 class TestValidaCredenciais:
