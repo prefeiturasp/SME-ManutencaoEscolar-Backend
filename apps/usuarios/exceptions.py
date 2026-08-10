@@ -13,7 +13,7 @@ class UsuarioNaoEncontradoError(Exception):
 
 
 class EmailUsuarioNaoEncontradoError(Exception):
-    """Indica que um usuário não foi encontrado."""
+    """Indica que o e-mail de um usuário não foi encontrado."""
 
     def __init__(self, title: str, detail: str) -> None:
         """Inicializa a exceção com título e descrição."""
