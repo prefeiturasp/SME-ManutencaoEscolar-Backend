@@ -201,3 +201,38 @@ class ApiEOLRepository:
             raise SmeIntegracaoError("Erro ao consultar dados do servidor")
         dados: dict = response.json()
         return dados
+
+    @staticmethod
+    def alterar_senha(
+        url: str, headers: dict[str, str], files: dict[str, tuple[None, str]]
+    ) -> None:
+        """Altera a senha do usuário por meio da API de integração.
+
+        Realiza uma requisição HTTP POST para o endpoint informado, enviando
+        os cabeçalhos e os dados da alteração de senha no formato
+        multipart/form-data
+
+        Args:
+            url (str): URL do endpoint responsável pela alteração da senha.
+            headers (dict[str, str]): Cabeçalhos HTTP utilizados na requisição.
+            files (dict[str, tuple[None, str]]): Dados enviados na requisição
+            multipart/form-data, contendo as informações necessárias para
+            alteração da senha.
+
+        Raises:
+            FalhaAutenticacaoError: Levantada quando a API retorna HTTP 401,
+                indicando falha na autenticação ou credenciais inválidas.
+            SmeIntegracaoError: Levantada quando a API retorna um erro HTTP
+                5xx, indicando uma falha no servidor da integração.
+        """
+        response = requests.post(
+            url,
+            headers=headers,
+            files=files,
+            timeout=10,
+        )
+        if response.status_code == status.HTTP_401_UNAUTHORIZED:
+            raise FalhaAutenticacaoError(str(response.text))
+
+        if response.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
+            raise SmeIntegracaoError("Erro ao alterar a senha no servidor.")

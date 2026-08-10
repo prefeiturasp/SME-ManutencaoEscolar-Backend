@@ -7,6 +7,7 @@ from typing import Any
 import requests
 
 from apps.core.constants import (
+    ENDPOINT_ALTERAR_SENHA_CORESSO,
     ENDPOINT_AUTENTICACAO,
     ENDPOINT_USUARIO_EXISTE_CORESSO,
 )
@@ -17,6 +18,7 @@ from apps.core.exceptions import (
 )
 from apps.core.repository.autenticacao_eol_repository import ApiEOLRepository
 from apps.core.services.token_service import TokenService
+from apps.usuarios.repository.usuario_repository import UsuarioRepository
 from apps.usuarios.services.usuario_service import UsuarioService
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
 
@@ -291,3 +293,42 @@ class AutenticacaoEOLService:
                 ),
             },
         }
+
+    @classmethod
+    def alterar_senha_no_coresso(cls, login: str, nova_senha: str) -> None:
+        """Altera a senha do usuário e invalida o token de recuperação.
+
+        Monta os dados necessários para a requisição à API do CoreSSO e
+        delega a alteração da senha ao repositório de integração. Após uma
+        alteração bem-sucedida, invalida o token de recuperação de senha
+        associado ao usuário.
+
+        Args:
+            login (str): Login do usuário cuja senha será alterada
+            nova_senha (str): Nova senha que será definida para o usuário.
+
+        Raises:
+            FalhaAutenticacaoError: Levantada quando ocorre uma falha de
+                autenticação durante a alteração da senha no CoreSSO.
+            SmeIntegracaoError: Levantada quando ocorre uma falha na
+                comunicação ou no processamento da requisição pela API de
+                integração do SME.
+        """
+        headers = {
+            "accept": "text/plain",
+            "x-api-eol-key": SME_API_EOL_TOKEN,
+        }
+        files = {
+            "Usuario": (None, login),
+            "Senha": (None, nova_senha),
+        }
+        url = f"{SME_API_EOL_URL}{ENDPOINT_ALTERAR_SENHA_CORESSO}"
+        try:
+            ApiEOLRepository.alterar_senha(url, headers=headers, files=files)
+            UsuarioRepository.invalidar_token_recuperacao_senha(
+                login, nova_senha
+            )
+        except FalhaAutenticacaoError as exc:
+            raise FalhaAutenticacaoError(exc) from exc
+        except SmeIntegracaoError as exc:
+            raise SmeIntegracaoError(exc) from exc

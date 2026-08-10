@@ -4,6 +4,7 @@ from django.db import models
 
 ENDPOINT_AUTENTICACAO = "/v1/autenticacao"
 ENDPOINT_USUARIO_EXISTE_CORESSO = "/AutenticacaoSgp/UsuarioExisteCoreSSO"
+ENDPOINT_ALTERAR_SENHA_CORESSO = "/AutenticacaoSgp/AlterarSenha"
 
 
 class EstadoChoices(models.TextChoices):

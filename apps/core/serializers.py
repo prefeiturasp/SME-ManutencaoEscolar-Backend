@@ -83,6 +83,7 @@ class AlterarSenhaSerializer(serializers.Serializer):
 
     registro_funcional_ou_cpf = serializers.CharField(
         required=True,
+        min_length=7,
         max_length=11,
         trim_whitespace=True,
         help_text="RF ou CPF do usuário para redefinição de senha.",
