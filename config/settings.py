@@ -76,7 +76,7 @@ APPS_TERCEIROS = [
 APPS_PROJETO = [
     "apps.core",
     "apps.usuarios",
-    "apps.fornecedor",
+    "apps.empresa",
     "apps.servico",
 ]
 

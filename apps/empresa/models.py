@@ -1,4 +1,4 @@
-"""Modelos da aplicação Fornecedor."""
+"""Modelos da aplicação Empresa."""
 
 from django.db import models
 
@@ -11,8 +11,8 @@ from apps.core.validacoes import (
 )
 
 
-class Fornecedor(BaseModel):
-    """Representa o cadastro de um fornecedor."""
+class Empresa(BaseModel):
+    """Representa o cadastro de uma empresa."""
 
     nome = models.CharField(max_length=255)
     cnpj = models.CharField(
@@ -39,9 +39,8 @@ class Fornecedor(BaseModel):
     estado = models.CharField(max_length=2, choices=EstadoChoices.choices)
 
     class Meta:
-        db_table = "fornecedor"
-        verbose_name = "Fornecedor"
-        verbose_name_plural = "Fornecedores"
+        verbose_name = "Empresa"
+        verbose_name_plural = "Empresas"
         ordering = ["-status", "-id"]
         indexes = [
             models.Index(fields=["cnpj"]),
