@@ -484,7 +484,7 @@ class TestAutenticacaoEOLService:
     )
     @patch(
         "apps.core.services.autenticacao_eol_service."
-        "UsuarioRepository.invalidar_token_recuperacao_senha",
+        "TokenRepository.invalidar_token_recuperacao_senha",
     )
     def test_alterar_senha_no_coresso_sucesso(
         self,
@@ -533,7 +533,7 @@ class TestAutenticacaoEOLService:
     )
     @patch(
         "apps.core.services.autenticacao_eol_service."
-        "UsuarioRepository.invalidar_token_recuperacao_senha",
+        "TokenRepository.invalidar_token_recuperacao_senha",
     )
     def test_alterar_senha_no_coresso_erro_integracao(
         self,
@@ -568,7 +568,7 @@ class TestAutenticacaoEOLService:
     )
     @patch(
         "apps.core.services.autenticacao_eol_service."
-        "UsuarioRepository.invalidar_token_recuperacao_senha",
+        "TokenRepository.invalidar_token_recuperacao_senha",
     )
     def test_alterar_senha_no_coresso_falha_autenticacao(
         self,

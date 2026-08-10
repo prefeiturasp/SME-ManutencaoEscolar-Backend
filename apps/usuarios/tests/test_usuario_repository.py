@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 import pytest
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db.models import ObjectDoesNotExist
 
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
@@ -192,21 +191,3 @@ class TestUsuarioRepository:
 
         with pytest.raises(ObjectDoesNotExist):
             UsuarioRepository.busca_usuario_por_username("123")
-
-    def test_invalidar_token_recuperacao_senha_invalida_token(
-        self, usuario_ativo
-    ):
-        """Deve invalidar o token após alterar a senha."""
-        token_generator = PasswordResetTokenGenerator()
-
-        token = token_generator.make_token(usuario_ativo)
-        assert token_generator.check_token(usuario_ativo, token)
-
-        UsuarioRepository.invalidar_token_recuperacao_senha(
-            usuario_ativo.username,
-            "nova-senha-123",
-        )
-
-        usuario_ativo.refresh_from_db()
-
-        assert not token_generator.check_token(usuario_ativo, token)

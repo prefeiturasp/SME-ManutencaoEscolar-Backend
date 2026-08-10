@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 from apps.core.exceptions import TokenInvalidoError
 from apps.core.repository.token_repository import TokenRepository
@@ -101,3 +102,21 @@ class TestTokenRepository:
             usuario_ativo,
             "token-123",
         )
+
+    def test_invalidar_token_recuperacao_senha_invalida_token(
+        self, usuario_ativo
+    ):
+        """Deve invalidar o token após alterar a senha."""
+        token_generator = PasswordResetTokenGenerator()
+
+        token = token_generator.make_token(usuario_ativo)
+        assert token_generator.check_token(usuario_ativo, token)
+
+        TokenRepository.invalidar_token_recuperacao_senha(
+            usuario_ativo.username,
+            "nova-senha-123",
+        )
+
+        usuario_ativo.refresh_from_db()
+
+        assert not token_generator.check_token(usuario_ativo, token)
