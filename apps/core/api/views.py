@@ -25,6 +25,7 @@ from apps.core.exceptions import (
     TokenInvalidoError,
 )
 from apps.core.schemas import (
+    ALTERAR_SENHA,
     ATUALIZA_TOKEN,
     LOGIN,
     LOGOUT,
@@ -232,6 +233,7 @@ class AlterarSenhaView(APIView):
 
     permission_classes = [AllowAny]
 
+    @ALTERAR_SENHA
     def post(self, request: Request) -> Response:
         serializer = AlterarSenhaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

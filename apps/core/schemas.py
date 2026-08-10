@@ -7,6 +7,7 @@ from drf_spectacular.utils import (
 )
 
 from apps.core.serializers import (
+    AlterarSenhaSerializer,
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
     LoginResponseSerializer,
@@ -231,6 +232,90 @@ REDEFINIR_SENHA = extend_schema(
             value={
                 "detail": "Não foi possível enviar o e-mail de recuperação de"
                 " senha.",
+            },
+        ),
+    ],
+)
+
+
+ALTERAR_SENHA = extend_schema(
+    auth=[],
+    tags=[TAG_AUTENTICACAO],
+    summary="Alterar senha",
+    description=(
+        "Altera a senha do usuário a partir do token de recuperação "
+        "enviado por e-mail. O token deve ser válido e não estar expirado."
+    ),
+    operation_id="alterarSenhaUsuario",
+    request=AlterarSenhaSerializer,
+    responses={
+        200: OpenApiResponse(description="Senha alterada com sucesso."),
+        400: OpenApiResponse(description="Dados inválidos."),
+        401: OpenApiResponse(
+            description=(
+                "Token de recuperação inválido ou expirado, ou falha "
+                "de autenticação durante a alteração da senha."
+            )
+        ),
+        404: OpenApiResponse(description="Usuário não encontrado."),
+        502: OpenApiResponse(description="Falha na integração com o CoreSSO."),
+    },
+    examples=[
+        OpenApiExample(
+            name="Alteração de senha",
+            request_only=True,
+            value={
+                "registro_funcional_ou_cpf": "1234567",
+                "token": "<token-recuperacao>",
+                "senha": "********",
+                "confirmacao_senha": "********",
+            },
+        ),
+        OpenApiExample(
+            name="Senha alterada com sucesso",
+            response_only=True,
+            status_codes=[200],
+            value={
+                "detail": "Senha alterada com sucesso.",
+            },
+        ),
+        OpenApiExample(
+            name="Usuário não encontrado",
+            response_only=True,
+            status_codes=[404],
+            value={
+                "title": "Usuário não encontrado.",
+                "detail": "Usuário não encontrado ou inválido",
+            },
+        ),
+        OpenApiExample(
+            name="Token inválido ou expirado",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "title": "Token inválido.",
+                "detail": (
+                    "Por segurança, o link de redefinição tem validade de "
+                    "6 horas. Solicite um novo para redefinir sua senha."
+                ),
+            },
+        ),
+        OpenApiExample(
+            name="Falha ao alterar senha",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "title": "Erro ao alterar senha",
+                "detail": "Usuário ou senha incorretos.",
+            },
+        ),
+        OpenApiExample(
+            name="Falha na integração",
+            response_only=True,
+            status_codes=[502],
+            value={
+                "title": "Erro ao alterar senha",
+                "detail": "Erro ao alterar a senha no servidor.",
             },
         ),
     ],
