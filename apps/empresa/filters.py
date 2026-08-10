@@ -1,12 +1,12 @@
-"""Filtros da API de Fornecedor."""
+"""Filtros da API de Empresa."""
 
 import django_filters
 
-from .models import Fornecedor
+from .models import Empresa
 
 
-class FornecedorFilter(django_filters.FilterSet):
-    """Filtra fornecedores por nome, razão social, CNPJ e status."""
+class EmpresaFilter(django_filters.FilterSet):
+    """Filtra empresas por nome, razão social, CNPJ e status."""
 
     nome = django_filters.CharFilter(lookup_expr="icontains")
     razao_social = django_filters.CharFilter(lookup_expr="icontains")
@@ -14,7 +14,7 @@ class FornecedorFilter(django_filters.FilterSet):
     status = django_filters.BooleanFilter()
 
     class Meta:
-        """Configuração do filtro de fornecedor."""
+        """Configuração do filtro de empresa."""
 
-        model = Fornecedor
+        model = Empresa
         fields = ["nome", "razao_social", "cnpj", "status"]
