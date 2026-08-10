@@ -542,7 +542,7 @@ def test_redefinir_senha_payload_invalido(
 def test_alterar_senha_retorna_sucesso(api_factory, monkeypatch):
     """Deve alterar a senha com sucesso."""
     monkeypatch.setattr(
-        "apps.core.api.views.UsuarioService.validar_token",
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
         classmethod(lambda cls, username, token: None),
     )
 
@@ -582,7 +582,7 @@ def test_alterar_senha_retorna_404_quando_usuario_nao_existe(
         )
 
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.validar_token",
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
         classmethod(raise_usuario_nao_encontrado),
     )
 
@@ -621,7 +621,7 @@ def test_alterar_senha_retorna_401_quando_token_invalido(
         )
 
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.validar_token",
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
         classmethod(raise_token_invalido),
     )
 
@@ -653,7 +653,7 @@ def test_alterar_senha_retorna_401_quando_falha_autenticacao(
 ):
     """Deve retornar 401 quando ocorrer falha de autenticação."""
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.validar_token",
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
         classmethod(lambda cls, username, token: None),
     )
 
@@ -690,7 +690,7 @@ def test_alterar_senha_retorna_502_quando_eol_esta_indisponivel(
 ):
     """Deve retornar 502 quando ocorrer falha na integração."""
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.validar_token",
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
         classmethod(lambda cls, username, token: None),
     )
 

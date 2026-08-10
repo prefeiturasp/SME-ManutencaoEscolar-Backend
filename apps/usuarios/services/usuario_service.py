@@ -7,7 +7,6 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from apps.core.exceptions import (
     EnvioEmailError,
-    TokenInvalidoError,
 )
 from apps.core.repository.token_repository import TokenRepository
 from apps.core.services.email_service import EmailService
@@ -130,35 +129,4 @@ class UsuarioService:
                 title="Erro ao enviar e-mail.",
                 detail="Parece que estamos com uma instabilidade no momento. "
                 "Tente novamnete daqui a pouco",
-            ) from None
-
-    @classmethod
-    def validar_token(cls, username: str, token: str) -> None:
-        """Altera a senha de um usuário a partir de token de recuperação.
-
-        Args:
-            username (str): Nome de usuário (RF ou CPF) do usuário.
-            token (str): Token de recuperação de senha enviado por e-mail.
-
-        Raises:
-            UsuarioNaoEncontradoError: Quando não existe usuário com o
-                username.
-            TokenRecuperacaoInvalidoError: Quando o token é inválido ou
-                expirado.
-        """
-        try:
-            UsuarioRepository.verificar_token_atualizar_senha(
-                username=username,
-                token=token,
-            )
-        except ObjectDoesNotExist:
-            raise UsuarioNaoEncontradoError(
-                title="Usuário não encontrado.",
-                detail=("Usuário não encontrado ou inválido"),
-            ) from None
-        except TokenInvalidoError:
-            raise TokenInvalidoError(
-                title="O link está expirado!",
-                detail="Por segurança, o link de redefinição tem validade de "
-                "6 horas. Solicite um novo para redefinir sua senha.",
             ) from None

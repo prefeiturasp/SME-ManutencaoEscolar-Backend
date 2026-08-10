@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.db.models import ObjectDoesNotExist
 from rest_framework_simplejwt.exceptions import TokenError
 
 from apps.core.exceptions import TokenInvalidoError
@@ -112,4 +113,74 @@ class TestTokenService:
         assert (
             exc.value.detail
             == "O refresh token é inválido ou já foi revogado."
+        )
+
+    @patch(
+        "apps.core.services.token_service.TokenRepository."
+        "verificar_token_atualizar_senha"
+    )
+    def test_validar_token(self, verificar_token_mock, usuario_ativo_dict):
+        """Deve validar o token de recuperação de senha."""
+        username = usuario_ativo_dict["username"]
+        token = "token-123"
+
+        TokenService.validar_token_recuperar_senha(
+            username=username,
+            token=token,
+        )
+
+        verificar_token_mock.assert_called_once_with(
+            username=username,
+            token=token,
+        )
+
+    @patch(
+        "apps.core.services.token_service.TokenRepository."
+        "verificar_token_atualizar_senha"
+    )
+    def test_validar_token_usuario_nao_encontrado(self, verificar_token_mock):
+        """Deve lançar erro quando o usuário não for encontrado."""
+        verificar_token_mock.side_effect = ObjectDoesNotExist
+
+        with pytest.raises(UsuarioNaoEncontradoError) as exc:
+            TokenService.validar_token_recuperar_senha(
+                username="1234567",
+                token="token-123",
+            )
+
+        assert exc.value.title == "Usuário não encontrado."
+        assert exc.value.detail == "Usuário não encontrado ou inválido"
+
+        verificar_token_mock.assert_called_once_with(
+            username="1234567",
+            token="token-123",
+        )
+
+    @patch(
+        "apps.core.services.token_service.TokenRepository."
+        "verificar_token_atualizar_senha"
+    )
+    def test_validar_token_invalido(self, verificar_token_mock):
+        """Deve lançar erro quando o token for inválido ou expirado."""
+        verificar_token_mock.side_effect = TokenInvalidoError(
+            title="Token inválido.",
+            detail="Token inválido.",
+        )
+
+        with pytest.raises(TokenInvalidoError) as exc:
+            TokenService.validar_token_recuperar_senha(
+                username="1234567",
+                token="token-invalido",
+            )
+
+        assert exc.value.title == "O link está expirado!"
+        assert (
+            exc.value.detail
+            == "Por segurança, o link de redefinição tem validade de "
+            "6 horas. Solicite um novo para redefinir sua senha."
+        )
+
+        verificar_token_mock.assert_called_once_with(
+            username="1234567",
+            token="token-invalido",
         )

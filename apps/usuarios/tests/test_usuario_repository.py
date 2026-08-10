@@ -1,10 +1,9 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db.models import ObjectDoesNotExist
 
-from apps.core.exceptions import TokenInvalidoError
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
@@ -193,72 +192,6 @@ class TestUsuarioRepository:
 
         with pytest.raises(ObjectDoesNotExist):
             UsuarioRepository.busca_usuario_por_username("123")
-
-    @patch(
-        "apps.usuarios.repository.usuario_repository."
-        "PasswordResetTokenGenerator"
-    )
-    @patch.object(
-        UsuarioRepository,
-        "_consulta_por_username",
-    )
-    def test_verificar_token_atualizar_senha_token_valido(
-        self, consulta_mock, token_generator_mock, usuario_ativo
-    ):
-        """Deve validar o token de recuperação de senha."""
-        consulta_mock.return_value = usuario_ativo
-
-        instancia = MagicMock()
-        instancia.check_token.return_value = True
-
-        token_generator_mock.return_value = instancia
-
-        UsuarioRepository.verificar_token_atualizar_senha(
-            usuario_ativo.username,
-            "token-123",
-        )
-        consulta_mock.assert_called_once_with(usuario_ativo.username)
-        instancia.check_token.assert_called_once_with(
-            usuario_ativo,
-            "token-123",
-        )
-
-    @patch(
-        "apps.usuarios.repository.usuario_repository."
-        "PasswordResetTokenGenerator"
-    )
-    @patch.object(
-        UsuarioRepository,
-        "_consulta_por_username",
-    )
-    def test_verificar_token_atualizar_senha_token_invalido(
-        self, consulta_mock, token_generator_mock, usuario_ativo
-    ):
-        """Deve lançar exceção quando o token for inválido."""
-        consulta_mock.return_value = usuario_ativo
-
-        instancia = MagicMock()
-        instancia.check_token.return_value = False
-
-        token_generator_mock.return_value = instancia
-
-        with pytest.raises(TokenInvalidoError) as exc:
-            UsuarioRepository.verificar_token_atualizar_senha(
-                usuario_ativo.username,
-                "token-invalido",
-            )
-
-        assert exc.value.title == "Token inválido."
-        assert (
-            exc.value.detail
-            == "O token de recuperação de senha é inválido ou expirou."
-        )
-
-        consulta_mock.assert_called_once_with(usuario_ativo.username)
-        instancia.check_token.assert_called_once_with(
-            usuario_ativo,
-            "token-invalido",
-        )
 
     def test_invalidar_token_recuperacao_senha_invalida_token(
         self, usuario_ativo

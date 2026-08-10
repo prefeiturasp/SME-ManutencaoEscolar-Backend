@@ -2,13 +2,9 @@
 
 from typing import Any
 
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
-from apps.core.exceptions import (
-    TokenInvalidoError,
-)
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.exceptions import (
     UsuarioNaoEncontradoError,
@@ -193,31 +189,6 @@ class UsuarioRepository:
                 },
             },
         }
-
-    @classmethod
-    def verificar_token_atualizar_senha(
-        cls,
-        username: str,
-        token: str,
-    ) -> None:
-        """Altera a senha de um usuário a partir de token de recuperação.
-
-        Args:
-            username (str): Nome de usuário (RF ou CPF) do usuário.
-            token (str): Token de recuperação de senha enviado por e-mail.
-
-        Raises:
-            TokenInvalidoError: Se o token for inválido ou expirado.
-        """
-        usuario = cls._consulta_por_username(username)
-        token_generator = PasswordResetTokenGenerator()
-        if not token_generator.check_token(usuario, token):
-            raise TokenInvalidoError(
-                title="Token inválido.",
-                detail=(
-                    "O token de recuperação de senha é inválido ou expirou."
-                ),
-            )
 
     @classmethod
     def invalidar_token_recuperacao_senha(

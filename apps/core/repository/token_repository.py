@@ -4,6 +4,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db.models import ObjectDoesNotExist
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.core.exceptions import TokenInvalidoError
 from apps.usuarios.models.usuario import Usuario
 
 
@@ -55,3 +56,31 @@ class TokenRepository:
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(usuario)
         return {"token_recuperacao": token}
+
+    @classmethod
+    def verificar_token_atualizar_senha(
+        cls,
+        username: str,
+        token: str,
+    ) -> None:
+        """Altera a senha de um usuário a partir de token de recuperação.
+
+        Args:
+            username (str): Nome de usuário (RF ou CPF) do usuário.
+            token (str): Token de recuperação de senha enviado por e-mail.
+
+        Raises:
+            TokenInvalidoError: Se o token for inválido ou expirado.
+        """
+        try:
+            usuario = Usuario.objects.get(username=username)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist from None
+        token_generator = PasswordResetTokenGenerator()
+        if not token_generator.check_token(usuario, token):
+            raise TokenInvalidoError(
+                title="Token inválido.",
+                detail=(
+                    "O token de recuperação de senha é inválido ou expirou."
+                ),
+            )

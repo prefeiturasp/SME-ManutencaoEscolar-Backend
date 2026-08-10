@@ -75,3 +75,24 @@ def usuario_inativo(cargo_perfil_diretor):
         cargo=cargo_perfil_diretor,
         is_active=False,
     )
+
+
+@pytest.fixture
+def usuario_ativo_dict(usuario_ativo):
+    """Fixture de usuario inativo retornando em diconario."""
+    return {
+        "id": usuario_ativo.id,
+        "uuid": usuario_ativo.uuid,
+        "nome": usuario_ativo.nome,
+        "email": usuario_ativo.email,
+        "registro_funcional": usuario_ativo.registro_funcional,
+        "cpf": usuario_ativo.cpf,
+        "username": usuario_ativo.username,
+        "perfil_acesso": {
+            "cargo": usuario_ativo.cargo.nome,
+            "perfil": {
+                "codigo": usuario_ativo.perfil,
+                "descricao": PerfilAcesso(usuario_ativo.perfil).label,
+            },
+        },
+    }

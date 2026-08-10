@@ -1,9 +1,8 @@
 from unittest.mock import patch
 
 import pytest
-from django.db.models import ObjectDoesNotExist
 
-from apps.core.exceptions import EnvioEmailError, TokenInvalidoError
+from apps.core.exceptions import EnvioEmailError
 from apps.usuarios.exceptions import (
     EmailUsuarioNaoEncontradoError,
     UsuarioNaoEncontradoError,
@@ -224,74 +223,4 @@ class TestUsuarioService:
         logger_mock.exception.assert_called_once_with(
             "Erro ao enviar e-mail para o usuário '%s'.",
             username,
-        )
-
-    @patch(
-        "apps.usuarios.services.usuario_service.UsuarioRepository."
-        "verificar_token_atualizar_senha"
-    )
-    def test_validar_token(self, verificar_token_mock, usuario_ativo_dict):
-        """Deve validar o token de recuperação de senha."""
-        username = usuario_ativo_dict["username"]
-        token = "token-123"
-
-        UsuarioService.validar_token(
-            username=username,
-            token=token,
-        )
-
-        verificar_token_mock.assert_called_once_with(
-            username=username,
-            token=token,
-        )
-
-    @patch(
-        "apps.usuarios.services.usuario_service.UsuarioRepository."
-        "verificar_token_atualizar_senha"
-    )
-    def test_validar_token_usuario_nao_encontrado(self, verificar_token_mock):
-        """Deve lançar erro quando o usuário não for encontrado."""
-        verificar_token_mock.side_effect = ObjectDoesNotExist
-
-        with pytest.raises(UsuarioNaoEncontradoError) as exc:
-            UsuarioService.validar_token(
-                username="1234567",
-                token="token-123",
-            )
-
-        assert exc.value.title == "Usuário não encontrado."
-        assert exc.value.detail == "Usuário não encontrado ou inválido"
-
-        verificar_token_mock.assert_called_once_with(
-            username="1234567",
-            token="token-123",
-        )
-
-    @patch(
-        "apps.usuarios.services.usuario_service.UsuarioRepository."
-        "verificar_token_atualizar_senha"
-    )
-    def test_validar_token_invalido(self, verificar_token_mock):
-        """Deve lançar erro quando o token for inválido ou expirado."""
-        verificar_token_mock.side_effect = TokenInvalidoError(
-            title="Token inválido.",
-            detail="Token inválido.",
-        )
-
-        with pytest.raises(TokenInvalidoError) as exc:
-            UsuarioService.validar_token(
-                username="1234567",
-                token="token-invalido",
-            )
-
-        assert exc.value.title == "O link está expirado!"
-        assert (
-            exc.value.detail
-            == "Por segurança, o link de redefinição tem validade de "
-            "6 horas. Solicite um novo para redefinir sua senha."
-        )
-
-        verificar_token_mock.assert_called_once_with(
-            username="1234567",
-            token="token-invalido",
         )

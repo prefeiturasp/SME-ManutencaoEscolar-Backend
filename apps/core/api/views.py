@@ -242,7 +242,7 @@ class AlterarSenhaView(APIView):
         senha = serializer.validated_data["senha"]
 
         try:
-            UsuarioService.validar_token(username, token)
+            TokenService.validar_token_recuperar_senha(username, token)
             AutenticacaoEOLService.alterar_senha_no_coresso(username, senha)
         except UsuarioNaoEncontradoError as exc:
             return Response(
