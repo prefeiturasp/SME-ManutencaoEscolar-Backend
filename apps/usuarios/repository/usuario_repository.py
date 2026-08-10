@@ -146,12 +146,8 @@ class UsuarioRepository:
         Returns:
             dict: Dados do usuário e suas informações de perfil de acesso.
         """
-        try:
-            usuario = cls._consulta_por_username(username)
-            return cls._retorna_usuario_em_dicionario(usuario)
-
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist from None
+        usuario = cls._consulta_por_username(username)
+        return cls._retorna_usuario_em_dicionario(usuario)
 
     @staticmethod
     def _retorna_usuario_em_dicionario(usuario: Usuario) -> dict:

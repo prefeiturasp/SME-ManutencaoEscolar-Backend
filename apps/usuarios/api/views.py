@@ -14,7 +14,7 @@ from apps.usuarios.services.usuario_service import UsuarioService
 
 
 class UsuarioViewSet(ViewSet):
-    """View do usário."""
+    """View do usuário."""
 
     @ME
     @action(
