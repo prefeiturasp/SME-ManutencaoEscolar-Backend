@@ -225,12 +225,17 @@ class ApiEOLRepository:
             SmeIntegracaoError: Levantada quando a API retorna um erro HTTP
                 5xx, indicando uma falha no servidor da integração.
         """
-        response = requests.post(
-            url,
-            headers=headers,
-            files=files,
-            timeout=10,
-        )
+        try:
+            response = requests.post(
+                url,
+                headers=headers,
+                files=files,
+                timeout=10,
+            )
+        except requests.exceptions.RequestException as exc:
+            raise SmeIntegracaoError(
+                "Erro de comunicação ao alterar a senha no servidor."
+            ) from exc
         if response.status_code == status.HTTP_401_UNAUTHORIZED:
             raise FalhaAutenticacaoError(str(response.text))
 
