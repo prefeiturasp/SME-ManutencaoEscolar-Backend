@@ -484,7 +484,7 @@ class TestAutenticacaoEOLService:
     )
     @patch(
         "apps.core.services.autenticacao_eol_service."
-        "TokenRepository.atualizar_senha_usuario",
+        "UsuarioRepository.atualizar_senha_usuario",
     )
     def test_alterar_senha_no_coresso_sucesso(
         self,
@@ -533,7 +533,7 @@ class TestAutenticacaoEOLService:
     )
     @patch(
         "apps.core.services.autenticacao_eol_service."
-        "TokenRepository.atualizar_senha_usuario",
+        "UsuarioRepository.atualizar_senha_usuario",
     )
     def test_alterar_senha_no_coresso_erro_integracao(
         self,
@@ -568,7 +568,7 @@ class TestAutenticacaoEOLService:
     )
     @patch(
         "apps.core.services.autenticacao_eol_service."
-        "TokenRepository.atualizar_senha_usuario",
+        "UsuarioRepository.atualizar_senha_usuario",
     )
     def test_alterar_senha_no_coresso_falha_autenticacao(
         self,

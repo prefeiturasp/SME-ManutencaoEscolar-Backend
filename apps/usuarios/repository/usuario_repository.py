@@ -185,3 +185,20 @@ class UsuarioRepository:
                 },
             },
         }
+
+    @classmethod
+    def atualizar_senha_usuario(cls, username: str, senha: str) -> None:
+        """Invalida o token de recuperação de senha do usuário.
+
+        Atualiza a senha do usuário utilizando o mecanismo de hash do Django.
+        A alteração do campo `password` faz com que tokens de recuperação
+        previamente gerados pelo `PasswordResetTokenGenerator` deixem de ser
+        válidos.
+
+        Args:
+            username (str): Nome de usuário utilizado para localizar o usuário.
+            senha (str): Nova senha que será definida para o usuário.
+        """
+        usuario = cls._consulta_por_username(username)
+        usuario.set_password(senha)
+        usuario.save(update_fields=["password"])

@@ -17,8 +17,8 @@ from apps.core.exceptions import (
     SmeIntegracaoError,
 )
 from apps.core.repository.autenticacao_eol_repository import ApiEOLRepository
-from apps.core.repository.token_repository import TokenRepository
 from apps.core.services.token_service import TokenService
+from apps.usuarios.repository.usuario_repository import UsuarioRepository
 from apps.usuarios.services.usuario_service import UsuarioService
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
 
@@ -325,7 +325,7 @@ class AutenticacaoEOLService:
         url = f"{SME_API_EOL_URL}{ENDPOINT_ALTERAR_SENHA_CORESSO}"
         try:
             ApiEOLRepository.alterar_senha(url, headers=headers, files=files)
-            TokenRepository.atualizar_senha_usuario(login, nova_senha)
+            UsuarioRepository.atualizar_senha_usuario(login, nova_senha)
         except FalhaAutenticacaoError as exc:
             raise FalhaAutenticacaoError(exc) from exc
         except SmeIntegracaoError as exc:
