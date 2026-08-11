@@ -45,8 +45,10 @@ export default defineConfig({
       allureWriter(on, config)
 
       const envKeys = [
-        'LOGIN_DIRETOR', 
-        'SENHA'
+        'LOGIN_DIRETOR',
+        'LOGIN_INVALIDO',
+        'SENHA',
+        'SENHA_INVALIDA'
       ]
 
       const customVariable = Object.fromEntries(
