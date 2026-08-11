@@ -100,9 +100,7 @@ class TokenRepository:
             )
 
     @classmethod
-    def invalidar_token_recuperacao_senha(
-        cls, username: str, senha: str
-    ) -> None:
+    def atualizar_senha_usuario(cls, username: str, senha: str) -> None:
         """Invalida o token de recuperação de senha do usuário.
 
         Atualiza a senha do usuário utilizando o mecanismo de hash do Django.

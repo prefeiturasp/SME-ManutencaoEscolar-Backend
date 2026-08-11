@@ -97,16 +97,14 @@ class TestTokenRepository:
             "token-123",
         )
 
-    def test_invalidar_token_recuperacao_senha_invalida_token(
-        self, usuario_ativo
-    ):
+    def test_atualizar_senha_usuario_invalida_token(self, usuario_ativo):
         """Deve invalidar o token após alterar a senha."""
         token_generator = PasswordResetTokenGenerator()
 
         token = token_generator.make_token(usuario_ativo)
         assert token_generator.check_token(usuario_ativo, token)
 
-        TokenRepository.invalidar_token_recuperacao_senha(
+        TokenRepository.atualizar_senha_usuario(
             usuario_ativo.username,
             "nova-senha-123",
         )

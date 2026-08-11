@@ -325,9 +325,7 @@ class AutenticacaoEOLService:
         url = f"{SME_API_EOL_URL}{ENDPOINT_ALTERAR_SENHA_CORESSO}"
         try:
             ApiEOLRepository.alterar_senha(url, headers=headers, files=files)
-            TokenRepository.invalidar_token_recuperacao_senha(
-                login, nova_senha
-            )
+            TokenRepository.atualizar_senha_usuario(login, nova_senha)
         except FalhaAutenticacaoError as exc:
             raise FalhaAutenticacaoError(exc) from exc
         except SmeIntegracaoError as exc:
