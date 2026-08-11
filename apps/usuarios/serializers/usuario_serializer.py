@@ -56,14 +56,3 @@ class UsuarioResponseSerializer(serializers.Serializer):
         required=False,
         help_text="Unidade Educacional do usuário.",
     )
-
-
-class RecuperarSenhaSerializer(serializers.Serializer):
-    """Valida os dados da requisição de recuperação de senha."""
-
-    registro_funcional_ou_cpf = serializers.CharField(
-        required=True,
-        max_length=11,
-        trim_whitespace=True,
-        help_text="Registro funcional ou CPF do usuário.",
-    )

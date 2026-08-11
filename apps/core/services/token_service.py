@@ -1,7 +1,8 @@
-"""Serviço para geração de tokens JWT."""
+"""Serviço para geração de tokens JWT e recuperação de senha."""
 
 import logging
 
+from django.db.models import ObjectDoesNotExist
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken, Token
 
@@ -102,3 +103,34 @@ class TokenService:
                 title="Logout não realizado.",
                 detail="O refresh token é inválido ou já foi revogado.",
             ) from exc
+
+    @classmethod
+    def validar_token_recuperar_senha(cls, username: str, token: str) -> None:
+        """Altera a senha de um usuário a partir de token de recuperação.
+
+        Args:
+            username (str): Nome de usuário (RF ou CPF) do usuário.
+            token (str): Token de recuperação de senha enviado por e-mail.
+
+        Raises:
+            UsuarioNaoEncontradoError: Quando não existe usuário com o
+                username.
+            TokenRecuperacaoInvalidoError: Quando o token é inválido ou
+                expirado.
+        """
+        try:
+            TokenRepository.verificar_token_atualizar_senha(
+                username=username,
+                token=token,
+            )
+        except ObjectDoesNotExist:
+            raise UsuarioNaoEncontradoError(
+                title="Usuário não encontrado.",
+                detail=("Usuário não encontrado ou inválido"),
+            ) from None
+        except TokenInvalidoError:
+            raise TokenInvalidoError(
+                title="O link está expirado!",
+                detail="Por segurança, o link de redefinição tem validade de "
+                "6 horas. Solicite um novo para redefinir sua senha.",
+            ) from None

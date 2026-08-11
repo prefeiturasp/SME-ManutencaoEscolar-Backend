@@ -2,12 +2,13 @@
 
 from typing import Any
 
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 from apps.usuarios.constants import PerfilAcesso
-from apps.usuarios.exceptions import UsuarioNaoEncontradoError
+from apps.usuarios.exceptions import (
+    UsuarioNaoEncontradoError,
+)
 from apps.usuarios.models import CargoEOL, Usuario
 
 
@@ -186,22 +187,18 @@ class UsuarioRepository:
         }
 
     @classmethod
-    def gerar_token_recuperar_senha(cls, username: str) -> dict:
-        """Gera um token para recuperação de senha do usuário.
+    def atualizar_senha_usuario(cls, username: str, senha: str) -> None:
+        """Invalida o token de recuperação de senha do usuário.
 
-        Busca o usuário pelo nome de usuário e gera um token de recuperação
-        de senha utilizando o ``PasswordResetTokenGenerator`` do Django.
+        Atualiza a senha do usuário utilizando o mecanismo de hash do Django.
+        A alteração do campo `password` faz com que tokens de recuperação
+        previamente gerados pelo `PasswordResetTokenGenerator` deixem de ser
+        válidos.
 
         Args:
-            username (str):  Nome de usuário utilizado para localizar o
-                usuário que terá o token de recuperação gerado.
-
-
-        Returns:
-            dict: Dicionário contendo o token de recuperação na chave
-                ``token_recuperacao``.
+            username (str): Nome de usuário utilizado para localizar o usuário.
+            senha (str): Nova senha que será definida para o usuário.
         """
         usuario = cls._consulta_por_username(username)
-        token_generator = PasswordResetTokenGenerator()
-        token = token_generator.make_token(usuario)
-        return {"token_recuperacao": token}
+        usuario.set_password(senha)
+        usuario.save(update_fields=["password"])

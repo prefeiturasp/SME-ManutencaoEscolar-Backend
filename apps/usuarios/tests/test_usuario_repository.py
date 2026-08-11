@@ -1,6 +1,7 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db.models import ObjectDoesNotExist
 
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
@@ -192,29 +193,18 @@ class TestUsuarioRepository:
         with pytest.raises(ObjectDoesNotExist):
             UsuarioRepository.busca_usuario_por_username("123")
 
-    @patch(
-        "apps.usuarios.repository.usuario_repository."
-        "PasswordResetTokenGenerator"
-    )
-    @patch.object(
-        UsuarioRepository,
-        "_consulta_por_username",
-    )
-    def test_deve_gerar_token(
-        self, consulta_mock, token_generator_mock, usuario_ativo
-    ):
-        consulta_mock.return_value = usuario_ativo
+    def test_atualizar_senha_usuario_invalida_token(self, usuario_ativo):
+        """Deve invalidar o token após alterar a senha."""
+        token_generator = PasswordResetTokenGenerator()
 
-        instancia = MagicMock()
-        instancia.make_token.return_value = "token-123"
+        token = token_generator.make_token(usuario_ativo)
+        assert token_generator.check_token(usuario_ativo, token)
 
-        token_generator_mock.return_value = instancia
-
-        resultado = UsuarioRepository.gerar_token_recuperar_senha(
-            usuario_ativo.username
+        UsuarioRepository.atualizar_senha_usuario(
+            usuario_ativo.username,
+            "nova-senha-123",
         )
 
-        assert resultado == {"token_recuperacao": "token-123"}
+        usuario_ativo.refresh_from_db()
 
-        consulta_mock.assert_called_once_with(usuario_ativo.username)
-        instancia.make_token.assert_called_once_with(usuario_ativo)
+        assert not token_generator.check_token(usuario_ativo, token)

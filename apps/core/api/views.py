@@ -24,21 +24,26 @@ from apps.core.exceptions import (
     SmeIntegracaoError,
     TokenInvalidoError,
 )
-from apps.core.schemas import ATUALIZA_TOKEN, LOGIN, LOGOUT, REDEFINIR_SENHA
+from apps.core.schemas import (
+    ALTERAR_SENHA,
+    ATUALIZA_TOKEN,
+    LOGIN,
+    LOGOUT,
+    REDEFINIR_SENHA,
+)
 from apps.core.serializers import (
+    AlterarSenhaSerializer,
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
     LoginResponseSerializer,
     LogoutSerializer,
+    RecuperarSenhaSerializer,
 )
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
 from apps.core.services.token_service import TokenService
 from apps.usuarios.exceptions import (
     EmailUsuarioNaoEncontradoError,
     UsuarioNaoEncontradoError,
-)
-from apps.usuarios.serializers.usuario_serializer import (
-    RecuperarSenhaSerializer,
 )
 from apps.usuarios.services.usuario_service import UsuarioService
 
@@ -221,3 +226,46 @@ class RedefinirSenhaView(APIView):
         )
 
         return Response({"email": email_mascarado}, status=status.HTTP_200_OK)
+
+
+class AlterarSenhaView(APIView):
+    """View responsável por alterar a senha do usuário a partir do token."""
+
+    permission_classes = [AllowAny]
+
+    @ALTERAR_SENHA
+    def post(self, request: Request) -> Response:
+        serializer = AlterarSenhaSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data["registro_funcional_ou_cpf"]
+        token = serializer.validated_data["token"]
+        senha = serializer.validated_data["senha"]
+
+        try:
+            TokenService.validar_token_recuperar_senha(username, token)
+            AutenticacaoEOLService.alterar_senha_no_coresso(username, senha)
+        except UsuarioNaoEncontradoError as exc:
+            return Response(
+                {"title": exc.title, "detail": exc.detail},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except TokenInvalidoError as exc:
+            return Response(
+                {"title": exc.title, "detail": exc.detail},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        except FalhaAutenticacaoError as exc:
+            return Response(
+                {"title": "Erro ao alterar senha", "detail": str(exc)},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        except SmeIntegracaoError as exc:
+            return Response(
+                {"title": "Erro ao alterar senha", "detail": str(exc)},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        return Response(
+            {"detail": "Senha alterada com sucesso."},
+            status=status.HTTP_200_OK,
+        )

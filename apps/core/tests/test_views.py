@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.test import force_authenticate
 
 from apps.core.api.views import (
+    AlterarSenhaView,
     AtualizarTokenView,
     HealthCheckView,
     LoginView,
@@ -536,3 +537,199 @@ def test_redefinir_senha_payload_invalido(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     assert "registro_funcional_ou_cpf" in response.data
+
+
+def test_alterar_senha_retorna_sucesso(api_factory, monkeypatch):
+    """Deve alterar a senha com sucesso."""
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
+        classmethod(lambda cls, username, token: None),
+    )
+
+    monkeypatch.setattr(
+        "apps.core.api.views.AutenticacaoEOLService.alterar_senha_no_coresso",
+        classmethod(lambda cls, login, nova_senha: None),
+    )
+
+    request = api_factory.post(
+        "/usuarios/alterar-senha/",
+        {
+            "registro_funcional_ou_cpf": "1234567",
+            "token": "token-123",
+            "senha": "NovaSenha123!",
+            "confirmacao_senha": "NovaSenha123!",
+        },
+        format="json",
+    )
+
+    response = AlterarSenhaView.as_view()(request)
+
+    print(response.data)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data == {"detail": "Senha alterada com sucesso."}
+
+
+def test_alterar_senha_retorna_404_quando_usuario_nao_existe(
+    api_factory, monkeypatch
+):
+    """Deve retornar 404 quando o usuário não existir."""
+
+    def raise_usuario_nao_encontrado(*args, **kwargs):
+        raise UsuarioNaoEncontradoError(
+            title="Usuário não encontrado.",
+            detail="Usuário não encontrado ou inválido",
+        )
+
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
+        classmethod(raise_usuario_nao_encontrado),
+    )
+
+    request = api_factory.post(
+        "/usuarios/alterar-senha/",
+        {
+            "registro_funcional_ou_cpf": "1234567",
+            "token": "token-123",
+            "senha": "NovaSenha123!",
+            "confirmacao_senha": "NovaSenha123!",
+        },
+        format="json",
+    )
+
+    response = AlterarSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.data == {
+        "title": "Usuário não encontrado.",
+        "detail": "Usuário não encontrado ou inválido",
+    }
+
+
+def test_alterar_senha_retorna_401_quando_token_invalido(
+    api_factory, monkeypatch
+):
+    """Deve retornar 401 quando o token for inválido."""
+
+    def raise_token_invalido(*args, **kwargs):
+        raise TokenInvalidoError(
+            title="Token inválido.",
+            detail=(
+                "Por segurança, o link de redefinição tem validade de "
+                "6 horas. Solicite um novo para redefinir sua senha."
+            ),
+        )
+
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
+        classmethod(raise_token_invalido),
+    )
+
+    request = api_factory.post(
+        "/usuarios/alterar-senha/",
+        {
+            "registro_funcional_ou_cpf": "1234567",
+            "token": "token-invalido",
+            "senha": "NovaSenha123!",
+            "confirmacao_senha": "NovaSenha123!",
+        },
+        format="json",
+    )
+
+    response = AlterarSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.data == {
+        "title": "Token inválido.",
+        "detail": (
+            "Por segurança, o link de redefinição tem validade de "
+            "6 horas. Solicite um novo para redefinir sua senha."
+        ),
+    }
+
+
+def test_alterar_senha_retorna_401_quando_falha_autenticacao(
+    api_factory, monkeypatch
+):
+    """Deve retornar 401 quando ocorrer falha de autenticação."""
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
+        classmethod(lambda cls, username, token: None),
+    )
+
+    def raise_falha_autenticacao(*args, **kwargs):
+        raise FalhaAutenticacaoError("Usuário ou senha incorretos.")
+
+    monkeypatch.setattr(
+        "apps.core.api.views.AutenticacaoEOLService.alterar_senha_no_coresso",
+        classmethod(raise_falha_autenticacao),
+    )
+
+    request = api_factory.post(
+        "/usuarios/alterar-senha/",
+        {
+            "registro_funcional_ou_cpf": "1234567",
+            "token": "token-123",
+            "senha": "NovaSenha123!",
+            "confirmacao_senha": "NovaSenha123!",
+        },
+        format="json",
+    )
+
+    response = AlterarSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.data == {
+        "title": "Erro ao alterar senha",
+        "detail": "Usuário ou senha incorretos.",
+    }
+
+
+def test_alterar_senha_retorna_502_quando_eol_esta_indisponivel(
+    api_factory, monkeypatch
+):
+    """Deve retornar 502 quando ocorrer falha na integração."""
+    monkeypatch.setattr(
+        "apps.core.api.views.TokenService.validar_token_recuperar_senha",
+        classmethod(lambda cls, username, token: None),
+    )
+
+    def raise_sme_integracao(*args, **kwargs):
+        raise SmeIntegracaoError("Erro ao alterar a senha no servidor.")
+
+    monkeypatch.setattr(
+        "apps.core.api.views.AutenticacaoEOLService.alterar_senha_no_coresso",
+        classmethod(raise_sme_integracao),
+    )
+
+    request = api_factory.post(
+        "/usuarios/alterar-senha/",
+        {
+            "registro_funcional_ou_cpf": "1234567",
+            "token": "token-123",
+            "senha": "NovaSenha123!",
+            "confirmacao_senha": "NovaSenha123!",
+        },
+        format="json",
+    )
+
+    response = AlterarSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_502_BAD_GATEWAY
+    assert response.data == {
+        "title": "Erro ao alterar senha",
+        "detail": "Erro ao alterar a senha no servidor.",
+    }
+
+
+def test_alterar_senha_payload_invalido(api_factory):
+    """Deve retornar 400 quando o payload for inválido."""
+    request = api_factory.post(
+        "/usuarios/alterar-senha/",
+        {},
+        format="json",
+    )
+
+    response = AlterarSenhaView.as_view()(request)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

@@ -283,6 +283,92 @@ class TestApiEOLRepository:
         with pytest.raises(SmeIntegracaoError):
             ApiEOLRepository._tratar_resposta(response)
 
+    @patch("apps.core.repository.autenticacao_eol_repository.requests.post")
+    def test_alterar_senha_realiza_requisicao_com_parametros_corretos(
+        self, mock_post
+    ):
+        """Deve realizar requisição POST com URL, headers, files e timeout."""
+        mock_response = Mock(spec=requests.Response)
+        mock_response.status_code = 200
+        mock_post.return_value = mock_response
+
+        files = {
+            "Usuario": (None, "1234567"),
+            "Senha": (None, "nova-senha"),
+        }
+
+        ApiEOLRepository.alterar_senha(
+            url=self.URL,
+            headers=self.HEADERS,
+            files=files,
+        )
+        mock_post.assert_called_once_with(
+            self.URL,
+            headers=self.HEADERS,
+            files=files,
+            timeout=10,
+        )
+
+    @patch("apps.core.repository.autenticacao_eol_repository.requests.post")
+    def test_alterar_senha_falha_autenticacao(self, mock_post):
+        """Deve lançar erro quando a API retornar status 401."""
+        mock_response = Mock(spec=requests.Response)
+        mock_response.status_code = 401
+        mock_response.text = "Usuário ou senha incorretos."
+        mock_post.return_value = mock_response
+
+        files = {
+            "Usuario": (None, "1234567"),
+            "Senha": (None, "nova-senha"),
+        }
+
+        with pytest.raises(
+            FalhaAutenticacaoError,
+            match="Usuário ou senha incorretos.",
+        ):
+            ApiEOLRepository.alterar_senha(
+                url=self.URL,
+                headers=self.HEADERS,
+                files=files,
+            )
+
+        mock_post.assert_called_once_with(
+            self.URL,
+            headers=self.HEADERS,
+            files=files,
+            timeout=10,
+        )
+
+    @patch("apps.core.repository.autenticacao_eol_repository.requests.post")
+    def test_alterar_senha_erro_integracao(self, mock_post):
+        """Deve lançar erro quando a API retornar status 5xx."""
+        mock_response = Mock(spec=requests.Response)
+        mock_response.status_code = 500
+        mock_response.text = "Erro interno"
+        mock_post.return_value = mock_response
+
+        files = {
+            "Usuario": (None, "1234567"),
+            "Senha": (None, "nova-senha"),
+        }
+
+        with pytest.raises(
+            SmeIntegracaoError,
+            match="Erro ao alterar a senha no servidor.",
+        ):
+            ApiEOLRepository.alterar_senha(
+                url=self.URL,
+                headers=self.HEADERS,
+                files=files,
+            )
+
+        mock_post.assert_called_once_with(
+            self.URL,
+            headers=self.HEADERS,
+            files=files,
+            timeout=10,
+        )
+
 
 class TestApiEOLRepositoryIntegracao:
     """Testes que verificam a integração entre os métodos."""

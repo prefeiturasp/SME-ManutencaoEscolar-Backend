@@ -142,7 +142,7 @@ class TestUsuarioService:
 
     @patch("apps.usuarios.services.usuario_service.EmailService.enviar")
     @patch(
-        "apps.usuarios.services.usuario_service.UsuarioRepository."
+        "apps.core.services.token_service.TokenRepository."
         "gerar_token_recuperar_senha"
     )
     @patch("apps.usuarios.services.usuario_service.settings")
@@ -187,7 +187,7 @@ class TestUsuarioService:
     @patch("apps.usuarios.services.usuario_service.logger")
     @patch("apps.usuarios.services.usuario_service.EmailService.enviar")
     @patch(
-        "apps.usuarios.services.usuario_service.UsuarioRepository."
+        "apps.core.services.token_service.TokenRepository."
         "gerar_token_recuperar_senha"
     )
     @patch("apps.usuarios.services.usuario_service.settings")
