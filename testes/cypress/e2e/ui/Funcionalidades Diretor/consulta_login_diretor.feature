@@ -11,8 +11,8 @@ Funcionalidade: Acesso de usuário diretor
     Então o sistema valida o "<campo>" no acesso
 
     Exemplos:
-      | campo | caso                        |
-      | login | Login realizado com sucesso |
+      | campo | caso                         |
+      | login | Acesso realizado com sucesso |
 
   Esquema do Cenário: Validar: <caso>
     Dado eu acesso o sistema Manutenção Escolar
@@ -20,9 +20,10 @@ Funcionalidade: Acesso de usuário diretor
     Então o sistema valida "<campo>" como obrigatório no acesso
 
     Exemplos:
-      | campo | caso                       |
-      | login | Campo de login obrigatório |
-      | senha | Campo de senha obrigatório |
+      | campo | caso                         |
+      | login | Campo de usuário obrigatório |
+      | senha | Campo de senha obrigatório   |
+      | ambos | Usuário e senha obrigatórios |
 
   Esquema do Cenário: Validar: <caso>
     Dado eu acesso o sistema Manutenção Escolar
@@ -30,9 +31,9 @@ Funcionalidade: Acesso de usuário diretor
     Então o sistema valida a quantidade "<campo>" de caracteres com o valor "<dado>" no acesso
 
     Exemplos:
-      | dado | campo | caso                            |
-      | 1234 | login | Mínimo de 7 caracteres no login |
-      | 123  | senha | Mínimo de 4 caracteres na senha |
+      | dado  | campo | caso                              |
+      | teste | login | Mínimo de 7 caracteres no usuário |
+      | 123   | senha | Mínimo de 4 caracteres na senha   |
 
   Esquema do Cenário: Validar: <caso>
     Dado eu acesso o sistema Manutenção Escolar
@@ -41,5 +42,5 @@ Funcionalidade: Acesso de usuário diretor
 
     Exemplos:
       | dado  | campo   | caso                          |
-      | 12345 | login   | Não permitir usuário inválido |
-      | 1234  | senha   | Não permitir senha inválida   |
+      | teste | login   | Não permitir usuário inválido |
+      | 123   | senha   | Não permitir senha inválida   |

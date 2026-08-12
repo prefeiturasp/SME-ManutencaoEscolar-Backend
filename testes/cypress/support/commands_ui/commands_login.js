@@ -50,15 +50,23 @@ Cypress.Commands.add('validar_campos_obrigatorios_acesso', (campo) => {
   if (campo === 'login') {    
     cy.get(login_ME_Localizadores.campo_senha())
       .type(Cypress.env('SENHA'))
+  
+  cy.get(login_ME_Localizadores.botao_acessar())
+	  .should('be.visible')
   }
 
   if (campo === 'senha') {    
     cy.get(login_ME_Localizadores.campo_usuario())
       .type(Cypress.env('LOGIN_DIRETOR'))
-  }
 
   cy.get(login_ME_Localizadores.botao_acessar())
 	  .should('be.visible')
+  }
+
+  if (campo === 'ambos') {    
+  cy.get(login_ME_Localizadores.botao_acessar())
+	  .should('be.disabled')
+  }  
 })
 
 Cypress.Commands.add('validar_caracteres_acesso', (campo, dado) => {
