@@ -86,3 +86,12 @@ bash: ## Abre um terminal interativo (Bash) dentro do container backend
 
 terminal: ## Alias para o comando bash (Abre o terminal dentro do container)
 	$(EXEC) bash
+
+clean: ## Remove arquivos temporários e de cache do projeto
+	$(DC) exec -u root $(CONTAINER) find . -type f -name '*.pyc' -delete
+	$(DC) exec -u root $(CONTAINER) find . -type d -name '__pycache__' -exec rm -rf {} +
+	$(DC) exec -u root $(CONTAINER) find . -type d -name '.pytest_cache' -exec rm -rf {} +
+	$(DC) exec -u root $(CONTAINER) find . -type d -name 'htmlcov' -exec rm -rf {} +
+	$(DC) exec -u root $(CONTAINER) find . -type d -name '.mypy_cache' -exec rm -rf {} +
+	$(DC) exec -u root $(CONTAINER) find . -type d -name '.ruff_cache' -exec rm -rf {} +
+	$(DC) exec -u root $(CONTAINER) find . -type f -name '.coverage' -delete
