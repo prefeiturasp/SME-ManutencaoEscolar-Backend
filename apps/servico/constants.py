@@ -12,3 +12,8 @@ class ServicoErrorMessages:
     NOME_JA_CADASTRADO = (
         "Já existe um serviço com este nome cadastrado no sistema."
     )
+
+    ERRO_AO_ATUALIZAR = (
+    "Não conseguimos salvar as alterações. "
+    "Por favor, tente novamente."
+    )

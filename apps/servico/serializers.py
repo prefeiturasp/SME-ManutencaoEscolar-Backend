@@ -9,6 +9,17 @@ from apps.servico.models import Servico
 class ServicoSerializer(serializers.ModelSerializer):
     """Serializa o serviço para listagem e detalhes."""
 
+    criado_por_nome = serializers.CharField(
+        source="criado_por.nome",
+        read_only=True,
+        allow_null=True,
+    )
+    atualizado_por_nome = serializers.CharField(
+        source="atualizado_por.nome",
+        read_only=True,
+        allow_null=True,
+    )
+
     class Meta:
         """Configuração do serializer de serviço."""
 
@@ -18,8 +29,23 @@ class ServicoSerializer(serializers.ModelSerializer):
             "uuid",
             "nome",
             "status",
+            "criado_por",
+            "criado_por_nome",
+            "criado_em",
+            "atualizado_por",
+            "atualizado_por_nome",
+            "atualizado_em",
         )
-
+        read_only_fields = (
+            "id",
+            "uuid",
+            "criado_por",
+            "criado_por_nome",
+            "criado_em",
+            "atualizado_por",
+            "atualizado_por_nome",
+            "atualizado_em",
+        )
 
 class ServicoCriarSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de serviços."""
@@ -42,7 +68,7 @@ class ServicoCriarSerializer(serializers.ModelSerializer):
         }
 
     def validate_nome(self, value: str) -> str:
-        """Garante que o nome do serviço não seja vazio."""
+        """Remove espaços e impede nomes vazios."""
         nome = value.strip()
 
         if not nome:
@@ -51,3 +77,7 @@ class ServicoCriarSerializer(serializers.ModelSerializer):
             )
 
         return nome
+
+
+class ServicoAtualizarSerializer(ServicoCriarSerializer):
+    """Serializa a atualização parcial de serviços."""
