@@ -312,9 +312,10 @@ def _parse_bool(value: str) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+MOCK_SENHA = "mock_secret_key"
 MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "localhost:9000")
 MINIO_ROOT_USER = os.environ.get("MINIO_ROOT_USER", "mock_access_key")
-MINIO_ROOT_PASSWORD = os.environ.get("MINIO_ROOT_PASSWORD", "mock_secret_key")
+MINIO_ROOT_PASSWORD = os.environ.get("MINIO_ROOT_PASSWORD", MOCK_SENHA)
 MINIO_USE_HTTPS = _parse_bool(os.environ.get("MINIO_USE_HTTPS", "false"))
 MINIO_BUCKET_NAME = os.environ.get("MINIO_BUCKET_NAME", "")
 MINIO_EXTERNAL_ENDPOINT = os.environ.get("MINIO_EXTERNAL_ENDPOINT", "")
