@@ -3,45 +3,22 @@
 import mimetypes
 import uuid
 from pathlib import Path
+from typing import Any
 
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 from django.db.models import QuerySet
 
-from apps.core.constants import TipoArquivo
+from apps.core.constants import (
+    MAPA_EXTENSOES_TIPO_ARQUIVO,
+    TAMANHO_MAXIMO_ARQUIVO,
+)
 from apps.core.models.anexo import Anexo
 from apps.core.repository.anexo_repository import AnexoRepository
 
 
 class AnexoService:
     """Regras de negócio relacionadas ao armazenamento de arquivos."""
-
-    EXTENSOES_IMAGEM = {
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".gif",
-        ".webp",
-        ".bmp",
-        ".tiff",
-        ".svg",
-    }
-
-    EXTENSOES_ARQUIVO = {
-        ".pdf",
-        ".doc",
-        ".docx",
-        ".xls",
-        ".xlsx",
-        ".csv",
-        ".txt",
-        ".zip",
-        ".rar",
-        ".7z",
-    }
-
-    TAMANHO_MAXIMO_ARQUIVO = 50 * 1024 * 1024
-    TAMANHO_MAXIMO_IMAGEM = 10 * 1024 * 1024
 
     def __init__(
         self,
@@ -56,88 +33,46 @@ class AnexoService:
         """
         self.repository = repository or AnexoRepository()
 
-    @transaction.atomic
-    def enviar_imagem(
-        self,
-        arquivo: UploadedFile,
-    ) -> Anexo:
-        """Valida, armazena e registra uma imagem.
-
-        Args:
-            arquivo: Imagem que será validada e armazenada.
-
-        Returns:
-            O anexo criado após o armazenamento do arquivo.
-
-        Raises:
-            ValueError: Se o arquivo for inválido, estiver vazio, possuir
-                uma extensão não permitida ou ultrapassar o tamanho máximo.
-        """
-        nome_arquivo, tamanho_bytes = self._validar_arquivo_recebido(
-            arquivo,
-        )
-
-        extensao = self._obter_extensao(
-            nome_arquivo,
-        )
-
-        if extensao not in self.EXTENSOES_IMAGEM:
-            raise ValueError(
-                "O arquivo informado não é uma imagem válida.",
-            )
-
-        if tamanho_bytes > self.TAMANHO_MAXIMO_IMAGEM:
-            raise ValueError(
-                "A imagem não pode ultrapassar 10 MB.",
-            )
-
-        return self._salvar(
-            arquivo=arquivo,
-            tipo=TipoArquivo.IMAGEM,
-            nome_original=nome_arquivo,
-            tamanho_bytes=tamanho_bytes,
-        )
-
-    @transaction.atomic
     def enviar_arquivo(
-        self,
-        arquivo: UploadedFile,
-    ) -> Anexo:
+        self, arquivo: UploadedFile, id_usuario: int
+    ) -> dict[str, Any]:
         """Valida, armazena e registra um arquivo.
+
+        O arquivo recebido é validado quanto ao nome, tamanho e extensão.
+        Após as validações, seus metadados são preparados e o arquivo é
+        persistido no armazenamento, sendo associado ao usuário informado.
 
         Args:
             arquivo: Arquivo que será validado e armazenado.
+            id_usuario: Identificador do usuário responsável pelo envio
+                do arquivo.
 
         Returns:
-            O anexo criado após o armazenamento do arquivo.
+            Dicionário contendo os dados do anexo criado e persistido,
+            incluindo seu identificador, nome, tipo, tipo MIME, tamanho
+            e URL para acesso ao arquivo.
 
         Raises:
             ValueError: Se o arquivo for inválido, estiver vazio, possuir
-                uma extensão não permitida ou ultrapassar o tamanho máximo.
+            uma extensão não permitida ou ultrapassar o tamanho máximo
+            permitido de 2 MB.
         """
         nome_arquivo, tamanho_bytes = self._validar_arquivo_recebido(
             arquivo,
         )
-
-        extensao = self._obter_extensao(
-            nome_arquivo,
-        )
-
-        if extensao not in self.EXTENSOES_ARQUIVO:
+        if tamanho_bytes > TAMANHO_MAXIMO_ARQUIVO:
             raise ValueError(
-                "O tipo de arquivo informado não é permitido.",
+                "O arquivo não pode ultrapassar 2 MB.",
             )
 
-        if tamanho_bytes > self.TAMANHO_MAXIMO_ARQUIVO:
-            raise ValueError(
-                "O arquivo não pode ultrapassar 50 MB.",
-            )
+        tipo = self._validar_extensao_arquivo(nome_arquivo)
 
         return self._salvar(
             arquivo=arquivo,
-            tipo=TipoArquivo.DOCUMENTO,
+            tipo=tipo,
             nome_original=nome_arquivo,
             tamanho_bytes=tamanho_bytes,
+            id_usuario=id_usuario,
         )
 
     def buscar_por_id(
@@ -237,17 +172,28 @@ class AnexoService:
         tipo: str,
         nome_original: str,
         tamanho_bytes: int,
-    ) -> Anexo:
+        id_usuario: int,
+    ) -> dict[str, Any]:
         """Prepara os metadados e persiste um arquivo.
+
+        O nome original é normalizado para remover qualquer componente
+        de caminho. Em seguida, é gerado um nome único para o arquivo
+        que será armazenado. O tipo MIME é obtido a partir do arquivo
+        enviado ou, caso não esteja disponível, inferido pela extensão
+        do nome original.
 
         Args:
             arquivo: Arquivo que será armazenado.
             tipo: Tipo do anexo que será registrado.
             nome_original: Nome original validado do arquivo.
             tamanho_bytes: Tamanho validado do arquivo em bytes.
+            id_usuario: Identificador do usuário responsável pela criação
+            do anexo.
 
         Returns:
-            O anexo criado e persistido.
+            Dicionário contendo os dados do anexo criado e persistido,
+            incluindo seu identificador, nome, tipo, tipo MIME, tamanho
+            e URL para acesso ao arquivo.
         """
         nome_original = Path(
             nome_original,
@@ -273,6 +219,7 @@ class AnexoService:
             tipo_mime=tipo_mime,
             tamanho_bytes=tamanho_bytes,
             arquivo=arquivo,
+            usuario_id=id_usuario,
         )
 
     @staticmethod
@@ -333,7 +280,7 @@ class AnexoService:
         nome = arquivo.name
         tamanho = arquivo.size
 
-        if nome is None:
+        if (nome is None) or (not nome):
             raise ValueError(
                 "O arquivo precisa possuir um nome.",
             )
@@ -343,14 +290,36 @@ class AnexoService:
                 "Não foi possível determinar o tamanho do arquivo.",
             )
 
-        if not nome:
-            raise ValueError(
-                "O arquivo precisa possuir um nome.",
-            )
-
         if tamanho <= 0:
             raise ValueError(
                 "Não é permitido enviar um arquivo vazio.",
             )
 
         return nome, tamanho
+
+    def _validar_extensao_arquivo(self, nome_arquivo: str) -> str:
+        """Valida a extensão do arquivo e identifica seu tipo.
+
+        Obtém a extensão do nome do arquivo e verifica se ela está
+        cadastrada no mapa de extensões permitidas. Quando a extensão
+        é válida, retorna o tipo de arquivo correspondente.
+
+        Args:
+            nome_arquivo (str): Nome do arquivo que terá a extensão validada.
+
+        Raises:
+            ValueError: Quando a extensão do arquivo não está entre as
+                extensões permitidas.
+
+        Returns:
+            str:  Tipo de arquivo correspondente à extensão informada.
+        """
+        extensao = self._obter_extensao(
+            nome_arquivo,
+        )
+        try:
+            return MAPA_EXTENSOES_TIPO_ARQUIVO[extensao]
+        except KeyError as exc:
+            raise ValueError(
+                "O tipo de arquivo informado não é permitido.",
+            ) from exc
