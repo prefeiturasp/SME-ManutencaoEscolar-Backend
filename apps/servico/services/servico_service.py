@@ -22,8 +22,8 @@ class ServicoService:
         self,
         dados: dict[str, Any],
         usuario_id: int,
-    ) -> Servico:
-        """Cria e retorna um serviço."""
+    ) -> dict[str, Any]:
+        """Cria e retorna os dados de um serviço."""
         dados_normalizados = dados.copy()
         nome = dados_normalizados["nome"].strip()
 
@@ -42,8 +42,8 @@ class ServicoService:
         servico: Servico,
         dados: dict[str, Any],
         usuario_id: int,
-    ) -> Servico:
-        """Atualiza e retorna um serviço."""
+    ) -> dict[str, Any]:
+        """Atualiza e retorna os dados de um serviço."""
         dados_normalizados = dados.copy()
 
         if "nome" in dados_normalizados:

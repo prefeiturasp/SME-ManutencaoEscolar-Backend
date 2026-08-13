@@ -74,7 +74,7 @@ class TestServicoRepository:
         self,
         servico_payload_valido: dict[str, Any],
     ) -> None:
-        """Deve criar, validar, salvar e retornar o serviço."""
+        """Deve criar, validar, salvar e retornar os dados do serviço."""
         repository = ServicoRepository()
         usuario_id = 10
 
@@ -95,14 +95,19 @@ class TestServicoRepository:
                 usuario_id=usuario_id,
             )
 
-        mock_full_clean.assert_called_once_with(resultado)
-        mock_save.assert_called_once_with(resultado)
+        servico_criado = mock_full_clean.call_args.args[0]
 
-        assert isinstance(resultado, Servico)
-        assert resultado.nome == servico_payload_valido["nome"]
-        assert resultado.status == servico_payload_valido["status"]
-        assert resultado.criado_por_id == usuario_id
-        assert resultado.atualizado_por_id == usuario_id
+        mock_full_clean.assert_called_once_with(servico_criado)
+        mock_save.assert_called_once_with(servico_criado)
+
+        assert isinstance(resultado, dict)
+        assert resultado["id"] is servico_criado.id
+        assert resultado["uuid"] == str(servico_criado.uuid)
+        assert resultado["nome"] == servico_payload_valido["nome"]
+        assert resultado["status"] == servico_payload_valido["status"]
+
+        assert servico_criado.criado_por_id == usuario_id
+        assert servico_criado.atualizado_por_id == usuario_id
 
     def test_deve_atualizar_todos_os_campos(
         self,
@@ -139,10 +144,14 @@ class TestServicoRepository:
         mock_full_clean.assert_called_once_with()
         mock_save.assert_called_once_with()
 
-        assert resultado is servico
-        assert resultado.nome == "Pintura externa"
-        assert resultado.status is False
-        assert resultado.atualizado_por_id == usuario_id
+        assert isinstance(resultado, dict)
+        assert resultado["nome"] == "Pintura externa"
+        assert resultado["status"] is False
+        assert resultado["atualizado_por"] == usuario_id
+
+        assert servico.nome == "Pintura externa"
+        assert servico.status is False
+        assert servico.atualizado_por_id == usuario_id
 
     def test_deve_manter_campos_nao_informados(
         self,
@@ -174,7 +183,11 @@ class TestServicoRepository:
         mock_full_clean.assert_called_once_with()
         mock_save.assert_called_once_with()
 
-        assert resultado is servico
-        assert resultado.nome == "Pintura"
-        assert resultado.status is True
-        assert resultado.atualizado_por_id == usuario_id
+        assert isinstance(resultado, dict)
+        assert resultado["nome"] == "Pintura"
+        assert resultado["status"] is True
+        assert resultado["atualizado_por"] == usuario_id
+
+        assert servico.nome == "Pintura"
+        assert servico.status is True
+        assert servico.atualizado_por_id == usuario_id

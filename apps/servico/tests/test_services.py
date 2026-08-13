@@ -93,10 +93,7 @@ class TestServicoService:
             exc_info.value.title
             == ServicoErrorMessages.NOME_JA_CADASTRADO_TITULO
         )
-        assert (
-            exc_info.value.detail
-            == ServicoErrorMessages.NOME_JA_CADASTRADO
-        )
+        assert exc_info.value.detail == ServicoErrorMessages.NOME_JA_CADASTRADO
 
         repository.existe_por_nome.assert_called_once_with("Pintura")
         repository.criar.assert_not_called()
@@ -205,10 +202,7 @@ class TestServicoService:
             exc_info.value.title
             == ServicoErrorMessages.NOME_JA_CADASTRADO_TITULO
         )
-        assert (
-            exc_info.value.detail
-            == ServicoErrorMessages.NOME_JA_CADASTRADO
-        )
+        assert exc_info.value.detail == ServicoErrorMessages.NOME_JA_CADASTRADO
 
         repository.existe_por_nome.assert_called_once_with(
             "Elétrica",

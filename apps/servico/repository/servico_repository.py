@@ -3,6 +3,8 @@
 from typing import Any
 from uuid import UUID
 
+from django.forms.models import model_to_dict
+
 from apps.servico.models import Servico
 
 
@@ -24,24 +26,30 @@ class ServicoRepository:
 
         return queryset.exists()
 
-    def criar(self, dados: dict[str, Any], usuario_id: int) -> Servico:
+    def criar(
+        self,
+        dados: dict[str, Any],
+        usuario_id: int,
+    ) -> dict[str, Any]:
         """Cria e persiste um serviço."""
         servico = self.model(
-            **dados,
-            criado_por_id=usuario_id,
-            atualizado_por_id=usuario_id
-            )
+            **dados, criado_por_id=usuario_id, atualizado_por_id=usuario_id
+        )
         servico.full_clean()
         servico.save()
 
-        return servico
+        dados_servico = model_to_dict(servico)
+        dados_servico["id"] = servico.id
+        dados_servico["uuid"] = str(servico.uuid)
+
+        return dados_servico
 
     def atualizar(
         self,
         servico: Servico,
         dados: dict[str, Any],
         usuario_id: int,
-    ) -> Servico:
+    ) -> dict[str, Any]:
         """Atualiza e persiste um serviço existente."""
         if "nome" in dados:
             servico.nome = dados["nome"]
@@ -54,4 +62,4 @@ class ServicoRepository:
         servico.full_clean()
         servico.save()
 
-        return servico
+        return model_to_dict(servico)

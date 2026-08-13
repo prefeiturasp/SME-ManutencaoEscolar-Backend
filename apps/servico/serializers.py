@@ -54,6 +54,7 @@ class ServicoSerializer(serializers.ModelSerializer):
             "atualizado_em",
         )
 
+
 class ServicoCriarSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de serviços."""
 
