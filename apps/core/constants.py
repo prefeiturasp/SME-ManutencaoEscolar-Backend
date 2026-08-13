@@ -37,3 +37,13 @@ class EstadoChoices(models.TextChoices):
     SP = "SP", "São Paulo"
     SE = "SE", "Sergipe"
     TO = "TO", "Tocantins"
+
+
+class TipoArquivo(models.TextChoices):
+    """Define os tipos de arquivo suportados pela aplicação."""
+
+    IMAGEM = "imagem", "Imagem"
+    DOCUMENTO = "documento", "Documento"
+    VIDEO = "video", "Vídeo"
+    COMPACTADO = "compactado", "Compactado"
+    OUTROS = "outros", "Outros"
