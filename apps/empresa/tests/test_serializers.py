@@ -40,6 +40,10 @@ class TestEmpresaSerializer:
             "complemento",
             "cidade",
             "estado",
+            "criado_por",
+            "criado_em",
+            "atualizado_por",
+            "atualizado_em",
         }
 
 
