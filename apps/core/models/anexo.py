@@ -1,11 +1,10 @@
 """Modelos relacionados ao armazenamento de arquivos anexados."""
 
 from django.db import models
-from django_minio_backend import MinioBackend
 
 from apps.core.constants import TipoArquivo
 from apps.core.models.mixins import BaseModel
-from config.settings import MINIO_BUCKET_NAME
+from apps.core.storage import get_private_storage
 
 
 class Anexo(BaseModel):
@@ -22,7 +21,7 @@ class Anexo(BaseModel):
 
     arquivo = models.FileField(
         upload_to="arquivos/%Y/%m/%d/",
-        storage=MinioBackend(bucket_name=MINIO_BUCKET_NAME),
+        storage=get_private_storage,
     )
 
     tipo = models.CharField(

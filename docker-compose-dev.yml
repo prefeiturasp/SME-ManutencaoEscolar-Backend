@@ -35,8 +35,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      minio:
-        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
 
     restart: unless-stopped
 
@@ -210,7 +210,30 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+  minio-init:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
 
+    container_name: minio-init
+
+    env_file:
+      - .env
+
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+
+    volumes:
+      - .:/app
+
+    command: python manage.py initialize_buckets
+
+    depends_on:
+      minio:
+        condition: service_healthy
+
+    networks:
+      - backend_network
 volumes:
   postgres_data:
   keydb_data:
