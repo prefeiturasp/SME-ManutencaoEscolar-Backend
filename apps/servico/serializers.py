@@ -19,6 +19,11 @@ class ServicoSerializer(serializers.ModelSerializer):
         read_only=True,
         allow_null=True,
     )
+    username = serializers.CharField(
+        source="criado_por.username",
+        read_only=True,
+        allow_null=True,
+    )
 
     class Meta:
         """Configuração do serializer de serviço."""
@@ -34,6 +39,7 @@ class ServicoSerializer(serializers.ModelSerializer):
             "criado_em",
             "atualizado_por",
             "atualizado_por_nome",
+            "username",
             "atualizado_em",
         )
         read_only_fields = (
@@ -44,6 +50,7 @@ class ServicoSerializer(serializers.ModelSerializer):
             "criado_em",
             "atualizado_por",
             "atualizado_por_nome",
+            "username",
             "atualizado_em",
         )
 

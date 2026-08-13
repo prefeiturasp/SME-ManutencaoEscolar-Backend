@@ -1,4 +1,4 @@
-"""Testes das views do domínio Serviço."""
+"""Testes das views DRF do domínio Serviço."""
 
 from unittest.mock import Mock, patch
 
@@ -6,8 +6,7 @@ import pytest
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.permissions import AllowAny
-from rest_framework.serializers import BaseSerializer
+from rest_framework.permissions import IsAuthenticated
 
 from apps.core.pagination import PaginacaoPadrao
 from apps.servico.api.views import (
@@ -17,104 +16,142 @@ from apps.servico.api.views import (
 from apps.servico.constants import ServicoErrorMessages
 from apps.servico.exceptions import ServicoJaCadastradoError
 from apps.servico.filters import ServicoFilter
+from apps.servico.models import Servico
 from apps.servico.serializers import (
+    ServicoAtualizarSerializer,
     ServicoCriarSerializer,
     ServicoSerializer,
 )
 from apps.servico.services.servico_service import ServicoService
 
 
+class TestServicoInstabilidadeError:
+    """Testa a exceção de instabilidade de serviços."""
+
+    def test_deve_possuir_configuracao_esperada(self) -> None:
+        """Deve utilizar status HTTP 500 e código específico."""
+        assert ServicoInstabilidadeError.status_code == 500
+        assert (
+            ServicoInstabilidadeError.default_detail
+            == ServicoErrorMessages.INSTABILIDADE
+        )
+        assert (
+            ServicoInstabilidadeError.default_code
+            == "servico_instabilidade"
+        )
+
+
 class TestServicoViewSet:
-    """Testes para ServicoViewSet."""
-
-    def setup_method(self):
-        """Configura a view e suas dependências."""
-        self.service = Mock(spec=ServicoService)
-
-        with patch(
-            "apps.servico.api.views.ServicoService",
-            return_value=self.service,
-        ):
-            self.view = ServicoViewSet()
+    """Testa a view responsável pelo domínio Serviço."""
 
     @staticmethod
-    def criar_serializer(dados: dict) -> Mock:
-        """Cria um serializer simulado com dados validados."""
-        serializer = Mock(spec=BaseSerializer)
-        serializer.validated_data = dados
-        serializer.instance = None
+    def criar_view_com_usuario(
+        usuario_id: int = 10,
+    ) -> ServicoViewSet:
+        """Cria uma view com um usuário autenticado simulado."""
+        view = ServicoViewSet()
+        view.request = Mock()
+        view.request.user.pk = usuario_id
+        view.service = Mock(spec=ServicoService)
+
+        return view
+
+    @staticmethod
+    def criar_serializer(
+        dados: dict | None = None,
+        instancia: Servico | None = None,
+    ) -> Mock:
+        """Cria um serializer simulado para os testes da view."""
+        serializer = Mock()
+        serializer.validated_data = dados or {}
+        serializer.instance = instancia
 
         return serializer
 
-    def test_deve_criar_service_ao_inicializar_view(self):
+    @patch("apps.servico.api.views.ServicoService")
+    def test_deve_criar_service_ao_instanciar_view(
+        self,
+        mock_service_class: Mock,
+    ) -> None:
         """Deve criar o service utilizado pela view."""
-        service = Mock(spec=ServicoService)
+        service = mock_service_class.return_value
 
-        with patch(
-            "apps.servico.api.views.ServicoService",
-            return_value=service,
-        ) as service_class:
-            view = ServicoViewSet()
+        view = ServicoViewSet()
 
-        service_class.assert_called_once_with()
         assert view.service is service
+        mock_service_class.assert_called_once_with()
 
-    def test_deve_possuir_configuracoes_da_view(self):
-        """Deve utilizar as configurações esperadas."""
-        assert ServicoViewSet.permission_classes == [AllowAny]
-        assert ServicoViewSet.http_method_names == [
-            "post",
-            "options",
+    def test_deve_possuir_configuracoes_da_view(self) -> None:
+        """Deve possuir as configurações esperadas."""
+        view = ServicoViewSet()
+
+        assert view.http_method_names == [
             "get",
+            "post",
+            "patch",
+            "options",
         ]
-        assert ServicoViewSet.filter_backends == [DjangoFilterBackend]
-        assert ServicoViewSet.filterset_class is ServicoFilter
-        assert ServicoViewSet.pagination_class is PaginacaoPadrao
+        assert view.lookup_field == "uuid"
+        assert view.filter_backends == [DjangoFilterBackend]
+        assert view.filterset_class is ServicoFilter
+        assert view.pagination_class is PaginacaoPadrao
+        assert view.permission_classes == [IsAuthenticated]
 
-    def test_deve_retornar_serializer_de_criacao_na_action_create(self):
-        """Deve retornar o serializer de criação no cadastro."""
-        self.view.action = "create"
+    @pytest.mark.parametrize(
+        ("acao", "serializer_esperado"),
+        [
+            ("create", ServicoCriarSerializer),
+            ("update", ServicoAtualizarSerializer),
+            ("partial_update", ServicoAtualizarSerializer),
+            ("list", ServicoSerializer),
+            ("retrieve", ServicoSerializer),
+        ],
+    )
+    def test_deve_retornar_serializer_conforme_acao(
+        self,
+        acao: str,
+        serializer_esperado: type,
+    ) -> None:
+        """Deve selecionar o serializer correspondente à ação."""
+        view = ServicoViewSet()
+        view.action = acao
 
-        serializer_class = self.view.get_serializer_class()
+        resultado = view.get_serializer_class()
 
-        assert serializer_class is ServicoCriarSerializer
+        assert resultado is serializer_esperado
 
-    def test_deve_retornar_serializer_de_listagem_na_action_list(self):
-        """Deve retornar o serializer de leitura na listagem."""
-        self.view.action = "list"
-
-        serializer_class = self.view.get_serializer_class()
-
-        assert serializer_class is ServicoSerializer
-
-    def test_deve_retornar_serializer_de_leitura_em_outra_action(self):
-        """Deve usar o serializer de leitura nas demais ações."""
-        self.view.action = "retrieve"
-
-        serializer_class = self.view.get_serializer_class()
-
-        assert serializer_class is ServicoSerializer
-
-    def test_deve_criar_servico_e_definir_instancia_no_serializer(self):
-        """Deve delegar a criação ao service."""
-        dados = {
-            "nome": "Pintura",
-            "status": True,
-        }
-        servico = Mock()
-        serializer = self.criar_serializer(dados)
-
-        self.service.criar.return_value = servico
-
-        self.view.perform_create(serializer)
-
-        self.service.criar.assert_called_once_with(dados)
-        assert serializer.instance is servico
-
-    def test_deve_converter_erro_de_servico_duplicado(self):
-        """Deve converter duplicidade em erro de validação do DRF."""
+    def test_deve_criar_servico_e_definir_instancia(
+        self,
+    ) -> None:
+        """Deve delegar a criação e definir a instância criada."""
+        view = self.criar_view_com_usuario(usuario_id=10)
         serializer = self.criar_serializer(
+            dados={
+                "nome": "Pintura",
+                "status": True,
+            }
+        )
+        servico_criado = Mock(spec=Servico)
+        view.service.criar.return_value = servico_criado
+
+        view.perform_create(serializer)
+
+        view.service.criar.assert_called_once_with(
             {
+                "nome": "Pintura",
+                "status": True,
+            },
+            usuario_id=10,
+        )
+        assert serializer.instance is servico_criado
+
+    def test_deve_converter_erro_de_nome_duplicado_na_criacao(
+        self,
+    ) -> None:
+        """Deve converter erro de duplicidade em erro de validação."""
+        view = self.criar_view_com_usuario()
+        serializer = self.criar_serializer(
+            dados={
                 "nome": "Pintura",
                 "status": True,
             }
@@ -123,117 +160,196 @@ class TestServicoViewSet:
             title=ServicoErrorMessages.NOME_JA_CADASTRADO_TITULO,
             detail=ServicoErrorMessages.NOME_JA_CADASTRADO,
         )
-
-        self.service.criar.side_effect = erro
+        view.service.criar.side_effect = erro
 
         with pytest.raises(DRFValidationError) as exc_info:
-            self.view.perform_create(serializer)
-
-        detalhe = exc_info.value.detail
+            view.perform_create(serializer)
 
         assert (
-            str(detalhe["title"])
+            str(exc_info.value.detail["title"])
             == ServicoErrorMessages.NOME_JA_CADASTRADO_TITULO
         )
         assert (
-            str(detalhe["detail"]) == ServicoErrorMessages.NOME_JA_CADASTRADO
+            str(exc_info.value.detail["detail"])
+            == ServicoErrorMessages.NOME_JA_CADASTRADO
         )
         assert exc_info.value.__cause__ is erro
-        assert serializer.instance is None
 
-    def test_deve_converter_django_validation_error_com_message_dict(self):
-        """Deve converter erros de campos do Django para o DRF."""
-        serializer = self.criar_serializer(
+    def test_deve_converter_validation_error_com_message_dict_na_criacao(
+        self,
+    ) -> None:
+        """Deve converter erros de validação organizados por campo."""
+        view = self.criar_view_com_usuario()
+        serializer = self.criar_serializer()
+        erro = DjangoValidationError(
             {
-                "nome": "",
-                "status": True,
+                "nome": ["Nome inválido."],
             }
+        )
+        view.service.criar.side_effect = erro
+
+        with pytest.raises(DRFValidationError) as exc_info:
+            view.perform_create(serializer)
+
+        mensagens = exc_info.value.detail["nome"]
+
+        assert [str(mensagem) for mensagem in mensagens] == [
+            "Nome inválido."
+        ]
+        assert exc_info.value.__cause__ is erro
+
+    def test_deve_converter_validation_error_com_messages_na_criacao(
+        self,
+    ) -> None:
+        """Deve converter uma lista de mensagens de validação."""
+        view = self.criar_view_com_usuario()
+        serializer = self.criar_serializer()
+        erro = DjangoValidationError(["Dados inválidos."])
+        view.service.criar.side_effect = erro
+
+        with pytest.raises(DRFValidationError) as exc_info:
+            view.perform_create(serializer)
+
+        assert [
+            str(mensagem) for mensagem in exc_info.value.detail
+        ] == ["Dados inválidos."]
+        assert exc_info.value.__cause__ is erro
+
+    def test_deve_converter_erro_inesperado_na_criacao(
+        self,
+    ) -> None:
+        """Deve converter erro inesperado em instabilidade."""
+        view = self.criar_view_com_usuario()
+        serializer = self.criar_serializer()
+        erro = RuntimeError("Erro interno do banco")
+        view.service.criar.side_effect = erro
+
+        with pytest.raises(ServicoInstabilidadeError) as exc_info:
+            view.perform_create(serializer)
+
+        assert str(exc_info.value.detail["title"]) == "Erro"
+        assert (
+            str(exc_info.value.detail["detail"])
+            == ServicoErrorMessages.INSTABILIDADE
+        )
+        assert exc_info.value.__cause__ is erro
+
+    def test_deve_atualizar_servico_e_definir_instancia(
+        self,
+    ) -> None:
+        """Deve delegar a atualização e definir a instância."""
+        view = self.criar_view_com_usuario(usuario_id=20)
+        servico_existente = Mock(spec=Servico)
+        servico_atualizado = Mock(spec=Servico)
+        serializer = self.criar_serializer(
+            dados={
+                "nome": "Pintura externa",
+                "status": False,
+            },
+            instancia=servico_existente,
+        )
+        view.service.atualizar.return_value = servico_atualizado
+
+        view.perform_update(serializer)
+
+        view.service.atualizar.assert_called_once_with(
+            servico=servico_existente,
+            dados={
+                "nome": "Pintura externa",
+                "status": False,
+            },
+            usuario_id=20,
+        )
+        assert serializer.instance is servico_atualizado
+
+    def test_deve_converter_erro_de_nome_duplicado_na_atualizacao(
+        self,
+    ) -> None:
+        """Deve converter duplicidade em erro de validação."""
+        view = self.criar_view_com_usuario()
+        serializer = self.criar_serializer(
+            instancia=Mock(spec=Servico),
+        )
+        erro = ServicoJaCadastradoError(
+            title=ServicoErrorMessages.NOME_JA_CADASTRADO_TITULO,
+            detail=ServicoErrorMessages.NOME_JA_CADASTRADO,
+        )
+        view.service.atualizar.side_effect = erro
+
+        with pytest.raises(DRFValidationError) as exc_info:
+            view.perform_update(serializer)
+
+        assert (
+            str(exc_info.value.detail["title"])
+            == ServicoErrorMessages.NOME_JA_CADASTRADO_TITULO
+        )
+        assert (
+            str(exc_info.value.detail["detail"])
+            == ServicoErrorMessages.NOME_JA_CADASTRADO
+        )
+        assert exc_info.value.__cause__ is erro
+
+    def test_deve_converter_validation_error_com_message_dict_na_atualizacao(
+        self,
+    ) -> None:
+        """Deve converter erros de atualização organizados por campo."""
+        view = self.criar_view_com_usuario()
+        serializer = self.criar_serializer(
+            instancia=Mock(spec=Servico),
         )
         erro = DjangoValidationError(
             {
                 "nome": ["Nome inválido."],
-                "status": ["Status inválido."],
             }
         )
-
-        self.service.criar.side_effect = erro
+        view.service.atualizar.side_effect = erro
 
         with pytest.raises(DRFValidationError) as exc_info:
-            self.view.perform_create(serializer)
+            view.perform_update(serializer)
 
-        detalhe = exc_info.value.detail
+        mensagens = exc_info.value.detail["nome"]
 
-        assert [str(item) for item in detalhe["nome"]] == ["Nome inválido."]
-        assert [str(item) for item in detalhe["status"]] == [
-            "Status inválido."
+        assert [str(mensagem) for mensagem in mensagens] == [
+            "Nome inválido."
         ]
         assert exc_info.value.__cause__ is erro
-        assert serializer.instance is None
 
-    def test_deve_converter_django_validation_error_com_messages(self):
-        """Deve converter erros gerais do Django para o DRF."""
+    def test_deve_converter_validation_error_com_messages_na_atualizacao(
+        self,
+    ) -> None:
+        """Deve converter uma lista de mensagens na atualização."""
+        view = self.criar_view_com_usuario()
         serializer = self.criar_serializer(
-            {
-                "nome": "Pintura",
-                "status": True,
-            }
+            instancia=Mock(spec=Servico),
         )
-        erro = DjangoValidationError(
-            [
-                "Primeiro erro.",
-                "Segundo erro.",
-            ]
-        )
-
-        self.service.criar.side_effect = erro
+        erro = DjangoValidationError(["Dados inválidos."])
+        view.service.atualizar.side_effect = erro
 
         with pytest.raises(DRFValidationError) as exc_info:
-            self.view.perform_create(serializer)
+            view.perform_update(serializer)
 
-        mensagens = [str(mensagem) for mensagem in exc_info.value.detail]
-
-        assert mensagens == [
-            "Primeiro erro.",
-            "Segundo erro.",
-        ]
+        assert [
+            str(mensagem) for mensagem in exc_info.value.detail
+        ] == ["Dados inválidos."]
         assert exc_info.value.__cause__ is erro
-        assert serializer.instance is None
 
-    def test_deve_converter_erro_inesperado_em_instabilidade(self):
-        """Deve ocultar erros inesperados como instabilidade."""
+    def test_deve_converter_erro_inesperado_na_atualizacao(
+        self,
+    ) -> None:
+        """Deve converter erro inesperado em instabilidade."""
+        view = self.criar_view_com_usuario()
         serializer = self.criar_serializer(
-            {
-                "nome": "Pintura",
-                "status": True,
-            }
+            instancia=Mock(spec=Servico),
         )
         erro = RuntimeError("Erro interno do banco")
-
-        self.service.criar.side_effect = erro
+        view.service.atualizar.side_effect = erro
 
         with pytest.raises(ServicoInstabilidadeError) as exc_info:
-            self.view.perform_create(serializer)
+            view.perform_update(serializer)
 
-        detalhe = exc_info.value.detail
-
-        assert exc_info.value.status_code == 500
-        assert exc_info.value.default_code == "servico_instabilidade"
-        assert str(detalhe["title"]) == "Erro"
-        assert str(detalhe["detail"]) == ServicoErrorMessages.INSTABILIDADE
+        assert str(exc_info.value.detail["title"]) == "Erro"
+        assert (
+            str(exc_info.value.detail["detail"])
+            == ServicoErrorMessages.ERRO_AO_ATUALIZAR
+        )
         assert exc_info.value.__cause__ is erro
-        assert serializer.instance is None
-
-
-class TestServicoInstabilidadeError:
-    """Testes para ServicoInstabilidadeError."""
-
-    def test_deve_possuir_configuracoes_corretas(self):
-        """Deve representar uma falha interna do serviço."""
-        assert ServicoInstabilidadeError.status_code == 500
-        assert (
-            ServicoInstabilidadeError.default_detail
-            == ServicoErrorMessages.INSTABILIDADE
-        )
-        assert (
-            ServicoInstabilidadeError.default_code == "servico_instabilidade"
-        )

@@ -18,12 +18,13 @@ class ServicoService:
         """Inicializa o serviço com o repositório informado ou o padrão."""
         self.repository = repository or ServicoRepository()
 
-    def criar(self, dados: dict[str, Any],
-              usuario_id: int) -> dict[str, Any]:
-        """Cria um serviço e retorna seus dados serializados."""
-        
+    def criar(
+        self,
+        dados: dict[str, Any],
+        usuario_id: int,
+    ) -> Servico:
+        """Cria e retorna um serviço."""
         dados_normalizados = dados.copy()
-        
         nome = dados_normalizados["nome"].strip()
 
         if self.repository.existe_por_nome(nome):
@@ -31,16 +32,18 @@ class ServicoService:
 
         dados_normalizados["nome"] = nome
 
-        return self.repository.criar(dados_normalizados,
-                                      usuario_id=usuario_id,)
+        return self.repository.criar(
+            dados_normalizados,
+            usuario_id=usuario_id,
+        )
 
     def atualizar(
         self,
         servico: Servico,
         dados: dict[str, Any],
-        usuario_id: int
-    ) -> dict[str, Any]:
-        """Atualiza um serviço e retorna seus dados serializados."""
+        usuario_id: int,
+    ) -> Servico:
+        """Atualiza e retorna um serviço."""
         dados_normalizados = dados.copy()
 
         if "nome" in dados_normalizados:
@@ -57,12 +60,12 @@ class ServicoService:
         return self.repository.atualizar(
             servico,
             dados_normalizados,
-            usuario_id=usuario_id
+            usuario_id=usuario_id,
         )
 
     @staticmethod
     def _lancar_erro_nome_duplicado() -> None:
-        """Lança a exceção de nome de serviço duplicado."""
+        """Lança a exceção para um nome de serviço duplicado."""
         raise ServicoJaCadastradoError(
             title=ServicoErrorMessages.NOME_JA_CADASTRADO_TITULO,
             detail=ServicoErrorMessages.NOME_JA_CADASTRADO,
