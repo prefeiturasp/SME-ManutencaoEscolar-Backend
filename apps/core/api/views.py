@@ -3,9 +3,12 @@
 from typing import Any
 
 from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiResponse,
     extend_schema,
 )
 from rest_framework import status
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import (
     AllowAny,
 )
@@ -33,12 +36,15 @@ from apps.core.schemas import (
 )
 from apps.core.serializers import (
     AlterarSenhaSerializer,
+    ArquivoResponseSerializer,
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
+    ErroResponseSerializer,
     LoginResponseSerializer,
     LogoutSerializer,
     RecuperarSenhaSerializer,
 )
+from apps.core.services.anexo_service import AnexoService
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
 from apps.core.services.token_service import TokenService
 from apps.usuarios.exceptions import (
@@ -268,4 +274,72 @@ class AlterarSenhaView(APIView):
         return Response(
             {"detail": "Senha alterada com sucesso."},
             status=status.HTTP_200_OK,
+        )
+
+
+class AnexoView(APIView):
+    """_summary_."""
+
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    lookup_field = "uuid"
+
+    @extend_schema(
+        summary="Envia um arquivo",
+        description="Recebe um arquivo e realiza seu armazenamento.",
+        request={
+            "multipart/form-data": {
+                "type": "object",
+                "properties": {
+                    "arquivo": {
+                        "type": "string",
+                        "format": "binary",
+                        "description": "Arquivo a ser enviado (máx 10MB)",
+                    },
+                },
+                "required": [
+                    "arquivo",
+                ],
+            }
+        },
+        responses={
+            201: OpenApiResponse(
+                response=ArquivoResponseSerializer,
+                description="Arquivo enviado com sucesso.",
+            ),
+            400: OpenApiResponse(
+                response=ErroResponseSerializer,
+                description="Erro ao enviar o arquivo.",
+                examples=[
+                    OpenApiExample(
+                        "Arquivo inválido",
+                        value={"erro": "Tipo de arquivo não permitido."},
+                    ),
+                ],
+            ),
+        },
+    )
+    def post(self, request: Request) -> Response:
+        """_summary_."""
+        arquivo = request.FILES.get("arquivo")
+
+        try:
+            registro = AnexoService().enviar_arquivo(
+                arquivo,
+            )
+        except ValueError as erro:
+            return Response(
+                {"erro": str(erro)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                "id": str(registro.id),
+                "nome": registro.nome_original,
+                "tipo": registro.tipo,
+                "tipo_mime": registro.tipo_mime,
+                "tamanho": registro.tamanho_bytes,
+                "url": registro.url,
+            },
+            status=status.HTTP_201_CREATED,
         )

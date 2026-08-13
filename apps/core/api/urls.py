@@ -4,6 +4,7 @@ from django.urls import path
 
 from apps.core.api.views import (
     AlterarSenhaView,
+    AnexoView,
     AtualizarTokenView,
     HealthCheckView,
     LoginView,
@@ -25,5 +26,10 @@ urlpatterns = [
         "alterar-senha/",
         AlterarSenhaView.as_view(),
         name="alterar-senha",
+    ),
+    path(
+        "upload/",
+        AnexoView.as_view(),
+        name="upload",
     ),
 ]

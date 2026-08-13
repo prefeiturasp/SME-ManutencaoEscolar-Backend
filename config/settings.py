@@ -201,6 +201,11 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ),
     "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.PaginacaoPadrao",
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.MultiPartParser",
+        "rest_framework.parsers.FormParser",
+    ],
 }
 # VERIFICAR ISSO SOBRE BLACK_LIST "rest_framework_simplejwt.token_blacklist"
 SIMPLE_JWT = {
