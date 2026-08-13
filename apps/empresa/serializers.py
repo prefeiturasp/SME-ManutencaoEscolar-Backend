@@ -40,7 +40,7 @@ class EmpresaSerializer(serializers.ModelSerializer):
         )
 
 
-class EmpresaCriarSerializer(serializers.ModelSerializer):
+class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de empresas."""
 
     class Meta:
