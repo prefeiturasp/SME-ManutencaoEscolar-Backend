@@ -14,10 +14,18 @@ from apps.core.validacoes import (
 )
 from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.models import Empresa
+from apps.usuarios.models import Usuario
 
 
 class EmpresaSerializer(serializers.ModelSerializer):
     """Serializa a empresa para listagem e detalhes."""
+
+    criado_por: serializers.SlugRelatedField[Usuario] = (
+        serializers.SlugRelatedField(slug_field="nome", read_only=True)
+    )
+    atualizado_por: serializers.SlugRelatedField[Usuario] = (
+        serializers.SlugRelatedField(slug_field="nome", read_only=True)
+    )
 
     class Meta:
         """Configuração do serializer de empresa."""
@@ -37,10 +45,14 @@ class EmpresaSerializer(serializers.ModelSerializer):
             "complemento",
             "cidade",
             "estado",
+            "criado_por",
+            "criado_em",
+            "atualizado_por",
+            "atualizado_em",
         )
 
 
-class EmpresaCriarSerializer(serializers.ModelSerializer):
+class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de empresas."""
 
     class Meta:

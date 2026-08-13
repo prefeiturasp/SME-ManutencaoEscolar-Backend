@@ -340,6 +340,33 @@ class TestApiEOLRepository:
         )
 
     @patch("apps.core.repository.autenticacao_eol_repository.requests.post")
+    def test_alterar_senha_erro_comunicacao(self, mock_post):
+        """Deve lançar erro quando a requisição falhar por comunicação."""
+        mock_post.side_effect = requests.exceptions.ConnectionError()
+
+        files = {
+            "Usuario": (None, "1234567"),
+            "Senha": (None, "nova-senha"),
+        }
+
+        with pytest.raises(
+            SmeIntegracaoError,
+            match="Erro de comunicação ao alterar a senha no servidor.",
+        ):
+            ApiEOLRepository.alterar_senha(
+                url=self.URL,
+                headers=self.HEADERS,
+                files=files,
+            )
+
+        mock_post.assert_called_once_with(
+            self.URL,
+            headers=self.HEADERS,
+            files=files,
+            timeout=10,
+        )
+
+    @patch("apps.core.repository.autenticacao_eol_repository.requests.post")
     def test_alterar_senha_erro_integracao(self, mock_post):
         """Deve lançar erro quando a API retornar status 5xx."""
         mock_response = Mock(spec=requests.Response)

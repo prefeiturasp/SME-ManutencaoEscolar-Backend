@@ -9,7 +9,7 @@ from drf_spectacular.utils import (
 )
 
 from apps.empresa.serializers import (
-    EmpresaCriarSerializer,
+    EmpresaCriarAtualizarSerializer,
     EmpresaSerializer,
 )
 
@@ -32,6 +32,9 @@ _EMPRESA_EXEMPLO_SAIDA = {
     "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
     **_EMPRESA_EXEMPLO_ENTRADA,
 }
+
+_CREDENCIAL_INVALID_DESCRIPTION = "Credenciais inválidas"
+_ERRO_SERVIDOR_DESCRIPTION = "Erro no servidor"
 
 EMPRESA_SCHEMA = extend_schema_view(
     list=extend_schema(
@@ -70,9 +73,9 @@ EMPRESA_SCHEMA = extend_schema_view(
         ],
         responses={
             200: EmpresaSerializer(many=True),
-            401: OpenApiResponse(description="Credenciais inválidas"),
+            401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
             503: OpenApiResponse(description="Instabilidade"),
-            500: OpenApiResponse(description="Erro no servidor"),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR_DESCRIPTION),
         },
         examples=[
             OpenApiExample(
@@ -82,19 +85,38 @@ EMPRESA_SCHEMA = extend_schema_view(
             ),
         ],
     ),
-    retrieve=extend_schema(exclude=True),
+    retrieve=extend_schema(
+        tags=["Empresa"],
+        summary="Detalhes de uma empresa",
+        description="Retorna os detalhes de uma empresa específica.",
+        operation_id="detalharEmpresa",
+        responses={
+            200: EmpresaSerializer,
+            401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
+            404: OpenApiResponse(description="Empresa não encontrada"),
+            503: OpenApiResponse(description="Instabilidade"),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR_DESCRIPTION),
+        },
+        examples=[
+            OpenApiExample(
+                name="Detalhes da empresa",
+                response_only=True,
+                value=_EMPRESA_EXEMPLO_SAIDA,
+            ),
+        ],
+    ),
     create=extend_schema(
         tags=["Empresa"],
         summary="Cria uma nova empresa",
         description="Adiciona uma nova empresa ao sistema.",
         operation_id="cadastrarEmpresa",
-        request=EmpresaCriarSerializer,
+        request=EmpresaCriarAtualizarSerializer,
         responses={
             201: OpenApiResponse(description="Empresa criada com sucesso"),
             400: OpenApiResponse(description="Dados inválidos"),
-            401: OpenApiResponse(description="Credenciais inválidas"),
+            401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
             503: OpenApiResponse(description="Instabilidade"),
-            500: OpenApiResponse(description="Erro no servidor"),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR_DESCRIPTION),
         },
         examples=[
             OpenApiExample(
@@ -109,4 +131,34 @@ EMPRESA_SCHEMA = extend_schema_view(
             ),
         ],
     ),
+    update=extend_schema(
+        tags=["Empresa"],
+        summary="Atualiza uma empresa",
+        description=(
+            "Atualiza integralmente os dados de uma empresa existente."
+        ),
+        operation_id="atualizarEmpresa",
+        request=EmpresaCriarAtualizarSerializer,
+        responses={
+            200: OpenApiResponse(description="Empresa atualizada com sucesso"),
+            400: OpenApiResponse(description="Dados inválidos"),
+            401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
+            404: OpenApiResponse(description="Empresa não encontrada"),
+            503: OpenApiResponse(description="Instabilidade"),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR_DESCRIPTION),
+        },
+        examples=[
+            OpenApiExample(
+                name="Exemplo de atualização de empresa",
+                request_only=True,
+                value=_EMPRESA_EXEMPLO_ENTRADA,
+            ),
+            OpenApiExample(
+                name="Empresa atualizada com sucesso",
+                response_only=True,
+                value=_EMPRESA_EXEMPLO_SAIDA,
+            ),
+        ],
+    ),
+    partial_update=extend_schema(exclude=True),
 )

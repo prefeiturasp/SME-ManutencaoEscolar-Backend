@@ -2,8 +2,11 @@
 
 from typing import Any
 
+from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 
+from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
 from apps.empresa.models import Empresa
 
 
@@ -15,9 +18,36 @@ class EmpresaRepository:
     def criar(self, dados: dict[str, Any]) -> dict[str, Any]:
         """Cria uma empresa e retorna seus dados em formato de dicionário."""
         empresa = self.model(**dados)
-        empresa.full_clean()
+        self._validar(empresa)
         empresa.save()
 
+        return self._serializar(empresa)
+
+    def atualizar(
+        self, empresa: Empresa, dados: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Atualiza os dados de uma empresa e retorna seu dicionário."""
+        for campo, valor in dados.items():
+            setattr(empresa, campo, valor)
+        self._validar(empresa)
+        empresa.save()
+
+        return self._serializar(empresa)
+
+    def _validar(self, empresa: Empresa) -> None:
+        """Executa full_clean traduzindo CNPJ duplicado em erro de domínio."""
+        try:
+            empresa.full_clean()
+        except ValidationError as exc:
+            erros_cnpj = getattr(exc, "error_dict", {}).get("cnpj", [])
+            if any(erro.code == "unique" for erro in erros_cnpj):
+                raise EmpresaCnpjDuplicadoError(
+                    EmpresaErrorMessages.CNPJ_JA_CADASTRADO
+                ) from exc
+            raise
+
+    def _serializar(self, empresa: Empresa) -> dict[str, Any]:
+        """Serializa uma instância de Empresa em dicionário."""
         dados_empresa = model_to_dict(empresa)
         dados_empresa["id"] = empresa.id
         dados_empresa["uuid"] = str(empresa.uuid)

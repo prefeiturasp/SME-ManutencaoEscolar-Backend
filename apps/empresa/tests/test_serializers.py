@@ -12,7 +12,7 @@ from apps.core.exceptions import (
 )
 from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.serializers import (
-    EmpresaCriarSerializer,
+    EmpresaCriarAtualizarSerializer,
     EmpresaSerializer,
 )
 
@@ -23,6 +23,7 @@ class TestEmpresaSerializer:
     """Testes para o serializer de leitura de empresa."""
 
     def test_deve_expor_campos_esperados(self):
+        """Deve expor os campos esperados."""
         serializer = EmpresaSerializer()
 
         assert set(serializer.fields.keys()) == {
@@ -39,14 +40,21 @@ class TestEmpresaSerializer:
             "complemento",
             "cidade",
             "estado",
+            "criado_por",
+            "criado_em",
+            "atualizado_por",
+            "atualizado_em",
         }
 
 
-class TestEmpresaCriarSerializer:
+class TestEmpresaCriarAtualizarSerializer:
     """Testes para o serializer de criação de empresa."""
 
     def test_deve_validar_payload_valido(self, empresa_payload_valido):
-        serializer = EmpresaCriarSerializer(data=empresa_payload_valido)
+        """Deve validar um payload válido."""
+        serializer = EmpresaCriarAtualizarSerializer(
+            data=empresa_payload_valido
+        )
 
         assert serializer.is_valid()
 
@@ -67,14 +75,16 @@ class TestEmpresaCriarSerializer:
         campo,
         valor_invalido,
     ):
+        """Deve invalidar campos com formato incorreto."""
         payload = {**empresa_payload_valido, campo: valor_invalido}
-        serializer = EmpresaCriarSerializer(data=payload)
+        serializer = EmpresaCriarAtualizarSerializer(data=payload)
 
         assert not serializer.is_valid()
         assert campo in serializer.errors
 
     def test_valida_cnpj_lanca_excecao(self):
-        serializer = EmpresaCriarSerializer()
+        """Deve lançar exceção ao validar CNPJ inválido."""
+        serializer = EmpresaCriarAtualizarSerializer()
 
         with (
             patch(
@@ -88,7 +98,8 @@ class TestEmpresaCriarSerializer:
         assert exc_info.value.detail[0] == EmpresaErrorMessages.CNPJ_INVALIDO
 
     def test_valida_cep_lanca_excecao(self):
-        serializer = EmpresaCriarSerializer()
+        """Deve lançar exceção ao validar CEP inválido."""
+        serializer = EmpresaCriarAtualizarSerializer()
 
         with (
             patch(
@@ -102,7 +113,8 @@ class TestEmpresaCriarSerializer:
         assert exc_info.value.detail[0] == EmpresaErrorMessages.CEP_INVALIDO
 
     def test_valida_link_rastreio_lanca_excecao(self):
-        serializer = EmpresaCriarSerializer()
+        """Deve lançar exceção ao validar link de rastreio inválido."""
+        serializer = EmpresaCriarAtualizarSerializer()
 
         with (
             patch(
@@ -120,6 +132,7 @@ class TestEmpresaCriarSerializer:
         )
 
     def test_valida_link_rastreio_com_valor_vazio(self):
-        serializer = EmpresaCriarSerializer()
+        """Deve permitir link de rastreio vazio."""
+        serializer = EmpresaCriarAtualizarSerializer()
 
         assert serializer.validate_link_rastreio("") == ""
