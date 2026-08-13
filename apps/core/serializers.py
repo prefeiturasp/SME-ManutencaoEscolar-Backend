@@ -125,7 +125,7 @@ class AlterarSenhaSerializer(serializers.Serializer):
 class ArquivoResponseSerializer(serializers.Serializer):
     """Representa os dados de um arquivo retornados pela API."""
 
-    id = serializers.UUIDField(
+    uuid = serializers.UUIDField(
         help_text="Identificador único do arquivo.",
     )
     nome = serializers.CharField(

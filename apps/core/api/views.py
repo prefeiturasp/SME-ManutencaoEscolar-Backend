@@ -278,7 +278,7 @@ class AlterarSenhaView(APIView):
 
 
 class AnexoView(APIView):
-    """_summary_."""
+    """View responsável pelo gerenciamento de anexos."""
 
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     lookup_field = "uuid"
@@ -319,13 +319,18 @@ class AnexoView(APIView):
         },
     )
     def post(self, request: Request) -> Response:
-        """_summary_."""
+        """Recebe, valida e armazena um arquivo enviado pelo usuário."""
         arquivo = request.FILES.get("arquivo")
+        id_usuario = request.user.id
+
+        if id_usuario is None:
+            return Response(
+                {"erro": "Usuário não autenticado."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         try:
-            registro = AnexoService().enviar_arquivo(
-                arquivo,
-            )
+            registro = AnexoService().enviar_arquivo(arquivo, id_usuario)
         except ValueError as erro:
             return Response(
                 {"erro": str(erro)},
@@ -333,13 +338,6 @@ class AnexoView(APIView):
             )
 
         return Response(
-            {
-                "id": str(registro.id),
-                "nome": registro.nome_original,
-                "tipo": registro.tipo,
-                "tipo_mime": registro.tipo_mime,
-                "tamanho": registro.tamanho_bytes,
-                "url": registro.url,
-            },
+            registro,
             status=status.HTTP_201_CREATED,
         )
