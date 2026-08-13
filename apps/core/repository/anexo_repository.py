@@ -7,39 +7,63 @@ from django.db import transaction
 from django.db.models import QuerySet
 
 from apps.core.models import Anexo
+from apps.usuarios.models.usuario import Usuario
 
 
 class AnexoRepository:
     """Repositório responsável pelo acesso aos anexos da aplicação."""
 
+    model = Anexo
+
     @staticmethod
+    @transaction.atomic
     def criar(
-        *,
         nome_original: str,
         tipo: str,
         tipo_mime: str,
         tamanho_bytes: int,
         arquivo: UploadedFile,
-    ) -> Anexo:
+        usuario_id: int,
+    ) -> dict[str, Any]:
         """Cria e persiste um novo anexo.
+
+        O arquivo é armazenado no backend configurado e o anexo é
+        associado ao usuário responsável pela criação.
 
         Args:
             nome_original: Nome original do arquivo enviado.
             tipo: Tipo do anexo conforme as opções definidas no modelo.
             tipo_mime: Tipo MIME do arquivo.
             tamanho_bytes: Tamanho do arquivo em bytes.
-            arquivo: Arquivo que será armazenado.
+            usuario_id: Identificador do usuário responsável pela criação
+            do anexo.
 
         Returns:
-            O anexo criado e persistido no banco de dados.
+            Dicionário contendo os dados do anexo criado:
+            - uuid: Identificador único do anexo.
+            - nome: Nome original do arquivo.
+            - tipo: Tipo do anexo.
+            - tipo_mime: Tipo MIME do arquivo.
+            - tamanho: Tamanho do arquivo em bytes.
+            - url: URL para acesso ao arquivo armazenado.
         """
-        return Anexo.objects.create(
+        usuario = Usuario.objects.get(id=usuario_id)
+        anexo = Anexo.objects.create(
             nome_original=nome_original,
             tipo=tipo,
             tipo_mime=tipo_mime,
             tamanho_bytes=tamanho_bytes,
             arquivo=arquivo,
+            criado_por=usuario,
         )
+        return {
+            "uuid": str(anexo.uuid),
+            "nome": anexo.nome_original,
+            "tipo": anexo.tipo,
+            "tipo_mime": anexo.tipo_mime,
+            "tamanho": anexo.tamanho_bytes,
+            "url": anexo.url,
+        }
 
     @staticmethod
     def buscar_por_uuid(
@@ -57,7 +81,6 @@ class AnexoRepository:
 
     @staticmethod
     def listar(
-        *,
         tipo: str | None = None,
     ) -> QuerySet[Anexo]:
         """Lista os anexos, opcionalmente filtrados por tipo.
