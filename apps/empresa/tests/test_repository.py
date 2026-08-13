@@ -3,6 +3,7 @@
 from unittest.mock import patch
 
 import pytest
+from django.core.exceptions import ValidationError
 
 from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
 from apps.empresa.models import Empresa
@@ -67,6 +68,21 @@ class TestEmpresaRepository:
 
         with pytest.raises(EmpresaCnpjDuplicadoError):
             repository.criar(empresa_payload_valido)
+
+    def test_criar_com_erro_de_validacao_nao_relacionado_a_cnpj_propaga_erro(
+        self, empresa_payload_valido
+    ):
+        """Deve propagar o erro original quando não for de CNPJ duplicado."""
+        repository = EmpresaRepository()
+        erro_validacao = ValidationError({"nome": ["campo obrigatório"]})
+
+        with (
+            patch.object(Empresa, "full_clean", side_effect=erro_validacao),
+            pytest.raises(ValidationError) as exc_info,
+        ):
+            repository.criar(empresa_payload_valido)
+
+        assert exc_info.value is erro_validacao
 
     @pytest.mark.django_db
     def test_atualizar_com_cnpj_duplicado_levanta_erro_de_dominio(
