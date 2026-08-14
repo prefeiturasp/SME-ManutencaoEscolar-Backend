@@ -137,19 +137,11 @@ class ArquivoResponseSerializer(serializers.Serializer):
     tipo_mime = serializers.CharField(
         help_text="Tipo MIME do arquivo.",
     )
-    tamanho_bytes = serializers.IntegerField(
+    tamanho = serializers.IntegerField(
         help_text="Tamanho do arquivo em bytes.",
     )
     url = serializers.URLField(
         help_text="URL para acesso ao arquivo armazenado.",
-    )
-
-
-class ErroResponseSerializer(serializers.Serializer):
-    """Representa a estrutura padrão de resposta para erros da API."""
-
-    erro = serializers.CharField(
-        help_text="Descrição do erro ocorrido durante a operação.",
     )
 
 

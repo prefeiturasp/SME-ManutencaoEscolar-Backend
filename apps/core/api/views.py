@@ -3,8 +3,6 @@
 from typing import Any
 
 from drf_spectacular.utils import (
-    OpenApiExample,
-    OpenApiResponse,
     extend_schema,
 )
 from rest_framework import status
@@ -21,6 +19,7 @@ from rest_framework_simplejwt.views import (
 )
 
 from apps.core.exceptions import (
+    AnexoArquivoError,
     EnvioEmailError,
     FalhaAutenticacaoError,
     InternalError,
@@ -33,13 +32,14 @@ from apps.core.schemas import (
     LOGIN,
     LOGOUT,
     REDEFINIR_SENHA,
+    UPLOAD_ARQUIVO,
 )
 from apps.core.serializers import (
     AlterarSenhaSerializer,
     ArquivoResponseSerializer,
+    ArquivoUploadSerializer,
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
-    ErroResponseSerializer,
     LoginResponseSerializer,
     LogoutSerializer,
     RecuperarSenhaSerializer,
@@ -283,61 +283,40 @@ class AnexoView(APIView):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     lookup_field = "uuid"
 
-    @extend_schema(
-        summary="Envia um arquivo",
-        description="Recebe um arquivo e realiza seu armazenamento.",
-        request={
-            "multipart/form-data": {
-                "type": "object",
-                "properties": {
-                    "arquivo": {
-                        "type": "string",
-                        "format": "binary",
-                        "description": "Arquivo a ser enviado (máx 10MB)",
-                    },
-                },
-                "required": [
-                    "arquivo",
-                ],
-            }
-        },
-        responses={
-            201: OpenApiResponse(
-                response=ArquivoResponseSerializer,
-                description="Arquivo enviado com sucesso.",
-            ),
-            400: OpenApiResponse(
-                response=ErroResponseSerializer,
-                description="Erro ao enviar o arquivo.",
-                examples=[
-                    OpenApiExample(
-                        "Arquivo inválido",
-                        value={"erro": "Tipo de arquivo não permitido."},
-                    ),
-                ],
-            ),
-        },
-    )
+    @UPLOAD_ARQUIVO
     def post(self, request: Request) -> Response:
         """Recebe, valida e armazena um arquivo enviado pelo usuário."""
-        arquivo = request.FILES.get("arquivo")
+        serializer = ArquivoUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        arquivo = serializer.validated_data["arquivo"]
         id_usuario = request.user.id
-
         if id_usuario is None:
             return Response(
-                {"erro": "Usuário não autenticado."},
+                {"detail": "Usuário não autenticado."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
         try:
-            registro = AnexoService().enviar_arquivo(arquivo, id_usuario)
-        except ValueError as erro:
+            anexo = AnexoService().enviar_arquivo(arquivo, id_usuario)
+            response = ArquivoResponseSerializer(anexo)
+        except AnexoArquivoError as erro:
             return Response(
-                {"erro": str(erro)},
+                {
+                    "title": erro.title,
+                    "detail": erro.detail,
+                },
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        except UsuarioNaoEncontradoError as erro:
+            return Response(
+                {
+                    "title": erro.title,
+                    "detail": erro.detail,
+                },
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         return Response(
-            registro,
+            response.data,
             status=status.HTTP_201_CREATED,
         )
