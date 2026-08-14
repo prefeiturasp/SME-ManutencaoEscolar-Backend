@@ -210,7 +210,7 @@ def test_salvar_remove_caminho_do_nome_e_inferir_mime(
         anexo_service._salvar(
             arquivo=upload,
             tipo=MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
-            nome_original="/tmp/arquivo.pdf",
+            nome_original="/caminho/arquivo.pdf",
             tamanho_bytes=9,
             id_usuario=10,
         )
@@ -284,11 +284,11 @@ def test_obter_url_retorna_url(anexo_service):
     """Verifica se retorna a URL do anexo."""
     anexo_service.repository.buscar_por_uuid.return_value = {
         "nome": "documento.pdf",
-        "url": "http://minio.local/documento.pdf",
+        "url": "https://minio.local/documento.pdf",
     }
 
     assert (
-        anexo_service.obter_url("uuid") == "http://minio.local/documento.pdf"
+        anexo_service.obter_url("uuid") == "https://minio.local/documento.pdf"
     )
 
 
