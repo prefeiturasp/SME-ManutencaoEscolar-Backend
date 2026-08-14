@@ -7,14 +7,15 @@ from typing import Any
 
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
-from django.db.models import QuerySet
 
 from apps.core.constants import (
     MAPA_EXTENSOES_TIPO_ARQUIVO,
     TAMANHO_MAXIMO_ARQUIVO,
 )
-from apps.core.models.anexo import Anexo
+from apps.core.exceptions import AnexoArquivoError
 from apps.core.repository.anexo_repository import AnexoRepository
+from apps.usuarios.exceptions import UsuarioNaoEncontradoError
+from apps.usuarios.repository.usuario_repository import UsuarioRepository
 
 
 class AnexoService:
@@ -27,12 +28,13 @@ class AnexoService:
         """Inicializa o serviço com o repositório de anexos.
 
         Args:
-            repository: Repositório utilizado para persistência e consulta
-                dos anexos. Quando não informado, uma instância padrão de
-                ``AnexoRepository`` é criada.
+            repository (AnexoRepository): Repositório utilizado para
+                persistência e consulta dos anexos. Quando não informado, uma
+                instância padrão de ``AnexoRepository`` é criada.
         """
         self.repository = repository or AnexoRepository()
 
+    @transaction.atomic
     def enviar_arquivo(
         self, arquivo: UploadedFile, id_usuario: int
     ) -> dict[str, Any]:
@@ -43,26 +45,32 @@ class AnexoService:
         persistido no armazenamento, sendo associado ao usuário informado.
 
         Args:
-            arquivo: Arquivo que será validado e armazenado.
-            id_usuario: Identificador do usuário responsável pelo envio
+            arquivo (UploadedFile): Arquivo que será validado e armazenado.
+            id_usuario (int): Identificador do usuário responsável pelo envio
                 do arquivo.
 
         Returns:
-            Dicionário contendo os dados do anexo criado e persistido,
-            incluindo seu identificador, nome, tipo, tipo MIME, tamanho
-            e URL para acesso ao arquivo.
+            dict[str, Any]: Dicionário contendo os dados do anexo criado e
+            persistido, incluindo seu identificador, nome, tipo, tipo MIME,
+            tamanho e URL para acesso ao arquivo.
 
         Raises:
-            ValueError: Se o arquivo for inválido, estiver vazio, possuir
-            uma extensão não permitida ou ultrapassar o tamanho máximo
+            AnexoArquivoError: Se o arquivo for inválido, estiver vazio,
+            possuir uma extensão não permitida ou ultrapassar o tamanho máximo
             permitido de 2 MB.
         """
+        if not UsuarioRepository.usuario_existe_por_id(id_usuario):
+            raise UsuarioNaoEncontradoError(
+                title="Usuário não encontrado",
+                detail="O usuário responsável pelo anexo não foi encontrado.",
+            )
         nome_arquivo, tamanho_bytes = self._validar_arquivo_recebido(
             arquivo,
         )
         if tamanho_bytes > TAMANHO_MAXIMO_ARQUIVO:
-            raise ValueError(
-                "O arquivo não pode ultrapassar 2 MB.",
+            raise AnexoArquivoError(
+                title="Arquivo muito grande",
+                detail="O arquivo não pode ultrapassar 2 MB.",
             )
 
         tipo = self._validar_extensao_arquivo(nome_arquivo)
@@ -75,35 +83,45 @@ class AnexoService:
             id_usuario=id_usuario,
         )
 
-    def buscar_por_id(
+    def buscar_por_uuid(
         self,
         identificador: str,
-    ) -> Anexo | None:
+    ) -> dict[str, Any]:
         """Busca um anexo pelo seu identificador.
 
         Args:
-            identificador: Identificador do anexo que será consultado.
+            identificador (str): Identificador UUID do anexo que será
+                consultado.
 
         Returns:
-            O anexo encontrado ou ``None`` caso não exista.
+             dict[str, Any]: Dicionário contendo os dados do anexo encontrado.
+
+        Raises:
+            AnexoArquivoError: Se o anexo não for encontrado.
         """
-        return self.repository.buscar_por_uuid(
-            identificador,
-        )
+        try:
+            return self.repository.buscar_por_uuid(
+                identificador,
+            )
+        except AnexoArquivoError as exc:
+            raise AnexoArquivoError(
+                title=exc.title,
+                detail=exc.detail,
+            ) from exc
 
     def listar(
         self,
-        *,
         tipo: str | None = None,
-    ) -> QuerySet[Anexo]:
+    ) -> dict[str, list[dict[str, Any]]]:
         """Lista os anexos, opcionalmente filtrados por tipo.
 
         Args:
-            tipo: Tipo do anexo utilizado como filtro. Quando ``None``,
+            tipo (str): Tipo do anexo utilizado como filtro. Quando ``None``,
                 retorna anexos de todos os tipos.
 
         Returns:
-            QuerySet contendo os anexos encontrados.
+            dict[str, list[dict[str, Any]]]: Dicionário contendo a chave
+                ``arquivos`` com a lista de anexos encontrados.
         """
         return self.repository.listar(
             tipo=tipo,
@@ -117,26 +135,14 @@ class AnexoService:
         """Exclui um anexo e seu arquivo armazenado.
 
         Args:
-            identificador: Identificador do anexo que será excluído.
+            identificador (str):  Identificador UUID do anexo que será
+                excluído.
 
         Raises:
-            ValueError: Se o anexo não for encontrado.
+            AnexoArquivoError: Se o anexo não for encontrado.
         """
-        arquivo = self.repository.buscar_por_uuid(
-            identificador,
-        )
-
-        if arquivo is None:
-            raise ValueError(
-                "Arquivo não encontrado.",
-            )
-
-        arquivo.arquivo.delete(
-            save=False,
-        )
-
         self.repository.excluir(
-            arquivo,
+            identificador,
         )
 
     def obter_url(
@@ -146,28 +152,29 @@ class AnexoService:
         """Obtém a URL de acesso a um arquivo armazenado.
 
         Args:
-            identificador: Identificador do anexo que será consultado.
+            identificador (str): Identificador UUID do anexo que será
+                consultado.
 
         Returns:
-            URL de acesso ao arquivo armazenado.
+            str: URL de acesso ao arquivo armazenado.
 
         Raises:
-            ValueError: Se o anexo não for encontrado.
+            AnexoArquivoError: Se o anexo não for encontrado.
         """
         arquivo = self.repository.buscar_por_uuid(
             identificador,
         )
-
-        if arquivo is None:
-            raise ValueError(
-                "Arquivo não encontrado.",
+        url = arquivo.get("url")
+        nome = arquivo.get("nome")
+        if not url:
+            raise AnexoArquivoError(
+                title="URL inválida.",
+                detail=f"Arquivo {nome} não possui URL para download",
             )
-
-        return arquivo.arquivo.url
+        return str(url)
 
     def _salvar(
         self,
-        *,
         arquivo: UploadedFile,
         tipo: str,
         nome_original: str,
@@ -183,17 +190,17 @@ class AnexoService:
         do nome original.
 
         Args:
-            arquivo: Arquivo que será armazenado.
-            tipo: Tipo do anexo que será registrado.
-            nome_original: Nome original validado do arquivo.
-            tamanho_bytes: Tamanho validado do arquivo em bytes.
-            id_usuario: Identificador do usuário responsável pela criação
+            arquivo (UploadedFile): Arquivo que será armazenado.
+            tipo (str): Tipo do anexo que será registrado.
+            nome_original (str):  Nome original validado do arquivo.
+            tamanho_bytes (int): Tamanho validado do arquivo em bytes.
+            id_usuario (int): Identificador do usuário responsável pela criação
             do anexo.
 
         Returns:
-            Dicionário contendo os dados do anexo criado e persistido,
-            incluindo seu identificador, nome, tipo, tipo MIME, tamanho
-            e URL para acesso ao arquivo.
+            dict[str, Any]: Dicionário contendo os dados do anexo criado e
+                persistido, incluindo seu identificador, nome, tipo, tipo MIME,
+                tamanho e URL para acesso ao arquivo.
         """
         nome_original = Path(
             nome_original,
@@ -229,10 +236,10 @@ class AnexoService:
         """Gera um nome único preservando a extensão do arquivo.
 
         Args:
-            nome_original: Nome original do arquivo.
+            nome_original (str): Nome original do arquivo.
 
         Returns:
-            Nome composto por um UUID e pela extensão original.
+            str: Nome composto por um UUID e pela extensão original.
         """
         extensao = Path(
             nome_original,
@@ -247,7 +254,7 @@ class AnexoService:
         """Obtém a extensão de um arquivo em letras minúsculas.
 
         Args:
-            nome_arquivo: Nome do arquivo cuja extensão será obtida.
+            nome_arquivo (str): Nome do arquivo cuja extensão será obtida.
 
         Returns:
             Extensão do arquivo, incluindo o ponto inicial.
@@ -263,36 +270,41 @@ class AnexoService:
         """Valida e retorna os metadados básicos de um arquivo.
 
         Args:
-            arquivo: Arquivo recebido pela aplicação.
+            arquivo (UploadedFile): Arquivo recebido pela aplicação.
 
         Returns:
-            Uma tupla contendo o nome do arquivo e seu tamanho em bytes.
+           tuple[str, int]:  Uma tupla contendo o nome do arquivo e seu
+            tamanho em bytes.
 
         Raises:
-            ValueError: Se o arquivo não for informado, não possuir nome,
-                não permitir determinar seu tamanho ou estiver vazio.
+            AnexoArquivoError: Se o arquivo não for informado, não possuir
+                nome, não permitir determinar seu tamanho ou estiver vazio.
         """
         if arquivo is None:
-            raise ValueError(
-                "Nenhum arquivo foi informado.",
+            raise AnexoArquivoError(
+                title="Arquivo não informado",
+                detail="Nenhum arquivo foi informado.",
             )
 
         nome = arquivo.name
         tamanho = arquivo.size
 
-        if (nome is None) or (not nome):
-            raise ValueError(
-                "O arquivo precisa possuir um nome.",
+        if not nome:
+            raise AnexoArquivoError(
+                title="Nome do arquivo ausente",
+                detail="O arquivo precisa possuir um nome.",
             )
 
         if tamanho is None:
-            raise ValueError(
-                "Não foi possível determinar o tamanho do arquivo.",
+            raise AnexoArquivoError(
+                title="Tamanho do arquivo indisponível",
+                detail="Não foi possível determinar o tamanho do arquivo.",
             )
 
         if tamanho <= 0:
-            raise ValueError(
-                "Não é permitido enviar um arquivo vazio.",
+            raise AnexoArquivoError(
+                title="Arquivo vazio",
+                detail="Não é permitido enviar um arquivo vazio.",
             )
 
         return nome, tamanho
@@ -308,11 +320,11 @@ class AnexoService:
             nome_arquivo (str): Nome do arquivo que terá a extensão validada.
 
         Raises:
-            ValueError: Quando a extensão do arquivo não está entre as
+            AnexoArquivoError: Quando a extensão do arquivo não está entre as
                 extensões permitidas.
 
         Returns:
-            str:  Tipo de arquivo correspondente à extensão informada.
+            str: Tipo de arquivo correspondente à extensão informada.
         """
         extensao = self._obter_extensao(
             nome_arquivo,
@@ -320,6 +332,19 @@ class AnexoService:
         try:
             return MAPA_EXTENSOES_TIPO_ARQUIVO[extensao]
         except KeyError as exc:
-            raise ValueError(
-                "O tipo de arquivo informado não é permitido.",
+            raise AnexoArquivoError(
+                title="Tipo de arquivo não permitido",
+                detail="O tipo de arquivo informado não é permitido.",
             ) from exc
+
+    def obter_para_download(self, identificador: str) -> dict[str, Any]:
+        """Obtém os dados de um anexo para realização do download.
+
+        Args:
+            identificador (str): Identificador UUID do anexo.
+
+        Returns:
+            dict[str, Any]: Dicionário contendo o arquivo, nome original e
+                tipo MIME.
+        """
+        return self.repository.buscar_para_download(identificador)

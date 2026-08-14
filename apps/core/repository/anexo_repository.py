@@ -4,9 +4,11 @@ from typing import Any
 
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import ObjectDoesNotExist
 
+from apps.core.exceptions import AnexoArquivoError
 from apps.core.models import Anexo
+from apps.usuarios.exceptions import UsuarioNaoEncontradoError
 from apps.usuarios.models.usuario import Usuario
 
 
@@ -15,9 +17,52 @@ class AnexoRepository:
 
     model = Anexo
 
-    @staticmethod
+    def _retorna_anexo_em_dicionario(self, anexo: Anexo) -> dict[str, Any]:
+        """Transforma uma instância de anexo para o formato de resposta.
+
+        Args:
+            anexo (Anexo): Instância do anexo que será convertida.
+
+        Returns:
+            dict[str, Any]: Dicionário contendo os principais dados do anexo.
+        """
+        return {
+            "uuid": str(anexo.uuid),
+            "nome": anexo.nome_original,
+            "tipo": anexo.tipo,
+            "tipo_mime": anexo.tipo_mime,
+            "tamanho": anexo.tamanho_bytes,
+            "url": anexo.url,
+        }
+
+    def _consulta_por_uuid(self, identificador: str) -> Anexo:
+        """Consulta um anexo pelo seu identificador UUID.
+
+        Realiza a busca de um anexo no banco de dados utilizando o UUID
+        como chave de busca.
+
+        Args:
+            identificador (str): Identificador UUID do anexo que será
+                consultado.
+
+        Raises:
+            AnexoArquivoError: Quando não existe um anexo com o UUID
+            informado no sistema.
+
+        Returns:
+            Anexo: Instância do modelo Anexo correspondente ao UUID informado.
+        """
+        try:
+            return Anexo.objects.get(uuid=identificador)
+        except ObjectDoesNotExist as exc:
+            raise AnexoArquivoError(
+                title="Arquivo não encontrado.",
+                detail="Arquivo não foi encontrado.",
+            ) from exc
+
     @transaction.atomic
     def criar(
+        self,
         nome_original: str,
         tipo: str,
         tipo_mime: str,
@@ -31,23 +76,36 @@ class AnexoRepository:
         associado ao usuário responsável pela criação.
 
         Args:
-            nome_original: Nome original do arquivo enviado.
-            tipo: Tipo do anexo conforme as opções definidas no modelo.
-            tipo_mime: Tipo MIME do arquivo.
-            tamanho_bytes: Tamanho do arquivo em bytes.
-            usuario_id: Identificador do usuário responsável pela criação
+            nome_original (str): Nome original do arquivo enviado.
+            tipo (str): Tipo do anexo conforme as opções definidas no modelo.
+            tipo_mime (str): Tipo MIME do arquivo.
+            tamanho_bytes (int): Tamanho do arquivo em bytes.
+            usuario_id (int): Identificador do usuário responsável pela criação
             do anexo.
 
         Returns:
-            Dicionário contendo os dados do anexo criado:
+            dict[str, Any]: Dicionário contendo os dados do anexo criado:
             - uuid: Identificador único do anexo.
             - nome: Nome original do arquivo.
             - tipo: Tipo do anexo.
             - tipo_mime: Tipo MIME do arquivo.
             - tamanho: Tamanho do arquivo em bytes.
             - url: URL para acesso ao arquivo armazenado.
+        Raises:
+            UsuarioNaoEncontradoError: Quando o usuário com o ID informado
+                não existe no sistema.
+            AnexoArquivoError: Quando ocorre um erro durante o armazenamento
+                do arquivo ou validação do anexo.
         """
-        usuario = Usuario.objects.get(id=usuario_id)
+        try:
+            usuario = Usuario.objects.get(
+                id=usuario_id,
+            )
+        except Usuario.DoesNotExist as exc:
+            raise UsuarioNaoEncontradoError(
+                title="Usuário não encontrado",
+                detail="O usuário responsável pelo anexo não foi encontrado.",
+            ) from exc
         anexo = Anexo.objects.create(
             nome_original=nome_original,
             tipo=tipo,
@@ -56,93 +114,104 @@ class AnexoRepository:
             arquivo=arquivo,
             criado_por=usuario,
         )
-        return {
-            "uuid": str(anexo.uuid),
-            "nome": anexo.nome_original,
-            "tipo": anexo.tipo,
-            "tipo_mime": anexo.tipo_mime,
-            "tamanho": anexo.tamanho_bytes,
-            "url": anexo.url,
-        }
+        return self._retorna_anexo_em_dicionario(anexo)
 
-    @staticmethod
     def buscar_por_uuid(
+        self,
         identificador: str,
-    ) -> Anexo | None:
+    ) -> dict[str, Any]:
         """Busca um anexo pelo seu identificador UUID.
 
         Args:
-            identificador: UUID do anexo que será consultado.
+            identificador (str): UUID do anexo que será consultado.
 
         Returns:
-            O anexo encontrado ou ``None`` caso não exista.
-        """
-        return Anexo.objects.filter(uuid=identificador).first()
+            dict[str, Any]: Dicionário contendo os dados do anexo encontrado.
 
-    @staticmethod
+        Raises:
+            AnexoArquivoError: Se o anexo não for encontrado
+        """
+        anexo = self._consulta_por_uuid(identificador)
+        return self._retorna_anexo_em_dicionario(anexo)
+
     def listar(
+        self,
         tipo: str | None = None,
-    ) -> QuerySet[Anexo]:
+    ) -> dict[str, list[dict[str, Any]]]:
         """Lista os anexos, opcionalmente filtrados por tipo.
 
         Args:
-            tipo: Tipo do anexo utilizado como filtro. Quando ``None``,
-                retorna anexos de todos os tipos.
+            tipo (str | None): Tipo do anexo utilizado como filtro.
+                Quando ``None``, retorna anexos de todos os tipos.
 
         Returns:
-            QuerySet contendo os anexos encontrados.
+            dict[str, list[dict[str, Any]]]: Dicionário contendo a chave
+            ``arquivos`` com a lista de anexos encontrados.
         """
-        consulta = Anexo.objects.all()
+        anexos = Anexo.objects.all()
 
         if tipo:
-            consulta = consulta.filter(tipo=tipo)
+            anexos = anexos.filter(tipo=tipo)
 
-        return consulta
+        return {
+            "arquivos": [
+                self._retorna_anexo_em_dicionario(anexo) for anexo in anexos
+            ]
+        }
 
-    @staticmethod
     @transaction.atomic
-    def atualizar(
-        arquivo: Anexo,
-        **dados: Any,
-    ) -> Anexo:
-        """Atualiza os campos informados de um anexo.
-
-        A atualização é executada dentro de uma transação atômica para
-        garantir que todas as alterações sejam persistidas ou nenhuma
-        delas seja aplicada.
-
-        Args:
-            arquivo: Instância do anexo que será atualizada.
-            **dados: Campos e respectivos valores que serão atualizados.
-
-        Returns:
-            O anexo após a atualização.
-        """
-        for campo, valor in dados.items():
-            setattr(arquivo, campo, valor)
-
-        arquivo.save(
-            update_fields=[
-                *dados.keys(),
-                "atualizado_em",
-            ],
-        )
-
-        return arquivo
-
-    @staticmethod
-    @transaction.atomic
-    def excluir(
-        arquivo: Anexo,
-    ) -> None:
+    def excluir(self, identificador: str) -> None:
         """Exclui um anexo do banco de dados.
 
         A operação é executada dentro de uma transação atômica.
 
         Args:
-            arquivo: Instância do anexo que será excluída.
+            identificador (str): Identificador UUID do anexo que será excluído.
+
+        Raises:
+            AnexoArquivoError: Se o anexo não for encontrado.
+        """
+        anexo = self._consulta_por_uuid(identificador)
+        anexo.arquivo.delete(
+            save=False,
+        )
+        anexo.delete()
+
+    def baixar(self, identificador: str) -> dict[str, Any]:
+        """Abre o arquivo de um anexo para realização do download.
+
+        Args:
+            identificador (str): Identificador UUID do anexo que será baixado.
+
+        Raises:
+            AnexoArquivoError: Se o anexo não for encontrado.
 
         Returns:
-            None.
+            dict[str, Any]: Dicionário contendo o arquivo aberto, seu nome
+                original e seu tipo MIME.
         """
-        arquivo.delete()
+        anexo = self._consulta_por_uuid(identificador)
+        return {
+            "arquivo": anexo.arquivo.open("rb"),
+            "nome": anexo.nome_original,
+            "tipo_mime": anexo.tipo_mime,
+        }
+
+    def buscar_para_download(self, identificador: str) -> dict[str, Any]:
+        """Busca os dados necessários para realizar o download de um anexo.
+
+        Args:
+            identificador (str): Identificador UUID do anexo.
+
+        Returns:
+            Dicionário contendo o arquivo, nome original e tipo MIME.
+
+        Raises:
+            AnexoArquivoError: Se o anexo não for encontrado.
+        """
+        anexo = self._consulta_por_uuid(identificador)
+        return {
+            "arquivo": anexo.arquivo,
+            "nome_original": anexo.nome_original,
+            "tipo_mime": anexo.tipo_mime,
+        }
