@@ -14,6 +14,8 @@ from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 
 URL_ARQUIVO = "https://minio.local/documento.pdf"
+TYPE_PDF = "application/pdf"
+DOCUMENTO_PDF = "documento.pdf"
 
 
 @pytest.fixture
@@ -122,14 +124,14 @@ def bloquear_uploads_minio(monkeypatch):
 def anexo() -> SimpleNamespace:
     """Fixture que representa um anexo persistido."""
     arquivo = Mock()
-    arquivo.name = "arquivos/documento.pdf"
+    arquivo.name = f"arquivos/{DOCUMENTO_PDF}"
     arquivo.url = URL_ARQUIVO
     arquivo.open.return_value = "stream"
     anexo = SimpleNamespace(
         uuid="12345678-1234-5678-1234-567812345678",
-        nome_original="documento.pdf",
+        nome_original=DOCUMENTO_PDF,
         tipo="documento",
-        tipo_mime="application/pdf",
+        tipo_mime=TYPE_PDF,
         tamanho_bytes=123,
         url=URL_ARQUIVO,
         arquivo=arquivo,
@@ -144,9 +146,9 @@ def mock_repository_anexo() -> Mock:
     repository = Mock()
     repository.criar.return_value = {
         "uuid": "12345678-1234-5678-1234-567812345678",
-        "nome": "documento.pdf",
+        "nome": DOCUMENTO_PDF,
         "tipo": MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
-        "tipo_mime": "application/pdf",
+        "tipo_mime": TYPE_PDF,
         "tamanho": 8,
         "url": URL_ARQUIVO,
     }
@@ -155,13 +157,13 @@ def mock_repository_anexo() -> Mock:
 
 @pytest.fixture
 def arquivo(
-    nome: str = "documento.pdf", conteudo: bytes = b"conteudo"
+    nome: str = DOCUMENTO_PDF, conteudo: bytes = b"conteudo"
 ) -> SimpleUploadedFile:
     """Cria um arquivo PDF para uso nos testes."""
     return SimpleUploadedFile(
         name=nome,
         content=conteudo,
-        content_type="application/pdf",
+        content_type=TYPE_PDF,
     )
 
 
