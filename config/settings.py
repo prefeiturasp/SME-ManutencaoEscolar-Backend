@@ -46,6 +46,9 @@ CORS_ALLOWED_ORIGINS = [] if CORS_ALLOW_ALL_ORIGINS else ALLOWED_HOSTS
 SME_API_EOL_URL = os.environ.get("SME_API_EOL_URL", "")
 SME_API_EOL_TOKEN = os.environ.get("SME_API_EOL_TOKEN", "")
 
+# Token de redefinição de senha expira em 6h
+PASSWORD_RESET_TIMEOUT = 21600
+
 # Application definition
 # ==========================================
 # APPS DO DJANGO (Framework)
@@ -68,6 +71,7 @@ APPS_TERCEIROS = [
     "drf_spectacular",
     "corsheaders",
     "django_celery_beat",
+    "django_minio_backend.apps.DjangoMinioBackendConfig",  # https://github.com/theriverman/django-minio-backend
 ]
 
 # ==========================================
@@ -197,6 +201,11 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ),
     "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.PaginacaoPadrao",
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.MultiPartParser",
+        "rest_framework.parsers.FormParser",
+    ],
 }
 # VERIFICAR ISSO SOBRE BLACK_LIST "rest_framework_simplejwt.token_blacklist"
 SIMPLE_JWT = {
@@ -268,17 +277,18 @@ LOGGING = {
     },
 }
 
-#
+# KEYBD
 KEYDB_HOST = os.environ.get("KEYDB_HOST", "")
 KEYDB_PORT = os.environ.get("KEYDB_PORT", "")
 KEYDB_HOST_PORT = os.environ.get("KEYDB_HOST_PORT", "")
 FLOWER_PORT = os.environ.get("FLOWER_PORT", "")
 FLOWER_HOST_PORT = os.environ.get("FLOWER_HOST_PORT", "")
 
+# CELERY
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "")
 
-CELERY_CONCURRENCY = os.environ.get("CELERY_BROKER_URL", "")
+CELERY_CONCURRENCY = os.environ.get("CELERY_CONCURRENCY", "")
 CELERY_LOG_LEVEL = os.environ.get("CELERY_LOG_LEVEL", "")
 
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -288,6 +298,7 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_ENABLE_UTC = USE_TZ
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
+# EMAIL
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
@@ -300,5 +311,52 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = f"Manutenção Escolar <{EMAIL_HOST_USER}>"
 
-# Token de redefinição de senha expira em 6h
-PASSWORD_RESET_TIMEOUT = 21600
+
+# MINIO
+def _parse_bool(value: str) -> bool:
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+MOCK_SENHA = "mock_secret_key"
+MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "localhost:9000")
+MINIO_ROOT_USER = os.environ.get("MINIO_ROOT_USER", "mock_access_key")
+MINIO_ROOT_PASSWORD = os.environ.get("MINIO_ROOT_PASSWORD", MOCK_SENHA)
+MINIO_USE_HTTPS = _parse_bool(os.environ.get("MINIO_USE_HTTPS", "false"))
+MINIO_BUCKET_NAME = os.environ.get("MINIO_BUCKET_NAME", "")
+MINIO_EXTERNAL_ENDPOINT = os.environ.get("MINIO_EXTERNAL_ENDPOINT", "")
+MINIO_EXTERNAL_ENDPOINT_USE_HTTPS = _parse_bool(
+    os.environ.get(
+        "MINIO_EXTERNAL_ENDPOINT_USE_HTTPS",
+        "false",
+    )
+)
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django_minio_backend.models.MinioBackend",
+        "OPTIONS": {
+            "MINIO_ENDPOINT": MINIO_ENDPOINT,
+            "MINIO_EXTERNAL_ENDPOINT": MINIO_EXTERNAL_ENDPOINT,
+            "MINIO_EXTERNAL_ENDPOINT_USE_HTTPS": (
+                MINIO_EXTERNAL_ENDPOINT_USE_HTTPS
+            ),
+            "MINIO_ACCESS_KEY": MINIO_ROOT_USER,
+            "MINIO_SECRET_KEY": MINIO_ROOT_PASSWORD,
+            "MINIO_USE_HTTPS": MINIO_USE_HTTPS,
+            "MINIO_URL_EXPIRY_HOURS": timedelta(
+                hours=int(os.environ.get("MINIO_URL_EXPIRY_HOURS", "1"))
+            ),
+            "MINIO_CONSISTENCY_CHECK_ON_START": False,
+            "MINIO_DEFAULT_BUCKET": MINIO_BUCKET_NAME,
+            "MINIO_PRIVATE_BUCKETS": [
+                MINIO_BUCKET_NAME,
+            ],
+            "MINIO_PUBLIC_BUCKETS": [],
+            "MINIO_BUCKET_CHECK_ON_SAVE": False,
+            "MINIO_URL_CACHING_ENABLED": False,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}

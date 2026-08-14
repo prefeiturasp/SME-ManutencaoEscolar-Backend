@@ -8,6 +8,7 @@ from drf_spectacular.utils import (
 
 from apps.core.serializers import (
     AlterarSenhaSerializer,
+    ArquivoResponseSerializer,
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
     LoginResponseSerializer,
@@ -320,4 +321,42 @@ ALTERAR_SENHA = extend_schema(
             },
         ),
     ],
+)
+
+UPLOAD_ARQUIVO = extend_schema(
+    tags=["Arquivos"],
+    summary="Envia um arquivo",
+    description="Recebe um arquivo e realiza seu armazenamento.",
+    operation_id="uploadArquivo",
+    request={
+        "multipart/form-data": {
+            "type": "object",
+            "properties": {
+                "arquivo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Arquivo a ser enviado (máx 10MB)",
+                },
+            },
+            "required": [
+                "arquivo",
+            ],
+        }
+    },
+    responses={
+        201: OpenApiResponse(
+            response=ArquivoResponseSerializer,
+            description="Arquivo enviado com sucesso.",
+        ),
+        400: OpenApiResponse(
+            response={},
+            description="Erro ao enviar o arquivo.",
+            examples=[
+                OpenApiExample(
+                    "Arquivo inválido",
+                    value={"erro": "Tipo de arquivo não permitido."},
+                ),
+            ],
+        ),
+    },
 )
