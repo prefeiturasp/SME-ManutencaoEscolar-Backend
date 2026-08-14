@@ -1,0 +1,86 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sme_manutencao_escolar_backend
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+    ports:
+      - "8002:8000"
+    restart: unless-stopped
+
+
+  keydb:
+    image: eqalpha/keydb:latest
+    container_name: keydb
+    command: keydb-server /etc/keydb/keydb.conf --appendonly yes
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+    ports:
+      - "${KEYDB_HOST_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "keydb-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    container_name: celery-worker
+    command: >
+      celery
+      -A config
+      worker
+      --loglevel=${CELERY_LOG_LEVEL:-INFO}
+      --concurrency=${CELERY_CONCURRENCY:-4}
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+    depends_on:
+      keydb:
+        condition: service_healthy
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    container_name: celery-beat
+    command: >
+      celery
+      -A config
+      beat
+      --scheduler django_celery_beat.schedulers:DatabaseScheduler
+      --loglevel=${CELERY_LOG_LEVEL:-INFO}
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+    depends_on:
+      keydb:
+        condition: service_healthy
+
+  flower:
+    image: mher/flower
+    container_name: flower
+    command: >
+      celery
+      --broker=${CELERY_BROKER_URL}
+      flower
+      --port=5555
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+    ports:
+      - "${FLOWER_HOST_PORT:-5555}:5555"
+    depends_on:
+      keydb:
+        condition: service_healthy

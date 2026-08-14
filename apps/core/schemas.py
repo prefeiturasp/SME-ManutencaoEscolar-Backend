@@ -1,0 +1,323 @@
+"""Esquemas OpenAPI para os endpoints de autenticação."""
+
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiResponse,
+    extend_schema,
+)
+
+from apps.core.serializers import (
+    AlterarSenhaSerializer,
+    AtualizarTokenSerializer,
+    AutenticacaoSerializer,
+    LoginResponseSerializer,
+    LogoutSerializer,
+    RecuperarSenhaSerializer,
+)
+
+TAG_AUTENTICACAO = "Autenticação"
+REFRESH_JWT = "<jwt-refresh>"
+SENHA = "********"
+
+LOGIN = extend_schema(
+    auth=[],
+    tags=[TAG_AUTENTICACAO],
+    summary="Login do usuário",
+    description="Autentica o usuário via CoreSSO e retorna token JWT.",
+    operation_id="autenticarUsuario",
+    request=AutenticacaoSerializer,
+    responses={
+        200: LoginResponseSerializer,
+        400: OpenApiResponse(description="Dados inválidos"),
+        401: OpenApiResponse(description="Credenciais inválidas"),
+        503: OpenApiResponse(description="Instabilidade"),
+        500: OpenApiResponse(description="Erro no servidor"),
+    },
+    examples=[
+        OpenApiExample(
+            name="Exemplo de autenticação",
+            request_only=True,
+            value={
+                "login": "1234567",
+                "senha": SENHA,
+            },
+        ),
+        OpenApiExample(
+            name="Login realizado com sucesso",
+            response_only=True,
+            value={
+                "refresh": REFRESH_JWT,
+                "access": "<jwt-access>",
+                "dados_usuario": {
+                    "id": 1,
+                    "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
+                    "nome": "Fulano da Silva",
+                    "email": "fulano@emial.com",
+                    "registro_funcional": "1234567",
+                    "cpf": "12345678901",
+                    "username": "1234567",
+                    "perfil_acesso": {
+                        "cargo": "DIRETOR DE ESCOLA",
+                        "perfil": {
+                            "codigo": "UE",
+                            "descricao": "Diretor Unidade Educacional",
+                        },
+                    },
+                    "diretoria_regional": "DRE Exemplo",
+                    "unidade_educacional": "EMEF Exemplo",
+                },
+            },
+        ),
+    ],
+)
+
+ATUALIZA_TOKEN = extend_schema(
+    tags=[TAG_AUTENTICACAO],
+    summary="Renovar tokens JWT",
+    description="Atualiza o token do usuário e retorna token JWT.",
+    operation_id="atualizaTokenUsuario",
+    request=AtualizarTokenSerializer,
+    responses={
+        200: OpenApiResponse(description="Credenciais validas"),
+        401: OpenApiResponse(
+            description="Refresh token inválido, expirado, "
+            "revogado ou associado a um usuário inexistente ou inativo."
+        ),
+    },
+    examples=[
+        OpenApiExample(
+            name="Exemplo atualização de token",
+            request_only=True,
+            value={"refresh": REFRESH_JWT},
+        ),
+        OpenApiExample(
+            name="Token atualizado com sucesso",
+            response_only=True,
+            status_codes=[200],
+            value={
+                "refresh": REFRESH_JWT,
+                "access": "<jwt-access>",
+            },
+        ),
+        OpenApiExample(
+            name="Token inválido ou usuário inválido",
+            response_only=True,
+            status_codes=[401],
+            value={"detail": "Mensagem"},
+        ),
+    ],
+)
+
+LOGOUT = extend_schema(
+    tags=[TAG_AUTENTICACAO],
+    summary="Realizar logout",
+    description="Realiza o logout do usuário autenticado revogando o refresh"
+    " token informado",
+    operation_id="logoutUsuario",
+    request=LogoutSerializer,
+    responses={
+        200: OpenApiResponse(
+            description="Credenciais validasLogout realizado com sucesso"
+        ),
+        401: OpenApiResponse(
+            description="Usuário autenticado inválido ou refresh token"
+            "inválido, revogado ou não pertencente ao usuário autenticado."
+        ),
+    },
+    examples=[
+        OpenApiExample(
+            name="Exemplo Logout",
+            request_only=True,
+            value={"refresh": REFRESH_JWT},
+        ),
+        OpenApiExample(
+            name="Logout realizado com sucesso",
+            response_only=True,
+            status_codes=[205],
+            value={
+                "detail": "Logout realizado com sucesso.",
+            },
+        ),
+        OpenApiExample(
+            name="Refresh token inválido",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "detail": ("O refresh token é inválido ou já foi revogado."),
+            },
+        ),
+        OpenApiExample(
+            name="Token não pertence ao usuário",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "detail": ("O token não pertence ao usuário autenticado."),
+            },
+        ),
+        OpenApiExample(
+            name="Usuário autenticado inválido",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "detail": "Usuário autenticado inválido.",
+            },
+        ),
+    ],
+)
+
+REDEFINIR_SENHA = extend_schema(
+    auth=[],
+    tags=[TAG_AUTENTICACAO],
+    summary="Solicitar recuperação de senha",
+    description=(
+        "Solicita a recuperação de senha de um usuário a partir do "
+        "registro funcional ou CPF. Caso o usuário seja encontrado, "
+        "um e-mail contendo o link para redefinição da senha será enviado."
+    ),
+    operation_id="solicitarRecuperacaoSenha",
+    request=RecuperarSenhaSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=(
+                "Solicitação processada com sucesso. Retorna o endereço "
+                "de e-mail mascarado para o qual a mensagem de "
+                "recuperação foi enviada."
+            ),
+            response={
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "mar********@email.com",
+                    },
+                },
+            },
+        ),
+        404: OpenApiResponse(
+            description="Não existe usuário cadastrado com o CPF ou registro "
+            "funcional informado."
+        ),
+        503: OpenApiResponse(
+            description="Não foi possível enviar o e-mail de recuperação de "
+            "senha."
+        ),
+    },
+    examples=[
+        OpenApiExample(
+            name="Solicitação de recuperação de senha",
+            request_only=True,
+            value={
+                "registro_funcional_ou_cpf": "1234567",
+            },
+        ),
+        OpenApiExample(
+            name="Recuperação solicitada com sucesso",
+            response_only=True,
+            status_codes=["200"],
+            value={
+                "email": "mar********@email.com",
+            },
+        ),
+        OpenApiExample(
+            name="Usuário não encontrado",
+            response_only=True,
+            status_codes=["404"],
+            value={
+                "detail": "Não existe usuário com este CPF ou RF",
+            },
+        ),
+        OpenApiExample(
+            name="Falha ao enviar e-mail",
+            response_only=True,
+            status_codes=["503"],
+            value={
+                "detail": "Não foi possível enviar o e-mail de recuperação de"
+                " senha.",
+            },
+        ),
+    ],
+)
+
+
+ALTERAR_SENHA = extend_schema(
+    auth=[],
+    tags=[TAG_AUTENTICACAO],
+    summary="Alterar senha",
+    description=(
+        "Altera a senha do usuário a partir do token de recuperação "
+        "enviado por e-mail. O token deve ser válido e não estar expirado."
+    ),
+    operation_id="alterarSenhaUsuario",
+    request=AlterarSenhaSerializer,
+    responses={
+        200: OpenApiResponse(description="Senha alterada com sucesso."),
+        400: OpenApiResponse(description="Dados inválidos."),
+        401: OpenApiResponse(
+            description=(
+                "Token de recuperação inválido ou expirado, ou falha "
+                "de autenticação durante a alteração da senha."
+            )
+        ),
+        404: OpenApiResponse(description="Usuário não encontrado."),
+        502: OpenApiResponse(description="Falha na integração com o CoreSSO."),
+    },
+    examples=[
+        OpenApiExample(
+            name="Alteração de senha",
+            request_only=True,
+            value={
+                "registro_funcional_ou_cpf": "1234567",
+                "token": "<token-recuperacao>",
+                "senha": SENHA,
+                "confirmacao_senha": SENHA,
+            },
+        ),
+        OpenApiExample(
+            name="Senha alterada com sucesso",
+            response_only=True,
+            status_codes=[200],
+            value={
+                "detail": "Senha alterada com sucesso.",
+            },
+        ),
+        OpenApiExample(
+            name="Usuário não encontrado",
+            response_only=True,
+            status_codes=[404],
+            value={
+                "title": "Usuário não encontrado.",
+                "detail": "Usuário não encontrado ou inválido",
+            },
+        ),
+        OpenApiExample(
+            name="Token inválido ou expirado",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "title": "Token inválido.",
+                "detail": (
+                    "Por segurança, o link de redefinição tem validade de "
+                    "6 horas. Solicite um novo para redefinir sua senha."
+                ),
+            },
+        ),
+        OpenApiExample(
+            name="Falha ao alterar senha",
+            response_only=True,
+            status_codes=[401],
+            value={
+                "title": "Erro ao alterar senha",
+                "detail": "Usuário ou senha incorretos.",
+            },
+        ),
+        OpenApiExample(
+            name="Falha na integração",
+            response_only=True,
+            status_codes=[502],
+            value={
+                "title": "Erro ao alterar senha",
+                "detail": "Erro ao alterar a senha no servidor.",
+            },
+        ),
+    ],
+)
