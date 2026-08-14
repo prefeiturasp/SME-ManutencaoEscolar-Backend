@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Serviços responsáveis pela gerencia dos anexos."""
 
 import mimetypes
 import uuid

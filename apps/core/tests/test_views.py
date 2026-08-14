@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 from uuid import UUID
 
 import pytest
@@ -7,6 +9,7 @@ from rest_framework.test import force_authenticate
 
 from apps.core.api.views import (
     AlterarSenhaView,
+    AnexoView,
     AtualizarTokenView,
     HealthCheckView,
     LoginView,
@@ -14,6 +17,7 @@ from apps.core.api.views import (
     RedefinirSenhaView,
 )
 from apps.core.exceptions import (
+    AnexoArquivoError,
     EnvioEmailError,
     FalhaAutenticacaoError,
     InternalError,
@@ -733,3 +737,130 @@ def test_alterar_senha_payload_invalido(api_factory):
     response = AlterarSenhaView.as_view()(request)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_post_cria_anexo_sem_enviar_arquivo_para_o_minio(
+    api_factory, usuario_ativo, arquivo
+):
+    """Verifica se cria o anexo sem realizar upload no MinIO."""
+    anexo = {
+        "uuid": "12345678-1234-5678-1234-567812345678",
+        "nome": "documento.pdf",
+        "tipo": "documento",
+        "tipo_mime": "application/pdf",
+        "tamanho": 9,
+        "url": "http://minio.local/documento.pdf",
+    }
+    request = api_factory.post(
+        "/upload/",
+        {"arquivo": arquivo},
+        format="multipart",
+    )
+    force_authenticate(request, user=usuario_ativo)
+
+    service = Mock()
+    service.enviar_arquivo.return_value = anexo
+
+    with (
+        patch(
+            "apps.core.api.views.AnexoService",
+            return_value=service,
+        ) as service_class,
+        patch(
+            "apps.core.models.anexo.Anexo.arquivo.field.storage._save",
+            autospec=True,
+            return_value="arquivos/documento.pdf",
+        ) as minio_save,
+    ):
+        response = AnexoView.as_view()(request)
+
+    assert response.status_code == 201
+    assert response.data["nome"] == "documento.pdf"
+    service_class.assert_called_once_with()
+    service.enviar_arquivo.assert_called_once()
+    minio_save.assert_not_called()
+
+
+def test_post_rejeita_usuario_nao_autenticado(api_factory, arquivo):
+    """Verifica se rejeita usuário sem identificador."""
+    request = api_factory.post(
+        "/upload/",
+        {"arquivo": arquivo},
+        format="multipart",
+    )
+    usuario_sem_id = SimpleNamespace(
+        id=None,
+        is_authenticated=True,
+    )
+    force_authenticate(request, user=usuario_sem_id)
+
+    with patch("apps.core.api.views.AnexoService") as service_class:
+        response = AnexoView.as_view()(request)
+
+    assert response.status_code == 401
+    assert response.data == {"detail": "Usuário não autenticado."}
+    service_class.assert_not_called()
+
+
+def test_post_retorna_400_para_erro_de_arquivo(
+    api_factory, usuario_ativo, arquivo
+):
+    """Verifica se retorna 400 quando ocorre erro no arquivo."""
+    request = api_factory.post(
+        "/upload/",
+        {"arquivo": arquivo},
+        format="multipart",
+    )
+    force_authenticate(request, user=usuario_ativo)
+
+    erro = AnexoArquivoError(
+        title="Tipo inválido",
+        detail="Arquivo não permitido.",
+    )
+
+    service = Mock()
+    service.enviar_arquivo.side_effect = erro
+
+    with patch(
+        "apps.core.api.views.AnexoService",
+        return_value=service,
+    ):
+        response = AnexoView.as_view()(request)
+
+    assert response.status_code == 400
+    assert response.data == {
+        "title": "Tipo inválido",
+        "detail": "Arquivo não permitido.",
+    }
+
+
+def test_post_retorna_404_para_usuario_inexistente(
+    api_factory, usuario_ativo, arquivo
+):
+    """Verifica se retorna 404 quando o usuário não é encontrado."""
+    request = api_factory.post(
+        "/upload/",
+        {"arquivo": arquivo},
+        format="multipart",
+    )
+    force_authenticate(request, user=usuario_ativo)
+
+    erro = UsuarioNaoEncontradoError(
+        title="Usuário não encontrado",
+        detail="Usuário inexistente.",
+    )
+
+    service = Mock()
+    service.enviar_arquivo.side_effect = erro
+
+    with patch(
+        "apps.core.api.views.AnexoService",
+        return_value=service,
+    ):
+        response = AnexoView.as_view()(request)
+
+    assert response.status_code == 404
+    assert response.data == {
+        "title": "Usuário não encontrado",
+        "detail": "Usuário inexistente.",
+    }
