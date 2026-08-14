@@ -35,7 +35,7 @@ def test_url_delega_para_o_storage():
     """Verifica se retorna a URL fornecida pelo storage."""
     anexo = Anexo()
     anexo.arquivo = SimpleNamespace(
-        url="http://minio.local/arquivos/uuid.pdf",
+        url="https://minio.local/arquivos/uuid.pdf",
     )
 
-    assert anexo.url == "http://minio.local/arquivos/uuid.pdf"
+    assert anexo.url == "https://minio.local/arquivos/uuid.pdf"

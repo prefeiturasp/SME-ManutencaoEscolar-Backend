@@ -749,7 +749,7 @@ def test_post_cria_anexo_sem_enviar_arquivo_para_o_minio(
         "tipo": "documento",
         "tipo_mime": "application/pdf",
         "tamanho": 9,
-        "url": "http://minio.local/documento.pdf",
+        "url": "https://minio.local/documento.pdf",
     }
     request = api_factory.post(
         "/upload/",
