@@ -1,0 +1,46 @@
+# language: pt
+
+Funcionalidade: Acesso de usuário diretor
+
+  Contexto:
+    Validação dos cenários e campos obrigatórios
+  
+  Esquema do Cenário: Validar: <caso>
+    Dado eu acesso o sistema com a visualização "web"
+    E realizo login no sistema Manutenção Escolar com perfil "Diretor"
+    Então o sistema valida o "<campo>" no acesso
+
+    Exemplos:
+      | campo | caso                         |
+      | login | Acesso realizado com sucesso |
+
+  Esquema do Cenário: Validar: <caso>
+    Dado eu acesso o sistema Manutenção Escolar
+    Quando tento clicar em entrar na tela de login
+    Então o sistema valida "<campo>" como obrigatório no acesso
+
+    Exemplos:
+      | campo | caso                         |
+      | login | Campo de usuário obrigatório |
+      | senha | Campo de senha obrigatório   |
+      | ambos | Usuário e senha obrigatórios |
+
+  Esquema do Cenário: Validar: <caso>
+    Dado eu acesso o sistema Manutenção Escolar
+    Quando tento clicar em entrar na tela de login
+    Então o sistema valida a quantidade "<campo>" de caracteres com o valor "<dado>" no acesso
+
+    Exemplos:
+      | dado  | campo | caso                              |
+      | teste | login | Mínimo de 7 caracteres no usuário |
+      | 123   | senha | Mínimo de 4 caracteres na senha   |
+
+  Esquema do Cenário: Validar: <caso>
+    Dado eu acesso o sistema Manutenção Escolar
+    Quando tento clicar em entrar na tela de login
+    Então o sistema valida "<campo>" inválido "<dado>" no acesso
+
+    Exemplos:
+      | dado  | campo   | caso                          |
+      | teste | login   | Não permitir usuário inválido |
+      | 123   | senha   | Não permitir senha inválida   |

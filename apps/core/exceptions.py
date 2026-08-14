@@ -57,3 +57,13 @@ class EnvioEmailError(Exception):
         self.detail = detail
 
         super().__init__(title, detail)
+
+
+class AnexoArquivoError(Exception):
+    """Exceção para erros relacionados ao processamento de arquivos."""
+
+    def __init__(self, title: str, detail: str) -> None:
+        """Inicializa uma exceção de arquivo."""
+        self.title = title
+        self.detail = detail
+        super().__init__(title, detail)

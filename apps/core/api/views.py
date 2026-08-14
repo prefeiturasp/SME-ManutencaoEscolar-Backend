@@ -6,6 +6,7 @@ from drf_spectacular.utils import (
     extend_schema,
 )
 from rest_framework import status
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import (
     AllowAny,
 )
@@ -18,6 +19,7 @@ from rest_framework_simplejwt.views import (
 )
 
 from apps.core.exceptions import (
+    AnexoArquivoError,
     EnvioEmailError,
     FalhaAutenticacaoError,
     InternalError,
@@ -30,15 +32,19 @@ from apps.core.schemas import (
     LOGIN,
     LOGOUT,
     REDEFINIR_SENHA,
+    UPLOAD_ARQUIVO,
 )
 from apps.core.serializers import (
     AlterarSenhaSerializer,
+    ArquivoResponseSerializer,
+    ArquivoUploadSerializer,
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
     LoginResponseSerializer,
     LogoutSerializer,
     RecuperarSenhaSerializer,
 )
+from apps.core.services.anexo_service import AnexoService
 from apps.core.services.autenticacao_eol_service import AutenticacaoEOLService
 from apps.core.services.token_service import TokenService
 from apps.usuarios.exceptions import (
@@ -268,4 +274,49 @@ class AlterarSenhaView(APIView):
         return Response(
             {"detail": "Senha alterada com sucesso."},
             status=status.HTTP_200_OK,
+        )
+
+
+class AnexoView(APIView):
+    """View responsável pelo gerenciamento de anexos."""
+
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    lookup_field = "uuid"
+
+    @UPLOAD_ARQUIVO
+    def post(self, request: Request) -> Response:
+        """Recebe, valida e armazena um arquivo enviado pelo usuário."""
+        serializer = ArquivoUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        arquivo = serializer.validated_data["arquivo"]
+        id_usuario = request.user.id
+        if id_usuario is None:
+            return Response(
+                {"detail": "Usuário não autenticado."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        try:
+            anexo = AnexoService().enviar_arquivo(arquivo, id_usuario)
+            response = ArquivoResponseSerializer(anexo)
+        except AnexoArquivoError as erro:
+            return Response(
+                {
+                    "title": erro.title,
+                    "detail": erro.detail,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except UsuarioNaoEncontradoError as erro:
+            return Response(
+                {
+                    "title": erro.title,
+                    "detail": erro.detail,
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(
+            response.data,
+            status=status.HTTP_201_CREATED,
         )

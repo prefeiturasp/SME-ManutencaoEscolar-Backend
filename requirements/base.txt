@@ -11,3 +11,4 @@ celery[redis]>=5.4,<6
 flower>=2.0,<3
 django-celery-beat>=2.8,<2.9
 django-filter>=25.2,<26
+django-minio-backend>=4.4,<4.5

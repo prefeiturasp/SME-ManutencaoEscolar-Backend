@@ -15,7 +15,7 @@ up: ## Inicializa os containers em segundo plano (background)
 	$(DC) up -d
 
 up-dev: ## Sobe apenas backend e postgres (útil para desenvolvimento rápido)
-	$(DC) up -d backend postgres
+	$(DC) up backend postgres minio minio-init
 
 down: ## Para e remove todos os containers, redes e volumes locais
 	$(DC) down

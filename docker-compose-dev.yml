@@ -35,6 +35,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
 
     restart: unless-stopped
 
@@ -187,9 +189,55 @@ services:
       - backend_network
 
 
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    env_file:
+      - .env
+    environment:
+      MINIO_ROOT_USER:  ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - backend_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+  minio-init:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+
+    container_name: minio-init
+
+    env_file:
+      - .env
+
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+
+    volumes:
+      - .:/app
+
+    command: python manage.py initialize_buckets
+
+    depends_on:
+      minio:
+        condition: service_healthy
+
+    networks:
+      - backend_network
 volumes:
   postgres_data:
   keydb_data:
+  minio_data:
 
 networks:
   backend_network:

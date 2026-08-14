@@ -34,3 +34,4 @@ repos:
           - django-filter
           - django-celery-beat
           - djangorestframework-simplejwt
+          - django-minio-backend
