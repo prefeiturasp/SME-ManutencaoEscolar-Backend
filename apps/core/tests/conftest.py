@@ -13,6 +13,8 @@ from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 
+URL_ARQUIVO = "https://minio.local/documento.pdf"
+
 
 @pytest.fixture
 def api_factory():
@@ -121,7 +123,7 @@ def anexo() -> SimpleNamespace:
     """Fixture que representa um anexo persistido."""
     arquivo = Mock()
     arquivo.name = "arquivos/documento.pdf"
-    arquivo.url = "http://minio.local/documento.pdf"
+    arquivo.url = URL_ARQUIVO
     arquivo.open.return_value = "stream"
     anexo = SimpleNamespace(
         uuid="12345678-1234-5678-1234-567812345678",
@@ -129,7 +131,7 @@ def anexo() -> SimpleNamespace:
         tipo="documento",
         tipo_mime="application/pdf",
         tamanho_bytes=123,
-        url="http://minio.local/documento.pdf",
+        url=URL_ARQUIVO,
         arquivo=arquivo,
     )
     anexo.delete = Mock()
@@ -146,7 +148,7 @@ def mock_repository_anexo() -> Mock:
         "tipo": MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
         "tipo_mime": "application/pdf",
         "tamanho": 8,
-        "url": "http://minio.local/documento.pdf",
+        "url": URL_ARQUIVO,
     }
     return repository
 

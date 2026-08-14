@@ -20,7 +20,7 @@ def test_retorna_anexo_em_dicionario(anexo):
         "tipo": "documento",
         "tipo_mime": "application/pdf",
         "tamanho": 123,
-        "url": "http://minio.local/documento.pdf",
+        "url": "https://minio.local/documento.pdf",
     }
 
 
