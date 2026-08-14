@@ -177,26 +177,6 @@ class AnexoRepository:
         )
         anexo.delete()
 
-    def baixar(self, identificador: str) -> dict[str, Any]:
-        """Abre o arquivo de um anexo para realização do download.
-
-        Args:
-            identificador (str): Identificador UUID do anexo que será baixado.
-
-        Raises:
-            AnexoArquivoError: Se o anexo não for encontrado.
-
-        Returns:
-            dict[str, Any]: Dicionário contendo o arquivo aberto, seu nome
-                original e seu tipo MIME.
-        """
-        anexo = self._consulta_por_uuid(identificador)
-        return {
-            "arquivo": anexo.arquivo.open("rb"),
-            "nome": anexo.nome_original,
-            "tipo_mime": anexo.tipo_mime,
-        }
-
     def buscar_para_download(self, identificador: str) -> dict[str, Any]:
         """Busca os dados necessários para realizar o download de um anexo.
 

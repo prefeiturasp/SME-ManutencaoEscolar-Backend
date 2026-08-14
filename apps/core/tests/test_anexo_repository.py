@@ -198,24 +198,6 @@ def test_excluir_deleta_arquivo_e_registro(anexo):
     anexo.delete.assert_called_once_with()
 
 
-def test_baixar_abre_arquivo(anexo):
-    """Verifica se abre o arquivo para download."""
-    repository = AnexoRepository()
-    with patch.object(
-        repository,
-        "_consulta_por_uuid",
-        return_value=anexo,
-    ):
-        resultado = repository.baixar(anexo.uuid)
-
-    assert resultado == {
-        "arquivo": "stream",
-        "nome": "documento.pdf",
-        "tipo_mime": "application/pdf",
-    }
-    anexo.arquivo.open.assert_called_once_with("rb")
-
-
 def test_buscar_para_download(anexo):
     """Verifica se retorna os dados necessários para o download."""
     repository = AnexoRepository()
