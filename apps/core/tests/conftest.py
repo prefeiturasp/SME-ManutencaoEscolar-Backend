@@ -108,7 +108,7 @@ def usuario_ativo_dict(usuario_ativo):
     }
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="module")
 def bloquear_uploads_minio(monkeypatch):
     """Impede qualquer tentativa de escrita no bucket durante testes."""
     from apps.core.models.anexo import Anexo
