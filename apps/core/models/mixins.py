@@ -70,6 +70,13 @@ class SoftDeleteMixin(models.Model):
     deletado_em = models.DateTimeField(
         "Deletado em", default=None, null=True, blank=True
     )
+    deletado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="%(app_label)s_%(class)s_deletado",
+    )
 
     objects = CustomManager()
     dm_objects = models.Manager()
@@ -77,16 +84,20 @@ class SoftDeleteMixin(models.Model):
     class Meta:
         abstract = True
 
-    def delete(
-        self, using: Any | None = None, keep_parents: bool = False
+    def soft_delete(
+        self,
+        using: Any | None = None,
+        keep_parents: bool = False,
+        usuario: Any | None = None,
     ) -> tuple[int, dict[str, int]]:
         """Marca o registro como deletado sem removê-lo fisicamente."""
         _ = using, keep_parents
         self.deletado_em = timezone.now()
-        self.save(update_fields=["deletado_em"])
+        self.deletado_por = usuario
+        self.save(update_fields=["deletado_em", "deletado_por"])
         return 1, {self._meta.label: 1}
 
-    def hard_delete(
+    def delete(
         self, using: str | None = None, keep_parents: bool = False
     ) -> tuple[int, dict[str, int]]:
         """Remove o registro fisicamente do banco de dados."""
