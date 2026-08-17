@@ -102,3 +102,26 @@ class TestEmpresaService:
         repository.atualizar.assert_called_once_with(
             instancia, {**dados_atualizados, "atualizado_por": None}
         )
+
+    def test_deletar_delega_para_repository(self, empresa_payload_valido):
+        """Deve delegar a exclusão da empresa ao repositório."""
+        repository = Mock(spec=EmpresaRepository)
+        instancia = Empresa(**empresa_payload_valido)
+        service = EmpresaService(repository=repository)
+        usuario = Mock()
+
+        service.deletar(instancia, usuario)
+
+        repository.deletar.assert_called_once_with(instancia, usuario)
+
+    def test_deletar_sem_usuario_delega_usuario_como_none(
+        self, empresa_payload_valido
+    ):
+        """Deve delegar usuário None ao repositório quando não informado."""
+        repository = Mock(spec=EmpresaRepository)
+        instancia = Empresa(**empresa_payload_valido)
+        service = EmpresaService(repository=repository)
+
+        service.deletar(instancia)
+
+        repository.deletar.assert_called_once_with(instancia, None)

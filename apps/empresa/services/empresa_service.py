@@ -59,3 +59,16 @@ class EmpresaService:
         return self.repository.atualizar(
             empresa, {**dados, "atualizado_por": usuario}
         )
+
+    def deletar(
+        self, empresa: Empresa, usuario: Usuario | None = None
+    ) -> None:
+        """Realiza a exclusão lógica de uma empresa.
+
+        Registra o usuário logado como responsável pela exclusão.
+
+        Args:
+            empresa: Instância da empresa a ser deletada.
+            usuario: Usuário logado responsável pela exclusão.
+        """
+        self.repository.deletar(empresa, usuario)

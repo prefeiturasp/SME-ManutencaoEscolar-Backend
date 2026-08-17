@@ -252,6 +252,27 @@ def test_listagem_retorna_empresas_cadastrados(
     assert dados["results"][0]["nome"] == empresa_payload_valido["nome"]
 
 
+def test_remocao_deleta_empresa_e_some_da_listagem(
+    api_client, empresa_payload_valido
+):
+    """Testa se a remoção via API faz a exclusão lógica da empresa."""
+    empresa_existente = Empresa.objects.create(**empresa_payload_valido)
+
+    response = api_client.delete(f"/api/v1/empresas/{empresa_existente.uuid}/")
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert not Empresa.objects.filter(uuid=empresa_existente.uuid).exists()
+
+
+def test_remocao_de_empresa_inexistente_retorna_404(api_client):
+    """Testa se a remoção de uma empresa inexistente retorna 404."""
+    response = api_client.delete(
+        "/api/v1/empresas/7ef06bb8-418f-43d1-bfe8-c392f13a2b1f/"
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
 def test_listagem_filtra_por_nome(api_client, empresa_payload_valido):
     """Testa se a listagem filtra empresas pelo nome."""
     Empresa.objects.create(**empresa_payload_valido)
