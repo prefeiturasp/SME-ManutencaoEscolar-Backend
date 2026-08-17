@@ -11,7 +11,6 @@ class DiretoriaRegional(models.Model):
     abreviacao = models.CharField(max_length=50)
 
     class Meta:
-        db_table = "diretoria_regional"
         verbose_name = "Diretoria Regional"
         verbose_name_plural = "Diretorias Regionais"
 

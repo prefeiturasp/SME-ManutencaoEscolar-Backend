@@ -7,7 +7,7 @@ import logging
 import requests
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.core.models import DiretoriaRegional as Dre
+from apps.escola.models import DiretoriaRegional as Dre
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
 
 logger = logging.getLogger(__name__)

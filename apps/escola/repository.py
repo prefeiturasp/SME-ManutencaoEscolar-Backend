@@ -1,0 +1,1 @@
+"""Repository do app escola."""
