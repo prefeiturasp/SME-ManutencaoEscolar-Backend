@@ -4,6 +4,9 @@ from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django_filters.rest_framework import DjangoFilterBackend
+from psycopg import DatabaseError
+from requests import Request
+from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.exceptions import APIException, NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -21,6 +24,7 @@ from apps.servico.serializers import (
     ServicoSerializer,
 )
 from apps.servico.services.servico_service import ServicoService
+from apps.usuarios.models.usuario import Usuario
 
 
 class ServicoInstabilidadeError(APIException):
@@ -38,7 +42,7 @@ class ServicoViewSet(viewsets.ModelViewSet):
     Delegando regras de negócio ao ServicoService.
     """
 
-    http_method_names = ["get", "post", "patch", "options"]
+    http_method_names = ["get", "post", "patch", "options", "delete"]
     queryset = Servico.objects.all()
     lookup_field = "uuid"
 
@@ -46,14 +50,14 @@ class ServicoViewSet(viewsets.ModelViewSet):
     filterset_class = ServicoFilter
     pagination_class = PaginacaoPadrao
 
-    def _obter_usuario_id(self) -> int:
+    def _obter_usuario(self) -> Usuario:
         """Retorna o ID do usuário autenticado."""
-        usuario_id = self.request.user.pk
+        usuario = self.request.user
 
-        if usuario_id is None:
+        if usuario is None:
             raise NotAuthenticated("Usuário não identificado.")
 
-        return usuario_id
+        return usuario
 
     @staticmethod
     def _obter_servico(serializer: BaseSerializer) -> Servico:
@@ -87,12 +91,12 @@ class ServicoViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         """Cria um serviço delegando as regras ao service."""
-        usuario_id = self._obter_usuario_id()
+        usuario = self._obter_usuario()
 
         try:
             servico = self.service.criar(
                 serializer.validated_data,
-                usuario_id=usuario_id,
+                usuario=usuario,
             )
         except ServicoJaCadastradoError as exc:
             raise DRFValidationError(
@@ -118,14 +122,14 @@ class ServicoViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer: BaseSerializer) -> None:
         """Atualiza um serviço delegando as regras ao service."""
-        usuario_id = self._obter_usuario_id()
+        usuario = self._obter_usuario()
         servico = self._obter_servico(serializer)
 
         try:
             servico_atualizado = self.service.atualizar(
                 servico=servico,
                 dados=serializer.validated_data,
-                usuario_id=usuario_id,
+                usuario=usuario,
             )
         except ServicoJaCadastradoError as exc:
             raise DRFValidationError(
@@ -148,3 +152,7 @@ class ServicoViewSet(viewsets.ModelViewSet):
             ) from exc
 
         serializer.instance = servico_atualizado
+
+    def perform_destroy(self, instance: Servico) -> None:
+        """Deleta uma empresa existente usando o serviço."""
+        self.service.deletar(instance, self._obter_usuario())

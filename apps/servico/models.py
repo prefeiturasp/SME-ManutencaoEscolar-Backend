@@ -17,12 +17,14 @@ class Servico(BaseModel):
         verbose_name_plural = "Serviços"
         ordering = ["-status", "-id"]
         indexes = [models.Index(fields=["status"])]
-        constraints = [
+        constraints=[
             models.UniqueConstraint(
                 Lower("nome"),
+                condition=models.Q(deletado_em__isnull=True),
                 name="servico_nome_unico_case_insensitive",
             ),
         ]
+        
 
     def __str__(self) -> str:
         return self.nome

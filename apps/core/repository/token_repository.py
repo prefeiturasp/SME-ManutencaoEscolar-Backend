@@ -1,11 +1,14 @@
 """Repositório para gerenciamento de tokens JWT e recuperação de senha."""
 
+from datetime import timedelta
+
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db.models import ObjectDoesNotExist
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.core.exceptions import TokenInvalidoError
 from apps.usuarios.models.usuario import Usuario
+from config import settings
 
 
 class TokenRepository:
@@ -32,7 +35,7 @@ class TokenRepository:
             raise ObjectDoesNotExist from None
 
     @classmethod
-    def gerar_tokens(cls, usuario_id: int) -> dict[str, str]:
+    def gerar_tokens(cls, usuario_id: int) -> dict[str, str | int]:
         """Gera um par de tokens (refresh e access) para um usuário específico.
 
         Args:
@@ -46,10 +49,17 @@ class TokenRepository:
         usuario = Usuario.objects.get(pk=usuario_id)
 
         refresh = RefreshToken.for_user(usuario)
+        
+        access_expira_em: timedelta = settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"]
+        refresh_expira_em: timedelta = settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"]
+
 
         return {
             "refresh": str(refresh),
             "access": str(refresh.access_token),
+            "access_expires_in": int(access_expira_em.total_seconds()),
+            "refresh_expires_in": int(refresh_expira_em.total_seconds()),
+
         }
 
     @classmethod
