@@ -10,7 +10,7 @@ import requests
 from django.core.management.base import CommandError
 
 from apps.core.management.commands.sincronizar_dres import Command
-from apps.core.models import DiretoriaRegional as Dre
+from apps.escola.models import DiretoriaRegional as Dre
 
 
 class TestSincronizarDres:

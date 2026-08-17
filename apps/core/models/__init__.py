@@ -1,4 +1,3 @@
 from .anexo import Anexo
-from .diretoria_regional import DiretoriaRegional
 
-__all__ = ["DiretoriaRegional", "Anexo"]
+__all__ = ["Anexo"]

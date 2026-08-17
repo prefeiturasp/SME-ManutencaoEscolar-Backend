@@ -1,1 +1,0 @@
-"""Models do app escola."""
