@@ -1,0 +1,1 @@
+"""Serializers do app escola."""

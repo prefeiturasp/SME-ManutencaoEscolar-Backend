@@ -14,6 +14,5 @@ class ServicoErrorMessages:
     )
 
     ERRO_AO_ATUALIZAR = (
-        "Não conseguimos salvar as alterações. " 
-        "Por favor, tente novamente."
+        "Não conseguimos salvar as alterações. " "Por favor, tente novamente."
     )

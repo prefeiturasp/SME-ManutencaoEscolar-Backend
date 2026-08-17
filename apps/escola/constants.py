@@ -1,0 +1,1 @@
+"""Constantes do app escola."""

@@ -82,6 +82,7 @@ APPS_PROJETO = [
     "apps.usuarios",
     "apps.empresa",
     "apps.servico",
+    "apps.escola",
 ]
 
 # ==========================================

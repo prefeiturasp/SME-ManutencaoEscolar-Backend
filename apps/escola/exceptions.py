@@ -1,0 +1,1 @@
+"""Exceptions do app escola."""
