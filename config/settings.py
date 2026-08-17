@@ -320,8 +320,8 @@ def _parse_bool(value: str) -> bool:
 
 MOCK_SENHA = "mock_secret_key"
 MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "localhost:9000")
-MINIO_ROOT_USER = os.environ.get("MINIO_ROOT_USER", "mock_access_key")
-MINIO_ROOT_PASSWORD = os.environ.get("MINIO_ROOT_PASSWORD", MOCK_SENHA)
+MINIO_ACCESS_KEY = os.environ.get("MINIO_ACCESS_KEY", "mock_access_key")
+MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY", MOCK_SENHA)
 MINIO_USE_HTTPS = _parse_bool(os.environ.get("MINIO_USE_HTTPS", "false"))
 MINIO_BUCKET_NAME = os.environ.get("MINIO_BUCKET_NAME", "")
 MINIO_EXTERNAL_ENDPOINT = os.environ.get("MINIO_EXTERNAL_ENDPOINT", "")
@@ -341,8 +341,8 @@ STORAGES = {
             "MINIO_EXTERNAL_ENDPOINT_USE_HTTPS": (
                 MINIO_EXTERNAL_ENDPOINT_USE_HTTPS
             ),
-            "MINIO_ACCESS_KEY": MINIO_ROOT_USER,
-            "MINIO_SECRET_KEY": MINIO_ROOT_PASSWORD,
+            "MINIO_ACCESS_KEY": MINIO_ACCESS_KEY,
+            "MINIO_SECRET_KEY": MINIO_SECRET_KEY,
             "MINIO_USE_HTTPS": MINIO_USE_HTTPS,
             "MINIO_URL_EXPIRY_HOURS": timedelta(
                 hours=int(os.environ.get("MINIO_URL_EXPIRY_HOURS", "1"))
