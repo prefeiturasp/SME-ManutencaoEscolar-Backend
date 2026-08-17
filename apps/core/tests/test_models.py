@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-from apps.core.models.diretoria_regional import DiretoriaRegional as Dre
+from apps.escola.models.diretoria_regional import DiretoriaRegional as Dre
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 

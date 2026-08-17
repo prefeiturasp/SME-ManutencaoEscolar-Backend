@@ -13,7 +13,6 @@ class Servico(BaseModel):
     status = models.BooleanField(default=True)
 
     class Meta:
-        db_table = "servico"
         verbose_name = "Serviço"
         verbose_name_plural = "Serviços"
         ordering = ["-status", "-id"]
