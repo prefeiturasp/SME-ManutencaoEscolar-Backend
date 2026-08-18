@@ -34,7 +34,7 @@ class EmpresaViewSet(ModelViewSet):
 
     queryset = Empresa.objects.all()
     lookup_field = "uuid"
-    http_method_names = ["get", "post", "put"]
+    http_method_names = ["get", "post", "put", "delete"]
     filter_backends = [DjangoFilterBackend]
     filterset_class = EmpresaFilter
 
@@ -81,3 +81,7 @@ class EmpresaViewSet(ModelViewSet):
             raise DRFValidationError(exc.message_dict) from exc
 
         serializer.instance = empresa
+
+    def perform_destroy(self, instance: Empresa) -> None:
+        """Deleta uma empresa existente usando o serviço."""
+        self.service.deletar(instance, self._usuario_logado())
