@@ -6,9 +6,9 @@ from apps.escola.api.views import TipoEscolaViewSet
 
 router = DefaultRouter()
 router.register(
-    r"tipos-unidade",
+    r"tipos-escola",
     TipoEscolaViewSet,
-    basename="tipo-unidade",
+    basename="tipos-escola",
 )
 
 urlpatterns = router.urls
