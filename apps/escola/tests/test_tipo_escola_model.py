@@ -7,8 +7,9 @@ from django.db import IntegrityError
 
 from apps.escola.models.tipos_escola import TipoEscola
 
+pytestmark = pytest.mark.django_db
 
-@pytest.mark.django_db
+
 class TestTipoEscola:
     """Testes do model TipoEscola."""
 
