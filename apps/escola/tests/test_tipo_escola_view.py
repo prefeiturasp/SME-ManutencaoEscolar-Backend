@@ -23,11 +23,10 @@ class TestTipoEscolaViewSet:
 
         resultados = resposta.data["results"]
 
-        assert len(resultados) == 3
+        assert len(resultados) == 2
         assert {resultado["codigo_eol"] for resultado in resultados} == {
             1,
             2,
-            3,
         }
 
     def test_deve_buscar_tipo_de_escola_por_uuid(

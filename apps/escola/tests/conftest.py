@@ -39,21 +39,24 @@ def cliente_api(usuario_ativo):
 
 
 @pytest.fixture
-def tipos_escola():
-    """Cria tipos de escola para utilização nos testes."""
-    return TipoEscola.objects.bulk_create(
-        [
-            TipoEscola(
-                codigo_eol=1,
-                sigla="EMEF",
-            ),
-            TipoEscola(
-                codigo_eol=2,
-                sigla="EMEI",
-            ),
-            TipoEscola(
-                codigo_eol=3,
-                sigla="CEMEI",
-            ),
-        ]
+def tipo_escola_emef():
+    """Cria um tipo de escola EMEF."""
+    return TipoEscola.objects.create(
+        codigo_eol=1,
+        sigla="EMEF",
     )
+
+
+@pytest.fixture
+def tipo_escola_cemei():
+    """Cria um tipo de escola CEMEI."""
+    return TipoEscola.objects.create(
+        codigo_eol=2,
+        sigla="CEMEI",
+    )
+
+
+@pytest.fixture
+def tipos_escola(tipo_escola_emef, tipo_escola_cemei):
+    """Cria tipos de escola para utilização nos testes."""
+    return [tipo_escola_emef, tipo_escola_cemei]
