@@ -80,3 +80,18 @@ def resposta_api_tipos_escolas():
         },
     ]
     return resposta
+
+
+@pytest.fixture()
+def configurar_api_eol(monkeypatch):
+    """Configura as variáveis da API EOL para os testes."""
+    monkeypatch.setattr(
+        "apps.escola.management.commands.sincronizar_tipos_escolas."
+        "SME_API_EOL_URL",
+        "https://api-eol-teste",
+    )
+    monkeypatch.setattr(
+        "apps.escola.management.commands.sincronizar_tipos_escolas."
+        "SME_API_EOL_TOKEN",
+        "token-teste",
+    )

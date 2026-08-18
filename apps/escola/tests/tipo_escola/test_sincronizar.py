@@ -5,7 +5,6 @@ import requests
 from django.core.management import CommandError, call_command
 
 from apps.escola.models import TipoEscola
-from config.settings import SME_API_EOL_TOKEN
 
 pytestmark = pytest.mark.django_db
 
@@ -21,7 +20,7 @@ class TestSincronizarTiposEscolas:
         self,
         mock_get,
         resposta_api_tipos_escolas,
-        caplog,
+        configurar_api_eol,
     ):
         """Deve criar os tipos de escola retornados pela API."""
         mock_get.return_value = resposta_api_tipos_escolas
@@ -44,9 +43,7 @@ class TestSincronizarTiposEscolas:
         "apps.escola.management.commands.sincronizar_tipos_escolas.requests.get"
     )
     def test_deve_atualizar_tipo_de_escola_existente(
-        self,
-        mock_get,
-        resposta_api_tipos_escolas,
+        self, mock_get, resposta_api_tipos_escolas, configurar_api_eol
     ):
         """Deve atualizar um tipo de escola existente."""
         tipo_escola = TipoEscola.objects.create(
@@ -68,9 +65,7 @@ class TestSincronizarTiposEscolas:
         "get"
     )
     def test_deve_criar_e_atualizar_registros(
-        self,
-        mock_get,
-        resposta_api_tipos_escolas,
+        self, mock_get, resposta_api_tipos_escolas, configurar_api_eol
     ):
         """Deve criar novos registros e atualizar os existentes."""
         TipoEscola.objects.create(
@@ -93,8 +88,7 @@ class TestSincronizarTiposEscolas:
         "get"
     )
     def test_deve_falhar_quando_api_retornar_json_invalido(
-        self,
-        mock_get,
+        self, mock_get, configurar_api_eol
     ):
         """Deve falhar quando a API retornar JSON inválido."""
         resposta = Mock()
@@ -114,8 +108,7 @@ class TestSincronizarTiposEscolas:
         "get"
     )
     def test_deve_falhar_quando_api_nao_retornar_lista(
-        self,
-        mock_get,
+        self, mock_get, configurar_api_eol
     ):
         """Deve falhar quando a API não retornar uma lista."""
         resposta = Mock()
@@ -133,7 +126,9 @@ class TestSincronizarTiposEscolas:
         ):
             call_command("sincronizar_tipos_escolas")
 
-    def test_deve_falhar_quando_registro_nao_for_um_dicionario(self):
+    def test_deve_falhar_quando_registro_nao_for_um_dicionario(
+        self, configurar_api_eol
+    ):
         """Deve rejeitar registro que não seja um objeto."""
         from apps.escola.management.commands.sincronizar_tipos_escolas import (
             Command,
@@ -145,7 +140,9 @@ class TestSincronizarTiposEscolas:
         ):
             Command._validar_registro("registro inválido")
 
-    def test_deve_falhar_quando_campo_obrigatorio_estiver_ausente(self):
+    def test_deve_falhar_quando_campo_obrigatorio_estiver_ausente(
+        self, configurar_api_eol
+    ):
         """Deve rejeitar registro com campo obrigatório ausente."""
         from apps.escola.management.commands.sincronizar_tipos_escolas import (
             Command,
@@ -161,7 +158,9 @@ class TestSincronizarTiposEscolas:
                 }
             )
 
-    def test_deve_falhar_quando_codigo_nao_for_inteiro(self):
+    def test_deve_falhar_quando_codigo_nao_for_inteiro(
+        self, configurar_api_eol
+    ):
         """Deve rejeitar código que não seja inteiro."""
         from apps.escola.management.commands.sincronizar_tipos_escolas import (
             Command,
@@ -178,7 +177,7 @@ class TestSincronizarTiposEscolas:
                 }
             )
 
-    def test_deve_falhar_quando_sigla_nao_for_string(self):
+    def test_deve_falhar_quando_sigla_nao_for_string(self, configurar_api_eol):
         """Deve rejeitar sigla que não seja uma string."""
         from apps.escola.management.commands.sincronizar_tipos_escolas import (
             Command,
@@ -195,7 +194,7 @@ class TestSincronizarTiposEscolas:
                 }
             )
 
-    def test_deve_aceitar_registro_valido(self):
+    def test_deve_aceitar_registro_valido(self, configurar_api_eol):
         """Deve aceitar um registro válido."""
         from apps.escola.management.commands.sincronizar_tipos_escolas import (
             Command,
@@ -213,8 +212,7 @@ class TestSincronizarTiposEscolas:
         "get"
     )
     def test_deve_falhar_quando_api_retornar_erro(
-        self,
-        mock_get,
+        self, mock_get, configurar_api_eol
     ):
         """Deve retornar erro quando a API externa falhar."""
         mock_get.side_effect = requests.RequestException("Erro de conexão")
@@ -230,9 +228,7 @@ class TestSincronizarTiposEscolas:
         "get"
     )
     def test_deve_consultar_api_com_token(
-        self,
-        mock_get,
-        resposta_api_tipos_escolas,
+        self, mock_get, resposta_api_tipos_escolas, configurar_api_eol
     ):
         """Deve consultar a API EOL com o token configurado."""
         mock_get.return_value = resposta_api_tipos_escolas
@@ -244,9 +240,7 @@ class TestSincronizarTiposEscolas:
         argumentos = mock_get.call_args
 
         assert argumentos.kwargs["headers"]["accept"] == "application/json"
-        assert (
-            argumentos.kwargs["headers"]["x-api-eol-key"] == SME_API_EOL_TOKEN
-        )
+        assert argumentos.kwargs["headers"]["x-api-eol-key"] == "token-teste"
 
     @patch(
         "apps.escola.management.commands.sincronizar_tipos_escolas."
@@ -279,8 +273,7 @@ class TestSincronizarTiposEscolas:
         "get"
     )
     def test_deve_reverter_importacao_quando_um_registro_for_invalido(
-        self,
-        mock_get,
+        self, mock_get, configurar_api_eol
     ):
         """Deve desfazer alterações quando um registro for inválido."""
         resposta = Mock()
