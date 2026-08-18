@@ -42,11 +42,16 @@ def test_healthcheck_retorna_ok(api_factory):
     assert response.data == {"status": "ok"}
 
 
-def test_login_retorna_payload_autenticado(api_factory, monkeypatch):
+def test_login_retorna_payload_autenticado(
+    api_factory,
+    monkeypatch,
+) -> None:
     """Deve retornar o payload autenticado."""
     dados = {
         "refresh": "refresh-token",
         "access": "access-token",
+        "access_expires_in": 60,
+        "refresh_expires_in": 604800,
         "usuario": {
             "id": 1,
             "uuid": UUID("2e7d7d7d-9b8b-4c92-9b3b-123456789abc"),
@@ -64,6 +69,7 @@ def test_login_retorna_payload_autenticado(api_factory, monkeypatch):
             },
         },
     }
+
     monkeypatch.setattr(
         "apps.core.api.views.AutenticacaoEOLService.login",
         classmethod(lambda cls, login, senha: dados),
@@ -80,8 +86,7 @@ def test_login_retorna_payload_autenticado(api_factory, monkeypatch):
 
     response = LoginView.as_view()(request)
 
-    assert response.status_code == 200
-    print(response.data)
+    assert response.status_code == status.HTTP_200_OK
     assert response.data == dados
 
 

@@ -6,6 +6,7 @@ from apps.servico.constants import ServicoErrorMessages
 from apps.servico.exceptions import ServicoJaCadastradoError
 from apps.servico.models import Servico
 from apps.servico.repository.servico_repository import ServicoRepository
+from apps.usuarios.models.usuario import Usuario
 
 
 class ServicoService:
@@ -21,7 +22,7 @@ class ServicoService:
     def criar(
         self,
         dados: dict[str, Any],
-        usuario_id: int,
+        usuario: Usuario,
     ) -> dict[str, Any]:
         """Cria e retorna os dados de um serviço."""
         dados_normalizados = dados.copy()
@@ -34,14 +35,22 @@ class ServicoService:
 
         return self.repository.criar(
             dados_normalizados,
-            usuario_id=usuario_id,
+            usuario=usuario,
         )
+
+    def deletar(
+        self,
+        model_servico: Servico,
+        usuario: Usuario,
+    ) -> tuple[int, dict[str, int]]:
+        """Realiza a exclusão lógica do serviço."""
+        return self.repository.deletar(usuario, model_servico)
 
     def atualizar(
         self,
         servico: Servico,
         dados: dict[str, Any],
-        usuario_id: int,
+        usuario: Usuario,
     ) -> dict[str, Any]:
         """Atualiza e retorna os dados de um serviço."""
         dados_normalizados = dados.copy()
@@ -60,7 +69,7 @@ class ServicoService:
         return self.repository.atualizar(
             servico,
             dados_normalizados,
-            usuario_id=usuario_id,
+            usuario=usuario,
         )
 
     @staticmethod
