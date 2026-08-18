@@ -2,10 +2,10 @@
 
 from django.db import models
 
-from apps.core.models.mixins import TimestampMixin, UUIDMixin
+from apps.core.models.mixins import UUIDMixin
 
 
-class TipoEscola(UUIDMixin, TimestampMixin):
+class TipoEscola(UUIDMixin):
     """Representa o tipo de unidade escolar cadastrado no sistema EOL."""
 
     codigo_eol = models.PositiveIntegerField(
@@ -14,12 +14,7 @@ class TipoEscola(UUIDMixin, TimestampMixin):
     )
     sigla = models.CharField(
         max_length=50,
-        unique=True,
         help_text="Sigla que identifica o tipo de escolar.",
-    )
-    data_atualizacao_eol = models.DateTimeField(
-        help_text="Data e hora da última atualização do registro no sistema "
-        "EOL.",
     )
 
     class Meta:
