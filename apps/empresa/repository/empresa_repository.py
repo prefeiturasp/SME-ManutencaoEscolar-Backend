@@ -8,6 +8,7 @@ from django.forms.models import model_to_dict
 from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
 from apps.empresa.models import Empresa
+from apps.usuarios.models import Usuario
 
 
 class EmpresaRepository:
@@ -33,6 +34,12 @@ class EmpresaRepository:
         empresa.save()
 
         return self._serializar(empresa)
+
+    def deletar(
+        self, empresa: Empresa, usuario: Usuario | None = None
+    ) -> None:
+        """Marca uma empresa como deletada e registra o usuário."""
+        empresa.soft_delete(usuario=usuario)
 
     def _validar(self, empresa: Empresa) -> None:
         """Executa full_clean traduzindo CNPJ duplicado em erro de domínio."""

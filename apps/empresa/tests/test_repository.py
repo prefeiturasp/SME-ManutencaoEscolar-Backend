@@ -101,3 +101,34 @@ class TestEmpresaRepository:
             repository.atualizar(
                 empresa, {"cnpj": empresa_payload_valido["cnpj"]}
             )
+
+    @pytest.mark.django_db
+    def test_deletar_marca_empresa_como_deletada(
+        self, empresa_payload_valido, usuario_ativo
+    ):
+        """Deve definir deletado_em e deletado_por e persistir a alteração."""
+        repository = EmpresaRepository()
+        dados = repository.criar(empresa_payload_valido)
+        empresa = Empresa.dm_objects.get(uuid=dados["uuid"])
+
+        repository.deletar(empresa, usuario_ativo)
+
+        empresa.refresh_from_db()
+        assert empresa.deletado_em is not None
+        assert empresa.deletado_por == usuario_ativo
+        assert not Empresa.objects.filter(uuid=empresa.uuid).exists()
+
+    @pytest.mark.django_db
+    def test_deletar_sem_usuario_define_deletado_por_como_none(
+        self, empresa_payload_valido
+    ):
+        """Deve definir deletado_por como None quando não houver usuário."""
+        repository = EmpresaRepository()
+        dados = repository.criar(empresa_payload_valido)
+        empresa = Empresa.dm_objects.get(uuid=dados["uuid"])
+
+        repository.deletar(empresa)
+
+        empresa.refresh_from_db()
+        assert empresa.deletado_em is not None
+        assert empresa.deletado_por is None
