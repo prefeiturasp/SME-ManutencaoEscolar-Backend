@@ -18,6 +18,5 @@ class ServicoErrorMessages:
     )
 
     ERRO_AO_EXCLUIR = (
-        "Não conseguimos excluir o serviço."
-        "Por favor, tente novamente."
+        "Não conseguimos excluir o serviço. Por favor, tente novamente."
     )

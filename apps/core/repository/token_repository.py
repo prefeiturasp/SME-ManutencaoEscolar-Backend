@@ -1,6 +1,7 @@
 """Repositório para gerenciamento de tokens JWT e recuperação de senha."""
 
 from datetime import timedelta
+from typing import cast
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db.models import ObjectDoesNotExist
@@ -50,12 +51,12 @@ class TokenRepository:
 
         refresh = RefreshToken.for_user(usuario)
 
-        access_expira_em: timedelta = settings.SIMPLE_JWT[
-            "ACCESS_TOKEN_LIFETIME"
-        ]
-        refresh_expira_em: timedelta = settings.SIMPLE_JWT[
-            "REFRESH_TOKEN_LIFETIME"
-        ]
+        access_expira_em: timedelta = cast(
+            timedelta, settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"]
+        )
+        refresh_expira_em: timedelta = cast(
+            timedelta, settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"]
+        )
 
         return {
             "refresh": str(refresh),

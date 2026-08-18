@@ -51,6 +51,7 @@ class AuditMixin(models.Model):
         on_delete=models.SET_NULL,
         related_name="%(app_label)s_%(class)s_deletado",
     )
+
     class Meta:
         abstract = True
 
