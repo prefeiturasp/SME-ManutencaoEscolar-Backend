@@ -37,18 +37,14 @@ class ServicoService:
             dados_normalizados,
             usuario=usuario,
         )
-    
+
     def deletar(
         self,
         model_servico: Servico,
         usuario: Usuario,
     ) -> tuple[int, dict[str, int]]:
-        """Realiza a exclusão lógica do serviço."""   
-        
-        return self.repository.deletar(
-            usuario,
-            model_servico
-        )
+        """Realiza a exclusão lógica do serviço."""
+        return self.repository.deletar(usuario, model_servico)
 
     def atualizar(
         self,

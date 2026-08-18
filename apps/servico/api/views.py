@@ -4,9 +4,6 @@ from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django_filters.rest_framework import DjangoFilterBackend
-from psycopg import DatabaseError
-from requests import Request
-from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.exceptions import APIException, NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -51,10 +48,10 @@ class ServicoViewSet(viewsets.ModelViewSet):
     pagination_class = PaginacaoPadrao
 
     def _obter_usuario(self) -> Usuario:
-        """Retorna o ID do usuário autenticado."""
+        """Retorna o usuário autenticado."""
         usuario = self.request.user
 
-        if usuario is None:
+        if not isinstance(usuario, Usuario):
             raise NotAuthenticated("Usuário não identificado.")
 
         return usuario
