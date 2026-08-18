@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 from rest_framework.test import APIClient
 
@@ -60,3 +62,21 @@ def tipo_escola_cemei():
 def tipos_escola(tipo_escola_emef, tipo_escola_cemei):
     """Cria tipos de escola para utilização nos testes."""
     return [tipo_escola_emef, tipo_escola_cemei]
+
+
+@pytest.fixture
+def resposta_api_tipos_escolas():
+    """Cria uma resposta simulada da API EOL."""
+    resposta = Mock()
+    resposta.raise_for_status.return_value = None
+    resposta.json.return_value = [
+        {
+            "codigo": 1,
+            "descricaoSigla": "EMEF",
+        },
+        {
+            "codigo": 2,
+            "descricaoSigla": "CEMEI",
+        },
+    ]
+    return resposta

@@ -19,6 +19,7 @@ import requests
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
+from apps.core.constants import TIMEOUT_DEFAULT
 from apps.escola.constants import ENDPOINT_TIPO_ESCOLA
 from apps.escola.models.tipos_escola import TipoEscola
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
@@ -82,8 +83,7 @@ class Command(BaseCommand):
         logger.info("Iniciando importação de tipos de escola.")
         try:
             response = requests.get(
-                api_url,
-                headers=headers,
+                api_url, headers=headers, timeout=TIMEOUT_DEFAULT
             )
             response.raise_for_status()
         except requests.RequestException as exc:
