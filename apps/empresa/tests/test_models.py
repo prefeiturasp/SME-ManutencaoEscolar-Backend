@@ -13,6 +13,8 @@ def test_str_do_empresa():
 def test_str_do_responsavel_tecnico():
     """Testa o método __str__ do modelo ResponsavelTecnico."""
     empresa = Empresa(nome="Empresa Exemplo", cnpj="12345678901234")
-    responsavel = ResponsavelTecnico(nome="João Responsável", empresa=empresa)
+    responsavel = ResponsavelTecnico(
+        nome="João Responsável", tipo="preposto", empresa=empresa
+    )
 
-    assert str(responsavel) == "João Responsável - Empresa Exemplo"
+    assert str(responsavel) == "João Responsável - Preposto"

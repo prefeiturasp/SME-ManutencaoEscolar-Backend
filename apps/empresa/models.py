@@ -83,4 +83,4 @@ class ResponsavelTecnico(BaseModel):
         ordering = ["-id"]
 
     def __str__(self) -> str:
-        return f"{self.nome} - {self.tipo}"
+        return f"{self.nome} - {self.get_tipo_display()}"
