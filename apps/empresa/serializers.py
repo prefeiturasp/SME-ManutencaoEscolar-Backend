@@ -1,5 +1,7 @@
 """Serializers da aplicação Empresa."""
 
+from typing import Any
+
 from rest_framework import serializers
 
 from apps.core.exceptions import (
@@ -103,3 +105,19 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
                     EmpresaErrorMessages.LINK_RASTREIO_INVALIDO
                 ) from None
         return value
+
+
+class EmpresaRelatedField(
+    serializers.PrimaryKeyRelatedField
+):
+    """Recebe o ID da Empresa e retorna seus dados completos."""
+
+    def to_representation(
+        self,
+        value: Empresa,
+    ) -> dict[str, Any]:
+        """Serializa os dados completos da empresa."""
+        return EmpresaSerializer(
+            value,
+            context=self.context,
+        ).data
