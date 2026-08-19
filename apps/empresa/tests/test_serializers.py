@@ -11,9 +11,12 @@ from apps.core.exceptions import (
     LinkRastreioInvalidoError,
 )
 from apps.empresa.constants import EmpresaErrorMessages
-from apps.empresa.serializers import (
+from apps.empresa.serializers.empresa_serializers import (
     EmpresaCriarAtualizarSerializer,
     EmpresaSerializer,
+)
+from apps.empresa.serializers.responsavel_serializers import (
+    ResponsavelTecnicoSerializer,
 )
 
 pytestmark = pytest.mark.django_db
@@ -88,7 +91,7 @@ class TestEmpresaCriarAtualizarSerializer:
 
         with (
             patch(
-                "apps.empresa.serializers.validar_formato_cnpj",
+                "apps.empresa.serializers.empresa_serializers.validar_formato_cnpj",
                 side_effect=CnpjInvalidoError("erro"),
             ),
             pytest.raises(ValidationError) as exc_info,
@@ -103,7 +106,7 @@ class TestEmpresaCriarAtualizarSerializer:
 
         with (
             patch(
-                "apps.empresa.serializers.validar_formato_cep",
+                "apps.empresa.serializers.empresa_serializers.validar_formato_cep",
                 side_effect=CepInvalidoError("erro"),
             ),
             pytest.raises(ValidationError) as exc_info,
@@ -118,7 +121,7 @@ class TestEmpresaCriarAtualizarSerializer:
 
         with (
             patch(
-                "apps.empresa.serializers.validar_formato_link_rastreio",
+                "apps.empresa.serializers.empresa_serializers.validar_formato_link_rastreio",
                 side_effect=LinkRastreioInvalidoError("erro"),
             ),
             pytest.raises(ValidationError) as exc_info,
@@ -136,3 +139,60 @@ class TestEmpresaCriarAtualizarSerializer:
         serializer = EmpresaCriarAtualizarSerializer()
 
         assert serializer.validate_link_rastreio("") == ""
+
+
+class TestResponsavelTecnicoSerializer:
+    """Testes para o serializer de responsável técnico."""
+
+    def test_deve_validar_payload_com_uuid_da_empresa(self, empresa):
+        """Deve aceitar o uuid da empresa como referência."""
+        serializer = ResponsavelTecnicoSerializer(
+            data={
+                "empresa": str(empresa.uuid),
+                "nome": "João Responsável",
+                "tipo": "preposto",
+                "email": "joao.responsavel@email.com",
+            }
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["empresa"] == empresa
+
+    def test_deve_invalidar_uuid_de_empresa_inexistente(self, empresa):
+        """Deve invalidar quando o uuid não corresponde a nenhuma empresa."""
+        serializer = ResponsavelTecnicoSerializer(
+            data={
+                "empresa": "00000000-0000-0000-0000-000000000000",
+                "nome": "João Responsável",
+                "tipo": "preposto",
+                "email": "joao.responsavel@email.com",
+            }
+        )
+
+        assert not serializer.is_valid()
+        assert "empresa" in serializer.errors
+
+    def test_valida_empresa_com_valor_vazio_lanca_excecao(self):
+        """Deve lançar exceção quando o valor da empresa for inválido."""
+        serializer = ResponsavelTecnicoSerializer()
+
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.validate_empresa(None)
+
+        assert exc_info.value.detail[0] == (
+            EmpresaErrorMessages.EMPRESA_INVALIDA
+        )
+
+    def test_deve_invalidar_id_numerico_da_empresa(self, empresa):
+        """Deve invalidar o id numérico, pois a referência é feita por uuid."""
+        serializer = ResponsavelTecnicoSerializer(
+            data={
+                "empresa": empresa.id,
+                "nome": "João Responsável",
+                "tipo": "preposto",
+                "email": "joao.responsavel@email.com",
+            }
+        )
+
+        assert not serializer.is_valid()
+        assert "empresa" in serializer.errors

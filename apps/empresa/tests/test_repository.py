@@ -10,6 +10,9 @@ from apps.empresa.models import Empresa
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
+from apps.empresa.repository.responsavel_repository import (
+    ResponsavelTecnicoRepository,
+)
 
 
 class TestEmpresaRepository:
@@ -132,3 +135,36 @@ class TestEmpresaRepository:
         empresa.refresh_from_db()
         assert empresa.deletado_em is not None
         assert empresa.deletado_por is None
+
+
+class TestResponsavelTecnicoRepository:
+    """Testes para o repositório de responsável técnico."""
+
+    @pytest.mark.django_db
+    def test_existe_por_empresa_e_tipo_retorna_true_quando_ja_cadastrado(
+        self, responsavel_payload_valido
+    ):
+        """Deve retornar True quando já houver responsável do tipo."""
+        repository = ResponsavelTecnicoRepository()
+        repository.criar(responsavel_payload_valido)
+
+        existe = repository.existe_por_empresa_e_tipo(
+            responsavel_payload_valido["empresa"].id,
+            responsavel_payload_valido["tipo"],
+        )
+
+        assert existe is True
+
+    @pytest.mark.django_db
+    def test_existe_por_empresa_e_tipo_retorna_false_quando_nao_cadastrado(
+        self, responsavel_payload_valido
+    ):
+        """Deve retornar False quando não houver responsável do tipo."""
+        repository = ResponsavelTecnicoRepository()
+
+        existe = repository.existe_por_empresa_e_tipo(
+            responsavel_payload_valido["empresa"].id,
+            responsavel_payload_valido["tipo"],
+        )
+
+        assert existe is False
