@@ -16,8 +16,8 @@ from rest_framework.viewsets import ModelViewSet
 from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
 from apps.empresa.filters import EmpresaFilter
 from apps.empresa.models import Empresa
-from apps.empresa.schemas import EMPRESA_SCHEMA
-from apps.empresa.serializers import (
+from apps.empresa.schemas.empresa_schemas import EMPRESA_SCHEMA
+from apps.empresa.serializers.empresa_serializers import (
     EmpresaCriarAtualizarSerializer,
     EmpresaSerializer,
 )
