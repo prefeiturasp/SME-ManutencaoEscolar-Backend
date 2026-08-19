@@ -49,3 +49,33 @@ class Empresa(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.nome} - {self.cnpj}"
+
+
+class ResponsavelTecnico(BaseModel):
+    """Representa o cadastro de um responsável técnico de uma empresa."""
+
+    TIPO_RESPONSAVEL_CHOICES = [
+        ("preposto", "Preposto"),
+        ("engenheiro_civil", "Engenheiro Civil"),
+        ("engenheiro_eletricista", "Engenheiro Eletricista"),
+    ]
+
+    empresa = models.ForeignKey(
+        Empresa,
+        on_delete=models.CASCADE,
+        related_name="responsaveis_tecnicos",
+    )
+    nome = models.CharField(max_length=255)
+    tipo = models.CharField(max_length=50, choices=TIPO_RESPONSAVEL_CHOICES)
+    numero_crea = models.CharField(max_length=20, blank=True, default="")
+    numero_art = models.CharField(max_length=20, blank=True, default="")
+    email = models.EmailField(max_length=255)
+    telefone = models.CharField(max_length=20, blank=True, default="")
+
+    class Meta:
+        verbose_name = "Responsável Técnico"
+        verbose_name_plural = "Responsáveis Técnicos"
+        ordering = ["-id"]
+
+    def __str__(self) -> str:
+        return f"{self.nome} - {self.tipo}"
