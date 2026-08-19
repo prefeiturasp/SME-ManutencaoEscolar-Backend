@@ -38,6 +38,7 @@ class ResponsavelTecnicoSerializer(serializers.ModelSerializer):
             "empresa",
             "email",
             "numero_crea",
+            "telefone",
             "numero_art",
             "criado_por",
             "criado_em",
