@@ -28,7 +28,6 @@ class ResponsavelTecnicoRepository:
     def _serializar(self, responsavel: ResponsavelTecnico) -> dict[str, Any]:
         """Serializa uma instância de Responsavel Técnico em dicionário."""
         dados_responsavel = model_to_dict(responsavel)
-        dados_responsavel["id"] = responsavel.id
         dados_responsavel["uuid"] = str(responsavel.uuid)
         dados_responsavel["empresa"] = responsavel.empresa
         dados_responsavel["criado_por"] = responsavel.criado_por
