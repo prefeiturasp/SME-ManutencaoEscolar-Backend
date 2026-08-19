@@ -10,3 +10,10 @@ class EmpresaErrorMessages:
     LINK_RASTREIO_INVALIDO = "Link inválido. Deve ser uma URL válida."
     EMPRESA_INATIVA = "Empresa está inativa."
     EMPRESA_NAO_ENCONTRADA = "Empresa não encontrada."
+    EMPRESA_INVALIDA = (
+        "Empresa inválida. Certifique-se de que a empresa existe."
+    )
+    RESPONSAVEL_TECNICO_TIPO_JA_CADASTRADO = (
+        "Já existe um responsável técnico deste tipo cadastrado "
+        "para esta empresa."
+    )
