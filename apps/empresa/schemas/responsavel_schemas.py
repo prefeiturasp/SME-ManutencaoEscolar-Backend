@@ -18,7 +18,7 @@ _RESPONSAVEL_EXEMPLO_ENTRADA = {
     "numero_crea": "123456789",
     "numero_art": "123456789",
     "email": "responsavel.exemplo@exemplo.com",
-    "telefone": "(11) 98765-4321",
+    "telefone": "11987654321",
 }
 
 _RESPONSAVEL_EXEMPLO_SAIDA = {

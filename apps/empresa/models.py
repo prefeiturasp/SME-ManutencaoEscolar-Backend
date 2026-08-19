@@ -70,7 +70,12 @@ class ResponsavelTecnico(BaseModel):
     numero_crea = models.CharField(max_length=20, blank=True, default="")
     numero_art = models.CharField(max_length=20, blank=True, default="")
     email = models.EmailField(max_length=255)
-    telefone = models.CharField(max_length=20, blank=True, default="")
+    telefone = models.CharField(
+        max_length=11,
+        blank=True,
+        default="",
+        validators=[apenas_digitos_validator],
+    )
 
     class Meta:
         verbose_name = "Responsável Técnico"
