@@ -147,4 +147,27 @@ SERVICO_SCHEMA = extend_schema_view(
             ),
         ],
     ),
+    destroy=extend_schema(
+        tags=[_TAG_SERVICO],
+        summary="Exclui um serviço",
+        description=(
+            "Realiza a exclusão lógica de um serviço identificado pelo UUID."
+        ),
+        operation_id="excluirServico",
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Serviço excluído com sucesso",
+            ),
+            401: OpenApiResponse(
+                description=_CREDENCIAIS_INVALIDAS,
+            ),
+            404: OpenApiResponse(
+                description="Serviço não encontrado",
+            ),
+            500: OpenApiResponse(
+                description=_ERRO_NO_SERVIDOR,
+            ),
+        },
+    ),
 )
