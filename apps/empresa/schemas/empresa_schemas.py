@@ -8,7 +8,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 
-from apps.empresa.serializers import (
+from apps.empresa.serializers.empresa_serializers import (
     EmpresaCriarAtualizarSerializer,
     EmpresaSerializer,
 )
