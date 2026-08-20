@@ -2,7 +2,7 @@
 
 
 class DiretoriaRegionalJaVinculadaError(Exception):
-    """Representa uma DRE que já está vinculada a um lote."""
+    """Representa uma Diretoria Regional que já está vinculada a um lote."""
 
     def __init__(self, title: str, detail: str | dict) -> None:
         """Inicializa a exceção com título e detalhe."""

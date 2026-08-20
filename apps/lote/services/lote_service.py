@@ -31,7 +31,7 @@ class LoteService:
         codigo_cadastro = dados_normalizados["codigo_cadastro"].strip()
         diretorias_regionais = cast(
             list[DiretoriaRegional],
-            dados_normalizados.get("dres", []),
+            dados_normalizados.get("diretorias_regionais", []),
         )
 
         diretorias_regionais_vinculadas = (

@@ -65,9 +65,12 @@ _LOTE_EXEMPLO_SAIDA: dict[str, object] = {
     ],
 }
 
-_LOTE_EXEMPLO_DRE_VINCULADA: dict[str, object] = {
-    "title": "DRE já vinculada",
-    "detail": ("Uma ou mais DREs já estão vinculadas a outro lote. DREs: 2."),
+_LOTE_EXEMPLO_DIRETORIA_REGIONAL_VINCULADA: dict[str, object] = {
+    "title": "DIRETORIA REGIONAL já vinculada",
+    "detail": (
+        "Uma ou mais Diretorias Regionais já estão vinculadas a outro lote."
+        "Diretorias Regionais: 2."
+    ),
 }
 
 LOTE_SCHEMA = extend_schema_view(
@@ -75,8 +78,8 @@ LOTE_SCHEMA = extend_schema_view(
         tags=[_TAG_LOTE],
         summary="Cria um novo lote",
         description=(
-            "Cadastra um lote e vincula as DREs informadas. "
-            "Cada DRE pode estar vinculada a somente um lote."
+            "Cadastra um lote e vincula as Diretorias Regionais informadas. "
+            "Cada Diretoria Regional pode estar vinculada a somente um lote."
         ),
         operation_id="cadastrarLote",
         request=LoteCriarSerializer,
@@ -105,10 +108,10 @@ LOTE_SCHEMA = extend_schema_view(
                 value=_LOTE_EXEMPLO_SAIDA,
             ),
             OpenApiExample(
-                name="DRE já vinculada",
+                name="Diretoria Regional já vinculada",
                 response_only=True,
                 status_codes=["400"],
-                value=_LOTE_EXEMPLO_DRE_VINCULADA,
+                value=_LOTE_EXEMPLO_DIRETORIA_REGIONAL_VINCULADA,
             ),
         ],
     ),

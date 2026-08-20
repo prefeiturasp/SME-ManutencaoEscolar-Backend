@@ -82,7 +82,7 @@ class LoteCriarSerializer(serializers.ModelSerializer):
     )
 
     empresa = serializers.SlugRelatedField(
-        slug_field="id",
+        slug_field="uuid",
         queryset=Empresa.objects.all(),
     )
 
@@ -112,10 +112,9 @@ class LoteCriarSerializer(serializers.ModelSerializer):
 
         if len(diretoria_regional_ids) != len(set(diretoria_regional_ids)):
             raise serializers.ValidationError(
-                """Não é permitido informar a mesma
-                    diretoria_regional mais de uma vez."""
+                "Não é permitido informar a mesma diretoria regional "
+                "mais de uma vez."
             )
-
         return diretorias_regionais
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
