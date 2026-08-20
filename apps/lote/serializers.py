@@ -5,7 +5,7 @@ from typing import Any
 from rest_framework import serializers
 
 from apps.empresa.models import Empresa
-from apps.empresa.serializers import EmpresaSerializer
+from apps.empresa.serializers.empresa_serializers import EmpresaSerializer
 from apps.escola.models import DiretoriaRegional
 from apps.escola.serializers import (
     DiretoriaRegionalSerializer,
