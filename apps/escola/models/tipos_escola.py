@@ -3,6 +3,15 @@
 from django.db import models
 
 from apps.core.models.mixins import UUIDMixin
+from apps.escola.constants import TIPO_ESCOLA_NAO_ACEITAS
+
+
+class TipoEscolaQuerySet(models.QuerySet):
+    """QuerySet customizado para tipos de escola."""
+
+    def aceitos(self) -> "TipoEscolaQuerySet":
+        """Retorna apenas os tipos de escola aceitos pelo sistema."""
+        return self.exclude(sigla__in=TIPO_ESCOLA_NAO_ACEITAS)
 
 
 class TipoEscola(UUIDMixin):
@@ -16,6 +25,8 @@ class TipoEscola(UUIDMixin):
         max_length=50,
         help_text="Sigla que identifica o tipo de escolar.",
     )
+
+    objects = TipoEscolaQuerySet.as_manager()
 
     class Meta:
         ordering = ("sigla",)

@@ -2,7 +2,7 @@
 
 Este módulo disponibiliza um comando Django responsável por consultar a API
 externa do EOL, validar os registros retornados e sincronizar os tipos de
-escola no banco de dados local.
+escola no banco de dados.
 
 A sincronização utiliza ``update_or_create`` para criar novos registros ou
 atualizar registros existentes com base no código EOL. A operação de banco de
