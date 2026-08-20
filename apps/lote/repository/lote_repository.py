@@ -6,33 +6,32 @@ from django.db import transaction
 from django.forms.models import model_to_dict
 
 from apps.escola.models import DiretoriaRegional
-from apps.lote.models import Lote, LoteDRE
+from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.usuario import Usuario
-from apps.escola.models import DiretoriaRegional
+
 
 class LoteRepository:
     """Gerencia as operações de persistência de lotes."""
 
     model: type[Lote] = Lote
-    vinculo_model: type[LoteDRE] = LoteDRE
+    vinculo_model: type[LoteDiretoriaRegional] = LoteDiretoriaRegional
 
-    def _obter_dres_vinculadas(
-    self,
-    dres: list[DiretoriaRegional],
+    def _obter_diretorias_regionais_vinculadas(
+        self,
+        diretorias_regionais: list[DiretoriaRegional],
     ) -> list[tuple[str, str]]:
         """Retorna os nomes das DREs e dos lotes vinculados."""
-        dre_ids = [dre.pk for dre in dres]
+        diretoria_regional_ids = [dre.pk for dre in diretorias_regionais]
 
         vinculos = self.vinculo_model.objects.filter(
-            dre_id__in=dre_ids,
+            diretoria_regional_id__in=diretoria_regional_ids,
         ).values_list(
-            "dre__nome",
+            "diretoria_regional__nome",
             "lote__codigo_cadastro",
         )
 
         return [
-            (str(dre_nome), str(lote_nome))
-            for dre_nome, lote_nome in vinculos
+            (str(dre_nome), str(lote_nome)) for dre_nome, lote_nome in vinculos
         ]
 
     @transaction.atomic
@@ -40,12 +39,12 @@ class LoteRepository:
         self,
         dados: dict[str, Any],
         usuario: Usuario,
-    ) -> Lote:
+    ) -> dict[str, Any]:
         """Cria um lote e seus vínculos com DREs."""
         dados_lote = dados.copy()
-        dres = cast(
+        diretorias_regionais = cast(
             list[DiretoriaRegional],
-            dados_lote.pop("dres", []),
+            dados_lote.pop("diretorias_regionais", []),
         )
 
         lote = self.model(
@@ -60,15 +59,15 @@ class LoteRepository:
             [
                 self.vinculo_model(
                     lote=lote,
-                    dre=dre,
+                    diretoria_regional=diretoria_regional,
                 )
-                for dre in dres
+                for diretoria_regional in diretorias_regionais
             ]
         )
 
         dados_lote = model_to_dict(lote)
         dados_lote["empresa"] = lote.empresa
-        dados_lote["dres"] = list(lote.dres)
+        dados_lote["diretorias_regionais"] = list(lote.diretorias_regionais)
         dados_lote["uuid"] = lote.uuid
         dados_lote["pk"] = lote.id
 

@@ -8,16 +8,12 @@ from rest_framework.exceptions import (
     APIException,
     NotAuthenticated,
 )
-from rest_framework.exceptions import (
-    ValidationError as DRFValidationError,
-)
-from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.serializers import BaseSerializer
 
 from apps.lote.constants import LoteErrorMessages
 from apps.lote.exceptions import (
-    DREJaVinculadaError,
-    LoteJaCadastradoError,
+    DiretoriaRegionalJaVinculadaError,
 )
 from apps.lote.models import Lote
 from apps.lote.schemas import LOTE_SCHEMA
@@ -57,25 +53,19 @@ class LoteViewSet(
         usuario = self.request.user
 
         if not isinstance(usuario, Usuario):
-            raise NotAuthenticated(
-                "Usuário não identificado."
-            )
+            raise NotAuthenticated("Usuário não identificado.")
 
         return usuario
 
     def get_serializer_class(self) -> type[BaseSerializer]:
-            """Retorna o serializer adequado para cada ação."""
-            if self.action == "create":
-                return LoteCriarSerializer
+        """Retorna o serializer adequado para cada ação."""
+        if self.action == "create":
+            return LoteCriarSerializer
 
-            return LoteSerializer
+        return LoteSerializer
 
-    def perform_create(
-        self,
-        serializer: BaseSerializer
-    ) -> None:
+    def perform_create(self, serializer: BaseSerializer) -> None:
         """Cria um lote delegando as regras ao lote."""
-
         usuario = self._obter_usuario()
 
         try:
@@ -83,7 +73,7 @@ class LoteViewSet(
                 dados=serializer.validated_data,
                 usuario=usuario,
             )
-        except DREJaVinculadaError as exc:
+        except DiretoriaRegionalJaVinculadaError as exc:
             raise DRFValidationError(
                 {
                     "title": exc.title,
@@ -101,7 +91,7 @@ class LoteViewSet(
             raise LoteInstabilidadeError(
                 {
                     "title": "Erro",
-                "detail": LoteErrorMessages.INSTABILIDADE,
+                    "detail": LoteErrorMessages.INSTABILIDADE,
                 }
             ) from exc
 

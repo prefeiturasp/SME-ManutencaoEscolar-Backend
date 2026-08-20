@@ -1,6 +1,8 @@
 """Modelos relacionados ao cadastro de lotes."""
 
 from django.db import models
+from django.db.models import QuerySet
+
 from apps.core.models.mixins import BaseModel
 from apps.escola.models.diretoria_regional import DiretoriaRegional
 
@@ -27,10 +29,10 @@ class Lote(BaseModel):
         related_name="lotes",
     )
     periodo_inicial = models.DateField(
-            verbose_name="periodo inicial",
-            null=True,
-            blank=True,
-        )
+        verbose_name="periodo inicial",
+        null=True,
+        blank=True,
+    )
     periodo_final = models.DateField(
         verbose_name="periodo final",
         null=True,
@@ -49,35 +51,34 @@ class Lote(BaseModel):
         return self.nome
 
     @property
-    def dres(self):
-        """Retorna todas as DREs vinculadas ao lote."""
-        return DiretoriaRegional.objects.filter(
-            vinculo_lote__lote=self
-        )
+    def diretorias_regionais(self) -> QuerySet[DiretoriaRegional]:
+        """Retorna todas as Diretorias Regionais vinculadas ao lote."""
+        return DiretoriaRegional.objects.filter(vinculo_lote__lote=self)
 
-class LoteDRE(BaseModel):
-    """Representa o vínculo exclusivo entre uma DRE e um lote."""
+
+class LoteDiretoriaRegional(BaseModel):
+    """Representa o vínculo exclusivo entre Diretoria Regional e lote."""
 
     lote = models.ForeignKey(
         Lote,
         verbose_name="lote",
         on_delete=models.CASCADE,
-        related_name="vinculos_dre",
+        related_name="vinculos_diretoria_regional",
     )
-    dre = models.OneToOneField(
+    diretoria_regional = models.OneToOneField(
         "escola.DiretoriaRegional",
-        verbose_name="DRE",
+        verbose_name="Diretoria Regional",
         on_delete=models.PROTECT,
         related_name="vinculo_lote",
     )
 
     class Meta:
-        """Configura os metadados do vínculo entre lote e DRE."""
+        """Configura os metadados do vínculo de lote e Diretoria Regional."""
 
-        verbose_name = "DRE do lote"
-        verbose_name_plural = "DREs dos lotes"
+        verbose_name = "Diretoria Regional do lote"
+        verbose_name_plural = "Diretorias Regionais do lote"
         ordering = ["id"]
 
     def __str__(self) -> str:
         """Retorna a represenptação textual do vínculo."""
-        return f"{self.lote} - {self.dre}"
+        return f"{self.lote} - {self.diretoria_regional}"

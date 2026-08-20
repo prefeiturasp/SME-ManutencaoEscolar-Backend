@@ -2,13 +2,14 @@
 
 from typing import Any
 
-from django.db.models import query
 from rest_framework import serializers
 
 from apps.empresa.models import Empresa
-from apps.empresa.serializers import EmpresaRelatedField, EmpresaSerializer
+from apps.empresa.serializers import EmpresaSerializer
 from apps.escola.models import DiretoriaRegional
-from apps.escola.serializers import DiretoriaRegionalRelatedField, DiretoriaRegionalSerializer
+from apps.escola.serializers import (
+    DiretoriaRegionalSerializer,
+)
 from apps.lote.models import Lote
 
 
@@ -30,7 +31,7 @@ class LoteSerializer(serializers.ModelSerializer):
         read_only=True,
         allow_null=True,
     )
-    dres = serializers.SerializerMethodField()
+    diretorias_regionais = serializers.SerializerMethodField()
 
     empresa = EmpresaSerializer()
 
@@ -47,7 +48,7 @@ class LoteSerializer(serializers.ModelSerializer):
             "empresa",
             "periodo_inicial",
             "periodo_final",
-            "dres",
+            "diretorias_regionais",
             "criado_por",
             "criado_por_nome",
             "criado_em",
@@ -58,27 +59,32 @@ class LoteSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
-    def get_dres(self, obj):
-        """Retorna as DREs vinculadas ao lote."""
-        return DiretoriaRegionalSerializer(
-            obj.dres,
-            many=True,
-        ).data
+    def get_diretorias_regionais(
+        self,
+        obj: Lote,
+    ) -> list[dict[str, Any]]:
+        """Retorna as diretorias regionais vinculadas ao lote."""
+        return list(
+            DiretoriaRegionalSerializer(
+                obj.diretorias_regionais,
+                many=True,
+            ).data
+        )
 
 
 class LoteCriarSerializer(serializers.ModelSerializer):
     """Valida os dados necessários para cadastrar um lote."""
 
-    dres = DiretoriaRegionalRelatedField(
+    diretorias_regionais = serializers.SlugRelatedField(
+        slug_field="id",
         queryset=DiretoriaRegional.objects.all(),
         many=True,
-        allow_empty=False,
     )
 
-    empresa = EmpresaRelatedField(
-        queryset=Empresa.objects.all()
+    empresa = serializers.SlugRelatedField(
+        slug_field="id",
+        queryset=Empresa.objects.all(),
     )
-
 
     class Meta:
         """Configura o serializer de criação de lotes."""
@@ -91,22 +97,26 @@ class LoteCriarSerializer(serializers.ModelSerializer):
             "periodo_inicial",
             "periodo_final",
             "status",
-            "dres",
+            "diretorias_regionais",
         )
 
-    def validate_dres(
+    def validate_diretorias_regionais(
         self,
-        dres: list[DiretoriaRegional],
+        diretorias_regionais: list[DiretoriaRegional],
     ) -> list[DiretoriaRegional]:
-        """Valida se não existem DREs repetidas na requisição."""
-        dre_ids = [dre.pk for dre in dres]
+        """Valida se existem diretorias regionais repetidas."""
+        diretoria_regional_ids = [
+            diretoria_regional.pk
+            for diretoria_regional in diretorias_regionais
+        ]
 
-        if len(dre_ids) != len(set(dre_ids)):
+        if len(diretoria_regional_ids) != len(set(diretoria_regional_ids)):
             raise serializers.ValidationError(
-                "Não é permitido informar a mesma DRE mais de uma vez."
+                """Não é permitido informar a mesma
+                    diretoria_regional mais de uma vez."""
             )
 
-        return dres
+        return diretorias_regionais
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Valida o período inicial e final do lote."""

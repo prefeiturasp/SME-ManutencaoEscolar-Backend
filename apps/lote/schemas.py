@@ -15,45 +15,59 @@ from apps.lote.serializers import (
 _TAG_LOTE = "Lote"
 
 _CREDENCIAIS_INVALIDAS = "Credenciais inválidas"
-_DADOS_INVALIDOS = (
-    "Dados inválidos, lote duplicado ou DRE já vinculada."
-)
+
+_DADOS_INVALIDOS = "Dados inválidos, lote duplicado ou DRE já vinculada."
+
 _ERRO_NO_SERVIDOR = "Erro no servidor"
 
 _LOTE_EXEMPLO_ENTRADA: dict[str, object] = {
-    "codigo_cadastro": "LOTE-001",
+    "codigo_cadastro": "LOTE-00123",
     "nome": "Lote de manutenção 2026",
     "status": True,
     "empresa": 1,
     "periodo_inicial": "2026-08-01",
     "periodo_final": "2026-12-31",
-    "dres": [1, 2, 3],
+    "diretorias_regionais": [1],
 }
 
 _LOTE_EXEMPLO_SAIDA: dict[str, object] = {
-    "id": 1,
-    "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
-    "codigo_cadastro": "LOTE-001",
     "nome": "Lote de manutenção 2026",
-    "status": True,
-    "empresa": 1,
+    "codigo_cadastro": "LOTE-00123",
+    "empresa": {
+        "id": 1,
+        "uuid": "eaa39861-5212-4817-9ba1-a81285985599",
+        "nome": "Empresa teste Vinculo",
+        "cnpj": "99889215000172",
+        "status": True,
+        "razao_social": "Empresa teste Vinculo",
+        "link_rastreio": "",
+        "cep": "13060770",
+        "logradouro": "XPTO",
+        "numero": "120",
+        "complemento": "",
+        "cidade": "Campinas",
+        "estado": "PI",
+        "criado_por": "ESCOLA EMEF ADMIN",
+        "criado_em": "2026-08-19T12:04:00.313114-03:00",
+        "atualizado_por": None,
+        "atualizado_em": "2026-08-19T12:04:00.313142-03:00",
+    },
     "periodo_inicial": "2026-08-01",
     "periodo_final": "2026-12-31",
-    "dres": [1, 2, 3],
-    "criado_por": 1,
-    "criado_por_nome": "Matheus Bonaretti",
-    "criado_em": "2026-08-19T10:00:00-03:00",
-    "atualizado_por": 1,
-    "atualizado_por_nome": "Matheus Bonaretti",
-    "username": "matheus.simoes",
-    "atualizado_em": "2026-08-19T10:00:00-03:00",
+    "status": True,
+    "diretorias_regionais": [
+        {
+            "id": 1,
+            "codigo": "108700",
+            "nome": "DIRETORIA REGIONAL DE EDUCACAO ITAQUERA",
+            "abreviacao": "DRE - IQ",
+        },
+    ],
 }
 
 _LOTE_EXEMPLO_DRE_VINCULADA: dict[str, object] = {
     "title": "DRE já vinculada",
-    "detail": (
-        "Uma ou mais DREs já estão vinculadas a outro lote. DREs: 2."
-    ),
+    "detail": ("Uma ou mais DREs já estão vinculadas a outro lote. DREs: 2."),
 }
 
 LOTE_SCHEMA = extend_schema_view(
