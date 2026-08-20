@@ -1,4 +1,17 @@
-"""sumarry."""
+"""Comando para sincronização de Subprefeituras com a API EOL.
+
+Este módulo disponibiliza um comando Django responsável por consultar a API
+externa do EOL, obter as Subprefeituras relacionadas às Diretorias Regionais
+cadastradas e sincronizar os registros no banco de dados.
+
+A sincronização consulta as Subprefeituras individualmente para cada Diretoria
+Regional cadastrada. Os registros são criados ou atualizados utilizando o
+código EOL da Subprefeitura como identificador.
+
+A operação de banco de dados é executada dentro de uma transação atômica,
+garantindo que as alterações realizadas durante a sincronização sejam
+persistidas integralmente ou revertidas em caso de erro não tratado.
+"""
 
 from __future__ import annotations
 
@@ -20,15 +33,31 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     """Sincroniza as Subprefeituras com os dados da API EOL.
 
-    Para cada Diretoria Regional cadastrada no banco, o comando consulta
-    a API EOL para obter as Subprefeituras relacionadas à DRE.
+    Para cada Diretoria Regional cadastrada no banco de dados, o comando
+    consulta a API EOL para obter as Subprefeituras relacionadas à DRE.
 
-    Os registros são criados ou atualizados utilizando o código da
-    Subprefeitura como identificador.
+    Os registros retornados pela API são validados e criados ou atualizados
+    no banco de dados utilizando o código EOL da Subprefeitura como
+    identificador.
     """
 
     def handle(self, *args: Any, **options: Any) -> None:
-        """Executa a sincronização das Subprefeituras."""
+        """Executa a sincronização das Subprefeituras.
+
+        A API EOL é consultada para cada Diretoria Regional cadastrada.
+        Os registros retornados são validados individualmente e, quando
+        válidos, criados ou atualizados no banco de dados local.
+
+        Args:
+            *args (Any): Argumentos posicionais recebidos pelo Django.
+            **options (Any): Opções recebidas pelo Django.
+
+        Raises:
+            CommandError: Se as configurações obrigatórias não estiverem
+                definidas, se não houver Diretorias Regionais cadastradas,
+                se ocorrer falha na consulta à API ou se a API retornar
+                dados em formato inválido.
+        """
         base_url = (SME_API_EOL_URL or "").strip()
         token = (SME_API_EOL_TOKEN or "").strip()
 
@@ -98,7 +127,21 @@ class Command(BaseCommand):
         headers: dict[str, str],
         codigo_dre: str,
     ) -> list[dict[str, Any]]:
-        """Consulta as Subprefeituras relacionadas a uma DRE."""
+        """Consulta a API EOL para obter as Subprefeituras de uma DRE.
+
+        Args:
+            base_url (str): URL base da API EOL.
+            headers (dict[str, str]): Cabeçalhos utilizados na requisição HTTP.
+            codigo_dre (str): Código EOL da Diretoria Regional.
+
+        Raises:
+            CommandError: Se ocorrer erro na requisição HTTP, se a API
+                retornar um JSON inválido ou se a resposta não for uma
+                lista de registros.
+        Returns:
+            list[dict[str, Any]]: Lista de registros de Subprefeituras
+                retornados pela API.
+        """
         endpoint = ENDPOINT_SUBPREFEITURA.format(
             codigo_dre=codigo_dre,
         )
@@ -141,7 +184,16 @@ class Command(BaseCommand):
 
     @staticmethod
     def _validar_registro(item: Any) -> None:
-        """Valida a estrutura e os tipos de um registro."""
+        """Valida a estrutura e os dados de um registro de Subprefeitura.
+
+        Args:
+            item (Any): Registro de Subprefeitura retornado pela API EOL.
+
+        Raises:
+            CommandError: Se o registro não for um objeto, possuir campos
+                obrigatórios ausentes, se o código ou nome não forem strings
+                ou se algum dos campos obrigatórios estiver vazio.
+        """
         if not isinstance(item, dict):
             raise CommandError(
                 "Um dos registros de Subprefeitura não é um objeto."

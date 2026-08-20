@@ -60,8 +60,8 @@ class Command(BaseCommand):
         persistido no banco de dados.
 
         Args:
-            *args: Argumentos posicionais recebidos pelo Django.
-            **options: Opções recebidas pelo Django.
+            *args (Any): Argumentos posicionais recebidos pelo Django.
+            **options (Any): Opções recebidas pelo Django.
 
         Raises:
             CommandError: Se as configurações obrigatórias não estiverem
@@ -91,8 +91,9 @@ class Command(BaseCommand):
             api_url=api_url,
             headers=headers,
         )
+        total_escolas = len(payload)
         logger.info(
-            f"API retornou {len(payload)} registros para importação.",
+            f"API retornou {total_escolas} registros para importação.",
         )
         quantidade_criados = 0
         quantidade_atualizados = 0
@@ -110,20 +111,12 @@ class Command(BaseCommand):
                 sigla = item["siglaTipoEscola"]
                 codigo_eol = item["codigoEscola"]
                 nome_escola = f"{sigla} {item['nomeEscola']}"
-                logger.info(
-                    f"[{numero}/{len(payload)}] Importando escola "
-                    f"{nome_escola}"
-                )
-
                 if sigla not in siglas_aceitas:
                     quantidades_ignorados += 1
-                    logger.info(
-                        f"Escola ignorada: sigla '{sigla}' não aceita.",
-                    )
                     continue
 
                 try:
-                    dre = self._obter_dre(item["codigoDRE"])
+                    diretoria_regional = self._obter_dre(item["codigoDRE"])
                     tipo_escola = self._obter_tipo_escola(sigla)
                     subprefeitura = self._obter_subprefeitura(
                         base_url=base_url,
@@ -132,14 +125,14 @@ class Command(BaseCommand):
                     )
                 except DadosEscolaError as exc:
                     quantidade_erros += 1
-                    logger.info(f"Escola ignorada: {exc}")
+                    logger.info(f"{nome_escola}: {exc}")
                     continue
 
                 _, foi_criado = Unidadeeducacional.objects.update_or_create(
                     codigo_eol=codigo_eol,
                     defaults={
                         "nome": nome_escola,
-                        "diretoria_regional": dre,
+                        "diretoria_regional": diretoria_regional,
                         "tipo_escola": tipo_escola,
                         "subprefeitura": subprefeitura,
                     },
@@ -149,6 +142,12 @@ class Command(BaseCommand):
                     quantidade_criados += 1
                 else:
                     quantidade_atualizados += 1
+
+                if numero % 500 == 0 or numero == total_escolas:
+                    logger.info(
+                        f"{numero} de {total_escolas} escolas analizadas. "
+                        "Aguarde ..."
+                    )
 
         tempo_execucao_segundos = time.perf_counter() - inicio
         tempo_execucao_minutos = tempo_execucao_segundos / 60
@@ -165,7 +164,7 @@ class Command(BaseCommand):
         """Valida a estrutura e os tipos de um registro da API.
 
         Args:
-            item: Registro retornado pela API EOL.
+            item (Any): Registro retornado pela API EOL.
 
         Raises:
             CommandError: Se o registro não for um dicionário, se
@@ -219,23 +218,24 @@ class Command(BaseCommand):
 
     @staticmethod
     def _obter_dre(codigo: str) -> DiretoriaRegional:
-        """Obtém uma DRE pelo código EOL.
+        """Obtém uma Diretoria Regional pelo código EOL.
 
         Args:
-            codigo: Código EOL da Diretoria Regional.
+            codigo (str): Código EOL da Diretoria Regional.
 
         Returns:
-            Instância da Diretoria Regional correspondente ao código.
+            DiretoriaRegional: Instância da Diretoria Regional correspondente
+                ao código.
 
         Raises:
-            DadosEscolaError: Se nenhuma DRE for encontrada para o
-                código informado.
+            DadosEscolaError: Se nenhuma Diretoria Regional for encontrada
+                para o código informado.
         """
         try:
             return DiretoriaRegional.objects.get(codigo=codigo)
         except DiretoriaRegional.DoesNotExist as exc:
             raise DadosEscolaError(
-                f"DRE com código '{codigo}' não encontrada."
+                f"Diretoria Regional com código '{codigo}' não encontrada."
             ) from exc
 
     @staticmethod
@@ -243,10 +243,10 @@ class Command(BaseCommand):
         """Obtém o tipo de escola pela sigla.
 
         Args:
-            sigla: Sigla do tipo de escola.
+            sigla (str): Sigla do tipo de escola.
 
         Returns:
-            Instância do tipo de escola correspondente à sigla.
+            TipoEscola: Instância do tipo de escola correspondente à sigla.
 
         Raises:
             DadosEscolaError: Se nenhum tipo de escola for encontrado
@@ -272,12 +272,12 @@ class Command(BaseCommand):
         de dados local.
 
         Args:
-            base_url: URL base da API EOL.
-            headers: Cabeçalhos utilizados na requisição HTTP.
-            codigo_escola: Código EOL da escola.
+            base_url (str): URL base da API EOL.
+            headers (dict[str, str]): Cabeçalhos utilizados na requisição HTTP.
+            codigo_escola (str): Código EOL da escola.
 
         Returns:
-            Instância da Subprefeitura correspondente à escola.
+            Subprefeitura: Instância da Subprefeitura correspondente à escola.
 
         Raises:
             DadosEscolaError: Se ocorrer erro na consulta à API, se
@@ -376,11 +376,11 @@ class Command(BaseCommand):
         """Consulta a API EOL e retorna os registros das escolas.
 
         Args:
-            api_url: URL completa do endpoint de escolas.
-            headers: Cabeçalhos utilizados na requisição HTTP.
+            api_url (str): URL completa do endpoint de escolas.
+            headers (dict[str, str]): Cabeçalhos utilizados na requisição HTTP.
 
         Returns:
-            Lista de registros retornados pela API.
+            list[Any]: Lista de registros retornados pela API.
 
         Raises:
             CommandError: Se ocorrer erro HTTP, erro de comunicação,

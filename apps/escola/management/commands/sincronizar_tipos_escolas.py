@@ -54,8 +54,8 @@ class Command(BaseCommand):
         sincronização dos registros no banco de dados local.
 
         Args:
-            *args: Argumentos posicionais recebidos pelo comando.
-            **options: Opções recebidas pelo comando.
+            *args (Any): Argumentos posicionais recebidos pelo comando.
+            **options (Any): Opções recebidas pelo comando.
 
         Raises:
             CommandError: Erros ao executar o script
@@ -139,7 +139,7 @@ class Command(BaseCommand):
         os campos obrigatórios e se os valores possuem os tipos esperados.
 
         Args:
-            item: Registro retornado pela API EOL.
+            item (Any): Registro retornado pela API EOL.
 
         Raises:
             CommandError: Erros ao executar o script
