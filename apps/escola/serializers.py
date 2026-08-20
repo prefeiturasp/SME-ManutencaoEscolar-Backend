@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from apps.escola.models import TipoEscola
+from apps.escola.models import DiretoriaRegional, TipoEscola
 
 
 class TipoEscolaSerializer(serializers.ModelSerializer):
@@ -15,4 +15,17 @@ class TipoEscolaSerializer(serializers.ModelSerializer):
             "uuid",
             "codigo_eol",
             "sigla",
+        )
+
+
+class DiretoriaRegionalSerializer(serializers.ModelSerializer):
+    """Serializa e valida os dados dos tipos de escola."""
+
+    class Meta:
+        model = DiretoriaRegional
+        fields = (
+            "id",
+            "codigo",
+            "nome",
+            "abreviacao",
         )
