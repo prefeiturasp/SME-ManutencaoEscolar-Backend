@@ -25,7 +25,7 @@ from apps.usuarios.models import Usuario
 class ResponsavelTecnicoViewSet(ModelViewSet):
     """CRUD + ações de Responsável Técnico.
 
-    Delegando regras de negócio ao EmpresaService.
+    Delegando regras de negócio ao ResponsavelTecnicoService.
     """
 
     queryset = ResponsavelTecnico.objects.all()
@@ -34,6 +34,7 @@ class ResponsavelTecnicoViewSet(ModelViewSet):
     http_method_names = ["post"]
 
     def __init__(self, **kwargs: Any) -> None:
+        """Inicializa a view com o serviço de Responsável Técnico."""
         super().__init__(**kwargs)
         self.service = ResponsavelTecnicoService()
 
@@ -43,7 +44,16 @@ class ResponsavelTecnicoViewSet(ModelViewSet):
         return usuario if usuario.is_authenticated else None
 
     def perform_create(self, serializer: BaseSerializer) -> None:
-        """Cria um novo responsável técnico usando o serviço."""
+        """
+        Cria um novo responsável técnico usando o serviço.
+
+        Args:
+            serializer (BaseSerializer): Serializer contendo os dados
+                do responsável técnico.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
         try:
             responsavel = self.service.criar(
                 serializer.validated_data, self._usuario_logado()

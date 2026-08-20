@@ -48,7 +48,17 @@ class ResponsavelTecnicoService:
     def _validar_tipo_unico_na_empresa(
         self, empresa_id: int, tipo: str
     ) -> None:
-        """Garante que não haja outro responsável do mesmo tipo na empresa."""
+        """
+        Garante que não haja outro responsável do mesmo tipo na empresa.
+
+        Args:
+            empresa_id (int): ID da empresa.
+            tipo (str): Tipo do responsável técnico.
+
+        Raises:
+            ValidationError: Se já existir um responsável técnico do mesmo
+                tipo na empresa.
+        """
         if self.repository.existe_por_empresa_e_tipo(empresa_id, tipo):
             mensagem = (
                 EmpresaErrorMessages.RESPONSAVEL_TECNICO_TIPO_JA_CADASTRADO

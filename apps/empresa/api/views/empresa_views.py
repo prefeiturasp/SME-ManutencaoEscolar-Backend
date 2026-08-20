@@ -55,7 +55,16 @@ class EmpresaViewSet(ModelViewSet):
         return usuario if usuario.is_authenticated else None
 
     def perform_create(self, serializer: BaseSerializer) -> None:
-        """Cria uma nova empresa usando o serviço."""
+        """
+        Cria uma nova empresa usando o serviço.
+
+        Args:
+            serializer (BaseSerializer): Serializer contendo os dados da
+                empresa.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
         try:
             empresa = self.service.criar(
                 serializer.validated_data, self._usuario_logado()
@@ -68,7 +77,16 @@ class EmpresaViewSet(ModelViewSet):
         serializer.instance = empresa
 
     def perform_update(self, serializer: BaseSerializer) -> None:
-        """Atualiza uma empresa existente usando o serviço."""
+        """
+        Atualiza uma empresa existente usando o serviço.
+
+        Args:
+            serializer (BaseSerializer): Serializer contendo os dados da
+                empresa.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
         try:
             empresa = self.service.atualizar(
                 cast(Empresa, serializer.instance),
@@ -83,5 +101,12 @@ class EmpresaViewSet(ModelViewSet):
         serializer.instance = empresa
 
     def perform_destroy(self, instance: Empresa) -> None:
-        """Deleta uma empresa existente usando o serviço."""
+        """
+        Deleta uma empresa existente usando o serviço.
+
+        Args:
+            instance (Empresa): Instância da empresa a ser deletada.
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
         self.service.deletar(instance, self._usuario_logado())
