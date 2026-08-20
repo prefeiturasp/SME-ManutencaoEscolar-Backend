@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Modelos relacionados as Subprefeituras."""
 
 from django.db import models
 

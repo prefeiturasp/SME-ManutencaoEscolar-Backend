@@ -4,6 +4,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from apps.escola.models import TipoEscola
+from apps.escola.models.diretoria_regional import DiretoriaRegional
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
@@ -85,13 +86,46 @@ def resposta_api_tipos_escolas():
 @pytest.fixture()
 def configurar_api_eol(monkeypatch):
     """Configura as variáveis da API EOL para os testes."""
-    monkeypatch.setattr(
-        "apps.escola.management.commands.sincronizar_tipos_escolas."
-        "SME_API_EOL_URL",
-        "https://api-eol-teste",
+    comandos = (
+        "sincronizar_tipos_escolas",
+        "sincronizar_subprefeituras",
     )
-    monkeypatch.setattr(
-        "apps.escola.management.commands.sincronizar_tipos_escolas."
-        "SME_API_EOL_TOKEN",
-        "token-teste",
+
+    for comando in comandos:
+        modulo = f"apps.escola.management.commands.{comando}"
+
+        monkeypatch.setattr(
+            f"{modulo}.SME_API_EOL_URL",
+            "https://api-eol-teste",
+        )
+        monkeypatch.setattr(
+            f"{modulo}.SME_API_EOL_TOKEN",
+            "token-teste",
+        )
+
+
+@pytest.fixture
+def diretoria_regional():
+    """Cria uma Diretoria Regional para os testes."""
+    return DiretoriaRegional.objects.create(
+        codigo="DRE01",
+        nome="Diretoria Regional Centro",
     )
+
+
+@pytest.fixture
+def resposta_api_subprefeituras():
+    """Retorna uma resposta simulada da API de Subprefeituras."""
+    resposta = Mock()
+    resposta.raise_for_status.return_value = None
+    resposta.json.return_value = [
+        {
+            "codigoSubprefeitura": "SP01",
+            "nomeSubprefeitura": "Subprefeitura Sé",
+        },
+        {
+            "codigoSubprefeitura": "SP02",
+            "nomeSubprefeitura": "Subprefeitura Lapa",
+        },
+    ]
+    return resposta
