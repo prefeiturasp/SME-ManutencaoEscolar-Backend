@@ -43,7 +43,8 @@ class LoteService:
             - empresa (Empresa): Empresa associada ao lote.
             - periodo_inicial (date): Data inicial do período do lote.
             - periodo_final (date): Data final do período do lote.
-            - diretorias_regionais (list[DiretoriaRegional]): Diretorias regionais vinculadas ao lote.
+            - diretorias_regionais (list[DiretoriaRegional]): Diretorias
+                regionais vinculadas ao lote.
             - uuid (str): Identificador único do lote.
             - pk (int): Chave primária do lote.
 
