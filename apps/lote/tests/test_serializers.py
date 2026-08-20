@@ -134,8 +134,5 @@ def test_rejeita_periodo_final_anterior_ao_inicial() -> None:
     with pytest.raises(serializers.ValidationError) as exc_info:
         serializer.validate(attrs)
 
-    mensagem = (
-        "O período final não pode ser anterior "
-        "ao período inicial."
-    )
+    mensagem = "O período final não pode ser anterior " "ao período inicial."
     assert str(exc_info.value.detail["periodo_final"]) == mensagem

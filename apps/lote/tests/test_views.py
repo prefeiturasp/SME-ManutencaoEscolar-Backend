@@ -11,9 +11,7 @@ from rest_framework import status
 from rest_framework.exceptions import (
     NotAuthenticated,
 )
-from rest_framework.exceptions import (
-    ValidationError as DRFValidationError,
-)
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.request import Request
 from rest_framework.serializers import BaseSerializer
 
@@ -95,9 +93,7 @@ def test_rejeita_usuario_nao_identificado() -> None:
     with pytest.raises(NotAuthenticated) as exc_info:
         view._obter_usuario()
 
-    assert str(exc_info.value.detail) == (
-        "Usuário não identificado."
-    )
+    assert str(exc_info.value.detail) == ("Usuário não identificado.")
 
 
 def test_retorna_serializer_de_criacao() -> None:
@@ -152,10 +148,7 @@ def test_converte_erro_de_diretoria_em_erro_de_validacao() -> None:
     erro = DiretoriaRegionalJaVinculadaError(
         title="Diretoria Regional já vinculada",
         detail={
-            "message": (
-                LoteErrorMessages
-                .DIRETORIA_REGIONAL_VINCULADA
-            ),
+            "message": (LoteErrorMessages.DIRETORIA_REGIONAL_VINCULADA),
             "vinculados": [
                 (
                     "Diretoria Regional Centro",
@@ -235,8 +228,6 @@ def test_configuracao_do_erro_de_instabilidade() -> None:
     """Deve configurar corretamente o erro de instabilidade."""
     erro = LoteInstabilidadeError()
 
-    assert erro.status_code == (
-        status.HTTP_500_INTERNAL_SERVER_ERROR
-    )
+    assert erro.status_code == (status.HTTP_500_INTERNAL_SERVER_ERROR)
     assert str(erro.detail) == LoteErrorMessages.INSTABILIDADE
     assert erro.default_code == "lote_instabilidade"

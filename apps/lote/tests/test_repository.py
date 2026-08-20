@@ -39,16 +39,11 @@ def test_obtem_diretorias_regionais_vinculadas() -> None:
             "LOTE-002",
         ),
     ]
-    filtro_mock = (
-        vinculo_model_mock.objects.filter.return_value
-    )
+    filtro_mock = vinculo_model_mock.objects.filter.return_value
     filtro_mock.values_list.return_value = vinculos
 
-    resultado = (
-        repository
-        ._obter_diretorias_regionais_vinculadas(
-            diretorias_regionais,
-        )
+    resultado = repository._obter_diretorias_regionais_vinculadas(
+        diretorias_regionais,
     )
 
     assert resultado == vinculos
@@ -70,18 +65,13 @@ def test_converte_dados_dos_vinculos_para_string() -> None:
         vinculo_model_mock,
     )
     diretoria_regional = DiretoriaRegional(pk=1)
-    filtro_mock = (
-        vinculo_model_mock.objects.filter.return_value
-    )
+    filtro_mock = vinculo_model_mock.objects.filter.return_value
     filtro_mock.values_list.return_value = [
         (123, 456),
     ]
 
-    resultado = (
-        repository
-        ._obter_diretorias_regionais_vinculadas(
-            [diretoria_regional],
-        )
+    resultado = repository._obter_diretorias_regionais_vinculadas(
+        [diretoria_regional],
     )
 
     assert resultado == [("123", "456")]
@@ -229,6 +219,4 @@ def test_criar_nao_altera_dados_originais() -> None:
         )
 
     assert dados == dados_originais
-    vinculo_model_mock.objects.bulk_create.assert_called_once_with(
-        []
-    )
+    vinculo_model_mock.objects.bulk_create.assert_called_once_with([])

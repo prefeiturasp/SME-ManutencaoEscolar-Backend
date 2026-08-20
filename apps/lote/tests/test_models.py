@@ -82,9 +82,7 @@ def test_representacao_textual_do_vinculo() -> None:
 
     resultado = str(vinculo)
 
-    assert resultado == (
-        f"{lote} - {diretoria_regional}"
-    )
+    assert resultado == (f"{lote} - {diretoria_regional}")
 
 
 def test_metadados_do_vinculo() -> None:
@@ -108,10 +106,7 @@ def test_relacionamento_com_lote() -> None:
     assert campo.remote_field is not None
     assert campo.remote_field.model is Lote
     assert campo.remote_field.on_delete is models.CASCADE
-    assert (
-        campo.remote_field.related_name
-        == "vinculos_diretoria_regional"
-    )
+    assert campo.remote_field.related_name == "vinculos_diretoria_regional"
 
 
 def test_relacionamento_exclusivo_com_diretoria_regional() -> None:
