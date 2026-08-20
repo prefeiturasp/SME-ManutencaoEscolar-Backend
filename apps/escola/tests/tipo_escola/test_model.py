@@ -5,6 +5,7 @@ import uuid
 import pytest
 from django.db import IntegrityError
 
+from apps.escola.constants import TIPO_ESCOLA_NAO_ACEITAS
 from apps.escola.models.tipos_escola import TipoEscola
 
 pytestmark = pytest.mark.django_db
@@ -77,3 +78,53 @@ class TestTipoEscola:
             tipo_emef,
             tipo_emei,
         ]
+
+    def test_deve_retornar_apenas_tipos_de_escola_aceitos(self):
+        """Deve excluir os tipos de escola não aceitos pelo sistema."""
+        sigla_nao_aceita = next(iter(TIPO_ESCOLA_NAO_ACEITAS))
+
+        tipo_aceito = TipoEscola.objects.create(
+            codigo_eol=1,
+            sigla="EMEF",
+        )
+        tipo_nao_aceito = TipoEscola.objects.create(
+            codigo_eol=2,
+            sigla=sigla_nao_aceita,
+        )
+
+        tipos_aceitos = TipoEscola.objects.aceitos()
+
+        assert tipo_aceito in tipos_aceitos
+        assert tipo_nao_aceito not in tipos_aceitos
+
+    def test_deve_retornar_todos_os_tipos_quando_nao_houver_tipo_nao_aceito(
+        self,
+    ):
+        """Deve retornar todos os tipos quando nenhum for não aceito."""
+        tipo_emef = TipoEscola.objects.create(
+            codigo_eol=1,
+            sigla="EMEF",
+        )
+        tipo_cemei = TipoEscola.objects.create(
+            codigo_eol=2,
+            sigla="CEMEI",
+        )
+
+        tipos_aceitos = TipoEscola.objects.aceitos()
+
+        assert list(tipos_aceitos) == [
+            tipo_cemei,
+            tipo_emef,
+        ]
+
+    def test_nao_deve_retornar_tipos_de_escola_nao_aceitos(
+        self,
+    ):
+        """Não deve retornar nenhuma sigla configurada como não aceita."""
+        for codigo, sigla in enumerate(TIPO_ESCOLA_NAO_ACEITAS, start=1):
+            TipoEscola.objects.create(
+                codigo_eol=codigo,
+                sigla=sigla,
+            )
+
+        assert not TipoEscola.objects.aceitos().exists()
