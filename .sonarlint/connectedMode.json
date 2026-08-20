@@ -1,4 +1,4 @@
 {
-    "sonarQubeUri": "http://sonarqube.sme.prefeitura.sp.gov.br",
-    "projectKey": "SME-ManutencaoEscolar-Backend"
+  "sonarQubeUri": "http://sonarqube.sme.prefeitura.sp.gov.br",
+  "projectKey": "SME-ManutencaoEscolar-Backend"
 }
