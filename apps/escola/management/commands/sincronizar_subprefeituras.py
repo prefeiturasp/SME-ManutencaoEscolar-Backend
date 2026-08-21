@@ -72,54 +72,72 @@ class Command(BaseCommand):
             "x-api-eol-key": token,
         }
 
-        diretorias = DiretoriaRegional.objects.all()
+        quantidades = {"criadas": 0, "atualizadas": 0}
 
+        logger.info("Iniciando importação das Subprefeituras.")
+        subprefeituras = self._coletar_registros(base_url, headers)
+        with transaction.atomic():
+            for item in subprefeituras:
+                logging.info(f"Item {item}\n")
+                codigo = item["codigoSubprefeitura"]
+                nome = item["nomeSubprefeitura"]
+                _, foi_criada = Subprefeitura.objects.update_or_create(
+                    codigo_eol=codigo,
+                    defaults={
+                        "nome": nome,
+                    },
+                )
+                quantidades["criadas" if foi_criada else "atualizadas"] += 1
+
+        logger.info(
+            f"Importação concluída: {quantidades['criadas']} criadas, "
+            f"{quantidades['atualizadas']} atualizadas.",
+        )
+
+    def _coletar_registros(
+        self,
+        base_url: str,
+        headers: dict[str, str],
+    ) -> list[dict[str, str]]:
+        """Coleta e valida as Subprefeituras de todas as Diretorias Regionais.
+
+        Consulta a API EOL para cada Diretoria Regional cadastrada, valida os
+        registros retornados e os reúne em uma única lista.
+
+        Args:
+            base_url (str): URL base da API EOL.
+            headers (dict[str, str]): Cabeçalhos utilizados na requisição HTTP.
+
+        Raises:
+            CommandError: Se não houver Diretorias Regionais cadastradas ou se
+            algum registro retornado pela API for inválido.
+
+        Returns:
+            list[dict[str, str]]: Lista de Subprefeituras coletadas e validadas
+            a partir das Diretorias Regionais cadastradas.
+        """
+        diretorias = DiretoriaRegional.objects.all()
+        subprefeituras = []
         if not diretorias.exists():
             raise CommandError(
                 "Nenhuma Diretoria Regional cadastrada. "
                 "Execute primeiro a sincronização das DREs."
             )
+        for dre in diretorias:
+            logger.info(
+                f"Consultando Subprefeituras da {dre.nome}.",
+            )
 
-        quantidade_criadas = 0
-        quantidade_atualizadas = 0
+            dados = self._obter_subprefeituras(
+                base_url=base_url,
+                headers=headers,
+                codigo_dre=dre.codigo,
+            )
+            for item in dados:
+                self._validar_registro(item)
+                subprefeituras.append(item)
 
-        logger.info("Iniciando importação das Subprefeituras.")
-
-        with transaction.atomic():
-            for dre in diretorias:
-                logger.info(
-                    f"Consultando Subprefeituras da {dre.nome}.",
-                )
-
-                subprefeituras = self._obter_subprefeituras(
-                    base_url=base_url,
-                    headers=headers,
-                    codigo_dre=dre.codigo,
-                )
-
-                for item in subprefeituras:
-                    self._validar_registro(item)
-
-                    codigo = item["codigoSubprefeitura"]
-                    nome = item["nomeSubprefeitura"]
-
-                    _, foi_criada = Subprefeitura.objects.update_or_create(
-                        codigo_eol=codigo,
-                        defaults={
-                            "nome": nome,
-                        },
-                    )
-
-                    if foi_criada:
-                        quantidade_criadas += 1
-                    else:
-                        quantidade_atualizadas += 1
-
-        logger.info(
-            "Importação concluída: %d criadas, %d atualizadas.",
-            quantidade_criadas,
-            quantidade_atualizadas,
-        )
+        return subprefeituras
 
     @staticmethod
     def _obter_subprefeituras(
