@@ -2,19 +2,13 @@
 
 from rest_framework import serializers
 
-from apps.empresa.constants import EmpresaErrorMessages
-from apps.empresa.models import Empresa, ResponsavelTecnico
+from apps.empresa.models import ResponsavelTecnico
 from apps.usuarios.models import Usuario
 
 
 class ResponsavelTecnicoSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de responsáveis técnicos."""
 
-    empresa: serializers.SlugRelatedField[Empresa] = (
-        serializers.SlugRelatedField(
-            slug_field="uuid", queryset=Empresa.objects.all()
-        )
-    )
     criado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
     )
@@ -35,7 +29,6 @@ class ResponsavelTecnicoSerializer(serializers.ModelSerializer):
         fields = (
             "tipo",
             "nome",
-            "empresa",
             "email",
             "numero_crea",
             "telefone",
@@ -45,11 +38,3 @@ class ResponsavelTecnicoSerializer(serializers.ModelSerializer):
             "atualizado_por",
             "atualizado_em",
         )
-
-    def validate_empresa(self, value: Empresa) -> Empresa:
-        """Garante que a empresa exista e seja válida."""
-        if not value:
-            raise serializers.ValidationError(
-                EmpresaErrorMessages.EMPRESA_INVALIDA
-            )
-        return value
