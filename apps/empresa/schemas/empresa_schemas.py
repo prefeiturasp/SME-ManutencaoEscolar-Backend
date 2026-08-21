@@ -8,7 +8,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 
-from apps.empresa.serializers import (
+from apps.empresa.serializers.empresa_serializers import (
     EmpresaCriarAtualizarSerializer,
     EmpresaSerializer,
 )
@@ -35,6 +35,7 @@ _EMPRESA_EXEMPLO_SAIDA = {
 
 _CREDENCIAL_INVALID_DESCRIPTION = "Credenciais inválidas"
 _ERRO_SERVIDOR_DESCRIPTION = "Erro no servidor"
+_EMPRESA_NAO_ENCONTRADA_DESCRIPTION = "Empresa não encontrada"
 
 EMPRESA_SCHEMA = extend_schema_view(
     list=extend_schema(
@@ -93,7 +94,9 @@ EMPRESA_SCHEMA = extend_schema_view(
         responses={
             200: EmpresaSerializer,
             401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
-            404: OpenApiResponse(description="Empresa não encontrada"),
+            404: OpenApiResponse(
+                description=_EMPRESA_NAO_ENCONTRADA_DESCRIPTION
+            ),
             503: OpenApiResponse(description="Instabilidade"),
             500: OpenApiResponse(description=_ERRO_SERVIDOR_DESCRIPTION),
         },
@@ -143,7 +146,9 @@ EMPRESA_SCHEMA = extend_schema_view(
             200: OpenApiResponse(description="Empresa atualizada com sucesso"),
             400: OpenApiResponse(description="Dados inválidos"),
             401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
-            404: OpenApiResponse(description="Empresa não encontrada"),
+            404: OpenApiResponse(
+                description=_EMPRESA_NAO_ENCONTRADA_DESCRIPTION
+            ),
             503: OpenApiResponse(description="Instabilidade"),
             500: OpenApiResponse(description=_ERRO_SERVIDOR_DESCRIPTION),
         },
@@ -161,4 +166,19 @@ EMPRESA_SCHEMA = extend_schema_view(
         ],
     ),
     partial_update=extend_schema(exclude=True),
+    destroy=extend_schema(
+        tags=["Empresa"],
+        summary="Remove uma empresa",
+        description="Remove uma empresa existente do sistema.",
+        operation_id="deletarEmpresa",
+        responses={
+            204: OpenApiResponse(description="Empresa removida com sucesso"),
+            401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
+            404: OpenApiResponse(
+                description=_EMPRESA_NAO_ENCONTRADA_DESCRIPTION
+            ),
+            503: OpenApiResponse(description="Instabilidade"),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR_DESCRIPTION),
+        },
+    ),
 )

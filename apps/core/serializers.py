@@ -43,6 +43,12 @@ class LoginResponseSerializer(serializers.Serializer):
 
     refresh = serializers.CharField(help_text="Token JWT de atualização.")
     access = serializers.CharField(help_text="Token JWT de acesso.")
+    access_expires_in = serializers.IntegerField(
+        help_text="Tempo de validade do token de acesso em segundos.",
+    )
+    refresh_expires_in = serializers.IntegerField(
+        help_text="Tempo de validade do token de atualização em segundos.",
+    )
     usuario = UsuarioResponseSerializer()
 
 

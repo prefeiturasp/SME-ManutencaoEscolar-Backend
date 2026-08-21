@@ -16,3 +16,7 @@ class ServicoErrorMessages:
     ERRO_AO_ATUALIZAR = (
         "Não conseguimos salvar as alterações. Por favor, tente novamente."
     )
+
+    ERRO_AO_EXCLUIR = (
+        "Não conseguimos excluir o serviço. Por favor, tente novamente."
+    )

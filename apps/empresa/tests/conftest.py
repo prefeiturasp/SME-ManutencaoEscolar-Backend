@@ -3,6 +3,7 @@
 import pytest
 from rest_framework.test import APIClient
 
+from apps.empresa.models import Empresa
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
@@ -54,4 +55,21 @@ def empresa_payload_valido():
         "complemento": "Apto 101",
         "cidade": "São Paulo",
         "estado": "SP",
+    }
+
+
+@pytest.fixture
+def empresa(empresa_payload_valido, db):
+    """Fixture de empresa persistida utilizada nos testes de Responsável."""
+    return Empresa.objects.create(**empresa_payload_valido)
+
+
+@pytest.fixture
+def responsavel_payload_valido(empresa):
+    """Payload válido para criação de responsável técnico."""
+    return {
+        "empresa": empresa,
+        "nome": "João Responsável",
+        "tipo": "preposto",
+        "email": "joao.responsavel@email.com",
     }

@@ -16,8 +16,8 @@ from rest_framework.viewsets import ModelViewSet
 from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
 from apps.empresa.filters import EmpresaFilter
 from apps.empresa.models import Empresa
-from apps.empresa.schemas import EMPRESA_SCHEMA
-from apps.empresa.serializers import (
+from apps.empresa.schemas.empresa_schemas import EMPRESA_SCHEMA
+from apps.empresa.serializers.empresa_serializers import (
     EmpresaCriarAtualizarSerializer,
     EmpresaSerializer,
 )
@@ -34,7 +34,7 @@ class EmpresaViewSet(ModelViewSet):
 
     queryset = Empresa.objects.all()
     lookup_field = "uuid"
-    http_method_names = ["get", "post", "put"]
+    http_method_names = ["get", "post", "put", "delete"]
     filter_backends = [DjangoFilterBackend]
     filterset_class = EmpresaFilter
 
@@ -55,7 +55,16 @@ class EmpresaViewSet(ModelViewSet):
         return usuario if usuario.is_authenticated else None
 
     def perform_create(self, serializer: BaseSerializer) -> None:
-        """Cria uma nova empresa usando o serviço."""
+        """
+        Cria uma nova empresa usando o serviço.
+
+        Args:
+            serializer (BaseSerializer): Serializer contendo os dados da
+                empresa.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
         try:
             empresa = self.service.criar(
                 serializer.validated_data, self._usuario_logado()
@@ -68,7 +77,16 @@ class EmpresaViewSet(ModelViewSet):
         serializer.instance = empresa
 
     def perform_update(self, serializer: BaseSerializer) -> None:
-        """Atualiza uma empresa existente usando o serviço."""
+        """
+        Atualiza uma empresa existente usando o serviço.
+
+        Args:
+            serializer (BaseSerializer): Serializer contendo os dados da
+                empresa.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
         try:
             empresa = self.service.atualizar(
                 cast(Empresa, serializer.instance),
@@ -81,3 +99,14 @@ class EmpresaViewSet(ModelViewSet):
             raise DRFValidationError(exc.message_dict) from exc
 
         serializer.instance = empresa
+
+    def perform_destroy(self, instance: Empresa) -> None:
+        """
+        Deleta uma empresa existente usando o serviço.
+
+        Args:
+            instance (Empresa): Instância da empresa a ser deletada.
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
+        self.service.deletar(instance, self._usuario_logado())

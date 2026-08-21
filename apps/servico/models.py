@@ -20,6 +20,7 @@ class Servico(BaseModel):
         constraints = [
             models.UniqueConstraint(
                 Lower("nome"),
+                condition=models.Q(deletado_em__isnull=True),
                 name="servico_nome_unico_case_insensitive",
             ),
         ]

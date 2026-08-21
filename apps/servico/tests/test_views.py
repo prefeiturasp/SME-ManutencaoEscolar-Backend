@@ -30,6 +30,7 @@ from apps.servico.serializers import (
     ServicoSerializer,
 )
 from apps.servico.services.servico_service import ServicoService
+from apps.usuarios.models.usuario import Usuario
 
 
 class TestServicoInstabilidadeError:
@@ -56,9 +57,15 @@ class TestServicoViewSet:
     ) -> tuple[ServicoViewSet, Mock]:
         """Cria uma view com usuário e service simulados."""
         view = ServicoViewSet()
+        request = Mock(spec=Request)
 
-        request = Mock()
-        request.user.pk = usuario_id
+        if usuario_id is None:
+            request.user = None
+        else:
+            usuario = Mock(spec=Usuario)
+            usuario.pk = usuario_id
+            request.user = usuario
+
         view.request = cast(Request, request)
 
         service = Mock(spec=ServicoService)
@@ -111,28 +118,31 @@ class TestServicoViewSet:
             "post",
             "patch",
             "options",
+            "delete",
         ]
         assert view.lookup_field == "uuid"
         assert view.filter_backends == [DjangoFilterBackend]
         assert view.filterset_class is ServicoFilter
         assert view.pagination_class is PaginacaoPadrao
 
-    def test_deve_retornar_id_do_usuario(self) -> None:
-        """Deve retornar o ID do usuário autenticado."""
+    def test_deve_retornar_usuario(self) -> None:
+        """Deve retornar o usuário da requisição."""
         view, _service = self.criar_view_com_usuario(usuario_id=25)
+        usuario = view.request.user
 
-        resultado = view._obter_usuario_id()
+        resultado = view._obter_usuario()
 
-        assert resultado == 25
+        assert resultado is usuario
+        assert resultado.pk == 25
 
-    def test_deve_rejeitar_usuario_sem_id(self) -> None:
-        """Deve rejeitar um usuário que não possua ID."""
+    def test_deve_rejeitar_usuario_nao_identificado(self) -> None:
+        """Deve rejeitar uma requisição sem usuário."""
         view, _service = self.criar_view_com_usuario(usuario_id=None)
 
         with pytest.raises(NotAuthenticated) as exc_info:
-            view._obter_usuario_id()
+            view._obter_usuario()
 
-        assert str(exc_info.value.detail) == ("Usuário não identificado.")
+        assert str(exc_info.value.detail) == "Usuário não identificado."
 
     def test_deve_retornar_servico_do_serializer(self) -> None:
         """Deve retornar a instância válida do serializer."""
@@ -190,11 +200,10 @@ class TestServicoViewSet:
 
         assert resultado is serializer_esperado
 
-    def test_deve_criar_servico_e_definir_instancia(
-        self,
-    ) -> None:
+    def test_deve_criar_servico_e_definir_instancia(self) -> None:
         """Deve delegar a criação e definir a instância criada."""
         view, service = self.criar_view_com_usuario(usuario_id=10)
+        usuario = view.request.user
         dados = {
             "nome": "Pintura",
             "status": True,
@@ -208,7 +217,7 @@ class TestServicoViewSet:
 
         service.criar.assert_called_once_with(
             dados,
-            usuario_id=10,
+            usuario=usuario,
         )
         assert serializer.instance is servico_criado
 
@@ -297,11 +306,10 @@ class TestServicoViewSet:
         )
         assert exc_info.value.__cause__ is erro
 
-    def test_deve_atualizar_servico_e_definir_instancia(
-        self,
-    ) -> None:
+    def test_deve_atualizar_servico_e_definir_instancia(self) -> None:
         """Deve delegar a atualização e definir a instância."""
         view, service = self.criar_view_com_usuario(usuario_id=20)
+        usuario = view.request.user
         servico_existente = self.criar_servico()
         servico_atualizado = self.criar_servico(
             nome="Pintura externa",
@@ -322,7 +330,7 @@ class TestServicoViewSet:
         service.atualizar.assert_called_once_with(
             servico=servico_existente,
             dados=dados,
-            usuario_id=20,
+            usuario=usuario,
         )
         assert serializer.instance is servico_atualizado
 
@@ -413,3 +421,16 @@ class TestServicoViewSet:
             ServicoErrorMessages.ERRO_AO_ATUALIZAR
         )
         assert exc_info.value.__cause__ is erro
+
+    def test_deve_delegar_exclusao_ao_service(self) -> None:
+        """Deve delegar a exclusão lógica ao service."""
+        view, service = self.criar_view_com_usuario(usuario_id=30)
+        usuario = view.request.user
+        servico = self.criar_servico()
+
+        view.perform_destroy(servico)
+
+        service.deletar.assert_called_once_with(
+            servico,
+            usuario,
+        )

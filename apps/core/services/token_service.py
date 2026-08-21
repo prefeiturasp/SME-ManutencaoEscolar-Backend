@@ -18,7 +18,7 @@ class TokenService:
     """Responsável pela geração dos tokens JWT."""
 
     @classmethod
-    def gerar_tokens(cls, id_usuario: int) -> dict[str, str]:
+    def gerar_tokens(cls, id_usuario: int) -> dict[str, str | int]:
         """Gera tokens de acesso e refresh para um usuário.
 
         Este método atua como uma camada de serviço que delega a geração
