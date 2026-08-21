@@ -3,9 +3,7 @@
 from django.db import models
 
 from apps.core.models.mixins import UUIDMixin
-from apps.escola.models.diretoria_regional import DiretoriaRegional
-from apps.escola.models.subprefeitura import Subprefeitura
-from apps.escola.models.tipos_escola import TipoEscola
+from apps.escola.models import Diretor
 
 
 class Unidadeeducacional(UUIDMixin):
@@ -21,19 +19,19 @@ class Unidadeeducacional(UUIDMixin):
         help_text="Nome da escola.",
     )
     diretoria_regional = models.ForeignKey(
-        DiretoriaRegional,
+        "escola.DiretoriaRegional",
         on_delete=models.PROTECT,
         related_name="escolas",
         help_text="Diretoria Regional de Educação da escola.",
     )
     tipo_escola = models.ForeignKey(
-        TipoEscola,
+        "escola.TipoEscola",
         on_delete=models.PROTECT,
         related_name="escolas",
         help_text="Tipo da unidade escolar.",
     )
     subprefeitura = models.ForeignKey(
-        Subprefeitura,
+        "escola.Subprefeitura",
         on_delete=models.PROTECT,
         related_name="escolas",
         help_text="Subprefeitura onde a escola está localizada.",
@@ -47,3 +45,22 @@ class Unidadeeducacional(UUIDMixin):
 
     def __str__(self) -> str:
         return f"{self.codigo_eol} - {self.nome}"
+
+    @property
+    def diretor_atual(self) -> Diretor | None:
+        """Retorna o diretor atualmente vinculado à escola.
+
+        A escola pode possuir vários registros históricos de diretores,
+        mas apenas um vínculo pode estar ativo simultaneamente. O vínculo
+        atual é identificado por `data_fim` igual a `None`.
+
+        Returns:
+            Diretor | None: O diretor atualmente vinculado à escola ou
+                `None` quando a escola não possui diretor atual.
+        """
+        historico = (
+            self.historico_diretores.filter(data_fim__isnull=True)
+            .select_related("diretor")
+            .first()
+        )
+        return historico.diretor if historico else None
