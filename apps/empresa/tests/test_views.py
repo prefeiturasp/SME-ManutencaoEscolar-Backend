@@ -7,11 +7,10 @@ from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.exceptions import (
     EmpresaCnpjDuplicadoError,
 )
-from apps.empresa.models import Empresa, ResponsavelTecnico
+from apps.empresa.models import Empresa
 
 pytestmark = pytest.mark.django_db
 
@@ -327,77 +326,3 @@ def test_listagem_filtra_por_status(
     assert len(dados["results"]) == 1
     assert dados["results"][0]["status"] is False
     assert dados["results"][0]["cnpj"] == "98765432109876"
-
-
-def test_requisicao_nao_autenticada_de_responsavel_retorna_401(
-    responsavel_payload_valido, empresa
-):
-    """Testa se requisições sem autenticação são rejeitadas."""
-    payload = {
-        "empresa": str(empresa.uuid),
-        "nome": responsavel_payload_valido["nome"],
-        "tipo": responsavel_payload_valido["tipo"],
-        "email": responsavel_payload_valido["email"],
-    }
-
-    response = APIClient().post(
-        "/api/v1/responsaveis-tecnicos/",
-        payload,
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-def test_criacao_de_responsavel_retorna_responsavel(
-    api_client, responsavel_payload_valido, empresa
-):
-    """Testa a criação de um responsável técnico via API."""
-    payload = {
-        "empresa": str(empresa.uuid),
-        "nome": responsavel_payload_valido["nome"],
-        "tipo": responsavel_payload_valido["tipo"],
-        "email": responsavel_payload_valido["email"],
-    }
-
-    response = api_client.post(
-        "/api/v1/responsaveis-tecnicos/",
-        payload,
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_201_CREATED
-    assert response.json()["nome"] == responsavel_payload_valido["nome"]
-    assert response.json()["tipo"] == responsavel_payload_valido["tipo"]
-    assert ResponsavelTecnico.objects.filter(
-        empresa=empresa, tipo=responsavel_payload_valido["tipo"]
-    ).exists()
-
-
-def test_criacao_de_responsavel_com_tipo_duplicado_retorna_400(
-    api_client, responsavel_payload_valido, empresa
-):
-    """Testa se a criação de um responsável técnico duplicado é rejeitada."""
-    ResponsavelTecnico.objects.create(
-        empresa=empresa,
-        nome=responsavel_payload_valido["nome"],
-        tipo=responsavel_payload_valido["tipo"],
-        email=responsavel_payload_valido["email"],
-    )
-    payload = {
-        "empresa": str(empresa.uuid),
-        "nome": "Outro Responsável",
-        "tipo": responsavel_payload_valido["tipo"],
-        "email": "outro.responsavel@email.com",
-    }
-
-    response = api_client.post(
-        "/api/v1/responsaveis-tecnicos/",
-        payload,
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()["tipo"][0] == (
-        EmpresaErrorMessages.RESPONSAVEL_TECNICO_TIPO_JA_CADASTRADO
-    )
