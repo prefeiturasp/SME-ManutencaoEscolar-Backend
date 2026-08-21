@@ -40,7 +40,8 @@ class TestSincronizarTiposEscolas:
         ).exists()
 
     @patch(
-        "apps.escola.management.commands.sincronizar_tipos_escolas.requests.get"
+        "apps.escola.management.commands.sincronizar_tipos_escolas.requests."
+        "get"
     )
     def test_deve_atualizar_tipo_de_escola_existente(
         self, mock_get, resposta_api_tipos_escolas, configurar_api_eol
