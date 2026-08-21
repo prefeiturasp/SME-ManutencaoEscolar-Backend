@@ -29,7 +29,7 @@ def test_requisicao_nao_autenticada_retorna_401(
 
 
 def test_criacao_retorna_empresa(
-    api_client, empresa_payload_valido, usuario_ativo
+    api_client, empresa_payload_valido_com_responsaveis, usuario_ativo
 ):
     """
     Testa a criação de uma empresa via API.
@@ -37,7 +37,7 @@ def test_criacao_retorna_empresa(
     Verifica se o retorno é correto.
     """
     empresa = {
-        **empresa_payload_valido,
+        **empresa_payload_valido_com_responsaveis,
         "id": 1,
         "uuid": "7ef06bb8-418f-43d1-bfe8-c392f13a2b1f",
         "status": True,
@@ -45,7 +45,7 @@ def test_criacao_retorna_empresa(
 
     def criar(dados, usuario):
         """Simula o retorno do serviço durante a criação da empresa."""
-        assert dados == empresa_payload_valido
+        assert dados == empresa_payload_valido_com_responsaveis
         assert usuario == usuario_ativo
         return empresa
 
@@ -55,17 +55,20 @@ def test_criacao_retorna_empresa(
     ):
         response = api_client.post(
             "/api/v1/empresas/",
-            empresa_payload_valido,
+            empresa_payload_valido_com_responsaveis,
             format="json",
         )
 
+    nome_esperado = empresa_payload_valido_com_responsaveis["nome"]
+    cnpj_esperado = empresa_payload_valido_com_responsaveis["cnpj"]
+
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json()["nome"] == empresa_payload_valido["nome"]
-    assert response.json()["cnpj"] == empresa_payload_valido["cnpj"]
+    assert response.json()["nome"] == nome_esperado
+    assert response.json()["cnpj"] == cnpj_esperado
 
 
 def test_criacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
-    api_client, empresa_payload_valido
+    api_client, empresa_payload_valido_com_responsaveis
 ):
     """
     Testa se a criação de uma empresa.
@@ -80,7 +83,7 @@ def test_criacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
     ):
         response = api_client.post(
             "/api/v1/empresas/",
-            empresa_payload_valido,
+            empresa_payload_valido_com_responsaveis,
             format="json",
         )
 
@@ -91,7 +94,7 @@ def test_criacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
 
 
 def test_criacao_mapeia_validation_error_do_django(
-    api_client, empresa_payload_valido
+    api_client, empresa_payload_valido_com_responsaveis
 ):
     """
     Testa criação de uma empresa.
@@ -104,7 +107,7 @@ def test_criacao_mapeia_validation_error_do_django(
     ):
         response = api_client.post(
             "/api/v1/empresas/",
-            empresa_payload_valido,
+            empresa_payload_valido_com_responsaveis,
             format="json",
         )
 
@@ -113,7 +116,10 @@ def test_criacao_mapeia_validation_error_do_django(
 
 
 def test_atualizacao_retorna_empresa(
-    api_client, empresa_payload_valido, usuario_ativo
+    api_client,
+    empresa_payload_valido,
+    empresa_payload_valido_com_responsaveis,
+    usuario_ativo,
 ):
     """
     Testa a atualização de uma empresa via API (PUT).
@@ -121,7 +127,10 @@ def test_atualizacao_retorna_empresa(
     Verifica se o retorno é correto.
     """
     empresa_existente = Empresa.objects.create(**empresa_payload_valido)
-    payload_atualizado = {**empresa_payload_valido, "nome": "Novo Nome"}
+    payload_atualizado = {
+        **empresa_payload_valido_com_responsaveis,
+        "nome": "Novo Nome",
+    }
     empresa_atualizada = {
         **payload_atualizado,
         "id": empresa_existente.id,
@@ -150,7 +159,7 @@ def test_atualizacao_retorna_empresa(
 
 
 def test_atualizacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
-    api_client, empresa_payload_valido
+    api_client, empresa_payload_valido, empresa_payload_valido_com_responsaveis
 ):
     """
     Testa se a atualização de uma empresa.
@@ -167,7 +176,7 @@ def test_atualizacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
     ):
         response = api_client.put(
             f"/api/v1/empresas/{empresa_existente.uuid}/",
-            empresa_payload_valido,
+            empresa_payload_valido_com_responsaveis,
             format="json",
         )
 
@@ -178,7 +187,7 @@ def test_atualizacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
 
 
 def test_atualizacao_mapeia_validation_error_do_django(
-    api_client, empresa_payload_valido
+    api_client, empresa_payload_valido, empresa_payload_valido_com_responsaveis
 ):
     """
     Testa atualização de uma empresa.
@@ -193,7 +202,7 @@ def test_atualizacao_mapeia_validation_error_do_django(
     ):
         response = api_client.put(
             f"/api/v1/empresas/{empresa_existente.uuid}/",
-            empresa_payload_valido,
+            empresa_payload_valido_com_responsaveis,
             format="json",
         )
 
