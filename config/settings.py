@@ -83,6 +83,7 @@ APPS_PROJETO = [
     "apps.empresa",
     "apps.servico",
     "apps.escola",
+    "apps.lote",
 ]
 
 # ==========================================
@@ -275,6 +276,13 @@ LOGGING = {
     "root": {
         "handlers": ["console"],
         "level": "WARNING",
+    },
+    "loggers": {
+        "apps": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
 

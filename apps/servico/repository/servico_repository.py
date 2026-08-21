@@ -6,6 +6,7 @@ from uuid import UUID
 from django.forms.models import model_to_dict
 
 from apps.servico.models import Servico
+from apps.usuarios.models.usuario import Usuario
 
 
 class ServicoRepository:
@@ -19,7 +20,10 @@ class ServicoRepository:
         excluir_uuid: UUID | None = None,
     ) -> bool:
         """Verifica se existe serviço cadastrado com o mesmo nome."""
-        queryset = self.model.objects.filter(nome__iexact=nome)
+        queryset = self.model.objects.filter(
+            nome__iexact=nome,
+            deletado_em__isnull=True,
+        )
 
         if excluir_uuid is not None:
             queryset = queryset.exclude(uuid=excluir_uuid)
@@ -29,11 +33,11 @@ class ServicoRepository:
     def criar(
         self,
         dados: dict[str, Any],
-        usuario_id: int,
+        usuario: Usuario,
     ) -> dict[str, Any]:
         """Cria e persiste um serviço."""
         servico = self.model(
-            **dados, criado_por_id=usuario_id, atualizado_por_id=usuario_id
+            **dados, criado_por=usuario, atualizado_por=usuario
         )
         servico.full_clean()
         servico.save()
@@ -48,7 +52,7 @@ class ServicoRepository:
         self,
         servico: Servico,
         dados: dict[str, Any],
-        usuario_id: int,
+        usuario: Usuario,
     ) -> dict[str, Any]:
         """Atualiza e persiste um serviço existente."""
         if "nome" in dados:
@@ -57,9 +61,23 @@ class ServicoRepository:
         if "status" in dados:
             servico.status = dados["status"]
 
-        servico.atualizado_por_id = usuario_id
+        servico.atualizado_por = usuario
 
         servico.full_clean()
         servico.save()
 
         return model_to_dict(servico)
+
+    def deletar(
+        self,
+        usuario: Usuario,
+        model_servico: Servico,
+    ) -> tuple[int, dict[str, int]]:
+        """Marca o registro como deletado sem removê-lo fisicamente."""
+        model_servico.deletado_por = usuario
+
+        model_servico.save(
+            update_fields=["deletado_por"],
+        )
+
+        return model_servico.soft_delete(usuario=usuario)

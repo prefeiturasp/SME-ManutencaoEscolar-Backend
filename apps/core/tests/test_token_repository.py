@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.conf import settings
 from django.db.models import ObjectDoesNotExist
 
 from apps.core.exceptions import TokenInvalidoError
@@ -14,15 +15,15 @@ class TestTokenRepository:
     @patch("apps.core.repository.token_repository.Usuario.objects.get")
     def test_gerar_tokens(
         self,
-        mock_usuario_get,
-        mock_refresh_for_user,
-    ):
+        mock_usuario_get: MagicMock,
+        mock_refresh_for_user: MagicMock,
+    ) -> None:
+        """Deve gerar os tokens e retornar seus tempos de expiração."""
         usuario = MagicMock()
         mock_usuario_get.return_value = usuario
 
         refresh = MagicMock()
         refresh.access_token = "access-token"
-
         mock_refresh_for_user.return_value = refresh
 
         resultado = TokenRepository.gerar_tokens(1)
@@ -33,6 +34,12 @@ class TestTokenRepository:
         assert resultado == {
             "refresh": str(refresh),
             "access": "access-token",
+            "access_expires_in": int(
+                settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
+            ),
+            "refresh_expires_in": int(
+                settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
+            ),
         }
 
     @patch("apps.core.repository.token_repository.PasswordResetTokenGenerator")

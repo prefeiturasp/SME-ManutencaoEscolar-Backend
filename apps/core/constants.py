@@ -6,6 +6,8 @@ ENDPOINT_AUTENTICACAO = "/v1/autenticacao"
 ENDPOINT_USUARIO_EXISTE_CORESSO = "/AutenticacaoSgp/UsuarioExisteCoreSSO"
 ENDPOINT_ALTERAR_SENHA_CORESSO = "/AutenticacaoSgp/AlterarSenha"
 
+TIMEOUT_DEFAULT = 30
+
 EXTENSOES_IMAGENS = [".jpg", ".jpeg", ".png"]
 EXTENSOES_DOCUMENTOS = [
     ".pdf",

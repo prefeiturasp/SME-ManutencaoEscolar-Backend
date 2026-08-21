@@ -1,0 +1,173 @@
+from unittest.mock import Mock
+
+import pytest
+from rest_framework.test import APIClient
+
+from apps.escola.models import TipoEscola
+from apps.escola.models.diretoria_regional import DiretoriaRegional
+from apps.escola.models.subprefeitura import Subprefeitura
+from apps.usuarios.constants import PerfilAcesso
+from apps.usuarios.models.cargo_eol import CargoEOL
+from apps.usuarios.models.usuario import Usuario
+
+
+@pytest.fixture
+def cargo_perfil_diretor():
+    """Fixture do cargo de diretor de unidade escolar."""
+    return CargoEOL.objects.create(
+        codigo="9999",
+        nome="Diretor",
+        perfil=PerfilAcesso.UE,
+    )
+
+
+@pytest.fixture
+def usuario_ativo(cargo_perfil_diretor):
+    """Fixture de usuario ativo."""
+    return Usuario.objects.create(
+        username="9876543219",
+        nome="João da Silva",
+        registro_funcional=None,
+        cpf="9876543219",
+        cargo=cargo_perfil_diretor,
+        is_active=True,
+    )
+
+
+@pytest.fixture
+def cliente_api(usuario_ativo):
+    """Retorna um cliente para requisições à API."""
+    cliente = APIClient()
+    cliente.force_authenticate(user=usuario_ativo)
+    return cliente
+
+
+@pytest.fixture
+def tipo_escola_emef():
+    """Cria um tipo de escola EMEF."""
+    return TipoEscola.objects.create(
+        codigo_eol=1,
+        sigla="EMEF",
+    )
+
+
+@pytest.fixture
+def tipo_escola_cemei():
+    """Cria um tipo de escola CEMEI."""
+    return TipoEscola.objects.create(
+        codigo_eol=2,
+        sigla="CEMEI",
+    )
+
+
+@pytest.fixture
+def tipos_escola(tipo_escola_emef, tipo_escola_cemei):
+    """Cria tipos de escola para utilização nos testes."""
+    return [tipo_escola_emef, tipo_escola_cemei]
+
+
+@pytest.fixture
+def resposta_api_tipos_escolas():
+    """Cria uma resposta simulada da API EOL."""
+    resposta = Mock()
+    resposta.raise_for_status.return_value = None
+    resposta.json.return_value = [
+        {
+            "codigo": 1,
+            "descricaoSigla": "EMEF",
+        },
+        {
+            "codigo": 2,
+            "descricaoSigla": "CEMEI",
+        },
+    ]
+    return resposta
+
+
+@pytest.fixture()
+def configurar_api_eol(monkeypatch):
+    """Configura as variáveis da API EOL para os testes."""
+    comandos = (
+        "sincronizar_tipos_escolas",
+        "sincronizar_subprefeituras",
+        "sincronizar_escolas",
+    )
+
+    for comando in comandos:
+        modulo = f"apps.escola.management.commands.{comando}"
+
+        monkeypatch.setattr(
+            f"{modulo}.SME_API_EOL_URL",
+            "https://api-eol-teste",
+        )
+        monkeypatch.setattr(
+            f"{modulo}.SME_API_EOL_TOKEN",
+            "token-teste",
+        )
+
+
+@pytest.fixture
+def diretoria_regional():
+    """Cria uma Diretoria Regional para os testes."""
+    return DiretoriaRegional.objects.create(
+        codigo="DRE01",
+        nome="Diretoria Regional Centro",
+    )
+
+
+@pytest.fixture
+def resposta_api_subprefeituras():
+    """Retorna uma resposta simulada da API de Subprefeituras."""
+    resposta = Mock()
+    resposta.raise_for_status.return_value = None
+    resposta.json.return_value = [
+        {
+            "codigoSubprefeitura": "SP01",
+            "nomeSubprefeitura": "Subprefeitura Sé",
+        },
+        {
+            "codigoSubprefeitura": "SP02",
+            "nomeSubprefeitura": "Subprefeitura Lapa",
+        },
+    ]
+    return resposta
+
+
+@pytest.fixture
+def subprefeitura():
+    """Cria uma Subprefeitura para os testes."""
+    return Subprefeitura.objects.create(
+        codigo_eol="SP01",
+        nome="Subprefeitura Sé",
+    )
+
+
+@pytest.fixture
+def resposta_api_escolas():
+    """Retorna uma resposta simulada da API de escolas."""
+    resposta = Mock()
+    resposta.raise_for_status.return_value = None
+    resposta.json.return_value = [
+        {
+            "codigoEscola": "100001",
+            "nomeEscola": "Escola Teste",
+            "nomeDRE": "Diretoria Regional Centro",
+            "siglaDRE": "DRE",
+            "codigoDRE": "DRE01",
+            "tipoEscola": "Escola Municipal",
+            "siglaTipoEscola": "EMEF",
+        },
+    ]
+    return resposta
+
+
+@pytest.fixture
+def respostas_api(
+    resposta_api_escolas,
+    resposta_api_subprefeituras,
+):
+    """Retorna as respostas simuladas das APIs."""
+    return [
+        resposta_api_escolas,
+        resposta_api_subprefeituras,
+    ]
