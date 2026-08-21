@@ -14,7 +14,7 @@ class ResponsavelTecnicoRepository:
 
     def bulk_criar(
         self, dados_lista: list[dict[str, Any]]
-    ) -> list[ResponsavelTecnico]:
+    ) -> list[dict[str, Any]]:
         """
         Cria múltiplos responsáveis técnicos em uma única operação no banco.
 
@@ -23,11 +23,12 @@ class ResponsavelTecnicoRepository:
                 dados de cada responsável técnico a ser criado.
 
         Returns:
-            list[ResponsavelTecnico]: Instâncias criadas dos responsáveis
-                técnicos.
+            list[dict[str, Any]]: Dados serializados dos responsáveis
+                técnicos criados.
         """
         responsaveis = [self.model(**dados) for dados in dados_lista]
-        return self.model.objects.bulk_create(responsaveis)
+        criados = self.model.objects.bulk_create(responsaveis)
+        return [self._serializar(responsavel) for responsavel in criados]
 
     def existe_por_empresa_e_tipo(self, empresa_id: int, tipo: str) -> bool:
         """

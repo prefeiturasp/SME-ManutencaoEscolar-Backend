@@ -157,9 +157,9 @@ class TestResponsavelTecnicoRepository:
         )
 
         assert len(criados) == 2
-        assert all(isinstance(r, ResponsavelTecnico) for r in criados)
+        assert all(isinstance(r, dict) for r in criados)
         assert ResponsavelTecnico.objects.count() == 2
-        assert {r.tipo for r in criados} == {"preposto", "engenheiro_civil"}
+        assert {r["tipo"] for r in criados} == {"preposto", "engenheiro_civil"}
 
     @pytest.mark.django_db
     def test_existe_por_empresa_e_tipo_retorna_true_quando_ja_cadastrado(
