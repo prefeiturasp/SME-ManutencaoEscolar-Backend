@@ -12,22 +12,22 @@ class ResponsavelTecnicoRepository:
 
     model = ResponsavelTecnico
 
-    def criar(self, dados: dict[str, Any]) -> dict[str, Any]:
+    def bulk_criar(
+        self, dados_lista: list[dict[str, Any]]
+    ) -> list[ResponsavelTecnico]:
         """
-        Cria um responsável técnico e retorna seus dados em dicionário.
+        Cria múltiplos responsáveis técnicos em uma única operação no banco.
 
         Args:
-            dados (dict[str, Any]): Dicionário contendo os dados do
-                responsável técnico.
+            dados_lista (list[dict[str, Any]]): Lista de dicionários com os
+                dados de cada responsável técnico a ser criado.
 
         Returns:
-            dict[str, Any]: Dicionário contendo os dados do responsável
-                técnico criado.
+            list[ResponsavelTecnico]: Instâncias criadas dos responsáveis
+                técnicos.
         """
-        responsavel = self.model(**dados)
-        responsavel.save()
-
-        return self._serializar(responsavel)
+        responsaveis = [self.model(**dados) for dados in dados_lista]
+        return self.model.objects.bulk_create(responsaveis)
 
     def existe_por_empresa_e_tipo(self, empresa_id: int, tipo: str) -> bool:
         """
