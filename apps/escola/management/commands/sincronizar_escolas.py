@@ -91,61 +91,35 @@ class Command(BaseCommand):
             api_url=api_url,
             headers=headers,
         )
-        total_escolas = len(payload)
         logger.info(
-            f"API retornou {total_escolas} registros para importação.",
+            f"API retornou {len(payload)} registros para importação.",
         )
-        quantidade_criados = 0
-        quantidade_atualizados = 0
-        quantidades_ignorados = 0
-        quantidade_erros = 0
-
-        siglas_aceitas = TipoEscola.objects.aceitos().values_list(
-            "sigla",
-            flat=True,
+        logger.info("Iniciando análise das informações. Aguarde...")
+        unidades_educacionais = self._coletar_registros(
+            base_url, headers, payload
         )
+        total_escolas = len(unidades_educacionais)
+        logger.info(
+            "Análise finalizada. \n Processando informações de "
+            f"{total_escolas} unidades para base de dados."
+        )
+        quantidades = {"criadas": 0, "atualizadas": 0}
         with transaction.atomic():
-            for numero, item in enumerate(payload, start=1):
-                self._validar_registro(item)
-
-                sigla = item["siglaTipoEscola"]
-                codigo_eol = item["codigoEscola"]
-                nome_escola = f"{sigla} {item['nomeEscola']}"
-                if sigla not in siglas_aceitas:
-                    quantidades_ignorados += 1
-                    continue
-
-                try:
-                    diretoria_regional = self._obter_dre(item["codigoDRE"])
-                    tipo_escola = self._obter_tipo_escola(sigla)
-                    subprefeitura = self._obter_subprefeitura(
-                        base_url=base_url,
-                        headers=headers,
-                        codigo_escola=codigo_eol,
-                    )
-                except DadosEscolaError as exc:
-                    quantidade_erros += 1
-                    logger.info(f"{nome_escola}: {exc}")
-                    continue
-
+            for numero, registro in enumerate(unidades_educacionais, start=1):
                 _, foi_criado = Unidadeeducacional.objects.update_or_create(
-                    codigo_eol=codigo_eol,
+                    codigo_eol=registro["codigo_eol"],
                     defaults={
-                        "nome": nome_escola,
-                        "diretoria_regional": diretoria_regional,
-                        "tipo_escola": tipo_escola,
-                        "subprefeitura": subprefeitura,
+                        "nome": registro["nome"],
+                        "diretoria_regional": registro["diretoria_regional"],
+                        "tipo_escola": registro["tipo_escola"],
+                        "subprefeitura": registro["subprefeitura"],
                     },
                 )
-
-                if foi_criado:
-                    quantidade_criados += 1
-                else:
-                    quantidade_atualizados += 1
+                quantidades["criadas" if foi_criado else "atualizadas"] += 1
 
                 if numero % 500 == 0 or numero == total_escolas:
                     logger.info(
-                        f"{numero} de {total_escolas} escolas analizadas. "
+                        f"{numero} de {total_escolas} escolas processadas. "
                         "Aguarde ..."
                     )
 
@@ -153,11 +127,83 @@ class Command(BaseCommand):
         tempo_execucao_minutos = tempo_execucao_segundos / 60
         logger.info(
             f"Importação concluída em {tempo_execucao_minutos:.2f} minutos:\n"
-            f"{quantidade_criados} criados\n"
-            f"{quantidade_atualizados} atualizados\n"
-            f"{quantidades_ignorados} têm as siglas não aceitas\n"
-            f"{quantidade_erros} com erros ao inserir\n"
+            f"{quantidades['criadas']} criados\n"
+            f"{quantidades['atualizadas']} atualizados\n"
         )
+
+    def _coletar_registros(
+        self,
+        base_url: str,
+        headers: dict[str, str],
+        payload: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Coleta e prepara os registros de escolas para persistência.
+
+        Valida os registros recebidos da API, ignora escolas com tipos não
+        aceitos e consulta os dados relacionados à Diretoria Regional, Tipo
+        de Escola e Subprefeitura. Os registros válidos são reunidos em uma
+        lista para posterior persistência no banco de dados.
+
+        Args:
+            base_url (str): URL base da API EOL.
+            headers (dict[str, str]): Cabeçalhos utilizados nas requisições
+                HTTP para a API EOL.
+            payload (list[dict[str, Any]]): Registros de escolas retornados
+                pela API EOL.
+
+        Returns:
+            list[dict[str, Any]]: Lista de registros de escolas validados e
+                enriquecidos com os dados relacionados necessários para
+                persistência.
+        """
+        siglas_aceitas = TipoEscola.objects.aceitos().values_list(
+            "sigla",
+            flat=True,
+        )
+        registros = []
+        quantidade_erros = 0
+        quantidades_ignorados = 0
+        for numero, item in enumerate(payload, start=1):
+            self._validar_registro(item)
+            sigla = item["siglaTipoEscola"]
+            codigo_eol = item["codigoEscola"]
+            nome_escola = f"{sigla} {item['nomeEscola']}"
+            if sigla not in siglas_aceitas:
+                quantidades_ignorados += 1
+                continue
+            try:
+                diretoria_regional = self._obter_dre(item["codigoDRE"])
+                tipo_escola = self._obter_tipo_escola(sigla)
+                subprefeitura = self._obter_subprefeitura(
+                    base_url=base_url,
+                    headers=headers,
+                    codigo_escola=codigo_eol,
+                )
+            except DadosEscolaError as exc:
+                logger.info(f"{nome_escola}: {exc}")
+                quantidade_erros += 1
+                continue
+
+            registros.append(
+                {
+                    "codigo_eol": codigo_eol,
+                    "nome": nome_escola,
+                    "diretoria_regional": diretoria_regional,
+                    "tipo_escola": tipo_escola,
+                    "subprefeitura": subprefeitura,
+                }
+            )
+            if numero % 500 == 0 or numero == len(payload):
+                logger.info(
+                    f"{numero} de {len(payload)} escolas analizadas. "
+                    "Aguarde ..."
+                )
+        logger.info(
+            f"{quantidades_ignorados} têm as siglas não aceitas\n"
+            f"{quantidade_erros} com erros ao obter dados de Diretoria "
+            f"Regional, Tipo de escola ou Subprefeitura."
+        )
+        return registros
 
     @staticmethod
     def _validar_registro(item: Any) -> None:
