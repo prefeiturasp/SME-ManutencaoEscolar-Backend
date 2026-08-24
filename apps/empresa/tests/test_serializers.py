@@ -213,7 +213,7 @@ class TestResponsavelTecnicoSerializer:
 
         assert serializer.is_valid(), serializer.errors
 
-    @pytest.mark.parametrize("campo", ["tipo", "nome", "email"])
+    @pytest.mark.parametrize("campo", ["tipo", "nome", "email", "telefone"])
     def test_deve_invalidar_quando_campo_obrigatorio_ausente(
         self, responsavel_tecnico_payload_valido, campo
     ):

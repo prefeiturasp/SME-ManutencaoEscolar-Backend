@@ -72,6 +72,7 @@ def responsavel_payload_valido(empresa):
         "nome": "João Responsável",
         "tipo": "preposto",
         "email": "joao.responsavel@email.com",
+        "telefone": "11987654321",
     }
 
 
@@ -82,6 +83,7 @@ def responsavel_tecnico_payload_valido():
         "tipo": "preposto",
         "nome": "João Responsável",
         "email": "joao.responsavel@email.com",
+        "telefone": "11987654321",
     }
 
 
