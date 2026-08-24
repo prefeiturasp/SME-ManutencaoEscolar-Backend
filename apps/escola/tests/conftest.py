@@ -7,18 +7,15 @@ from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
 from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import Unidadeeducacional
-from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 
 
 @pytest.fixture
-def cargo_perfil_diretor():
-    """Fixture do cargo de diretor de unidade escolar."""
-    return CargoEOL.objects.create(
-        codigo="9999",
-        nome="Diretor",
-        perfil=PerfilAcesso.UE,
+def obter_cargo_diretor():
+    """Retorna o cargo EOL de Diretor de Escola."""
+    return CargoEOL.objects.get(
+        nome="DIRETOR DE ESCOLA",
     )
 
 
@@ -92,6 +89,7 @@ def configurar_api_eol(monkeypatch):
         "sincronizar_tipos_escolas",
         "sincronizar_subprefeituras",
         "sincronizar_escolas",
+        "sincronizar_diretores",
     )
 
     for comando in comandos:
@@ -203,4 +201,60 @@ def unidade_educacional_cemei(
         diretoria_regional=diretoria_regional,
         tipo_escola=tipo_escola_cemei,
         subprefeitura=subprefeitura,
+    )
+
+
+@pytest.fixture
+def resposta_api_diretor():
+    """Retorna uma resposta HTTP simulada da API de diretores."""
+    resposta = Mock()
+    resposta.status_code = 200
+    resposta.json.return_value = [
+        {
+            "codigoRF": "0000011",
+            "nomeServidor": "Diretor Escola",
+            "dataInicio": "10/18/2021 00:00:00",
+            "dataFim": None,
+            "cargo": "DIRETOR DE ESCOLA",
+            "cdTipoFuncaoAtividade": 0,
+            "estaAfastado": False,
+            "funcaoExterno": 0,
+            "tipoFuncaoExterno": 0,
+        },
+    ]
+
+    return resposta
+
+
+@pytest.fixture
+def resposta_dados_complementares():
+    """Retorna uma resposta HTTP simulada com dados complementares."""
+    resposta = Mock()
+    resposta.status_code = 200
+    resposta.json.return_value = {
+        "grupos": [],
+        "dre": "DIRETORIA REGIONAL DE EDUCACAO",
+        "codigoUe": "100001",
+        "nomeUe": "EMEF Escola Teste",
+        "enderecoUe": "Rua Teste, 100",
+        "telefoneUe": "1122223333",
+        "email": "diretor.um@email.com",
+        "nome": "Diretor Escola",
+        "cpf": "12345678900",
+        "login": "1234567",
+    }
+
+    return resposta
+
+
+@pytest.fixture
+def usuario_sincronizacao(cargo_perfil_diretor):
+    """Fixture de usuario ativo."""
+    return Usuario.objects.create(
+        username="sincronizacao_eol",
+        nome="Sincronizador Dados do EOL",
+        registro_funcional=None,
+        cpf=None,
+        cargo=cargo_perfil_diretor,
+        is_active=False,
     )
