@@ -7,7 +7,10 @@ from apps.core.pagination import PaginacaoPadrao
 from apps.escola.filters import TipoEscolaFilter
 from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
-from apps.escola.schemas import TIPO_ESCOLA
+from apps.escola.schemas import (
+    DIRETORIA_REGIONAL,
+    TIPO_ESCOLA,
+)
 from apps.escola.serializers import (
     DiretoriaRegionalSerializer,
     TipoEscolaSerializer,
@@ -32,6 +35,7 @@ class TipoEscolaViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = PaginacaoPadrao
 
 
+@DIRETORIA_REGIONAL
 class DiretoriaRegionalViewSet(viewsets.ReadOnlyModelViewSet):
     """Disponibiliza operações de leitura para diretorias regionais."""
 
