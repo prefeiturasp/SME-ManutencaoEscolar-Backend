@@ -131,7 +131,7 @@ def anexo() -> SimpleNamespace:
 
 @pytest.fixture
 def mock_repository_anexo() -> Mock:
-    """_summary_."""
+    """Mock do repository de anexo."""
     repository = Mock()
     repository.criar.return_value = {
         "uuid": "12345678-1234-5678-1234-567812345678",

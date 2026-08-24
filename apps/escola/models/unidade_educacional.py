@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Model referente as Unidades educacionais."""
 
 from django.db import models
 

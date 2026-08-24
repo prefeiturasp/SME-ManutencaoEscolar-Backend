@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Fixtures globais utilizadas pelos testes do projeto."""
 
 import pytest
 
