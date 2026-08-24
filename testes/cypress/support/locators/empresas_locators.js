@@ -19,9 +19,6 @@ class Empresas_Localizadores {
 
   // consultar
 
-  // editar 
-
-  // excluir
 
 }
 

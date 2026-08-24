@@ -14,3 +14,38 @@ Funcionalidade: Cadastro de Empresa
     Exemplos:
       | status | caso                           |
       | ativo  | Empresa cadastrada com sucesso |
+
+  Esquema do Cenário: Validar: <caso>
+    E acesso a tela Empresas
+    Quando crio cadastro a empresa "<status>"
+    Então o sistema salva a empresa inativa
+
+    Exemplos:
+      | status  | caso                            |
+      | inativa | Empresa cadastrada como inativa |
+  
+  Esquema do Cenário: Validar: <caso>
+    E acesso a tela Empresas
+    Quando clico em criar cadastro de empresa "<status>"
+    Então o sistema não salva a empresa sem preenchimento dos campos
+
+    Exemplos:
+      | status | caso                                        |
+      | ativo  | Não permitir salvar sem campos obrigatórios |
+
+  Esquema do Cenário: Validar campo: <caso>
+    E acesso a tela Empresas
+    Quando valido o campo obrigatório "<campo>"
+    Então o sistema exibe mensagem de campo obrigatório
+
+    Exemplos:
+      | caso         | campo        |
+      | Nome         | nome         |
+      | CNPJ         | cnpj         |
+      | Razão Social | razao_social |
+      | Status       | status       |
+      | CEP          | cep          |
+      | Logradouro   | logradouro   |
+      | Número       | numero       |
+      | Cidade       | cidade       |
+      | Estado       | estado       |
