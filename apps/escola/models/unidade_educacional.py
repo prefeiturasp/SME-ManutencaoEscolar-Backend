@@ -3,7 +3,7 @@
 from django.db import models
 
 from apps.core.models.mixins import UUIDMixin
-from apps.escola.models import Diretor
+from apps.escola.models import ResponsavelUnidade
 
 
 class Unidadeeducacional(UUIDMixin):
@@ -47,20 +47,40 @@ class Unidadeeducacional(UUIDMixin):
         return f"{self.codigo_eol} - {self.nome}"
 
     @property
-    def diretor_atual(self) -> Diretor | None:
-        """Retorna o diretor atualmente vinculado à escola.
+    def responsaveis_atuais(self) -> models.QuerySet:
+        """Retorna os responsáveis atualmente vinculados à unidade.
 
-        A escola pode possuir vários registros históricos de diretores,
-        mas apenas um vínculo pode estar ativo simultaneamente. O vínculo
-        atual é identificado por `data_fim` igual a `None`.
+        Uma unidade educacional pode possuir até múltiplos responsáveis
+        simultaneamente, cada um podendo exercer um cargo diferente.
+
+        O vínculo atual é identificado por `data_fim` igual a `None`.
 
         Returns:
-            Diretor | None: O diretor atualmente vinculado à escola ou
-                `None` quando a escola não possui diretor atual.
+            QuerySet: Históricos dos responsáveis atualmente vinculados,
+                com o responsável e o cargo carregados.
+        """
+        return self.historico_responsaveis.filter(
+            ativo=True,
+        ).select_related("responsavel", "cargo")
+
+    @property
+    def diretor_atual(self) -> ResponsavelUnidade | None:
+        """Retorna o diretor atualmente vinculado à unidade.
+
+        Procura entre os responsáveis atuais da unidade aquele que possui
+        o cargo de diretor.
+
+        Returns:
+            ResponsavelUnidade | None: O diretor atual da unidade ou `None`
+                quando não houver um responsável com cargo de diretor.
         """
         historico = (
-            self.historico_diretores.filter(data_fim__isnull=True)
-            .select_related("diretor")
+            self.historico_responsaveis.filter(
+                ativo=True,
+                cargo__nome__iexact="DIRETOR DE ESCOLA",
+            )
+            .select_related("responsavel", "cargo")
             .first()
         )
-        return historico.diretor if historico else None
+
+        return historico.responsavel if historico else None
