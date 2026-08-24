@@ -6,7 +6,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
-from apps.empresa.models import Empresa
+from apps.empresa.models import Empresa, ResponsavelTecnico
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
@@ -141,12 +141,33 @@ class TestResponsavelTecnicoRepository:
     """Testes para o repositório de responsável técnico."""
 
     @pytest.mark.django_db
+    def test_bulk_criar_persiste_responsaveis_no_banco(
+        self, responsavel_payload_valido
+    ):
+        """Deve persistir múltiplos responsáveis em uma única operação."""
+        repository = ResponsavelTecnicoRepository()
+        outro_payload = {
+            **responsavel_payload_valido,
+            "tipo": "engenheiro_civil",
+            "email": "outro.responsavel@email.com",
+        }
+
+        criados = repository.bulk_criar(
+            [responsavel_payload_valido, outro_payload]
+        )
+
+        assert len(criados) == 2
+        assert all(isinstance(r, dict) for r in criados)
+        assert ResponsavelTecnico.objects.count() == 2
+        assert {r["tipo"] for r in criados} == {"preposto", "engenheiro_civil"}
+
+    @pytest.mark.django_db
     def test_existe_por_empresa_e_tipo_retorna_true_quando_ja_cadastrado(
         self, responsavel_payload_valido
     ):
         """Deve retornar True quando já houver responsável do tipo."""
         repository = ResponsavelTecnicoRepository()
-        repository.criar(responsavel_payload_valido)
+        repository.bulk_criar([responsavel_payload_valido])
 
         existe = repository.existe_por_empresa_e_tipo(
             responsavel_payload_valido["empresa"].id,
