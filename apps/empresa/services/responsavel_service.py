@@ -8,7 +8,6 @@ from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.repository.responsavel_repository import (
     ResponsavelTecnicoRepository,
 )
-from apps.usuarios.models import Usuario
 
 
 class ResponsavelTecnicoService:
@@ -24,26 +23,30 @@ class ResponsavelTecnicoService:
         """
         self.repository = repository or ResponsavelTecnicoRepository()
 
-    def criar(
-        self, dados: dict[str, Any], usuario: Usuario | None = None
-    ) -> dict[str, Any]:
-        """Cria um responsável técnico e retorna seus dados serializados.
+    def bulk_criar(
+        self, dados_lista: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """Cria múltiplos responsáveis e retorna seus dados serializados.
 
         Registra o usuário logado como responsável pela criação.
 
         Args:
-            dados: Dados do responsável técnico a ser criado.
+            dados_lista: Lista de dicionários com os dados dos
+                responsáveis técnicos a serem criados.
             usuario: Usuário logado responsável pela criação.
 
         Returns:
-            Dados serializados do responsável técnico criado.
+            Lista de dados serializados dos responsáveis técnicos criados.
 
         Raises:
             ValidationError: Se já existir um responsável técnico do mesmo
                 tipo cadastrado para a mesma empresa.
         """
-        self._validar_tipo_unico_na_empresa(dados["empresa"].id, dados["tipo"])
-        return self.repository.criar({**dados, "criado_por": usuario})
+        for dados in dados_lista:
+            self._validar_tipo_unico_na_empresa(
+                dados["empresa_id"], dados["tipo"]
+            )
+        return self.repository.bulk_criar(dados_lista)
 
     def _validar_tipo_unico_na_empresa(
         self, empresa_id: int, tipo: str

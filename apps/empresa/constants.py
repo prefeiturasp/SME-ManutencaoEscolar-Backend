@@ -17,3 +17,6 @@ class EmpresaErrorMessages:
         "Já existe um responsável técnico deste tipo cadastrado "
         "para esta empresa."
     )
+    RESPONSAVEL_TECNICO_OBRIGATORIO = (
+        "Informe ao menos um responsável técnico."
+    )

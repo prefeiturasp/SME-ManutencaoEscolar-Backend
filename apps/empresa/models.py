@@ -72,8 +72,6 @@ class ResponsavelTecnico(BaseModel):
     email = models.EmailField(max_length=255)
     telefone = models.CharField(
         max_length=11,
-        blank=True,
-        default="",
         validators=[apenas_digitos_validator],
     )
 
