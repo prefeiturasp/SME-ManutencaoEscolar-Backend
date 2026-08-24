@@ -1,4 +1,24 @@
-"""sumarry."""
+"""Sincroniza os diretores das unidades educacionais com a API EOL.
+
+O comando consulta os diretores de cada unidade educacional, obtém seus
+dados complementares e prepara os registros para persistência local.
+
+O processo de sincronização:
+
+1. Valida as configurações de acesso à API EOL.
+2. Obtém as unidades educacionais cadastradas.
+3. Consulta o diretor de cada unidade pelo código do cargo.
+4. Considera apenas os vínculos atuais e, quando houver mais de um,
+   seleciona o registro com a `dataInicio` mais recente.
+5. Consulta os dados complementares do servidor.
+6. Valida e normaliza os dados recebidos.
+7. Cria ou atualiza os responsáveis e seus vínculos com as unidades.
+8. Registra as informações de auditoria da operação.
+9. Executa a persistência dentro de uma transação atômica.
+
+A sincronização utiliza o cadastro local de `CargoEOL` para identificar
+o código EOL correspondente ao cargo de Diretor de Escola.
+"""
 
 from __future__ import annotations
 
@@ -31,7 +51,23 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Sincroniza os diretores das unidades educacionais com a API EOL."""
+    """Sincroniza os diretores das unidades educacionais com a API EOL.
+
+    O comando integra os dados de diretores disponibilizados pela API EOL
+    com os cadastros locais de responsáveis e vínculos com unidades
+    educacionais.
+
+    A operação é realizada em duas etapas: primeiro os dados são consultados,
+    validados e preparados em memória; depois os registros válidos são
+    persistidos dentro de uma transação atômica.
+
+    Quando uma unidade possui mais de um diretor com vínculo atual, o
+    registro com a data de início mais recente é utilizado.
+
+    A persistência mantém as informações de auditoria de criação e
+    atualização dos registros.
+
+    """
 
     def handle(self, *args: Any, **options: Any) -> None:
         """Executa a sincronização dos diretores das unidades educacionais.
@@ -100,37 +136,6 @@ class Command(BaseCommand):
                 lista_diretores,
                 start=1,
             ):
-                # responsavel, foi_criado = (
-                #     ResponsavelUnidade.objects.update_or_create(
-                #         registro_funcional=registro["registro_funcional"],
-                #         defaults={
-                #             "nome": registro["nome"],
-                #             "email": registro["email"],
-                #             "telefone": registro["telefone"],
-                #             "esta_afastado": registro["esta_afastado"],
-                #         },
-                #     )
-                # )
-                # quantidades["criados" if foi_criado else "atualizados"] += 1
-
-                # _, historico_criado = (
-                #     HistoricoResponsavel.objects.update_or_create(
-                #         responsavel=responsavel,
-                #         unidade_educacional=registro["unidade_educacional"],
-                #         cargo=registro["cargo_diretor"],
-                #         defaults={
-                #             "ativo": True,
-                #         },
-                #     )
-                # )
-                # quantidades[
-                #     (
-                #         "historicos_criados"
-                #         if historico_criado
-                #         else "historicos_atualizados"
-                #     )
-                # ] += 1
-
                 responsavel, responsavel_criado = self._salvar_responsavel(
                     registro=registro,
                     usuario=usuario,
@@ -327,12 +332,6 @@ class Command(BaseCommand):
             return None
 
         registros_validos = []
-
-        if len(payload) > 1:
-            logger.info(
-                f"A unidade de código {codigo_escola} retornou mais de um "
-                "diretor."
-            )
 
         for item in payload:
             self._validar_registro_diretor(
@@ -703,7 +702,27 @@ class Command(BaseCommand):
         registro: dict[str, Any],
         usuario: Any | None,
     ) -> tuple[ResponsavelUnidade, bool]:
-        """Cria ou atualiza o responsável com informações de auditoria."""
+        """Cria ou atualiza um responsável com informações de auditoria.
+
+        Na criação, os dados do responsável e os usuários de criação e
+        atualização são definidos a partir do registro e do usuário informado.
+
+        Na atualização, os dados do responsável são atualizados e o usuário
+        responsável pela alteração é registrado em `atualizado_por`. Os dados
+        originais de criação são preservados.
+
+        Args:
+            registro (dict[str, Any]): Dados do responsável obtidos durante a
+            sincronização. Deve conter `registro_funcional`, `nome`, `email`,
+            `telefone` e `esta_afastado`.
+            usuario (Any | None): Usuário responsável pela execução da
+                sincronização. Pode   ser `None` quando não houver usuário
+                associado à operação.
+        Returns:
+            tuple[ResponsavelUnidade, bool]: Tupla contendo o responsável
+                criado ou atualizado e um booleano indicando se um novo
+                registro foi criado.
+        """
         responsavel, foi_criado = ResponsavelUnidade.objects.get_or_create(
             registro_funcional=registro["registro_funcional"],
             defaults={
@@ -732,7 +751,29 @@ class Command(BaseCommand):
         registro: dict[str, Any],
         usuario: Any | None,
     ) -> tuple[HistoricoResponsavel, bool]:
-        """Cria ou atualiza o vínculo do responsável com a unidade."""
+        """Cria ou atualiza o vínculo do responsável com a unidade.
+
+        O vínculo é identificado pelo responsável, unidade educacional e cargo.
+        Na criação, o vínculo é marcado como ativo e são registrados os
+        usuários de criação e atualização.
+
+        Na atualização, o vínculo é marcado como ativo e o usuário responsável
+        pela alteração é registrado em `atualizado_por`. Os dados originais de
+        criação são preservados.
+
+        Args:
+            responsavel (ResponsavelUnidade): Responsável associado ao vínculo.
+            registro (dict[str, Any]): Dados do vínculo obtidos durante a
+            sincronização. Deve conter `unidade_educacional` e `cargo_diretor`.
+            usuario (Any | None): Usuário responsável pela execução da
+                sincronização. Pode ser `None` quando não houver usuário
+                associado à operação.
+
+        Returns:
+            tuple[HistoricoResponsavel, bool]: Tupla contendo o histórico
+                criado ou atualizado e um booleano indicando se um novo
+                registro foi criado.
+        """
         historico, foi_criado = HistoricoResponsavel.objects.get_or_create(
             responsavel=responsavel,
             unidade_educacional=registro["unidade_educacional"],
