@@ -34,13 +34,17 @@ class LoteRepository:
 
         vinculos = self.vinculo_model.objects.filter(
             diretoria_regional_id__in=diretoria_regional_ids,
-        ).values_list(
-            "diretoria_regional__nome",
-            "lote__codigo_cadastro",
+        ).select_related(
+            "diretoria_regional",
+            "lote",
         )
 
         return [
-            (str(dre_nome), str(lote_nome)) for dre_nome, lote_nome in vinculos
+            (
+                vinculo.diretoria_regional.nome_curto_dre,
+                vinculo.lote.codigo_cadastro,
+            )
+            for vinculo in vinculos
         ]
 
     @transaction.atomic
