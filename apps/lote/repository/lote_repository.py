@@ -41,7 +41,7 @@ class LoteRepository:
 
         return [
             (
-                vinculo.diretoria_regional.nome_curto_dre,
+                vinculo.diretoria_regional.nome_curto,
                 vinculo.lote.codigo_cadastro,
             )
             for vinculo in vinculos

@@ -32,7 +32,7 @@ def criar_vinculo_mock(
         Vínculo simulado contendo uma diretoria regional e um lote.
     """
     diretoria_regional = Mock(spec=DiretoriaRegional)
-    diretoria_regional.nome_curto_dre = nome_dre
+    diretoria_regional.nome_curto = nome_dre
 
     lote = Mock(spec=Lote)
     lote.codigo_cadastro = codigo_lote
