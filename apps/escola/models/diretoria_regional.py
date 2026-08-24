@@ -16,3 +16,14 @@ class DiretoriaRegional(models.Model):
 
     def __str__(self) -> str:
         return f"{self.abreviacao} - {self.nome}"
+
+    @property
+    def nome_curto(self) -> str:
+        """Retorna o nome da Diretoria regional  de forma abreviada."""
+        if self.nome and self.nome.startswith(
+            "DIRETORIA REGIONAL DE EDUCACAO"
+        ):
+            return self.nome.replace(
+                "DIRETORIA REGIONAL DE EDUCACAO", "DRE"
+            ).strip()
+        return self.nome

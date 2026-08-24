@@ -7,7 +7,10 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 
-from apps.escola.serializers import TipoEscolaSerializer
+from apps.escola.serializers import (
+    DiretoriaRegionalSerializer,
+    TipoEscolaSerializer,
+)
 
 TAG_ESCOLA = "Escola"
 
@@ -44,7 +47,40 @@ TIPO_ESCOLA = extend_schema_view(
         operation_id="obterTipoEscola",
         responses={
             200: TipoEscolaSerializer,
-            404: OpenApiResponse(description="Tipo não encontrado"),
+            404: OpenApiResponse(
+                description="Tipo não encontrado",
+            ),
+        },
+    ),
+)
+
+DIRETORIA_REGIONAL = extend_schema_view(
+    list=extend_schema(
+        tags=[TAG_ESCOLA],
+        summary="Lista as diretorias regionais",
+        description=(
+            "Retorna a lista paginada de Diretorias Regionais de "
+            "Educação cadastradas. Este endpoint permite somente "
+            "a consulta dos registros."
+        ),
+        operation_id="listarDiretoriasRegionais",
+        responses={
+            200: DiretoriaRegionalSerializer(many=True),
+        },
+    ),
+    retrieve=extend_schema(
+        tags=[TAG_ESCOLA],
+        summary="Consulta uma diretoria regional",
+        description=(
+            "Retorna os dados de uma Diretoria Regional de Educação "
+            "identificada pelo ID."
+        ),
+        operation_id="obterDiretoriaRegional",
+        responses={
+            200: DiretoriaRegionalSerializer,
+            404: OpenApiResponse(
+                description="Diretoria regional não encontrada",
+            ),
         },
     ),
 )
