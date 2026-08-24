@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
 from apps.escola.models.subprefeitura import Subprefeitura
+from apps.escola.models.unidade_educacional import Unidadeeducacional
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
@@ -171,3 +172,35 @@ def respostas_api(
         resposta_api_escolas,
         resposta_api_subprefeituras,
     ]
+
+
+@pytest.fixture
+def unidade_educacional_emef(
+    diretoria_regional,
+    tipo_escola_emef,
+    subprefeitura,
+):
+    """Cria uma unidade educacional do tipo EMEF para testes."""
+    return Unidadeeducacional.objects.create(
+        codigo_eol="100001",
+        nome="EMEF ESCOLA TESTE",
+        diretoria_regional=diretoria_regional,
+        tipo_escola=tipo_escola_emef,
+        subprefeitura=subprefeitura,
+    )
+
+
+@pytest.fixture
+def unidade_educacional_cemei(
+    diretoria_regional,
+    tipo_escola_cemei,
+    subprefeitura,
+):
+    """Cria uma unidade educacional do tipo CEMEI para testes."""
+    return Unidadeeducacional.objects.create(
+        codigo_eol="200002",
+        nome="CEMEI ESCOLA TESTE",
+        diretoria_regional=diretoria_regional,
+        tipo_escola=tipo_escola_cemei,
+        subprefeitura=subprefeitura,
+    )
