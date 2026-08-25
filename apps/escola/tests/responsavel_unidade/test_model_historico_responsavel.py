@@ -36,18 +36,6 @@ class TestHistoricoResponsavel:
         ]
         assert unidade_educacional_emef.diretor_atual == responsavel_unidade
 
-    def test_atual_deve_retornar_true_quando_ativo(self):
-        """Deve indicar que o vínculo está atual quando ativo."""
-        historico = HistoricoResponsavel(ativo=True)
-
-        assert historico.atual is True
-
-    def test_atual_deve_retornar_false_quando_inativo(self):
-        """Deve indicar que o vínculo não está atual quando inativo."""
-        historico = HistoricoResponsavel(ativo=False)
-
-        assert historico.atual is False
-
     def test_deve_permitir_mesmo_responsavel_em_varias_escolas(
         self,
         unidade_educacional_emef,
@@ -115,7 +103,6 @@ class TestHistoricoResponsavel:
         historico.refresh_from_db()
 
         assert historico.ativo is True
-        assert historico.atual is True
 
     def test_deve_registrar_datas_de_auditoria(
         self,

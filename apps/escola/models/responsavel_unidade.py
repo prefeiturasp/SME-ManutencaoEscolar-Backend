@@ -131,12 +131,3 @@ class HistoricoResponsavel(BaseModel):
             f"{self.responsavel.nome} - "
             f"{self.cargo.nome} ({status})"
         )
-
-    @property
-    def atual(self) -> bool:
-        """Indica se o vínculo do responsável está ativo.
-
-        Returns:
-            bool: True quando o vínculo está ativo e False quando está inativo.
-        """
-        return self.ativo
