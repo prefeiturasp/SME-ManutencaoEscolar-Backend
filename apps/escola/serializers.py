@@ -30,10 +30,3 @@ class DiretoriaRegionalSerializer(serializers.ModelSerializer):
             "abreviacao",
             "nome_curto",
         )
-
-    def get_nome_curto(
-        self,
-        obj: DiretoriaRegional,
-    ) -> str:
-        """Retorna o nome abreviado da Diretoria Regional."""
-        return obj.nome_curto

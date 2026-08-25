@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 
 from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
+from apps.escola.models.responsavel_unidade import ResponsavelUnidade
 from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import Unidadeeducacional
 from apps.usuarios.models.cargo_eol import CargoEOL
@@ -257,4 +258,16 @@ def usuario_sincronizacao(cargo_perfil_diretor):
         cpf=None,
         cargo=cargo_perfil_diretor,
         is_active=False,
+    )
+
+
+@pytest.fixture
+def responsavel_unidade() -> ResponsavelUnidade:
+    """Cria um responsável de unidade para os testes."""
+    return ResponsavelUnidade.objects.create(
+        registro_funcional="000000011",
+        nome="DIRETOR TESTE",
+        email="responsavel.emef@teste.com",
+        telefone="11999999999",
+        esta_afastado=False,
     )

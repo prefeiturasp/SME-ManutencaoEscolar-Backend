@@ -129,7 +129,7 @@ class HistoricoResponsavel(BaseModel):
         return (
             f"{self.unidade_educacional.codigo_eol} - "
             f"{self.responsavel.nome} - "
-            f"{self.cargo} ({status})"
+            f"{self.cargo.nome} ({status})"
         )
 
     @property

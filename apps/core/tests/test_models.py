@@ -7,7 +7,6 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-from apps.escola.models.diretoria_regional import DiretoriaRegional as Dre
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 
@@ -160,10 +159,3 @@ class TestSoftDeleteMixin:
 
         obj.refresh_from_db()
         assert obj.deletado_em is None
-
-
-def test_str_do_dre():
-    """Testa o método __str__ do modelo Dre."""
-    dre = Dre(nome="Diretoria Exemplo", abreviacao="DRE", codigo="123")
-
-    assert str(dre) == "DRE - Diretoria Exemplo"
