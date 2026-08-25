@@ -4,19 +4,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from apps.empresa.models import Empresa
-from apps.usuarios.constants import PerfilAcesso
-from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
-
-
-@pytest.fixture
-def cargo_perfil_diretor():
-    """Fixture do cargo de diretor de unidade escolar."""
-    return CargoEOL.objects.create(
-        codigo="9999",
-        nome="Diretor",
-        perfil=PerfilAcesso.UE,
-    )
 
 
 @pytest.fixture
