@@ -18,7 +18,10 @@ class Empresas_Localizadores {
   btn_salvar_cadastro = () => 'div.justify-between > .flex > .bg-primary'
 
   // consultar
-
+  btn_abrir_empresa = () => ':nth-child(1) > .py-2 > .group\\/button'
+  btn_rastrear_empresa = () => ':nth-child(1) > :nth-child(5) > .font-medium'
+  btn_limpar_filtros = () => '.justify-end > :nth-child(1)'
+  btn_buscar = () => '.justify-end > :nth-child(2)'
 
 }
 

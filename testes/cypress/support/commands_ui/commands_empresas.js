@@ -294,3 +294,127 @@ Cypress.Commands.add('validar_campo_obrigatorio_empresa', () => {
   cy.contains(/é obrigatóri[ao]!/)
     .should('be.visible')
 })
+
+Cypress.Commands.add('clicar_detalhes_empresa', (campo) => {
+
+  cy.get(empresas_localizadores.btn_cadastrar_empresa())
+    .contains('Cadastrar empresa')
+    .click()
+
+      cy.get(empresas_localizadores.campo_cidade())
+        .should('be.visible')
+        .click()
+
+      cy.get(empresas_localizadores.link_rastreio())
+        .should('be.visible')
+        .click()
+})
+
+Cypress.Commands.add('abrir_cadastro_empresa', () => {
+  cy.get(empresas_localizadores.btn_abrir_empresa())
+    .should('be.visible')
+    .first()
+    .click()
+})
+
+Cypress.Commands.add('validar_consulta_empresa', () => {
+  cy.contains('Empresas')  
+})
+
+Cypress.Commands.add('rastrear_empresa', () => {
+  cy.get(empresas_localizadores.btn_rastrear_empresa())
+    .should('be.visible')
+    .first()
+    .click()
+})
+
+Cypress.Commands.add('limpar_filtros_empresa', () => {
+  cy.get(empresas_localizadores.btn_limpar_filtros())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('filtros_consulta_empresa', (campo) => {
+
+  switch (campo) {
+
+    case 'nome':
+      cy.get(empresas_localizadores.campo_nome())
+        .should('be.visible')
+        .type(Cypress.env('NOME_EMPRESA'))
+
+      cy.get(empresas_localizadores.btn_buscar())
+        .should('be.visible')
+        .click()
+
+      break
+
+    case 'cnpj':
+      cy.get(empresas_localizadores.campo_cnpj())
+        .should('be.visible')
+        .type('1')
+
+      cy.get(empresas_localizadores.btn_buscar())
+        .should('be.visible')
+        .click()
+
+      break
+
+    case 'razao_social':
+      cy.get(empresas_localizadores.campo_razao_social())
+        .should('be.visible')
+        .type(Cypress.env('RAZAO_SOCIAL'))
+
+      cy.get(empresas_localizadores.btn_buscar())
+        .should('be.visible')
+        .click()
+
+      break
+
+    case 'status':      
+      cy.get(empresas_localizadores.select_status())
+        .should('exist')
+        .click()
+
+      cy.contains('Ativo')
+        .should('exist')
+        .click()
+
+      cy.get(empresas_localizadores.btn_buscar())
+        .should('be.visible')
+        .click()
+
+      break
+
+    default:
+      throw new Error(`Campo não configurado: ${campo}`)
+  }
+})
+
+Cypress.Commands.add('validar_filtros_empresa', () => {
+  cy.contains('Nome da empresa')  
+})
+
+Cypress.Commands.add('filtros_sem_dados_empresa', (campo) => {
+
+  switch (campo) {
+
+    case 'cnpj':
+      cy.get(empresas_localizadores.campo_cnpj())
+        .should('be.visible')
+        .type('00000000000000')
+
+      cy.get(empresas_localizadores.btn_buscar())
+        .should('be.visible')
+        .click()
+
+      break
+
+    default:
+      throw new Error(`Campo não configurado: ${campo}`)
+  }
+})
+
+Cypress.Commands.add('validar_dados_nao_encontrados_empresa', () => {
+  cy.contains('Não encontramos dados para esta busca')  
+})

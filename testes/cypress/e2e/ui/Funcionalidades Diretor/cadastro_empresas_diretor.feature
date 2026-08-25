@@ -35,8 +35,8 @@ Funcionalidade: Cadastro de Empresa
 
   Esquema do Cenário: Validar campo: <caso>
     E acesso a tela Empresas
-    Quando valido o campo obrigatório "<campo>"
-    Então o sistema exibe mensagem de campo obrigatório
+    Quando valido o campo obrigatório "<campo>" na empresa
+    Então o sistema exibe campo obrigatório de empresa
 
     Exemplos:
       | caso         | campo        |
