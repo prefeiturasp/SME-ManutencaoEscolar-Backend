@@ -34,11 +34,13 @@ class TestSincronizarSubprefeituras:
         assert Subprefeitura.objects.filter(
             codigo_eol="SP01",
             nome="Subprefeitura Sé",
+            diretoria_regional=diretoria_regional_centro,
         ).exists()
 
         assert Subprefeitura.objects.filter(
             codigo_eol="SP02",
             nome="Subprefeitura Lapa",
+            diretoria_regional=diretoria_regional_centro,
         ).exists()
 
     @patch(
@@ -56,6 +58,7 @@ class TestSincronizarSubprefeituras:
         subprefeitura = Subprefeitura.objects.create(
             codigo_eol="SP01",
             nome="Nome antigo",
+            diretoria_regional=diretoria_regional_centro,
         )
 
         mock_get.return_value = resposta_api_subprefeituras
@@ -82,6 +85,7 @@ class TestSincronizarSubprefeituras:
         Subprefeitura.objects.create(
             codigo_eol="SP01",
             nome="Nome antigo",
+            diretoria_regional=diretoria_regional_centro,
         )
 
         mock_get.return_value = resposta_api_subprefeituras
@@ -464,11 +468,13 @@ class TestSincronizarSubprefeituras:
         assert Subprefeitura.objects.filter(
             codigo_eol="SP01",
             nome="Subprefeitura Sé",
+            diretoria_regional=primeira_dre,
         ).exists()
 
         assert Subprefeitura.objects.filter(
             codigo_eol="SP02",
             nome="Subprefeitura Santo Amaro",
+            diretoria_regional=segunda_dre,
         ).exists()
 
         assert mock_get.call_args_list[0].kwargs["params"]["codigoEolDRE"] == (

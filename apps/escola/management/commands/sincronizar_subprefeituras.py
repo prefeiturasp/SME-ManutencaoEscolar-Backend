@@ -81,10 +81,12 @@ class Command(BaseCommand):
                 logging.info(f"Item {item}\n")
                 codigo = item["codigoSubprefeitura"]
                 nome = item["nomeSubprefeitura"]
+                diretoria_regional = item["diretoria_regional"]
                 _, foi_criada = Subprefeitura.objects.update_or_create(
                     codigo_eol=codigo,
                     defaults={
                         "nome": nome,
+                        "diretoria_regional": diretoria_regional,
                     },
                 )
                 quantidades["criadas" if foi_criada else "atualizadas"] += 1
@@ -98,7 +100,7 @@ class Command(BaseCommand):
         self,
         base_url: str,
         headers: dict[str, str],
-    ) -> list[dict[str, str]]:
+    ) -> list[dict[str, Any]]:
         """Coleta e valida as Subprefeituras de todas as Diretorias Regionais.
 
         Consulta a API EOL para cada Diretoria Regional cadastrada, valida os
@@ -113,7 +115,7 @@ class Command(BaseCommand):
             algum registro retornado pela API for inválido.
 
         Returns:
-            list[dict[str, str]]: Lista de Subprefeituras coletadas e validadas
+            list[dict[str, Any]]: Lista de Subprefeituras coletadas e validadas
             a partir das Diretorias Regionais cadastradas.
         """
         diretorias = DiretoriaRegional.objects.all()
@@ -135,7 +137,12 @@ class Command(BaseCommand):
             )
             for item in dados:
                 self._validar_registro(item)
-                subprefeituras.append(item)
+                subprefeituras.append(
+                    {
+                        **item,
+                        "diretoria_regional": dre,
+                    }
+                )
 
         return subprefeituras
 

@@ -17,6 +17,15 @@ class Subprefeitura(UUIDMixin):
         max_length=255,
         help_text="Nome da Subprefeitura.",
     )
+    diretoria_regional = models.ForeignKey(
+        "escola.DiretoriaRegional",
+        verbose_name="Diretoria Regional",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="subprefeituras",
+        help_text="Diretoria Regional responsável pela Subprefeitura.",
+    )
 
     class Meta:
         ordering = ("nome",)

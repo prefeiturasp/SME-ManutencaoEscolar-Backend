@@ -37,14 +37,11 @@ class DiretoriaRegionalSerializer(serializers.ModelSerializer):
 class SubprefeituraSerializer(serializers.ModelSerializer):
     """Serializa e valida os dados das subprefeituras."""
 
+    diretoria_regional = DiretoriaRegionalSerializer(read_only=True)
+
     class Meta:
         model = Subprefeitura
-        fields = (
-            "id",
-            "uuid",
-            "codigo_eol",
-            "nome",
-        )
+        fields = ("id", "uuid", "codigo_eol", "nome", "diretoria_regional")
 
 
 class LoteUnidadeEducacionalSerializer(serializers.Serializer):
