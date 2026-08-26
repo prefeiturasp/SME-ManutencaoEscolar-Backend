@@ -7,9 +7,9 @@ from drf_spectacular.utils import (
     extend_schema,
 )
 
-from apps.core.serializers.serializers import (
+from apps.core.serializers.anexo import ArquivoResponseSerializer
+from apps.core.serializers.autenticacao import (
     AlterarSenhaSerializer,
-    ArquivoResponseSerializer,
     AtualizarTokenSerializer,
     AutenticacaoSerializer,
     LoginResponseSerializer,
