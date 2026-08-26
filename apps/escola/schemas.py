@@ -146,3 +146,18 @@ UNIDADE_EDUCACIONAL = extend_schema_view(
         description="Retorna os dados de uma unidade educacional específica.",
     ),
 )
+
+
+SUBPREFEITURA = extend_schema_view(
+    list=extend_schema(
+        summary="Lista subprefeituras",
+        description=(
+            "Retorna a lista de subprefeituras cadastradas no sistema. "
+            "Permite filtrar por código EOL e nome."
+        ),
+    ),
+    retrieve=extend_schema(
+        summary="Obtém uma subprefeitura",
+        description=("Retorna os dados de uma subprefeitura específica."),
+    ),
+)

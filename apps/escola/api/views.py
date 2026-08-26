@@ -15,6 +15,7 @@ from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import Unidadeeducacional
 from apps.escola.schemas import (
     DIRETORIA_REGIONAL,
+    SUBPREFEITURA,
     TIPO_ESCOLA,
     UNIDADE_EDUCACIONAL,
 )
@@ -55,6 +56,7 @@ class DiretoriaRegionalViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = PaginacaoPadrao
 
 
+@SUBPREFEITURA
 class SubprefeituraViewSet(viewsets.ReadOnlyModelViewSet):
     """Disponibiliza operações de leitura para subprefeituras."""
 
