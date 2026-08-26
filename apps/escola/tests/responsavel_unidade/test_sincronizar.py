@@ -1004,9 +1004,9 @@ class TestSincronizarDiretores:
 
     def test_deve_exibir_progresso_a_cada_500_unidades(
         self,
-        diretoria_regional,
+        diretoria_regional_centro,
         tipo_escola_emef,
-        subprefeitura,
+        subprefeitura_se,
         configurar_api_eol,
         usuario_sincronizacao,
         obter_cargo_diretor,
@@ -1016,9 +1016,9 @@ class TestSincronizarDiretores:
             Unidadeeducacional.objects.create(
                 codigo_eol=str(100000 + numero),
                 nome=f"EMEF ESCOLA TESTE {numero}",
-                diretoria_regional=diretoria_regional,
+                diretoria_regional=diretoria_regional_centro,
                 tipo_escola=tipo_escola_emef,
-                subprefeitura=subprefeitura,
+                subprefeitura=subprefeitura_se,
             )
 
         registro_diretor = self.REGISTRO.copy()

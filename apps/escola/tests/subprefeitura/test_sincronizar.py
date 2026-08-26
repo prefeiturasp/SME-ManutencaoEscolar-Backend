@@ -22,7 +22,7 @@ class TestSincronizarSubprefeituras:
         mock_get,
         resposta_api_subprefeituras,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve criar as Subprefeituras retornadas pela API."""
         mock_get.return_value = resposta_api_subprefeituras
@@ -50,7 +50,7 @@ class TestSincronizarSubprefeituras:
         mock_get,
         resposta_api_subprefeituras,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve atualizar uma Subprefeitura existente."""
         subprefeitura = Subprefeitura.objects.create(
@@ -76,7 +76,7 @@ class TestSincronizarSubprefeituras:
         mock_get,
         resposta_api_subprefeituras,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve criar novos registros e atualizar os existentes."""
         Subprefeitura.objects.create(
@@ -127,7 +127,7 @@ class TestSincronizarSubprefeituras:
         self,
         mock_get,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve falhar quando a API retornar JSON inválido."""
         resposta = Mock()
@@ -150,7 +150,7 @@ class TestSincronizarSubprefeituras:
         self,
         mock_get,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve falhar quando a API não retornar uma lista."""
         resposta = Mock()
@@ -278,7 +278,7 @@ class TestSincronizarSubprefeituras:
         self,
         mock_get,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve retornar erro quando a API externa falhar."""
         mock_get.side_effect = requests.RequestException(
@@ -300,7 +300,7 @@ class TestSincronizarSubprefeituras:
         mock_get,
         resposta_api_subprefeituras,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve consultar a API EOL com o token configurado."""
         mock_get.return_value = resposta_api_subprefeituras
@@ -323,7 +323,7 @@ class TestSincronizarSubprefeituras:
         mock_get,
         resposta_api_subprefeituras,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve enviar o código da DRE nos parâmetros da requisição."""
         mock_get.return_value = resposta_api_subprefeituras
@@ -343,7 +343,7 @@ class TestSincronizarSubprefeituras:
         mock_get,
         resposta_api_subprefeituras,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve consultar o endpoint utilizando o código da DRE."""
         mock_get.return_value = resposta_api_subprefeituras
@@ -388,7 +388,7 @@ class TestSincronizarSubprefeituras:
         self,
         mock_get,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve desfazer alterações quando um registro for inválido."""
         resposta = Mock()
