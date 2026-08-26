@@ -2,8 +2,12 @@
 
 import django_filters
 
-from apps.escola.models import TipoEscola, Unidadeeducacional
-from apps.escola.models.subprefeitura import Subprefeitura
+from apps.escola.models import (
+    DiretoriaRegional,
+    Subprefeitura,
+    TipoEscola,
+    Unidadeeducacional,
+)
 
 
 class TipoEscolaFilter(django_filters.FilterSet):
@@ -37,6 +41,27 @@ class SubprefeituraFilter(django_filters.FilterSet):
             "codigo_eol",
             "nome",
         )
+
+
+class DiretoriaRegionalFilter(django_filters.FilterSet):
+    """Filtros disponíveis para diretorias regionais."""
+
+    codigo = django_filters.CharFilter(
+        field_name="codigo",
+        lookup_expr="exact",
+    )
+    nome = django_filters.CharFilter(
+        field_name="nome",
+        lookup_expr="icontains",
+    )
+    abreviacao = django_filters.CharFilter(
+        field_name="abreviacao",
+        lookup_expr="icontains",
+    )
+
+    class Meta:
+        model = DiretoriaRegional
+        fields = ("codigo", "nome", "abreviacao")
 
 
 class UnidadeEducacionalFilter(django_filters.FilterSet):

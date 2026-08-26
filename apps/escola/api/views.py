@@ -5,14 +5,17 @@ from rest_framework import viewsets
 
 from apps.core.pagination import PaginacaoPadrao
 from apps.escola.filters import (
+    DiretoriaRegionalFilter,
     SubprefeituraFilter,
     TipoEscolaFilter,
     UnidadeEducacionalFilter,
 )
-from apps.escola.models import TipoEscola
-from apps.escola.models.diretoria_regional import DiretoriaRegional
-from apps.escola.models.subprefeitura import Subprefeitura
-from apps.escola.models.unidade_educacional import Unidadeeducacional
+from apps.escola.models import (
+    DiretoriaRegional,
+    Subprefeitura,
+    TipoEscola,
+    Unidadeeducacional,
+)
 from apps.escola.schemas import (
     DIRETORIA_REGIONAL,
     SUBPREFEITURA,
@@ -53,6 +56,9 @@ class DiretoriaRegionalViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = DiretoriaRegional.objects.all()
     serializer_class = DiretoriaRegionalSerializer
     lookup_field = "id"
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = DiretoriaRegionalFilter
     pagination_class = PaginacaoPadrao
 
 
