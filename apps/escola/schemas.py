@@ -1,6 +1,7 @@
 """Schemas do app escola."""
 
 from drf_spectacular.utils import (
+    OpenApiExample,
     OpenApiParameter,
     OpenApiResponse,
     extend_schema,
@@ -31,6 +32,26 @@ TIPO_ESCOLA = extend_schema_view(
                     "Filtra os tipos de escola cuja a sigla contenha o valor "
                     "informado."
                 ),
+            ),
+            OpenApiParameter(
+                name="fields",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description=(
+                    "Lista de campos que devem ser retornados, "
+                    "separados por vírgula. Exemplo: uuid,sigla"
+                ),
+                examples=[
+                    OpenApiExample(
+                        "UUID e sigla",
+                        value="uuid,sigla",
+                    ),
+                    OpenApiExample(
+                        "Somente sigla",
+                        value="sigla",
+                    ),
+                ],
             ),
         ],
         responses={
@@ -82,5 +103,46 @@ DIRETORIA_REGIONAL = extend_schema_view(
                 description="Diretoria regional não encontrada",
             ),
         },
+    ),
+)
+
+
+UNIDADE_EDUCACIONAL = extend_schema_view(
+    list=extend_schema(
+        tags=[TAG_ESCOLA],
+        summary="Lista unidades educacionais",
+        description=(
+            "Retorna as unidades educacionais cadastradas, "
+            "permitindo filtrar por CODESC, tipo de escola, "
+            "Diretoria Regional, unidade educacional, "
+            "subprefeitura, lote e status."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="fields",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description=(
+                    "Lista de campos que devem ser retornados, "
+                    "separados por vírgula. Exemplo: uuid,sigla"
+                ),
+                examples=[
+                    OpenApiExample(
+                        "UUID e nome",
+                        value="uuid,nome",
+                    ),
+                    OpenApiExample(
+                        "Somente nome",
+                        value="nome",
+                    ),
+                ],
+            ),
+        ],
+    ),
+    retrieve=extend_schema(
+        tags=[TAG_ESCOLA],
+        summary="Obtém uma unidade educacional",
+        description="Retorna os dados de uma unidade educacional específica.",
     ),
 )

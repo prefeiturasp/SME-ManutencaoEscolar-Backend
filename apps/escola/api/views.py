@@ -4,16 +4,25 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
 from apps.core.pagination import PaginacaoPadrao
-from apps.escola.filters import TipoEscolaFilter
+from apps.escola.filters import (
+    SubprefeituraFilter,
+    TipoEscolaFilter,
+    UnidadeEducacionalFilter,
+)
 from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
+from apps.escola.models.subprefeitura import Subprefeitura
+from apps.escola.models.unidade_educacional import Unidadeeducacional
 from apps.escola.schemas import (
     DIRETORIA_REGIONAL,
     TIPO_ESCOLA,
+    UNIDADE_EDUCACIONAL,
 )
 from apps.escola.serializers import (
     DiretoriaRegionalSerializer,
+    SubprefeituraSerializer,
     TipoEscolaSerializer,
+    UnidadeEducacionalSerializer,
 )
 
 
@@ -43,4 +52,37 @@ class DiretoriaRegionalViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = DiretoriaRegional.objects.all()
     serializer_class = DiretoriaRegionalSerializer
     lookup_field = "id"
+    pagination_class = PaginacaoPadrao
+
+
+class SubprefeituraViewSet(viewsets.ReadOnlyModelViewSet):
+    """Disponibiliza operações de leitura para subprefeituras."""
+
+    http_method_names = ["get", "options"]
+    queryset = Subprefeitura.objects.all()
+    serializer_class = SubprefeituraSerializer
+    lookup_field = "uuid"
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SubprefeituraFilter
+    pagination_class = PaginacaoPadrao
+
+
+@UNIDADE_EDUCACIONAL
+class UnidadeEducacionalViewSet(viewsets.ReadOnlyModelViewSet):
+    """Disponibiliza operações de leitura para unidades educacionais."""
+
+    http_method_names = ["get", "options"]
+    queryset = Unidadeeducacional.objects.select_related(
+        "diretoria_regional",
+        "tipo_escola",
+        "subprefeitura",
+        "diretoria_regional__vinculo_lote",
+        "diretoria_regional__vinculo_lote__lote",
+    ).all()
+    serializer_class = UnidadeEducacionalSerializer
+    lookup_field = "uuid"
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UnidadeEducacionalFilter
     pagination_class = PaginacaoPadrao

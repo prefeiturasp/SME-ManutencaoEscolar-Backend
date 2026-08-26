@@ -2,11 +2,12 @@
 
 from drf_spectacular.utils import (
     OpenApiExample,
+    OpenApiParameter,
     OpenApiResponse,
     extend_schema,
 )
 
-from apps.core.serializers import (
+from apps.core.serializers.serializers import (
     AlterarSenhaSerializer,
     ArquivoResponseSerializer,
     AtualizarTokenSerializer,
@@ -239,7 +240,6 @@ REDEFINIR_SENHA = extend_schema(
     ],
 )
 
-
 ALTERAR_SENHA = extend_schema(
     auth=[],
     tags=[TAG_AUTENTICACAO],
@@ -359,4 +359,27 @@ UPLOAD_ARQUIVO = extend_schema(
             ],
         ),
     },
+)
+
+FIELDS_PARAMETER = (
+    OpenApiParameter(
+        name="fields",
+        type=str,
+        location=OpenApiParameter.QUERY,
+        required=False,
+        description=(
+            "Lista de campos que devem ser retornados, "
+            "separados por vírgula. Exemplo: uuid,nome"
+        ),
+        examples=[
+            OpenApiExample(
+                "UUID e nome",
+                value="uuid,nome",
+            ),
+            OpenApiExample(
+                "Somente nome",
+                value="nome",
+            ),
+        ],
+    ),
 )

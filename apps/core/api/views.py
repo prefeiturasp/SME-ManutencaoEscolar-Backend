@@ -34,7 +34,7 @@ from apps.core.schemas import (
     REDEFINIR_SENHA,
     UPLOAD_ARQUIVO,
 )
-from apps.core.serializers import (
+from apps.core.serializers.serializers import (
     AlterarSenhaSerializer,
     ArquivoResponseSerializer,
     ArquivoUploadSerializer,
