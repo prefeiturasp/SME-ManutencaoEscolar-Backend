@@ -260,4 +260,30 @@ LOTE_SCHEMA = extend_schema_view(
             ),
         ],
     ),
+    retrieve=extend_schema(
+        tags=[_TAG_LOTE],
+        summary="Busca um lote",
+        description="Retorna os dados de um lote pelo UUID.",
+        operation_id="buscarLote",
+        responses={
+            200: LoteSerializer,
+            401: OpenApiResponse(
+                description=_CREDENCIAIS_INVALIDAS,
+            ),
+            404: OpenApiResponse(
+                description="Lote não encontrado",
+            ),
+            500: OpenApiResponse(
+                description=_ERRO_NO_SERVIDOR,
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                name="Detalhes do lote",
+                response_only=True,
+                status_codes=["200"],
+                value=_LOTE_EXEMPLO_SAIDA,
+            ),
+        ],
+    ),
 )
