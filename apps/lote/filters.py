@@ -11,7 +11,9 @@ def _converter_status(valor: str) -> bool:
 
 
 class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
-    """Permite filtrar por múltiplos identificadores numéricos."""
+    """Filtre por múltiplos valores numéricos."""
+
+    pass
 
 
 class LoteFilter(filters.FilterSet):
