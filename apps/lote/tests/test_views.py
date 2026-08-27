@@ -23,6 +23,7 @@ from apps.lote.constants import LoteErrorMessages
 from apps.lote.exceptions import (
     DiretoriaRegionalJaVinculadaError,
 )
+from apps.lote.models import Lote
 from apps.lote.serializers import (
     LoteCriarSerializer,
     LoteSerializer,
@@ -231,3 +232,30 @@ def test_configuracao_do_erro_de_instabilidade() -> None:
     assert erro.status_code == (status.HTTP_500_INTERNAL_SERVER_ERROR)
     assert str(erro.detail) == LoteErrorMessages.INSTABILIDADE
     assert erro.default_code == "lote_instabilidade"
+
+
+def test_obtem_lote_do_serializer() -> None:
+    """Deve retornar o lote presente na instância do serializer."""
+    lote = Lote(
+        nome="Lote Centro",
+        codigo_cadastro="LOTE-001",
+    )
+    serializer, serializer_mock = criar_serializer_mock({})
+    serializer_mock.instance = lote
+
+    resultado = LoteViewSet._obter_lote(serializer)
+
+    assert resultado is lote
+
+
+def test_rejeita_serializer_sem_instancia_de_lote() -> None:
+    """Deve rejeitar serializer que não possua um lote válido."""
+    serializer, _ = criar_serializer_mock({})
+
+    with pytest.raises(DRFValidationError) as exc_info:
+        LoteViewSet._obter_lote(serializer)
+
+    assert str(exc_info.value.detail["title"]) == "Erro"
+    assert str(exc_info.value.detail["detail"]) == (
+        "Serviço inválido ou não encontrado."
+    )
