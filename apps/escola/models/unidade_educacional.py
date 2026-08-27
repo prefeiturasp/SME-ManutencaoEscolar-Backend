@@ -34,6 +34,8 @@ class Unidadeeducacional(UUIDMixin):
         "escola.Subprefeitura",
         on_delete=models.PROTECT,
         related_name="escolas",
+        null=True,
+        blank=True,
         help_text="Subprefeitura onde a escola está localizada.",
     )
     status = models.BooleanField(default=True)

@@ -131,3 +131,18 @@ class TestUnidadeEducacionalFilter:
         )
 
         assert not filtro.qs.exists()
+
+    def test_filtra_por_unidades_sem_subprefeitura(
+        self,
+        unidade_educacional_cemei,
+        unidade_educacional_emef,
+    ):
+        unidade_educacional_cemei.subprefeitura = None
+        unidade_educacional_cemei.save()
+
+        filtro = UnidadeEducacionalFilter(
+            data={"subprefeitura": "sem-subprefeitura"},
+            queryset=Unidadeeducacional.objects.all(),
+        )
+
+        assert list(filtro.qs) == [unidade_educacional_cemei]

@@ -1,6 +1,7 @@
 """Filtros do domínio Tipo de Escola."""
 
 import django_filters
+from django.db.models import QuerySet
 
 from apps.escola.models import (
     DiretoriaRegional,
@@ -34,13 +35,14 @@ class SubprefeituraFilter(django_filters.FilterSet):
         field_name="nome",
         lookup_expr="icontains",
     )
+    diretoria_regional = django_filters.NumberFilter(
+        field_name="diretoria_regional__id",
+        lookup_expr="exact",
+    )
 
     class Meta:
         model = Subprefeitura
-        fields = (
-            "codigo_eol",
-            "nome",
-        )
+        fields = ("codigo_eol", "nome", "diretoria_regional")
 
 
 class DiretoriaRegionalFilter(django_filters.FilterSet):
@@ -83,18 +85,43 @@ class UnidadeEducacionalFilter(django_filters.FilterSet):
         field_name="uuid",
         lookup_expr="exact",
     )
-    subprefeitura = django_filters.UUIDFilter(
-        field_name="subprefeitura__uuid",
-        lookup_expr="exact",
+    subprefeitura = django_filters.CharFilter(
+        method="filtrar_subprefeitura",
     )
     status = django_filters.BooleanFilter(
         field_name="status",
         lookup_expr="exact",
     )
     lote = django_filters.CharFilter(
-        field_name="diretoria_regional__vinculo_lote__lote__codigo_cadastro",
+        field_name="diretoria_regional__vinculo_lote__lote__nome",
         lookup_expr="icontains",
     )
+
+    def filtrar_subprefeitura(
+        self,
+        queryset: QuerySet[Unidadeeducacional],
+        name: str,
+        value: str,
+    ) -> QuerySet[Unidadeeducacional]:
+        """Filtra unidades educacionais por subprefeitura.
+
+        Permite filtrar pelas unidades vinculadas a uma subprefeitura
+        específica ou pelas unidades que não possuem subprefeitura.
+
+        Args:
+            queryset: QuerySet de unidades educacionais a ser filtrado.
+            name: Nome do campo utilizado pelo filtro.
+            value: UUID da subprefeitura ou o valor
+                ``"sem-subprefeitura"`` para unidades sem subprefeitura.
+
+        Returns:
+            QuerySet contendo as unidades educacionais que atendem
+            ao critério de subprefeitura informado.
+        """
+        if value == "sem-subprefeitura":
+            return queryset.filter(subprefeitura__isnull=True)
+
+        return queryset.filter(subprefeitura__uuid=value)
 
     class Meta:
         model = Unidadeeducacional

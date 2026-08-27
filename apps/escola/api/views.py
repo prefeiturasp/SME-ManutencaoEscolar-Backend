@@ -40,7 +40,7 @@ class TipoEscolaViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     http_method_names = ["get", "options"]
-    queryset = TipoEscola.objects.all()
+    queryset = TipoEscola.objects.aceitos()
     serializer_class = TipoEscolaSerializer
     lookup_field = "uuid"
 
