@@ -39,7 +39,7 @@ def test_metadados_do_lote() -> None:
     """Deve configurar corretamente os metadados do lote."""
     assert Lote._meta.verbose_name == "lote"
     assert Lote._meta.verbose_name_plural == "lotes"
-    assert Lote._meta.ordering == ["nome"]
+    assert Lote._meta.ordering == ["-status", "-id"]
 
 
 def test_retorna_diretorias_regionais_vinculadas() -> None:

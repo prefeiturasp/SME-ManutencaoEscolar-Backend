@@ -22,6 +22,9 @@ _SERVICO_EXEMPLO_ENTRADA = {
     "status": True,
 }
 
+_SERVICO_NAO_ENCONTRADO = "Serviço não encontrado"
+
+
 _SERVICO_EXEMPLO_PATCH = {
     "nome": "Pintura externa",
     "status": True,
@@ -75,7 +78,32 @@ SERVICO_SCHEMA = extend_schema_view(
             ),
         ],
     ),
-    retrieve=extend_schema(exclude=True),
+    retrieve=extend_schema(
+        tags=[_TAG_SERVICO],
+        summary="Busca um serviço",
+        description="Retorna os dados de um serviço identificado pelo UUID.",
+        operation_id="buscarServico",
+        responses={
+            200: ServicoSerializer,
+            401: OpenApiResponse(
+                description=_CREDENCIAIS_INVALIDAS,
+            ),
+            404: OpenApiResponse(
+                description=_SERVICO_NAO_ENCONTRADO,
+            ),
+            500: OpenApiResponse(
+                description=_ERRO_NO_SERVIDOR,
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                name="Serviço encontrado",
+                response_only=True,
+                status_codes=["200"],
+                value=_SERVICO_EXEMPLO_SAIDA,
+            ),
+        ],
+    ),
     create=extend_schema(
         tags=[_TAG_SERVICO],
         summary="Cria um novo serviço",
@@ -124,7 +152,7 @@ SERVICO_SCHEMA = extend_schema_view(
                 description=_CREDENCIAIS_INVALIDAS,
             ),
             404: OpenApiResponse(
-                description="Serviço não encontrado",
+                description=_SERVICO_NAO_ENCONTRADO,
             ),
             500: OpenApiResponse(
                 description=_ERRO_NO_SERVIDOR,
@@ -163,7 +191,7 @@ SERVICO_SCHEMA = extend_schema_view(
                 description=_CREDENCIAIS_INVALIDAS,
             ),
             404: OpenApiResponse(
-                description="Serviço não encontrado",
+                description=_SERVICO_NAO_ENCONTRADO,
             ),
             500: OpenApiResponse(
                 description=_ERRO_NO_SERVIDOR,
