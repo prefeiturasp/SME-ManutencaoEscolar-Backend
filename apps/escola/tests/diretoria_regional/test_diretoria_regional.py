@@ -16,9 +16,7 @@ class TestDiretoriaRegional:
 
         resultado = str(diretoria_regional)
 
-        assert resultado == (
-            "BT - DIRETORIA REGIONAL DE EDUCACAO BUTANTA"
-        )
+        assert resultado == ("BT - DIRETORIA REGIONAL DE EDUCACAO BUTANTA")
 
     def test_deve_retornar_nome_curto_da_diretoria(self) -> None:
         """Substitui o prefixo do nome da diretoria pela sigla DRE."""

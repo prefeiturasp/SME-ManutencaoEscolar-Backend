@@ -6,7 +6,7 @@ from apps.lote.models import Lote
 
 
 def _converter_status(valor: str) -> bool:
-    """Converte o status recebido como texto para booleano."""
+    """Converta o status recebido como texto para booleano."""
     return valor == "true"
 
 
@@ -41,9 +41,7 @@ class LoteFilter(filters.FilterSet):
     )
 
     diretorias_regionais = NumberInFilter(
-        field_name=(
-            "vinculos_diretoria_regional__diretoria_regional_id"
-        ),
+        field_name=("vinculos_diretoria_regional__diretoria_regional_id"),
         lookup_expr="in",
         distinct=True,
     )
