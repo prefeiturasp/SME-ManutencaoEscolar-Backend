@@ -9,6 +9,7 @@ import pytest
 from rest_framework import serializers
 
 from apps.escola.models import DiretoriaRegional
+from apps.escola.serializers import DiretoriaRegionalSerializer
 from apps.lote.models import Lote
 from apps.lote.serializers import (
     LoteCriarSerializer,
@@ -137,3 +138,20 @@ def test_rejeita_periodo_final_anterior_ao_inicial() -> None:
     mensagem = "O período final não pode ser anterior ao período inicial."
 
     assert str(exc_info.value.detail["periodo_final"]) == mensagem
+
+
+def test_retorna_nome_curto_da_diretoria_regional() -> None:
+    """Deve retornar o nome abreviado da Diretoria Regional."""
+    diretoria_regional = DiretoriaRegional(
+        pk=1,
+        codigo="DRE-1",
+        nome="DIRETORIA REGIONAL DE EDUCACAO BUTANTA",
+        abreviacao="BT",
+    )
+    serializer = DiretoriaRegionalSerializer(
+        instance=diretoria_regional,
+    )
+
+    resultado = serializer.data
+
+    assert resultado["nome_curto"] == "DRE BUTANTA"

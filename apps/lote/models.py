@@ -44,7 +44,7 @@ class Lote(BaseModel):
 
         verbose_name = "lote"
         verbose_name_plural = "lotes"
-        ordering = ["nome"]
+        ordering = ["-status", "-id"]
 
     def __str__(self) -> str:
         """Retorna a representação textual do lote."""
@@ -73,7 +73,7 @@ class LoteDiretoriaRegional(BaseModel):
     )
 
     class Meta:
-        """Configura os metadados do vínculo de lote e Diretoria Regional."""
+        """Configura os metadados do vínculo lote e Diretoria Regional."""
 
         verbose_name = "Diretoria Regional do lote"
         verbose_name_plural = "Diretorias Regionais do lote"

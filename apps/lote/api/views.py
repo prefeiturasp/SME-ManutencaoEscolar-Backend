@@ -3,7 +3,8 @@
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework import mixins, status, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, viewsets
 from rest_framework.exceptions import (
     APIException,
     NotAuthenticated,
@@ -11,10 +12,12 @@ from rest_framework.exceptions import (
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.serializers import BaseSerializer
 
+from apps.core.pagination import PaginacaoPadrao
 from apps.lote.constants import LoteErrorMessages
 from apps.lote.exceptions import (
     DiretoriaRegionalJaVinculadaError,
 )
+from apps.lote.filters import LoteFilter
 from apps.lote.models import Lote
 from apps.lote.schemas import LOTE_SCHEMA
 from apps.lote.serializers import (
@@ -34,14 +37,34 @@ class LoteInstabilidadeError(APIException):
 
 
 @LOTE_SCHEMA
-class LoteViewSet(
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-):
-    """Disponibiliza o cadastro de lotes."""
+class LoteViewSet(viewsets.ModelViewSet):
+    """CRUD + ações de Lotes.
 
-    http_method_names = ["post", "options"]
+    Delegando regras de negócio ao LotesService.
+    """
+
+    http_method_names = ["get", "post", "options"]
     queryset = Lote.objects.all()
+    lookup_field = "uuid"
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = LoteFilter
+    pagination_class = PaginacaoPadrao
+
+    @staticmethod
+    def _obter_lote(serializer: BaseSerializer) -> Lote:
+        """Retorna a instância de serviço do serializer."""
+        lote = serializer.instance
+
+        if not isinstance(lote, Lote):
+            raise DRFValidationError(
+                {
+                    "title": "Erro",
+                    "detail": "Serviço inválido ou não encontrado.",
+                }
+            )
+
+        return lote
 
     def __init__(self, **kwargs: Any) -> None:
         """Inicializa a view com o serviço de lotes."""
