@@ -31,6 +31,9 @@ class EmpresaSerializer(serializers.ModelSerializer):
     atualizado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
     )
+    responsaveis_tecnicos: ResponsavelTecnicoSerializer = (
+        ResponsavelTecnicoSerializer(many=True, read_only=True)
+    )
 
     class Meta:
         """Configuração do serializer de empresa."""
@@ -54,6 +57,7 @@ class EmpresaSerializer(serializers.ModelSerializer):
             "criado_em",
             "atualizado_por",
             "atualizado_em",
+            "responsaveis_tecnicos",
         )
 
 
@@ -117,9 +121,18 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
     def validate_responsaveis_tecnicos(
         self, value: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
-        """Valida se existe pelo menos 1 responsável técnico."""
+        """Valida a lista de responsáveis técnicos.
+
+        Exige ao menos um responsável e proíbe mais de um do mesmo ``tipo``
+        no payload.
+        """
         if len(value) < 1:
             raise serializers.ValidationError(
                 EmpresaErrorMessages.RESPONSAVEL_TECNICO_OBRIGATORIO
+            )
+        tipos = [item["tipo"] for item in value]
+        if len(tipos) != len(set(tipos)):
+            raise serializers.ValidationError(
+                EmpresaErrorMessages.RESPONSAVEL_TECNICO_TIPO_DUPLICADO
             )
         return value

@@ -92,19 +92,36 @@ class EmpresaService:
     ) -> dict[str, Any]:
         """Atualiza uma empresa existente e retorna seus dados serializados.
 
-        Registra o usuário logado como responsável pela atualização.
+        Registra o usuário logado como responsável pela atualização. Quando
+        ``dados`` contém a chave ``responsaveis_tecnicos``, a lista informada
+        é sincronizada dentro de uma transação (upsert por ``uuid``:
+        atualiza os existentes, cria os novos e remove os ausentes).
 
         Args:
             empresa: Instância da empresa a ser atualizada.
-            dados: Dados a serem aplicados na atualização.
+            dados: Dados a serem aplicados na atualização, podendo incluir
+                a lista de responsáveis técnicos em ``responsaveis_tecnicos``.
             usuario: Usuário logado responsável pela atualização.
 
         Returns:
             Dados serializados da empresa atualizada.
         """
-        return self.empresa_repository.atualizar(
-            empresa, {**dados, "atualizado_por": usuario}
-        )
+        dados = {**dados, "atualizado_por": usuario}
+        responsaveis_dados = dados.pop("responsaveis_tecnicos", None)
+
+        with transaction.atomic():
+            empresa_atualizada = self.empresa_repository.atualizar(
+                empresa, dados
+            )
+            empresa_atualizada["responsaveis_tecnicos"] = (
+                self.responsavel_tecnico_service.sincronizar(
+                    empresa_id=empresa_atualizada["id"],
+                    dados_lista=responsaveis_dados,
+                    usuario=usuario,
+                )
+            )
+
+        return empresa_atualizada
 
     def deletar(
         self, empresa: Empresa, usuario: Usuario | None = None
