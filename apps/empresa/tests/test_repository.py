@@ -162,6 +162,117 @@ class TestResponsavelTecnicoRepository:
         assert {r["tipo"] for r in criados} == {"preposto", "engenheiro_civil"}
 
     @pytest.mark.django_db
+    def test_bulk_atualizar_altera_campos_dos_responsaveis(
+        self, responsavel_payload_valido
+    ):
+        """Deve aplicar os campos informados no responsável identificado."""
+        repository = ResponsavelTecnicoRepository()
+        (criado,) = repository.bulk_criar([responsavel_payload_valido])
+        responsavel_id = ResponsavelTecnico.objects.get(uuid=criado["uuid"]).id
+
+        atualizados = repository.bulk_atualizar(
+            [
+                {
+                    "id": responsavel_id,
+                    "nome": "Nome Atualizado",
+                    "email": "atualizado@email.com",
+                }
+            ]
+        )
+
+        assert atualizados[0]["nome"] == "Nome Atualizado"
+        responsavel = ResponsavelTecnico.objects.get(pk=responsavel_id)
+        assert responsavel.nome == "Nome Atualizado"
+        assert responsavel.email == "atualizado@email.com"
+
+    @pytest.mark.django_db
+    def test_bulk_atualizar_atualiza_atualizado_em_quando_ha_mudanca(
+        self, responsavel_payload_valido
+    ):
+        """Deve atualizar ``atualizado_em`` quando algum campo muda."""
+        repository = ResponsavelTecnicoRepository()
+        (criado,) = repository.bulk_criar([responsavel_payload_valido])
+        responsavel_id = ResponsavelTecnico.objects.get(uuid=criado["uuid"]).id
+        atualizado_em_original = ResponsavelTecnico.objects.get(
+            pk=responsavel_id
+        ).atualizado_em
+
+        repository.bulk_atualizar(
+            [{"id": responsavel_id, "nome": "Nome Atualizado"}]
+        )
+
+        responsavel = ResponsavelTecnico.objects.get(pk=responsavel_id)
+        assert responsavel.atualizado_em > atualizado_em_original
+
+    @pytest.mark.django_db
+    def test_bulk_atualizar_nao_salva_quando_nada_muda(
+        self, responsavel_payload_valido
+    ):
+        """Não deve tocar o registro quando nenhum campo é alterado."""
+        repository = ResponsavelTecnicoRepository()
+        (criado,) = repository.bulk_criar([responsavel_payload_valido])
+        responsavel = ResponsavelTecnico.objects.get(uuid=criado["uuid"])
+        atualizado_em_original = responsavel.atualizado_em
+
+        repository.bulk_atualizar(
+            [
+                {
+                    "id": responsavel.id,
+                    "nome": responsavel.nome,
+                    "email": responsavel.email,
+                    "tipo": responsavel.tipo,
+                }
+            ]
+        )
+
+        responsavel.refresh_from_db()
+        assert responsavel.atualizado_em == atualizado_em_original
+
+    @pytest.mark.django_db
+    def test_listar_por_empresa_retorna_responsaveis_da_empresa(
+        self, responsavel_payload_valido
+    ):
+        """Deve retornar as instâncias dos responsáveis da empresa."""
+        repository = ResponsavelTecnicoRepository()
+        repository.bulk_criar(
+            [
+                responsavel_payload_valido,
+                {
+                    **responsavel_payload_valido,
+                    "tipo": "engenheiro_civil",
+                    "email": "engenheiro@email.com",
+                },
+            ]
+        )
+
+        resultado = repository.listar_por_empresa(
+            responsavel_payload_valido["empresa"].id
+        )
+
+        assert {responsavel.tipo for responsavel in resultado} == {
+            "preposto",
+            "engenheiro_civil",
+        }
+
+    @pytest.mark.django_db
+    def test_remover_marca_responsaveis_como_deletados(
+        self, responsavel_payload_valido, usuario_ativo
+    ):
+        """Deve aplicar soft delete e registrar o usuário responsável."""
+        repository = ResponsavelTecnicoRepository()
+        repository.bulk_criar([responsavel_payload_valido])
+        responsavel = ResponsavelTecnico.objects.get()
+
+        repository.remover([responsavel], usuario_ativo)
+
+        responsavel.refresh_from_db()
+        assert responsavel.deletado_em is not None
+        assert responsavel.deletado_por == usuario_ativo
+        assert not ResponsavelTecnico.objects.filter(
+            pk=responsavel.pk
+        ).exists()
+
+    @pytest.mark.django_db
     def test_existe_por_empresa_e_tipo_retorna_true_quando_ja_cadastrado(
         self, responsavel_payload_valido
     ):
