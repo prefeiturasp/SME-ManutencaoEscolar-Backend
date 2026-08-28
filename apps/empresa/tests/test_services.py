@@ -114,42 +114,99 @@ class TestEmpresaService:
             ],
         }
 
+    @pytest.mark.django_db
     def test_atualizar_delega_para_repository(self, empresa_payload_valido):
         """
         Fluxo serviço e repositório.
 
-        Deve delegar a atualização ao repositório
-        e devolver o dicionário retornado.
+        Deve delegar a atualização ao repositório, sincronizar os
+        responsáveis técnicos e devolver o dicionário retornado.
         """
         empresa_repository = Mock(spec=EmpresaRepository)
+        responsavel_tecnico_service = Mock(spec=ResponsavelTecnicoService)
         instancia = Empresa(**empresa_payload_valido)
-        dados_atualizados = {"nome": "Novo Nome"}
-        empresa = {**empresa_payload_valido, "nome": "Novo Nome"}
+        dados_atualizados = {"nome": "Novo Nome", "responsaveis_tecnicos": []}
+        empresa = {"id": 1, "nome": "Novo Nome"}
         empresa_repository.atualizar.return_value = empresa
-        service = EmpresaService(empresa_repository=empresa_repository)
+        responsavel_tecnico_service.sincronizar.return_value = []
+        service = EmpresaService(
+            empresa_repository=empresa_repository,
+            responsavel_tecnico_service=responsavel_tecnico_service,
+        )
         usuario = Mock()
 
         resultado = service.atualizar(instancia, dados_atualizados, usuario)
 
-        assert resultado == empresa
+        assert resultado == {**empresa, "responsaveis_tecnicos": []}
         empresa_repository.atualizar.assert_called_once_with(
-            instancia, {**dados_atualizados, "atualizado_por": usuario}
+            instancia, {"nome": "Novo Nome", "atualizado_por": usuario}
         )
 
+    @pytest.mark.django_db
     def test_atualizar_sem_usuario_define_atualizado_por_como_none(
         self, empresa_payload_valido
     ):
         """Deve definir atualizado_por como None quando não houver usuário."""
         empresa_repository = Mock(spec=EmpresaRepository)
+        responsavel_tecnico_service = Mock(spec=ResponsavelTecnicoService)
         instancia = Empresa(**empresa_payload_valido)
-        dados_atualizados = {"nome": "Novo Nome"}
-        service = EmpresaService(empresa_repository=empresa_repository)
+        dados_atualizados = {"nome": "Novo Nome", "responsaveis_tecnicos": []}
+        empresa_repository.atualizar.return_value = {
+            "id": 1,
+            "nome": "Novo Nome",
+        }
+        responsavel_tecnico_service.sincronizar.return_value = []
+        service = EmpresaService(
+            empresa_repository=empresa_repository,
+            responsavel_tecnico_service=responsavel_tecnico_service,
+        )
 
         service.atualizar(instancia, dados_atualizados)
 
         empresa_repository.atualizar.assert_called_once_with(
-            instancia, {**dados_atualizados, "atualizado_por": None}
+            instancia, {"nome": "Novo Nome", "atualizado_por": None}
         )
+
+    @pytest.mark.django_db
+    def test_atualizar_com_responsaveis_sincroniza_lista(
+        self, empresa_payload_valido, responsavel_tecnico_payload_valido
+    ):
+        """Deve atualizar a empresa e sincronizar os responsáveis técnicos."""
+        empresa_repository = Mock(spec=EmpresaRepository)
+        responsavel_tecnico_service = Mock(spec=ResponsavelTecnicoService)
+        empresa_repository.atualizar.return_value = {
+            "id": 7,
+            "nome": "Novo Nome",
+        }
+        responsavel_tecnico_service.sincronizar.return_value = [
+            {"tipo": "preposto"}
+        ]
+        service = EmpresaService(
+            empresa_repository=empresa_repository,
+            responsavel_tecnico_service=responsavel_tecnico_service,
+        )
+        instancia = Empresa(**empresa_payload_valido)
+        usuario = Mock()
+        dados = {
+            "nome": "Novo Nome",
+            "responsaveis_tecnicos": [responsavel_tecnico_payload_valido],
+        }
+
+        resultado = service.atualizar(instancia, dados, usuario)
+
+        empresa_repository.atualizar.assert_called_once_with(
+            instancia, {"nome": "Novo Nome", "atualizado_por": usuario}
+        )
+        responsavel_tecnico_service.sincronizar.assert_called_once_with(
+            empresa_id=7,
+            dados_lista=[responsavel_tecnico_payload_valido],
+            usuario=usuario,
+        )
+        assert resultado == {
+            "id": 7,
+            "nome": "Novo Nome",
+            "responsaveis_tecnicos": [{"tipo": "preposto"}],
+        }
 
     def test_deletar_delega_para_repository(self, empresa_payload_valido):
         """Deve delegar a exclusão da empresa ao repositório."""
@@ -226,3 +283,108 @@ class TestResponsavelTecnicoService:
             ]
         }
         repository.bulk_criar.assert_not_called()
+
+    def test_sincronizar_atualiza_por_uuid_cria_sem_uuid_e_remove_ausentes(
+        self,
+    ):
+        """Deve atualizar por uuid, criar itens sem uuid e remover ausentes."""
+        repository = Mock(spec=ResponsavelTecnicoRepository)
+        preposto = Mock(id=1, uuid="uuid-preposto", tipo="preposto")
+        engenheiro_civil = Mock(
+            id=2, uuid="uuid-engenheiro", tipo="engenheiro_civil"
+        )
+        repository.listar_por_empresa.return_value = [
+            preposto,
+            engenheiro_civil,
+        ]
+        repository.bulk_atualizar.return_value = [
+            {"tipo": "preposto", "nome": "Preposto Novo"}
+        ]
+        repository.bulk_criar.return_value = [
+            {"tipo": "engenheiro_eletricista", "nome": "Eletricista"}
+        ]
+        service = ResponsavelTecnicoService(repository=repository)
+        usuario = Mock()
+        dados_lista = [
+            {
+                "uuid": "uuid-preposto",
+                "tipo": "preposto",
+                "nome": "Preposto Novo",
+            },
+            {"tipo": "engenheiro_eletricista", "nome": "Eletricista"},
+        ]
+
+        resultado = service.sincronizar(1, dados_lista, usuario)
+
+        repository.bulk_atualizar.assert_called_once_with(
+            [
+                {
+                    "uuid": "uuid-preposto",
+                    "tipo": "preposto",
+                    "nome": "Preposto Novo",
+                    "id": 1,
+                    "atualizado_por": usuario,
+                }
+            ]
+        )
+        repository.bulk_criar.assert_called_once_with(
+            [
+                {
+                    "tipo": "engenheiro_eletricista",
+                    "nome": "Eletricista",
+                    "empresa_id": 1,
+                    "criado_por": usuario,
+                }
+            ]
+        )
+        repository.remover.assert_called_once_with([engenheiro_civil], usuario)
+        assert resultado == [
+            {"tipo": "preposto", "nome": "Preposto Novo"},
+            {"tipo": "engenheiro_eletricista", "nome": "Eletricista"},
+        ]
+
+    def test_sincronizar_nao_cria_nem_remove_quando_todos_tem_uuid(self):
+        """Não deve criar nem remover quando todos os itens têm uuid."""
+        repository = Mock(spec=ResponsavelTecnicoRepository)
+        preposto = Mock(id=1, uuid="uuid-preposto", tipo="preposto")
+        repository.listar_por_empresa.return_value = [preposto]
+        repository.bulk_atualizar.return_value = [
+            {"tipo": "preposto", "nome": "Preposto Novo"}
+        ]
+        service = ResponsavelTecnicoService(repository=repository)
+
+        resultado = service.sincronizar(
+            1,
+            [
+                {
+                    "uuid": "uuid-preposto",
+                    "tipo": "preposto",
+                    "nome": "Preposto Novo",
+                }
+            ],
+            None,
+        )
+
+        repository.remover.assert_not_called()
+        repository.bulk_criar.assert_not_called()
+        assert resultado == [{"tipo": "preposto", "nome": "Preposto Novo"}]
+
+    def test_sincronizar_com_uuid_desconhecido_levanta_validation_error(self):
+        """Deve falhar quando um uuid informado não pertence à empresa."""
+        repository = Mock(spec=ResponsavelTecnicoRepository)
+        repository.listar_por_empresa.return_value = []
+        service = ResponsavelTecnicoService(repository=repository)
+
+        with pytest.raises(ValidationError) as exc_info:
+            service.sincronizar(
+                1, [{"uuid": "uuid-inexistente", "tipo": "preposto"}], None
+            )
+
+        assert exc_info.value.message_dict == {
+            "responsaveis_tecnicos": [
+                EmpresaErrorMessages.RESPONSAVEL_TECNICO_NAO_ENCONTRADO
+            ]
+        }
+        repository.bulk_atualizar.assert_not_called()
+        repository.bulk_criar.assert_not_called()
+        repository.remover.assert_not_called()

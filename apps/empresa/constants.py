@@ -7,6 +7,9 @@ class EmpresaErrorMessages:
     CNPJ_INVALIDO = "CNPJ inválido."
     CNPJ_JA_CADASTRADO = "Já existe uma empresa cadastrada com este CNPJ."
     CEP_INVALIDO = "CEP inválido. Deve conter 8 dígitos numéricos."
+    TELEFONE_INVALIDO = (
+        "Telefone inválido. Deve conter 10 ou 11 dígitos numéricos."
+    )
     LINK_RASTREIO_INVALIDO = "Link inválido. Deve ser uma URL válida."
     EMPRESA_INATIVA = "Empresa está inativa."
     EMPRESA_NAO_ENCONTRADA = "Empresa não encontrada."
@@ -19,4 +22,11 @@ class EmpresaErrorMessages:
     )
     RESPONSAVEL_TECNICO_OBRIGATORIO = (
         "Informe ao menos um responsável técnico."
+    )
+    RESPONSAVEL_TECNICO_TIPO_DUPLICADO = (
+        "Não é permitido informar mais de um responsável técnico "
+        "do mesmo tipo."
+    )
+    RESPONSAVEL_TECNICO_NAO_ENCONTRADO = (
+        "Responsável técnico não encontrado para esta empresa."
     )

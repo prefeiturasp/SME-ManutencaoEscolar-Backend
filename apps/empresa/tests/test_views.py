@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 from apps.empresa.exceptions import (
     EmpresaCnpjDuplicadoError,
 )
-from apps.empresa.models import Empresa
+from apps.empresa.models import Empresa, ResponsavelTecnico
 
 pytestmark = pytest.mark.django_db
 
@@ -156,6 +156,59 @@ def test_atualizacao_retorna_empresa(
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["nome"] == "Novo Nome"
+
+
+def test_atualizacao_sincroniza_responsaveis_tecnicos(
+    api_client, empresa_payload_valido, usuario_ativo
+):
+    """PUT deve atualizar a empresa e sincronizar os responsáveis por tipo."""
+    empresa_existente = Empresa.objects.create(**empresa_payload_valido)
+    ResponsavelTecnico.objects.create(
+        empresa=empresa_existente,
+        nome="Preposto Antigo",
+        tipo="preposto",
+        email="preposto.antigo@email.com",
+        telefone="11987654321",
+    )
+    ResponsavelTecnico.objects.create(
+        empresa=empresa_existente,
+        nome="Engenheiro Antigo",
+        tipo="engenheiro_civil",
+        email="engenheiro.antigo@email.com",
+        telefone="11987654321",
+    )
+    payload = {
+        **empresa_payload_valido,
+        "nome": "Novo Nome",
+        "responsaveis_tecnicos": [
+            {
+                "tipo": "preposto",
+                "nome": "Preposto Novo",
+                "email": "preposto.novo@email.com",
+                "telefone": "11987654321",
+            }
+        ],
+    }
+
+    response = api_client.put(
+        f"/api/v1/empresas/{empresa_existente.uuid}/",
+        payload,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["nome"] == "Novo Nome"
+    tipos = {
+        responsavel["tipo"]
+        for responsavel in response.json()["responsaveis_tecnicos"]
+    }
+    assert tipos == {"preposto"}
+
+    empresa_existente.refresh_from_db()
+    assert empresa_existente.nome == "Novo Nome"
+    responsaveis = ResponsavelTecnico.objects.filter(empresa=empresa_existente)
+    assert responsaveis.count() == 1
+    assert responsaveis.get().nome == "Preposto Novo"
 
 
 def test_atualizacao_mapeia_cnpj_duplicado_para_erro_de_validacao(

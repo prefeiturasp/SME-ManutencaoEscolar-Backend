@@ -8,6 +8,7 @@ from apps.core.exceptions import (
     CepInvalidoError,
     CnpjInvalidoError,
     LinkRastreioInvalidoError,
+    TelefoneInvalidoError,
 )
 
 CNPJ_FORMATO_REGEX = re.compile(r"^[A-Z0-9]{12}\d{2}$")
@@ -67,4 +68,12 @@ def validar_formato_link_rastreio(link: str) -> None:
     if not LINK_FORMATO_REGEX.match(link or ""):
         raise LinkRastreioInvalidoError(
             "Link inválido. Deve ser uma URL válida."
+        )
+
+
+def validar_telefone(telefone: str) -> None:
+    """Valida apenas o número de caracteres (10 ou 11 dígitos numéricos)."""
+    if not re.match(r"^\d{10,11}$", telefone or ""):
+        raise TelefoneInvalidoError(
+            "Telefone inválido. Deve conter 10 ou 11 dígitos numéricos."
         )

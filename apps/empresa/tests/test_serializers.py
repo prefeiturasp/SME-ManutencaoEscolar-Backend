@@ -47,6 +47,7 @@ class TestEmpresaSerializer:
             "criado_em",
             "atualizado_por",
             "atualizado_em",
+            "responsaveis_tecnicos",
         }
 
 
@@ -182,6 +183,21 @@ class TestEmpresaCriarAtualizarSerializer:
             "Informe ao menos um responsável técnico."
         )
 
+    def test_valida_responsaveis_tecnicos_com_tipo_duplicado_lanca_excecao(
+        self,
+    ):
+        """Deve lançar exceção quando há responsáveis repetidos por tipo."""
+        serializer = EmpresaCriarAtualizarSerializer()
+
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.validate_responsaveis_tecnicos(
+                [{"tipo": "preposto"}, {"tipo": "preposto"}]
+            )
+
+        assert exc_info.value.detail[0] == (
+            EmpresaErrorMessages.RESPONSAVEL_TECNICO_TIPO_DUPLICADO
+        )
+
 
 class TestResponsavelTecnicoSerializer:
     """Testes para o serializer de responsável técnico."""
@@ -191,6 +207,7 @@ class TestResponsavelTecnicoSerializer:
         serializer = ResponsavelTecnicoSerializer()
 
         assert set(serializer.fields.keys()) == {
+            "uuid",
             "tipo",
             "nome",
             "email",
@@ -224,3 +241,14 @@ class TestResponsavelTecnicoSerializer:
 
         assert not serializer.is_valid()
         assert campo in serializer.errors
+
+    def test_valida_telefone_lanca_excecao(self):
+        """Deve lançar exceção ao validar telefone com formato inválido."""
+        serializer = ResponsavelTecnicoSerializer()
+
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.validate_telefone("123")
+
+        assert exc_info.value.detail[0] == (
+            EmpresaErrorMessages.TELEFONE_INVALIDO
+        )

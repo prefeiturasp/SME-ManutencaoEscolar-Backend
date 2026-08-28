@@ -2,6 +2,9 @@
 
 from rest_framework import serializers
 
+from apps.core.exceptions import TelefoneInvalidoError
+from apps.core.validacoes import validar_telefone
+from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.models import ResponsavelTecnico
 from apps.usuarios.models import Usuario
 
@@ -9,6 +12,7 @@ from apps.usuarios.models import Usuario
 class ResponsavelTecnicoSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de responsáveis técnicos."""
 
+    uuid: serializers.UUIDField = serializers.UUIDField(required=False)
     criado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
     )
@@ -27,6 +31,7 @@ class ResponsavelTecnicoSerializer(serializers.ModelSerializer):
 
         model = ResponsavelTecnico
         fields = (
+            "uuid",
             "tipo",
             "nome",
             "email",
@@ -38,3 +43,13 @@ class ResponsavelTecnicoSerializer(serializers.ModelSerializer):
             "atualizado_por",
             "atualizado_em",
         )
+
+    def validate_telefone(self, value: str) -> str:
+        """Garante que o telefone tenha 10 ou 11 dígitos numéricos."""
+        try:
+            validar_telefone(value)
+        except TelefoneInvalidoError:
+            raise serializers.ValidationError(
+                EmpresaErrorMessages.TELEFONE_INVALIDO
+            ) from None
+        return value
