@@ -3,7 +3,6 @@
 import pytest
 from rest_framework.test import APIClient
 
-from apps.empresa.models import Empresa
 from apps.usuarios.models.usuario import Usuario
 
 
@@ -27,29 +26,6 @@ def api_client(usuario_ativo):
     client = APIClient()
     client.force_authenticate(user=usuario_ativo)
     return client
-
-
-@pytest.fixture
-def empresa_payload_valido():
-    """Payload válido para criação de empresa."""
-    return {
-        "nome": "Empresa Exemplo",
-        "cnpj": "12345678901234",
-        "razao_social": "Empresa Exemplo LTDA",
-        "link_rastreio": "https://www.exemplo.com/rastreio",
-        "cep": "12345678",
-        "logradouro": "Rua Exemplo",
-        "numero": "123",
-        "complemento": "Apto 101",
-        "cidade": "São Paulo",
-        "estado": "SP",
-    }
-
-
-@pytest.fixture
-def empresa(empresa_payload_valido, db):
-    """Fixture de empresa persistida utilizada nos testes de Responsável."""
-    return Empresa.objects.create(**empresa_payload_valido)
 
 
 @pytest.fixture

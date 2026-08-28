@@ -8,6 +8,7 @@ from apps.escola.models.diretoria_regional import DiretoriaRegional
 from apps.escola.models.responsavel_unidade import ResponsavelUnidade
 from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import Unidadeeducacional
+from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 
@@ -312,3 +313,16 @@ def responsavel_unidade() -> ResponsavelUnidade:
         telefone="11999999999",
         esta_afastado=False,
     )
+
+
+@pytest.fixture
+def lote_centro(diretoria_regional_centro, empresa):
+    """Fixture de lote."""
+    lote = Lote.objects.create(
+        codigo_cadastro="LOTE-001", nome="Lote Centro", empresa=empresa
+    )
+    LoteDiretoriaRegional.objects.create(
+        lote=lote,
+        diretoria_regional=diretoria_regional_centro,
+    )
+    return lote
