@@ -37,6 +37,12 @@ class LinkRastreioInvalidoError(ValueError):
     pass
 
 
+class TelefoneInvalidoError(ValueError):
+    """Levantado quando um telefone não contem o número de dígitos esperado."""
+
+    pass
+
+
 class TokenInvalidoError(Exception):
     """Problema na geração de token JWT."""
 
