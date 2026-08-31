@@ -84,7 +84,7 @@ class Command(BaseCommand):
             "x-api-eol-key": token,
         }
 
-        unidades = Unidadeeducacional.objects.all()[:10]
+        unidades = Unidadeeducacional.objects.all()
 
         if not unidades.exists():
             raise CommandError("Nenhuma unidade educacional cadastrada.")
