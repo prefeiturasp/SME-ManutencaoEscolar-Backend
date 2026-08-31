@@ -20,8 +20,8 @@ class TestSubprefeitura:
         subprefeitura = Subprefeitura.objects.create(
             codigo_eol="SP01",
             nome="Subprefeitura Sé",
-            diretoria_regional=diretoria_regional_centro,
         )
+        subprefeitura.diretorias_regionais.add(diretoria_regional_centro)
 
         assert subprefeitura.codigo_eol == "SP01"
         assert subprefeitura.nome == "Subprefeitura Sé"
@@ -31,20 +31,17 @@ class TestSubprefeitura:
         subprefeitura = Subprefeitura.objects.create(
             codigo_eol="SP01",
             nome="Subprefeitura Sé",
-            diretoria_regional=diretoria_regional_centro,
         )
+        subprefeitura.diretorias_regionais.add(diretoria_regional_centro)
 
         assert subprefeitura.uuid is not None
         assert isinstance(subprefeitura.uuid, uuid.UUID)
 
-    def test_deve_representar_subprefeitura_com_str(
-        self, diretoria_regional_centro
-    ):
+    def test_deve_representar_subprefeitura_com_str(self):
         """Deve retornar código e nome na representação textual."""
         subprefeitura = Subprefeitura(
             codigo_eol="SP01",
             nome="Subprefeitura Sé",
-            diretoria_regional=diretoria_regional_centro,
         )
 
         assert str(subprefeitura) == "SP01 - Subprefeitura Sé"
@@ -57,7 +54,6 @@ class TestSubprefeitura:
         Subprefeitura.objects.create(
             codigo_eol="SP01",
             nome="Subprefeitura Sé",
-            diretoria_regional=diretoria_regional_centro,
         )
 
         with pytest.raises(IntegrityError):
@@ -71,18 +67,20 @@ class TestSubprefeitura:
         subprefeitura_se = Subprefeitura.objects.create(
             codigo_eol="SP01",
             nome="Subprefeitura Sé",
-            diretoria_regional=diretoria_regional_centro,
         )
+        subprefeitura_se.diretorias_regionais.add(diretoria_regional_centro)
+
         subprefeitura_lapa = Subprefeitura.objects.create(
             codigo_eol="SP02",
             nome="Subprefeitura Lapa",
-            diretoria_regional=diretoria_regional_centro,
         )
+        subprefeitura_lapa.diretorias_regionais.add(diretoria_regional_centro)
+
         subprefeitura_mooca = Subprefeitura.objects.create(
             codigo_eol="SP03",
             nome="Subprefeitura Mooca",
-            diretoria_regional=diretoria_regional_centro,
         )
+        subprefeitura_mooca.diretorias_regionais.add(diretoria_regional_centro)
 
         subprefeituras = list(Subprefeitura.objects.all())
 

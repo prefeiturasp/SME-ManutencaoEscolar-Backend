@@ -573,8 +573,6 @@ def test_alterar_senha_retorna_sucesso(api_factory, monkeypatch):
 
     response = AlterarSenhaView.as_view()(request)
 
-    print(response.data)
-
     assert response.status_code == status.HTTP_200_OK
     assert response.data == {"detail": "Senha alterada com sucesso."}
 

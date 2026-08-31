@@ -148,21 +148,23 @@ def resposta_api_subprefeituras():
 @pytest.fixture
 def subprefeitura_se(diretoria_regional_centro):
     """Cria uma Subprefeitura para os testes."""
-    return Subprefeitura.objects.create(
+    subprefeitura = Subprefeitura.objects.create(
         codigo_eol="SP01",
         nome="Subprefeitura Sé",
-        diretoria_regional=diretoria_regional_centro,
     )
+    subprefeitura.diretorias_regionais.add(diretoria_regional_centro)
+    return subprefeitura
 
 
 @pytest.fixture
 def subprefeitura_pirituba(diretoria_regional_ipiranga):
     """Cria uma Subprefeitura para os testes."""
-    return Subprefeitura.objects.create(
+    subprefeitura = Subprefeitura.objects.create(
         codigo_eol="SP02",
         nome="Subprefeitura Pirituba",
-        diretoria_regional=diretoria_regional_ipiranga,
     )
+    subprefeitura.diretorias_regionais.add(diretoria_regional_ipiranga)
+    return subprefeitura
 
 
 @pytest.fixture

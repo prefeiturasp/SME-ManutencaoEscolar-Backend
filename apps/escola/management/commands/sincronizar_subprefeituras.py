@@ -82,13 +82,16 @@ class Command(BaseCommand):
                 codigo = item["codigoSubprefeitura"]
                 nome = item["nomeSubprefeitura"]
                 diretoria_regional = item["diretoria_regional"]
-                _, foi_criada = Subprefeitura.objects.update_or_create(
-                    codigo_eol=codigo,
-                    defaults={
-                        "nome": nome,
-                        "diretoria_regional": diretoria_regional,
-                    },
+                subprefeitura, foi_criada = (
+                    Subprefeitura.objects.update_or_create(
+                        codigo_eol=codigo,
+                        defaults={
+                            "nome": nome,
+                        },
+                    )
                 )
+                if diretoria_regional:
+                    subprefeitura.diretorias_regionais.add(diretoria_regional)
                 quantidades["criadas" if foi_criada else "atualizadas"] += 1
 
         logger.info(

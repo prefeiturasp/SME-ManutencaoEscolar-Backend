@@ -392,34 +392,30 @@ class TestSincronizarEscolas:
             )
 
     @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
-    def test_deve_falhar_quando_nao_houver_subprefeitura(
+    def test_deve_retornar_none_quando_nao_houver_subprefeitura(
         self,
         mock_get,
     ):
-        """Deve falhar quando nenhuma Subprefeitura for retornada."""
+        """Deve retornar None quando nenhuma Subprefeitura for retornada."""
         resposta = Mock()
         resposta.raise_for_status.return_value = None
         resposta.json.return_value = []
         mock_get.return_value = resposta
 
-        from apps.escola.exceptions import DadosEscolaError
+        resultado = Command._obter_subprefeitura(
+            base_url="https://api-eol-teste",
+            headers={},
+            codigo_escola="100001",
+        )
 
-        with pytest.raises(
-            DadosEscolaError,
-            match="Nenhuma Subprefeitura encontrada para a escola",
-        ):
-            Command._obter_subprefeitura(
-                base_url="https://api-eol-teste",
-                headers={},
-                codigo_escola="100001",
-            )
+        assert resultado is None
 
     @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
-    def test_deve_falhar_quando_subprefeitura_nao_existir_no_banco(
+    def test_deve_retornar_none_quando_subprefeitura_nao_existir_no_banco(
         self,
         mock_get,
     ):
-        """Deve falhar quando a Subprefeitura não existir no banco."""
+        """Deve retornar None quando a Subprefeitura não existir no banco."""
         resposta = Mock()
         resposta.raise_for_status.return_value = None
         resposta.json.return_value = [
@@ -430,17 +426,13 @@ class TestSincronizarEscolas:
         ]
         mock_get.return_value = resposta
 
-        from apps.escola.exceptions import DadosEscolaError
+        resultado = Command._obter_subprefeitura(
+            base_url="https://api-eol-teste",
+            headers={},
+            codigo_escola="100001",
+        )
 
-        with pytest.raises(
-            DadosEscolaError,
-            match="Subprefeitura com código 'SP99' não encontrada",
-        ):
-            Command._obter_subprefeitura(
-                base_url="https://api-eol-teste",
-                headers={},
-                codigo_escola="100001",
-            )
+        assert resultado is None
 
     @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
     def test_deve_falhar_quando_api_principal_retornar_erro(

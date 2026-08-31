@@ -41,7 +41,10 @@ class Unidadeeducacional(UUIDMixin):
     status = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ("nome",)
+        ordering = (
+            "-status",
+            "nome",
+        )
         verbose_name = "Escola"
         verbose_name_plural = "Escolas"
 

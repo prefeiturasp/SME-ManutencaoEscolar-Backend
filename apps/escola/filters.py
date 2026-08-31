@@ -36,7 +36,7 @@ class SubprefeituraFilter(django_filters.FilterSet):
         lookup_expr="icontains",
     )
     diretoria_regional = django_filters.NumberFilter(
-        field_name="diretoria_regional__id",
+        field_name="diretorias_regionais__id",
         lookup_expr="exact",
     )
 

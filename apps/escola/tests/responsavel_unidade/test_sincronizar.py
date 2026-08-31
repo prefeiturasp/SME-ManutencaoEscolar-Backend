@@ -89,15 +89,6 @@ class TestSincronizarDiretores:
             resposta_api_diretor,
             resposta_dados_complementares,
         ]
-        print(
-            list(
-                CargoEOL.objects.values(
-                    "id",
-                    "codigo",
-                    "nome",
-                )
-            )
-        )
 
         call_command("sincronizar_diretores")
 

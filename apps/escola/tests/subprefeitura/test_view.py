@@ -47,19 +47,11 @@ class TestSubprefeituraViewSet:
         )
 
         assert resposta.status_code == status.HTTP_200_OK
-        print(resposta.data)
         assert resposta.data == {
             "id": subprefeitura_se.id,
             "uuid": str(subprefeitura_se.uuid),
             "codigo_eol": subprefeitura_se.codigo_eol,
             "nome": subprefeitura_se.nome,
-            "diretoria_regional": {
-                "id": subprefeitura_se.diretoria_regional.id,
-                "codigo": subprefeitura_se.diretoria_regional.codigo,
-                "nome": subprefeitura_se.diretoria_regional.nome,
-                "abreviacao": subprefeitura_se.diretoria_regional.abreviacao,
-                "nome_curto": subprefeitura_se.diretoria_regional.nome_curto,
-            },
         }
 
     def test_deve_filtrar_por_nome(
