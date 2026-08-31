@@ -2,7 +2,12 @@
 
 from rest_framework.routers import DefaultRouter
 
-from apps.escola.api.views import DiretoriaRegionalViewSet, TipoEscolaViewSet
+from apps.escola.api.views import (
+    DiretoriaRegionalViewSet,
+    SubprefeituraViewSet,
+    TipoEscolaViewSet,
+    UnidadeEducacionalViewSet,
+)
 
 router = DefaultRouter()
 router.register(
@@ -12,9 +17,22 @@ router.register(
 )
 
 router.register(
-    r"diretoria-regional",
+    r"diretorias-regionais",
     DiretoriaRegionalViewSet,
-    basename="diregorias-regionais",
+    basename="diretorias-regionais",
 )
+
+router.register(
+    r"unidades-educacionais",
+    UnidadeEducacionalViewSet,
+    basename="unidades-educacionais",
+)
+
+router.register(
+    r"subprefeituras",
+    SubprefeituraViewSet,
+    basename="subprefeituras",
+)
+
 
 urlpatterns = router.urls

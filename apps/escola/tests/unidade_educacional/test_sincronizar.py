@@ -9,7 +9,6 @@ from django.core.management import CommandError, call_command
 from apps.escola.constants import TIPO_ESCOLA_NAO_ACEITAS
 from apps.escola.management.commands.sincronizar_escolas import Command
 from apps.escola.models import (
-    DiretoriaRegional,
     Unidadeeducacional,
 )
 
@@ -54,9 +53,9 @@ class TestSincronizarEscolas:
         self,
         mock_get,
         respostas_api,
-        diretoria_regional,
+        diretoria_regional_centro,
         tipo_escola_emef,
-        subprefeitura,
+        subprefeitura_se,
         configurar_api_eol,
     ):
         """Deve criar uma escola retornada pela API."""
@@ -71,27 +70,27 @@ class TestSincronizarEscolas:
         )
 
         assert escola.nome == "EMEF Escola Teste"
-        assert escola.diretoria_regional == diretoria_regional
+        assert escola.diretoria_regional == diretoria_regional_centro
         assert escola.tipo_escola == tipo_escola_emef
-        assert escola.subprefeitura == subprefeitura
+        assert escola.subprefeitura == subprefeitura_se
 
     @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
     def test_deve_atualizar_escola_existente(
         self,
         mock_get,
         respostas_api,
-        diretoria_regional,
+        diretoria_regional_centro,
         tipo_escola_emef,
-        subprefeitura,
+        subprefeitura_se,
         configurar_api_eol,
     ):
         """Deve atualizar uma escola existente."""
         escola = Unidadeeducacional.objects.create(
             codigo_eol="100001",
             nome="Nome Antigo",
-            diretoria_regional=diretoria_regional,
+            diretoria_regional=diretoria_regional_centro,
             tipo_escola=tipo_escola_emef,
-            subprefeitura=subprefeitura,
+            subprefeitura=subprefeitura_se,
         )
 
         mock_get.side_effect = respostas_api
@@ -108,9 +107,9 @@ class TestSincronizarEscolas:
         self,
         mock_get,
         respostas_api,
-        diretoria_regional,
+        diretoria_regional_centro,
         tipo_escola_emef,
-        subprefeitura,
+        subprefeitura_se,
         configurar_api_eol,
     ):
         """Deve consultar a API EOL com o token configurado."""
@@ -134,9 +133,9 @@ class TestSincronizarEscolas:
         self,
         mock_get,
         respostas_api,
-        diretoria_regional,
+        diretoria_regional_centro,
         tipo_escola_emef,
-        subprefeitura,
+        subprefeitura_se,
         configurar_api_eol,
     ):
         """Deve consultar a Subprefeitura específica da escola."""
@@ -153,7 +152,7 @@ class TestSincronizarEscolas:
         self,
         mock_get,
         configurar_api_eol,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve ignorar escolas com tipo não aceito."""
         sigla_nao_aceita = next(iter(TIPO_ESCOLA_NAO_ACEITAS))
@@ -290,12 +289,12 @@ class TestSincronizarEscolas:
 
     def test_deve_obter_dre_pelo_codigo(
         self,
-        diretoria_regional,
+        diretoria_regional_centro,
     ):
         """Deve retornar a DRE correspondente ao código."""
         resultado = Command._obter_dre("DRE01")
 
-        assert resultado == diretoria_regional
+        assert resultado == diretoria_regional_centro
 
     def test_deve_falhar_quando_dre_nao_existir(self):
         """Deve falhar quando a DRE não existir."""
@@ -331,7 +330,7 @@ class TestSincronizarEscolas:
         self,
         mock_get,
         resposta_api_subprefeituras,
-        subprefeitura,
+        subprefeitura_se,
         configurar_api_eol,
     ):
         """Deve retornar a Subprefeitura vinculada à escola."""
@@ -346,7 +345,7 @@ class TestSincronizarEscolas:
             codigo_escola="100001",
         )
 
-        assert resultado == subprefeitura
+        assert resultado == subprefeitura_se
 
     @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
     def test_deve_falhar_quando_api_de_subprefeitura_retornar_json_invalido(
@@ -393,34 +392,30 @@ class TestSincronizarEscolas:
             )
 
     @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
-    def test_deve_falhar_quando_nao_houver_subprefeitura(
+    def test_deve_retornar_none_quando_nao_houver_subprefeitura(
         self,
         mock_get,
     ):
-        """Deve falhar quando nenhuma Subprefeitura for retornada."""
+        """Deve retornar None quando nenhuma Subprefeitura for retornada."""
         resposta = Mock()
         resposta.raise_for_status.return_value = None
         resposta.json.return_value = []
         mock_get.return_value = resposta
 
-        from apps.escola.exceptions import DadosEscolaError
+        resultado = Command._obter_subprefeitura(
+            base_url="https://api-eol-teste",
+            headers={},
+            codigo_escola="100001",
+        )
 
-        with pytest.raises(
-            DadosEscolaError,
-            match="Nenhuma Subprefeitura encontrada para a escola",
-        ):
-            Command._obter_subprefeitura(
-                base_url="https://api-eol-teste",
-                headers={},
-                codigo_escola="100001",
-            )
+        assert resultado is None
 
     @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
-    def test_deve_falhar_quando_subprefeitura_nao_existir_no_banco(
+    def test_deve_retornar_none_quando_subprefeitura_nao_existir_no_banco(
         self,
         mock_get,
     ):
-        """Deve falhar quando a Subprefeitura não existir no banco."""
+        """Deve retornar None quando a Subprefeitura não existir no banco."""
         resposta = Mock()
         resposta.raise_for_status.return_value = None
         resposta.json.return_value = [
@@ -431,17 +426,13 @@ class TestSincronizarEscolas:
         ]
         mock_get.return_value = resposta
 
-        from apps.escola.exceptions import DadosEscolaError
+        resultado = Command._obter_subprefeitura(
+            base_url="https://api-eol-teste",
+            headers={},
+            codigo_escola="100001",
+        )
 
-        with pytest.raises(
-            DadosEscolaError,
-            match="Subprefeitura com código 'SP99' não encontrada",
-        ):
-            Command._obter_subprefeitura(
-                base_url="https://api-eol-teste",
-                headers={},
-                codigo_escola="100001",
-            )
+        assert resultado is None
 
     @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
     def test_deve_falhar_quando_api_principal_retornar_erro(
@@ -503,7 +494,7 @@ class TestSincronizarEscolas:
         self,
         mock_get,
         resposta_api_escolas,
-        diretoria_regional,
+        diretoria_regional_centro,
         tipo_escola_emef,
         configurar_api_eol,
     ):
@@ -525,8 +516,9 @@ class TestSincronizarEscolas:
         mock_get,
         resposta_api_subprefeituras,
         tipo_escola_emef,
-        subprefeitura,
+        subprefeitura_se,
         configurar_api_eol,
+        diretoria_regional_centro,
     ):
         """Deve continuar quando uma escola tiver DRE inexistente."""
         resposta = Mock()
@@ -552,11 +544,6 @@ class TestSincronizarEscolas:
             },
         ]
 
-        diretoria_regional = DiretoriaRegional.objects.create(
-            codigo="DRE01",
-            nome="Diretoria Regional Centro",
-        )
-
         resposta_subprefeitura = resposta_api_subprefeituras
 
         mock_get.side_effect = [
@@ -573,9 +560,9 @@ class TestSincronizarEscolas:
         )
 
         assert escola.nome == "EMEF Escola Válida"
-        assert escola.diretoria_regional == diretoria_regional
+        assert escola.diretoria_regional == diretoria_regional_centro
         assert escola.tipo_escola == tipo_escola_emef
-        assert escola.subprefeitura == subprefeitura
+        assert escola.subprefeitura == subprefeitura_se
 
     @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
     def test_deve_falhar_quando_registro_subprefeitura_nao_for_um_dicionario(
@@ -729,9 +716,9 @@ class TestSincronizarEscolas:
     def test_deve_exibir_progresso_a_cada_500_escolas(
         self,
         mock_get,
-        diretoria_regional,
+        diretoria_regional_centro,
         tipo_escola_emef,
-        subprefeitura,
+        subprefeitura_se,
         configurar_api_eol,
     ):
         """Deve atualizar o progresso ao processar 500 escolas."""
@@ -739,9 +726,9 @@ class TestSincronizarEscolas:
             {
                 "codigoEscola": str(numero),
                 "nomeEscola": f"Escola {numero}",
-                "nomeDRE": diretoria_regional.nome,
+                "nomeDRE": diretoria_regional_centro.nome,
                 "siglaDRE": "DRE",
-                "codigoDRE": diretoria_regional.codigo,
+                "codigoDRE": diretoria_regional_centro.codigo,
                 "tipoEscola": "Escola Municipal",
                 "siglaTipoEscola": tipo_escola_emef.sigla,
             }
@@ -756,8 +743,8 @@ class TestSincronizarEscolas:
         resposta_subprefeitura.raise_for_status.return_value = None
         resposta_subprefeitura.json.return_value = [
             {
-                "codigoSubprefeitura": subprefeitura.codigo_eol,
-                "nomeSubprefeitura": subprefeitura.nome,
+                "codigoSubprefeitura": subprefeitura_se.codigo_eol,
+                "nomeSubprefeitura": subprefeitura_se.nome,
             }
         ]
 

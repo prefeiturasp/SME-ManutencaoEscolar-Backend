@@ -310,7 +310,7 @@ class Command(BaseCommand):
         base_url: str,
         headers: dict[str, str],
         codigo_escola: str,
-    ) -> Subprefeitura:
+    ) -> Subprefeitura | None:
         """Obtém a Subprefeitura vinculada a uma escola.
 
         Consulta o endpoint específico da escola, valida o registro
@@ -323,7 +323,10 @@ class Command(BaseCommand):
             codigo_escola (str): Código EOL da escola.
 
         Returns:
-            Subprefeitura: Instância da Subprefeitura correspondente à escola.
+            Subprefeitura | None: Instância da Subprefeitura correspondente à
+                escola, ou None quando nenhuma Subprefeitura for encontrada na
+                API ou quando a Subprefeitura retornada não existir no banco
+                de dados.
 
         Raises:
             DadosEscolaError: Se ocorrer erro na consulta à API, se
@@ -363,10 +366,11 @@ class Command(BaseCommand):
             )
 
         if not payload:
-            raise DadosEscolaError(
-                f"Nenhuma Subprefeitura encontrada para a escola "
+            logger.info(
+                "Nenhuma Subprefeitura encontrada para a escola "
                 f"{codigo_escola}."
             )
+            return None
 
         item = payload[0]
 
@@ -408,11 +412,12 @@ class Command(BaseCommand):
 
         try:
             return Subprefeitura.objects.get(codigo_eol=codigo.strip())
-        except Subprefeitura.DoesNotExist as exc:
-            raise DadosEscolaError(
+        except Subprefeitura.DoesNotExist:
+            logger.info(
                 f"Subprefeitura com código '{codigo.strip()}' "
                 f"não encontrada para a escola {codigo_escola}."
-            ) from exc
+            )
+            return None
 
     @staticmethod
     def _obter_escolas_da_api(

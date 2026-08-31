@@ -1,6 +1,7 @@
 """Modelos relacionados aos tipos de escola."""
 
 from django.db import models
+from django.db.models import OuterRef, Subquery
 
 from apps.core.models.mixins import UUIDMixin
 from apps.escola.constants import TIPO_ESCOLA_NAO_ACEITAS
@@ -10,8 +11,20 @@ class TipoEscolaQuerySet(models.QuerySet):
     """QuerySet customizado para tipos de escola."""
 
     def aceitos(self) -> "TipoEscolaQuerySet":
-        """Retorna apenas os tipos de escola aceitos pelo sistema."""
-        return self.exclude(sigla__in=TIPO_ESCOLA_NAO_ACEITAS)
+        """Retorna os tipos aceitos, mantendo o menor código EOL por sigla."""
+        menor_codigo_por_sigla = (
+            self.filter(
+                sigla=OuterRef("sigla"),
+            )
+            .order_by("codigo_eol")
+            .values("codigo_eol")[:1]
+        )
+
+        return self.exclude(
+            sigla__in=TIPO_ESCOLA_NAO_ACEITAS,
+        ).filter(
+            codigo_eol=Subquery(menor_codigo_por_sigla),
+        )
 
 
 class TipoEscola(UUIDMixin):

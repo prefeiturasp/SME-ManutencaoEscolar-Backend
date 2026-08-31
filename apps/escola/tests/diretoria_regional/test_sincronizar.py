@@ -9,7 +9,9 @@ import pytest
 import requests
 from django.core.management.base import CommandError
 
-from apps.core.management.commands.sincronizar_dres import Command
+from apps.escola.management.commands.sincronizar_diretorias_regionais import (
+    Command,
+)
 from apps.escola.models import DiretoriaRegional as Dre
 
 
@@ -33,15 +35,18 @@ class TestSincronizarDres:
 
         with (
             patch(
-                "apps.core.management.commands.sincronizar_dres.requests.get",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.requests.get",
                 return_value=response,
             ) as mock_get,
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_URL",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_URL",
                 "https://api.exemplo/",
             ),
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_TOKEN",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_TOKEN",
                 "token",
             ),
         ):
@@ -79,19 +84,23 @@ class TestSincronizarDres:
 
         with (
             patch(
-                "apps.core.management.commands.sincronizar_dres.requests.get",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.requests.get",
                 return_value=response,
             ),
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_URL",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_URL",
                 "https://api.exemplo",
             ),
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_TOKEN",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_TOKEN",
                 "token",
             ),
             patch(
-                "apps.core.management.commands.sincronizar_dres.logger.warning"
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.logger.warning"
             ) as mock_warning,
         ):
             command.handle()
@@ -115,11 +124,13 @@ class TestSincronizarDres:
 
         with (
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_URL",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_URL",
                 url,
             ),
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_TOKEN",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_TOKEN",
                 token,
             ),
             pytest.raises(
@@ -135,15 +146,18 @@ class TestSincronizarDres:
 
         with (
             patch(
-                "apps.core.management.commands.sincronizar_dres.requests.get",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.requests.get",
                 side_effect=requests.RequestException("falha"),
             ),
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_URL",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_URL",
                 "https://api.exemplo",
             ),
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_TOKEN",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_TOKEN",
                 "token",
             ),
             pytest.raises(CommandError, match="Erro ao consultar a API"),
@@ -166,15 +180,18 @@ class TestSincronizarDres:
 
         with (
             patch(
-                "apps.core.management.commands.sincronizar_dres.requests.get",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.requests.get",
                 return_value=response,
             ),
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_URL",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_URL",
                 "https://api.exemplo",
             ),
             patch(
-                "apps.core.management.commands.sincronizar_dres.SME_API_EOL_TOKEN",
+                "apps.escola.management.commands."
+                "sincronizar_diretorias_regionais.SME_API_EOL_TOKEN",
                 "token",
             ),
             pytest.raises(

@@ -17,6 +17,13 @@ class Subprefeitura(UUIDMixin):
         max_length=255,
         help_text="Nome da Subprefeitura.",
     )
+    diretorias_regionais = models.ManyToManyField(
+        "escola.DiretoriaRegional",
+        verbose_name="Diretoria Regional",
+        blank=True,
+        related_name="subprefeituras",
+        help_text="Diretorias Regionais responsável pela Subprefeitura.",
+    )
 
     class Meta:
         ordering = ("nome",)

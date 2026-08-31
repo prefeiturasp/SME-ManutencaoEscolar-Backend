@@ -8,6 +8,7 @@ from apps.escola.models.diretoria_regional import DiretoriaRegional
 from apps.escola.models.responsavel_unidade import ResponsavelUnidade
 from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import Unidadeeducacional
+from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 
@@ -107,11 +108,22 @@ def configurar_api_eol(monkeypatch):
 
 
 @pytest.fixture
-def diretoria_regional():
+def diretoria_regional_centro():
     """Cria uma Diretoria Regional para os testes."""
     return DiretoriaRegional.objects.create(
         codigo="DRE01",
-        nome="Diretoria Regional Centro",
+        nome="DIRETORIA REGIONAL DE EDUCACAO CENTRO",
+        abreviacao="CT",
+    )
+
+
+@pytest.fixture
+def diretoria_regional_ipiranga():
+    """Cria uma Diretoria Regional para os testes."""
+    return DiretoriaRegional.objects.create(
+        codigo="DRE02",
+        nome="DIRETORIA REGIONAL DE EDUCACAO IPIRANGA",
+        abreviacao="IP",
     )
 
 
@@ -134,12 +146,25 @@ def resposta_api_subprefeituras():
 
 
 @pytest.fixture
-def subprefeitura():
+def subprefeitura_se(diretoria_regional_centro):
     """Cria uma Subprefeitura para os testes."""
-    return Subprefeitura.objects.create(
+    subprefeitura = Subprefeitura.objects.create(
         codigo_eol="SP01",
         nome="Subprefeitura Sé",
     )
+    subprefeitura.diretorias_regionais.add(diretoria_regional_centro)
+    return subprefeitura
+
+
+@pytest.fixture
+def subprefeitura_pirituba(diretoria_regional_ipiranga):
+    """Cria uma Subprefeitura para os testes."""
+    subprefeitura = Subprefeitura.objects.create(
+        codigo_eol="SP02",
+        nome="Subprefeitura Pirituba",
+    )
+    subprefeitura.diretorias_regionais.add(diretoria_regional_ipiranga)
+    return subprefeitura
 
 
 @pytest.fixture
@@ -175,33 +200,52 @@ def respostas_api(
 
 @pytest.fixture
 def unidade_educacional_emef(
-    diretoria_regional,
+    diretoria_regional_centro,
     tipo_escola_emef,
-    subprefeitura,
+    subprefeitura_se,
 ):
     """Cria uma unidade educacional do tipo EMEF para testes."""
     return Unidadeeducacional.objects.create(
         codigo_eol="100001",
         nome="EMEF ESCOLA TESTE",
-        diretoria_regional=diretoria_regional,
+        diretoria_regional=diretoria_regional_centro,
         tipo_escola=tipo_escola_emef,
-        subprefeitura=subprefeitura,
+        subprefeitura=subprefeitura_se,
+        status=True,
+    )
+
+
+@pytest.fixture
+def unidade_educacional_inativa_emef(
+    diretoria_regional_centro,
+    tipo_escola_emef,
+    subprefeitura_se,
+):
+    """Cria uma unidade educacional do tipo EMEF para testes."""
+    return Unidadeeducacional.objects.create(
+        codigo_eol="900009",
+        nome="EMEF ESCOLA TESTE INATIVA",
+        diretoria_regional=diretoria_regional_centro,
+        tipo_escola=tipo_escola_emef,
+        subprefeitura=subprefeitura_se,
+        status=False,
     )
 
 
 @pytest.fixture
 def unidade_educacional_cemei(
-    diretoria_regional,
+    diretoria_regional_ipiranga,
     tipo_escola_cemei,
-    subprefeitura,
+    subprefeitura_pirituba,
 ):
     """Cria uma unidade educacional do tipo CEMEI para testes."""
     return Unidadeeducacional.objects.create(
         codigo_eol="200002",
         nome="CEMEI ESCOLA TESTE",
-        diretoria_regional=diretoria_regional,
+        diretoria_regional=diretoria_regional_ipiranga,
         tipo_escola=tipo_escola_cemei,
-        subprefeitura=subprefeitura,
+        subprefeitura=subprefeitura_pirituba,
+        status=True,
     )
 
 
@@ -271,3 +315,16 @@ def responsavel_unidade() -> ResponsavelUnidade:
         telefone="11999999999",
         esta_afastado=False,
     )
+
+
+@pytest.fixture
+def lote_centro(diretoria_regional_centro, empresa):
+    """Fixture de lote."""
+    lote = Lote.objects.create(
+        codigo_cadastro="LOTE-001", nome="Lote Centro", empresa=empresa
+    )
+    LoteDiretoriaRegional.objects.create(
+        lote=lote,
+        diretoria_regional=diretoria_regional_centro,
+    )
+    return lote

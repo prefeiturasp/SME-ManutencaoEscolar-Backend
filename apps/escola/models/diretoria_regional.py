@@ -11,6 +11,7 @@ class DiretoriaRegional(models.Model):
     abreviacao = models.CharField(max_length=50)
 
     class Meta:
+        ordering = ("nome",)
         verbose_name = "Diretoria Regional"
         verbose_name_plural = "Diretorias Regionais"
 
