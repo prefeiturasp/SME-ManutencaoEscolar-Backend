@@ -313,6 +313,9 @@ class TestSincronizarDadosUnidadesEducacionais:
             ("08032450", "08032450"),
             (" 08032450 ", "08032450"),
             (None, ""),
+            (12.5, ""),
+            ([], ""),
+            ({}, ""),
         ],
     )
     def test_deve_normalizar_cep(
@@ -744,3 +747,9 @@ class TestSincronizarDadosUnidadesEducacionais:
 
         assert dados.unidade_educacional == unidade_educacional_emef
         assert unidade_educacional_emef.dados == dados
+
+    def test_deve_remover_espacos_de_string(self):
+        """Deve remover espaços das extremidades de uma string."""
+        resultado = Command()._normalizar_string("  texto de teste  ")
+
+        assert resultado == "texto de teste"
