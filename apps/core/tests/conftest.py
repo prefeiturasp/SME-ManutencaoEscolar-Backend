@@ -10,7 +10,6 @@ from apps.core.constants import MAPA_EXTENSOES_TIPO_ARQUIVO
 from apps.core.models.mixins import BaseModel
 from apps.core.services.anexo_service import AnexoService
 from apps.usuarios.constants import PerfilAcesso
-from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 
 URL_ARQUIVO = "https://minio.local/documento.pdf"
@@ -49,16 +48,6 @@ def django_test_db_setup(django_db_setup, django_db_blocker):
         connection.schema_editor() as schema_editor,
     ):
         schema_editor.delete_model(ModelBase)
-
-
-@pytest.fixture
-def cargo_perfil_diretor():
-    """Fixture do cargo de diretor de unidade escolar."""
-    return CargoEOL.objects.create(
-        codigo="9999",
-        nome="Diretor",
-        perfil=PerfilAcesso.UE,
-    )
 
 
 @pytest.fixture
@@ -142,7 +131,7 @@ def anexo() -> SimpleNamespace:
 
 @pytest.fixture
 def mock_repository_anexo() -> Mock:
-    """_summary_."""
+    """Mock do repository de anexo."""
     repository = Mock()
     repository.criar.return_value = {
         "uuid": "12345678-1234-5678-1234-567812345678",

@@ -2,7 +2,7 @@
 
 from rest_framework.routers import DefaultRouter
 
-from apps.empresa.api.views import EmpresaViewSet
+from apps.empresa.api.views.empresa_views import EmpresaViewSet
 
 router = DefaultRouter()
 router.trailing_slash = "/?"

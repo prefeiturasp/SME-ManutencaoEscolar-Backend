@@ -3,19 +3,7 @@
 import pytest
 from rest_framework.test import APIClient
 
-from apps.usuarios.constants import PerfilAcesso
-from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
-
-
-@pytest.fixture
-def cargo_perfil_diretor():
-    """Fixture do cargo de diretor de unidade escolar."""
-    return CargoEOL.objects.create(
-        codigo="9999",
-        nome="Diretor",
-        perfil=PerfilAcesso.UE,
-    )
 
 
 @pytest.fixture
@@ -41,17 +29,34 @@ def api_client(usuario_ativo):
 
 
 @pytest.fixture
-def empresa_payload_valido():
-    """Payload válido para criação de empresa."""
+def responsavel_payload_valido(empresa):
+    """Payload válido para criação de responsável técnico."""
     return {
-        "nome": "Empresa Exemplo",
-        "cnpj": "12345678901234",
-        "razao_social": "Empresa Exemplo LTDA",
-        "link_rastreio": "https://www.exemplo.com/rastreio",
-        "cep": "12345678",
-        "logradouro": "Rua Exemplo",
-        "numero": "123",
-        "complemento": "Apto 101",
-        "cidade": "São Paulo",
-        "estado": "SP",
+        "empresa": empresa,
+        "nome": "João Responsável",
+        "tipo": "preposto",
+        "email": "joao.responsavel@email.com",
+        "telefone": "11987654321",
+    }
+
+
+@pytest.fixture
+def responsavel_tecnico_payload_valido():
+    """Payload válido para um responsável aninhado no serializer de empresa."""
+    return {
+        "tipo": "preposto",
+        "nome": "João Responsável",
+        "email": "joao.responsavel@email.com",
+        "telefone": "11987654321",
+    }
+
+
+@pytest.fixture
+def empresa_payload_valido_com_responsaveis(
+    empresa_payload_valido, responsavel_tecnico_payload_valido
+):
+    """Payload válido de empresa com responsáveis técnicos aninhados."""
+    return {
+        **empresa_payload_valido,
+        "responsaveis_tecnicos": [responsavel_tecnico_payload_valido],
     }

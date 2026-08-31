@@ -283,6 +283,8 @@ class AutenticacaoEOLService:
         return {
             "refresh": token["refresh"],
             "access": token["access"],
+            "access_expires_in": token["access_expires_in"],
+            "refresh_expires_in": token["refresh_expires_in"],
             "usuario": {
                 **usuario,
                 "diretoria_regional": dados_usuario.get(

@@ -13,7 +13,6 @@ class Servico(BaseModel):
     status = models.BooleanField(default=True)
 
     class Meta:
-        db_table = "servico"
         verbose_name = "Serviço"
         verbose_name_plural = "Serviços"
         ordering = ["-status", "-id"]
@@ -21,6 +20,7 @@ class Servico(BaseModel):
         constraints = [
             models.UniqueConstraint(
                 Lower("nome"),
+                condition=models.Q(deletado_em__isnull=True),
                 name="servico_nome_unico_case_insensitive",
             ),
         ]

@@ -848,28 +848,35 @@ class TestLogin:
     )
     def test_login_sucesso(
         self,
-        mock_autentica,
-        mock_buscar_cargos,
-        mock_dados_usuario,
-        mock_sincronizar_usuario,
-        mock_gerar_token,
-    ):
+        mock_autentica: Mock,
+        mock_buscar_cargos: Mock,
+        mock_dados_usuario: Mock,
+        mock_sincronizar_usuario: Mock,
+        mock_gerar_token: Mock,
+    ) -> None:
+        """Deve autenticar o usuário e retornar os tokens."""
         mock_autentica.return_value = {
             "nome": "João",
             "codigoRf": "1234567",
             "cpf": "12345678901",
         }
-
+        mock_buscar_cargos.return_value = []
         mock_dados_usuario.return_value = {
             "id": 1,
             "nome": "João",
             "email": "joao@email.com",
             "cpf": "12345678901",
         }
-
+        mock_sincronizar_usuario.return_value = {
+            "id": 1,
+            "nome": "João",
+            "email": "joao@email.com",
+        }
         mock_gerar_token.return_value = {
             "refresh": "refresh",
             "access": "access_token",
+            "access_expires_in": 3600,
+            "refresh_expires_in": 604800,
         }
 
         resultado = AutenticacaoEOLService.login(
@@ -877,13 +884,21 @@ class TestLogin:
             self.SENHA_VALIDA,
         )
 
-        assert "refresh" in resultado
-        assert "access" in resultado
-        assert "usuario" in resultado
+        assert resultado["refresh"] == "refresh"
+        assert resultado["access"] == "access_token"
+        assert resultado["access_expires_in"] == 3600
+        assert resultado["refresh_expires_in"] == 604800
+        assert resultado["usuario"]["id"] == 1
 
-        mock_autentica.assert_called_once()
-        mock_dados_usuario.assert_called_once()
-        mock_gerar_token.assert_called_once()
+        mock_autentica.assert_called_once_with(
+            login=self.LOGIN_VALIDO,
+            senha=self.SENHA_VALIDA,
+        )
+        mock_buscar_cargos.assert_called_once_with(
+            registro_funcional="1234567",
+        )
+        mock_dados_usuario.assert_called_once_with("1234567")
+        mock_gerar_token.assert_called_once_with(1)
 
     @patch(
         "apps.core.services.autenticacao_eol_service.SME_API_EOL_URL",

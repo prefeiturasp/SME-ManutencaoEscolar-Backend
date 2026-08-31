@@ -1,5 +1,7 @@
 """Serializers da aplicação Empresa."""
 
+from typing import Any
+
 from rest_framework import serializers
 
 from apps.core.exceptions import (
@@ -14,6 +16,9 @@ from apps.core.validacoes import (
 )
 from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.models import Empresa
+from apps.empresa.serializers.responsavel_serializers import (
+    ResponsavelTecnicoSerializer,
+)
 from apps.usuarios.models import Usuario
 
 
@@ -25,6 +30,9 @@ class EmpresaSerializer(serializers.ModelSerializer):
     )
     atualizado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
+    )
+    responsaveis_tecnicos: ResponsavelTecnicoSerializer = (
+        ResponsavelTecnicoSerializer(many=True, read_only=True)
     )
 
     class Meta:
@@ -49,11 +57,16 @@ class EmpresaSerializer(serializers.ModelSerializer):
             "criado_em",
             "atualizado_por",
             "atualizado_em",
+            "responsaveis_tecnicos",
         )
 
 
 class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de empresas."""
+
+    responsaveis_tecnicos: ResponsavelTecnicoSerializer = (
+        ResponsavelTecnicoSerializer(many=True)
+    )
 
     class Meta:
         """Configuração do serializer de empresa."""
@@ -71,6 +84,7 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
             "complemento",
             "cidade",
             "estado",
+            "responsaveis_tecnicos",
         )
 
     def validate_cnpj(self, value: str) -> str:
@@ -102,4 +116,23 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     EmpresaErrorMessages.LINK_RASTREIO_INVALIDO
                 ) from None
+        return value
+
+    def validate_responsaveis_tecnicos(
+        self, value: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """Valida a lista de responsáveis técnicos.
+
+        Exige ao menos um responsável e proíbe mais de um do mesmo ``tipo``
+        no payload.
+        """
+        if len(value) < 1:
+            raise serializers.ValidationError(
+                EmpresaErrorMessages.RESPONSAVEL_TECNICO_OBRIGATORIO
+            )
+        tipos = [item["tipo"] for item in value]
+        if len(tipos) != len(set(tipos)):
+            raise serializers.ValidationError(
+                EmpresaErrorMessages.RESPONSAVEL_TECNICO_TIPO_DUPLICADO
+            )
         return value

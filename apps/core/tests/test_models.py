@@ -7,7 +7,6 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-from apps.core.models.diretoria_regional import DiretoriaRegional as Dre
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 
@@ -91,7 +90,7 @@ class TestSoftDeleteMixin:
         obj = ModelBase.objects.create(nome="Teste")
         assert obj.deletado_em is None
 
-        obj.delete()
+        obj.soft_delete()
 
         obj.refresh_from_db()
         assert obj.deletado_em is not None
@@ -103,7 +102,7 @@ class TestSoftDeleteMixin:
         obj = ModelBase.objects.create(nome="Teste")
         obj_id = obj.id
 
-        obj.hard_delete()
+        obj.delete()
 
         assert ModelBase.dm_objects.filter(id=obj_id).count() == 0
 
@@ -111,7 +110,7 @@ class TestSoftDeleteMixin:
     def test_restore_restaura_objeto(self):
         """Testa que restore() restaura um objeto soft-deleted."""
         obj = ModelBase.objects.create(nome="Teste")
-        obj.delete()
+        obj.soft_delete()
 
         assert obj.deletado_em is not None
 
@@ -124,7 +123,7 @@ class TestSoftDeleteMixin:
     def test_soft_deleted_nao_aparece_em_objects(self):
         """Testa que objetos soft-deleted não aparecem em objects."""
         obj = ModelBase.objects.create(nome="Teste")
-        obj.delete()
+        obj.soft_delete()
 
         assert ModelBase.objects.filter(id=obj.id).count() == 0
 
@@ -132,7 +131,7 @@ class TestSoftDeleteMixin:
     def test_soft_deleted_aparece_em_dm_objects(self):
         """Testa que objetos soft-deleted aparecem em dm_objects."""
         obj = ModelBase.objects.create(nome="Teste")
-        obj.delete()
+        obj.soft_delete()
 
         assert ModelBase.dm_objects.filter(id=obj.id).count() == 1
 
@@ -142,7 +141,7 @@ class TestSoftDeleteMixin:
         obj = ModelBase.objects.create(nome="Teste")
         before_delete = timezone.now()
 
-        obj.delete()
+        obj.soft_delete()
 
         obj.refresh_from_db()
         assert obj.deletado_em is not None
@@ -152,7 +151,7 @@ class TestSoftDeleteMixin:
     def test_restore_limpa_deletado_em(self):
         """Testa que o corpo de restore() limpa o campo deletado_em."""
         obj = ModelBase.objects.create(nome="Teste")
-        obj.delete()
+        obj.soft_delete()
         obj.refresh_from_db()
         assert obj.deletado_em is not None
 
@@ -160,10 +159,3 @@ class TestSoftDeleteMixin:
 
         obj.refresh_from_db()
         assert obj.deletado_em is None
-
-
-def test_str_do_dre():
-    """Testa o método __str__ do modelo Dre."""
-    dre = Dre(nome="Diretoria Exemplo", abreviacao="DRE", codigo="123")
-
-    assert str(dre) == "DRE - Diretoria Exemplo"

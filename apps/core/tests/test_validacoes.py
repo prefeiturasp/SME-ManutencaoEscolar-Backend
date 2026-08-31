@@ -3,6 +3,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
+from apps.core.exceptions import TelefoneInvalidoError
 from apps.core.validacoes import (
     CepInvalidoError,
     CnpjInvalidoError,
@@ -14,6 +15,7 @@ from apps.core.validacoes import (
     validar_formato_cep,
     validar_formato_cnpj,
     validar_formato_link_rastreio,
+    validar_telefone,
 )
 
 
@@ -112,6 +114,41 @@ class TestValidarFormatoCep:
         """Valida rejeição de vários formatos inválidos."""
         with pytest.raises(CepInvalidoError):
             validar_formato_cep(cep_invalido)
+
+
+class TestValidarTelefone:
+    """Testa a função validar_telefone."""
+
+    @pytest.mark.parametrize(
+        "telefone_valido",
+        [
+            "1123456789",  # 10 dígitos
+            "11987654321",  # 11 dígitos
+        ],
+    )
+    def test_deve_aceitar_telefone_com_10_ou_11_digitos(
+        self, telefone_valido: str
+    ) -> None:
+        """Valida aceitação de telefone com 10 ou 11 dígitos."""
+        # Não deve lançar exceção
+        validar_telefone(telefone_valido)
+
+    @pytest.mark.parametrize(
+        "telefone_invalido",
+        [
+            "",  # Vazio
+            "123456789",  # Menos de 10 dígitos
+            "119876543210",  # Mais de 11 dígitos
+            "1198765432A",  # Com letras
+            "(11) 98765-4321",  # Com máscara
+        ],
+    )
+    def test_deve_rejeitar_telefone_invalido_parametrizado(
+        self, telefone_invalido: str
+    ) -> None:
+        """Valida rejeição de vários formatos inválidos."""
+        with pytest.raises(TelefoneInvalidoError):
+            validar_telefone(telefone_invalido)
 
 
 class TestValidarFormatoLinkRastreio:

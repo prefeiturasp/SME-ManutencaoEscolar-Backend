@@ -43,4 +43,6 @@ urlpatterns = [
     path(BASE_URL_API, include("apps.empresa.api.urls")),
     path(BASE_URL_API, include("apps.servico.api.urls")),
     path(BASE_URL_API, include("apps.usuarios.api.urls")),
+    path(BASE_URL_API, include("apps.escola.api.urls")),
+    path(BASE_URL_API, include("apps.lote.api.urls")),
 ]

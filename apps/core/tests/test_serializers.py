@@ -1,7 +1,7 @@
 import pytest
 from rest_framework import serializers
 
-from apps.core.serializers import (
+from apps.core.serializers.autenticacao import (
     AlterarSenhaSerializer,
     AutenticacaoSerializer,
 )
