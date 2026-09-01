@@ -92,6 +92,7 @@ def configurar_api_eol(monkeypatch):
         "sincronizar_subprefeituras",
         "sincronizar_escolas",
         "sincronizar_diretores",
+        "sincronizar_dados_escolas",
     )
 
     for comando in comandos:
@@ -328,3 +329,35 @@ def lote_centro(diretoria_regional_centro, empresa):
         diretoria_regional=diretoria_regional_centro,
     )
     return lote
+
+
+@pytest.fixture
+def resposta_dados_unidade():
+    """Retorna uma resposta simulada da API de dados da unidade."""
+    resposta = Mock()
+    resposta.status_code = 200
+    resposta.raise_for_status.return_value = None
+    resposta.json.return_value = {
+        "nomeDRE": "DIRETORIA REGIONAL DE EDUCACAO SAO MIGUEL",
+        "siglaDRE": "DRE - MP",
+        "codigoDRE": "109300",
+        "codigoINEP": "35055256",
+        "siglaTipoEscola": "EMEF        ",
+        "nome": "EMEF ESCOLA TESTE.",
+        "nomeExibicao": "EMEF ESCOLA TESTE.",
+        "codigo": "100001",
+        "tipoUnidade": "ESCOLA",
+        "email": "escolaemef@mail.com",
+        "telefone": "12345678",
+        "tipoLogradouro": "Rua",
+        "logradouro": "LOGRADOURO",
+        "numero": "001",
+        "bairro": "BAIRRO TESTE",
+        "cep": 8032450,
+        "municipio": "SAO PAULO",
+        "uf": "SP",
+        "tipoUnidadeAdm": 24,
+        "descTipoUnidadeAdm": "DIRETORIA REGIONAL DE EDUCACAO",
+    }
+
+    return resposta

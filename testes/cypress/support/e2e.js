@@ -2,9 +2,11 @@
 require('@shelex/cypress-allure-plugin')
 
 // Comandos personalizados - API
+require('./commands_api/commands_autenticacao')
 
 // Comandos personalizados - UI
 require('./commands_ui/commands_login')
+require('./commands_ui/commands_empresas')
 
 // Evita falhas silenciosas caso algum comando seja removido ou renomeado
 Cypress.on('uncaught:exception', (err, runnable) => {

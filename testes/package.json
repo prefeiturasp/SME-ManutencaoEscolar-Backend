@@ -2,6 +2,7 @@
   "devDependencies": {
     "@badeball/cypress-cucumber-preprocessor": "^26.0.0",
     "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
+    "@faker-js/faker": "^10.6.0",
     "@shelex/cypress-allure-plugin": "^2.41.2",
     "cypress": "^14.5.4",
     "cypress-cloud": "^1.13.1",

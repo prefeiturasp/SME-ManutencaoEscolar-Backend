@@ -7,6 +7,7 @@ ENDPOINT_OBTER_FUNCIONARIOS_POR_CARGO = (
     "/escolas/{codigo_escola}/funcionarios/cargos/{codigo_cargo}"
 )
 
+ENDPOINT_DADOS_ESCOLA = "/escolas/dados/{codigo_escola}"
 FORMATO_DATA_FUNCIONARIOS_POR_CARGO = "%m/%d/%Y %H:%M:%S"
 
 TIPO_ESCOLA_NAO_ACEITAS = {

@@ -89,3 +89,59 @@ class Unidadeeducacional(UUIDMixin):
         )
 
         return historico.responsavel if historico else None
+
+
+class DadosUnidadeEducacional(models.Model):
+    """Armazena dados de contato e endereço de uma unidade educacional."""
+
+    unidade_educacional = models.OneToOneField(
+        "escola.Unidadeeducacional",
+        on_delete=models.CASCADE,
+        related_name="dados",
+    )
+    email = models.EmailField(
+        blank=True,
+        default="",
+    )
+    telefone = models.CharField(
+        max_length=30,
+        blank=True,
+        default="",
+    )
+    logradouro = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+    )
+    numero = models.CharField(
+        max_length=30,
+        blank=True,
+        default="",
+    )
+    bairro = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+    )
+    cep = models.CharField(
+        max_length=8,
+        blank=True,
+        default="",
+    )
+    municipio = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+    )
+    uf = models.CharField(
+        max_length=2,
+        blank=True,
+        default="",
+    )
+
+    class Meta:
+        verbose_name = "Dados da Unidade Educacional"
+        verbose_name_plural = "Dados das Unidades Educacionais"
+
+    def __str__(self) -> str:
+        return f"Dados de {self.unidade_educacional}"

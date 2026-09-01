@@ -479,3 +479,28 @@ class TestSincronizarSubprefeituras:
         assert mock_get.call_args_list[1].kwargs["params"]["codigoEolDRE"] == (
             segunda_dre.codigo
         )
+
+    def test_deve_criar_subprefeitura_sem_diretoria_regional(
+        self,
+        configurar_api_eol,
+    ):
+        """Deve criar Subprefeitura quando não houver DRE relacionada."""
+        registro = {
+            "codigoSubprefeitura": "SP01",
+            "nomeSubprefeitura": "Subprefeitura Sé",
+            "diretoria_regional": None,
+        }
+
+        with patch.object(
+            Command,
+            "_coletar_registros",
+            return_value=[registro],
+        ):
+            call_command("sincronizar_subprefeituras")
+
+        subprefeitura = Subprefeitura.objects.get(
+            codigo_eol="SP01",
+        )
+
+        assert subprefeitura.nome == "Subprefeitura Sé"
+        assert not subprefeitura.diretorias_regionais.exists()

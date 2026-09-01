@@ -48,7 +48,18 @@ export default defineConfig({
         'LOGIN_DIRETOR',
         'LOGIN_INVALIDO',
         'SENHA',
-        'SENHA_INVALIDA'
+        'SENHA_INVALIDA',
+        'CNPJ',
+        'RAZAO_SOCIAL',
+        'NOME_EMPRESA',
+        'UUID_EMPRESA',
+        'LINK_RASTREIO',
+        'CEP',
+        'LOGRADOURO',
+        'NUMERO',
+        'COMPLEMENTO',
+        'CIDADE',
+        'ESTADO',
       ]
 
       const customVariable = Object.fromEntries(
