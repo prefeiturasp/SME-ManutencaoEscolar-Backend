@@ -322,7 +322,7 @@ def responsavel_unidade() -> ResponsavelUnidade:
 def lote_centro(diretoria_regional_centro, empresa):
     """Fixture de lote."""
     lote = Lote.objects.create(
-        codigo_cadastro="LOTE-001", nome="Lote Centro", empresa=empresa
+        codigo_cadastro="LOTE-001", nome="Lote Centro", empresa=empresa, status=True
     )
     LoteDiretoriaRegional.objects.create(
         lote=lote,

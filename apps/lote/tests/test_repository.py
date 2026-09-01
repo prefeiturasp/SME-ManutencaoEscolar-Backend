@@ -84,6 +84,7 @@ def test_obtem_diretorias_regionais_vinculadas() -> None:
 
     vinculo_model_mock.objects.filter.assert_called_once_with(
         diretoria_regional_id__in=[1, 2],
+        lote__status=True,
     )
     filtro_mock.select_related.assert_called_once_with(
         "diretoria_regional",
@@ -110,6 +111,7 @@ def test_obtem_lista_vazia_quando_nao_existem_vinculos() -> None:
 
     vinculo_model_mock.objects.filter.assert_called_once_with(
         diretoria_regional_id__in=[],
+        lote__status=True,
     )
     filtro_mock.select_related.assert_called_once_with(
         "diretoria_regional",

@@ -82,15 +82,19 @@ class UnidadeEducacionalSerializer(serializers.ModelSerializer):
         obj: Unidadeeducacional,
     ) -> dict | None:
         """Retorna o lote associado à diretoria regional da unidade."""
-        vinculo = getattr(
-            obj.diretoria_regional,
-            "vinculo_lote",
+        lote_diretoria = obj.diretoria_regional.vinculo_lote.filter(
+            lote__status=True).first()
+
+        if not lote_diretoria:
+            return None
+
+        lote = getattr(
+            lote_diretoria,
+            "lote",
             None,
         )
 
-        if vinculo is None:
+        if lote is None:
             return None
-
-        lote = vinculo.lote
 
         return LoteUnidadeEducacionalSerializer(lote).data

@@ -250,6 +250,7 @@ def test_obtem_lote_do_serializer() -> None:
 
 def test_rejeita_serializer_sem_instancia_de_lote() -> None:
     """Deve rejeitar serializer que não possua um lote válido."""
+
     serializer, _ = criar_serializer_mock({})
 
     with pytest.raises(DRFValidationError) as exc_info:
@@ -257,5 +258,5 @@ def test_rejeita_serializer_sem_instancia_de_lote() -> None:
 
     assert str(exc_info.value.detail["title"]) == "Erro"
     assert str(exc_info.value.detail["detail"]) == (
-        "Serviço inválido ou não encontrado."
+        "Lote inválido ou não encontrado."
     )

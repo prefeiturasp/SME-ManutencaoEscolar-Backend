@@ -24,51 +24,11 @@ _ERRO_NO_SERVIDOR = "Erro no servidor"
 
 _ESCOLA_CONST = "ESCOLA EMEF ADMIN"
 
-_EMPRESA_1_EXEMPLO: dict[str, object] = {
-    "id": 1,
-    "uuid": "eaa39861-5212-4817-9ba1-a81285985599",
-    "nome": "Empresa teste Vinculo",
-    "cnpj": "99889215000172",
-    "status": True,
-    "razao_social": "Empresa teste Vinculo",
-    "link_rastreio": "",
-    "cep": "13060770",
-    "logradouro": "XPTO",
-    "numero": "120",
-    "complemento": "",
-    "cidade": "Campinas",
-    "estado": "PI",
-    "criado_por": _ESCOLA_CONST,
-    "criado_em": "2026-08-19T12:04:00.313114-03:00",
-    "atualizado_por": None,
-    "atualizado_em": "2026-08-19T12:04:00.313142-03:00",
-}
-
-_EMPRESA_2_EXEMPLO: dict[str, object] = {
-    "id": 2,
-    "uuid": "f882ef71-1705-46cb-850b-c404650d95e5",
-    "nome": "Empresa 2",
-    "cnpj": "40715305000102",
-    "status": True,
-    "razao_social": "Empresa 2",
-    "link_rastreio": "",
-    "cep": "13197414",
-    "logradouro": "XPTO",
-    "numero": "120",
-    "complemento": "",
-    "cidade": "Campinas",
-    "estado": "PI",
-    "criado_por": _ESCOLA_CONST,
-    "criado_em": "2026-08-20T18:54:20.650700-03:00",
-    "atualizado_por": None,
-    "atualizado_em": "2026-08-20T18:54:20.650905-03:00",
-}
-
 _LOTE_EXEMPLO_ENTRADA: dict[str, object] = {
     "codigo_cadastro": "LOTE-00123",
     "nome": "Lote de manutenção 2026",
     "status": True,
-    "empresa": 1,
+    "empresa": "f882ef71-1705-46cb-850b-c404650d95e5",
     "periodo_inicial": "2026-08-01",
     "periodo_final": "2026-12-31",
     "diretorias_regionais": [1],
@@ -77,19 +37,23 @@ _LOTE_EXEMPLO_ENTRADA: dict[str, object] = {
 _LOTE_EXEMPLO_SAIDA: dict[str, object] = {
     "nome": "Lote de manutenção 2026",
     "codigo_cadastro": "LOTE-00123",
-    "empresa": _EMPRESA_1_EXEMPLO,
+    "empresa": "eaa39861-5212-4817-9ba1-a81285985599",
     "periodo_inicial": "2026-08-01",
     "periodo_final": "2026-12-31",
     "status": True,
     "diretorias_regionais": [
-        {
-            "id": 1,
-            "codigo": "108700",
-            "nome": "DIRETORIA REGIONAL DE EDUCACAO ITAQUERA",
-            "abreviacao": "DRE - IQ",
-            "nome_curto": "DRE ITAQUERA",
-        },
+        1
     ],
+}
+
+_LOTE_EXEMPLO_ATUALIZACAO: dict[str, object] = {
+    "codigo_cadastro": "DRE GUAIANASES",
+    "nome": "DRE GUAIANASES ATUALIZADO",
+    "status": False,
+    "empresa": "f882ef71-1705-46cb-850b-c404650d95e5",
+    "periodo_inicial": "2026-07-27",
+    "periodo_final": "2026-08-03",
+    "diretorias_regionais": [13, 11],
 }
 
 _LOTE_EXEMPLO_DIRETORIA_REGIONAL_VINCULADA: dict[str, object] = {
@@ -111,7 +75,7 @@ _LOTES_EXEMPLO_LISTAGEM: dict[str, object] = {
             "codigo_cadastro": "Lote0001",
             "nome": "Lote",
             "status": True,
-            "empresa": _EMPRESA_2_EXEMPLO,
+            "empresa": "eaa39861-5212-4817-9ba1-a81285985599",
             "periodo_inicial": "2026-07-29",
             "periodo_final": "2026-08-14",
             "diretorias_regionais": [
@@ -250,6 +214,52 @@ LOTE_SCHEMA = extend_schema_view(
                 name="Lote cadastrado com sucesso",
                 response_only=True,
                 status_codes=["201"],
+                value=_LOTE_EXEMPLO_SAIDA,
+            ),
+            OpenApiExample(
+                name="Diretoria Regional já vinculada",
+                response_only=True,
+                status_codes=["400"],
+                value=_LOTE_EXEMPLO_DIRETORIA_REGIONAL_VINCULADA,
+            ),
+        ],
+    ),
+    partial_update=extend_schema(
+        tags=[_TAG_LOTE],
+        summary="Atualiza parcialmente um lote",
+        description=(
+            "Atualiza os campos informados de um lote identificado pelo UUID. "
+            "Quando as Diretorias Regionais são informadas, seus vínculos são "
+            "sincronizados. Cada Diretoria Regional pode estar vinculada a "
+            "somente um lote."
+        ),
+        operation_id="atualizarLote",
+        request=LoteCriarSerializer,
+        responses={
+            200: LoteSerializer,
+            400: OpenApiResponse(
+                description=_DADOS_INVALIDOS,
+            ),
+            401: OpenApiResponse(
+                description=_CREDENCIAIS_INVALIDAS,
+            ),
+            404: OpenApiResponse(
+                description="Lote não encontrado",
+            ),
+            500: OpenApiResponse(
+                description=_ERRO_NO_SERVIDOR,
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                name="Exemplo de atualização parcial do lote",
+                request_only=True,
+                value=_LOTE_EXEMPLO_ATUALIZACAO,
+            ),
+            OpenApiExample(
+                name="Lote atualizado com sucesso",
+                response_only=True,
+                status_codes=["200"],
                 value=_LOTE_EXEMPLO_SAIDA,
             ),
             OpenApiExample(
