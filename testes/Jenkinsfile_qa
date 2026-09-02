@@ -43,7 +43,7 @@ pipeline {
                                     sh -c "rm -rf allure-results && \
                                         npm install && \
                                         npm install cypress@14.5.2 cypress-cloud@beta \
-                                        @shelex/cypress-allure-plugin allure-mocha crypto-js@4.1.1 --save-dev && \
+                                        @shelex/cypress-allure-plugin mocha-allure-reporter crypto-js@4.1.1 --save-dev && \
                                         npx cypress-cloud run \
                                                 --parallel \
                                                 --browser chrome \
