@@ -2,7 +2,7 @@ class Empresas_Localizadores {
 
   // criar
   menu_cadastro = () => '.p-1 > .cursor-pointer'
-  menu_empresas = () => '[href="/cadastro/empresas"]'
+  menu_empresas = () => '[href="/empresas"]'
   btn_cadastrar_empresa = () => 'div.flex.items-center.justify-between > a'
   campo_nome = () => '#nome'
   campo_cnpj = () => '#cnpj'

@@ -12,7 +12,7 @@ Cypress.Commands.add('acessar_empresas', () => {
     .should('be.visible')
     .click()
 
-  cy.url({ timeout: 10000 }).should('include', 'cadastro/empresas')
+  cy.url({ timeout: 10000 }).should('include', 'empresas')
 })
 
 Cypress.Commands.add('criar_empresa', () => {
@@ -23,7 +23,7 @@ Cypress.Commands.add('criar_empresa', () => {
     .click()
 
   cy.url({ timeout: 30000 })
-    .should('include', '/cadastro/empresas/cadastrar')
+    .should('include', '/empresas/cadastrar')
 
   cy.get(empresas_localizadores.campo_nome())
     .should('be.visible')
@@ -83,7 +83,7 @@ Cypress.Commands.add('criar_empresa', () => {
 })
 
 Cypress.Commands.add('validar_cadastro_empresa', () => {
-  cy.contains('Sucesso')
+  cy.contains('Responsável técnico')
 })
 
 Cypress.Commands.add('clicar_criar_empresa', () => {
@@ -92,7 +92,7 @@ Cypress.Commands.add('clicar_criar_empresa', () => {
     .click()
 
   cy.url({ timeout: 30000 })
-    .should('include', '/cadastro/empresas/cadastrar') 
+    .should('include', '/empresas/cadastrar') 
 
   cy.get(empresas_localizadores.select_status())
     .should('be.visible')
@@ -104,7 +104,7 @@ Cypress.Commands.add('clicar_criar_empresa', () => {
 })
 
 Cypress.Commands.add('validar_cadastro_nao_preenchido_empresa', () => {
-  cy.contains('Cadastrar empresa')
+  cy.contains('Próximo')
     .should('be.disabled')
 })
 
@@ -116,7 +116,7 @@ Cypress.Commands.add('criar_empresa_inativa', () => {
     .click()
 
   cy.url({ timeout: 30000 })
-    .should('include', '/cadastro/empresas/cadastrar')
+    .should('include', '/empresas/cadastrar')
 
   cy.get(empresas_localizadores.campo_nome())
     .should('be.visible')
@@ -182,7 +182,7 @@ Cypress.Commands.add('campos_obrigatorios_criar_empresa', (campo) => {
     .click()
 
   cy.url({ timeout: 30000 })
-    .should('include', '/cadastro/empresas/cadastrar')
+    .should('include', '/empresas/cadastrar')
 
   switch (campo) {
 
@@ -392,7 +392,7 @@ Cypress.Commands.add('filtros_consulta_empresa', (campo) => {
 })
 
 Cypress.Commands.add('validar_filtros_empresa', () => {
-  cy.contains('Nome da empresa')  
+  cy.contains('Empresas cadastradas')  
 })
 
 Cypress.Commands.add('filtros_sem_dados_empresa', (campo) => {
