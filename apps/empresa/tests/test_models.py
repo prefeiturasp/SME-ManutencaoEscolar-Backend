@@ -1,6 +1,10 @@
 """Testes para os modelos da aplicação Empresa."""
 
-from apps.empresa.models import Empresa, ResponsavelTecnico
+from apps.empresa.models import (
+    AnexoResponsavelTecnico,
+    Empresa,
+    ResponsavelTecnico,
+)
 
 
 def test_str_do_empresa():
@@ -18,3 +22,11 @@ def test_str_do_responsavel_tecnico():
     )
 
     assert str(responsavel) == "João Responsável - Preposto"
+
+
+def test_str_do_anexo_responsavel_tecnico():
+    """Testa o método __str__ do anexo do responsável técnico."""
+    responsavel = ResponsavelTecnico(nome="João Responsável")
+    anexo = AnexoResponsavelTecnico(responsavel_tecnico=responsavel)
+
+    assert str(anexo) == "Anexo de João Responsável"

@@ -3,7 +3,13 @@
 from django.db import models
 
 from apps.core.constants import EstadoChoices
-from apps.core.models.mixins import BaseModel
+from apps.core.models.mixins import (
+    BaseModel,
+    CriacaoMixin,
+    SoftDeleteMixin,
+    UUIDMixin,
+)
+from apps.core.storage import get_private_storage
 from apps.core.validacoes import (
     apenas_digitos_validator,
     cnpj_formato_validacao,
@@ -82,3 +88,27 @@ class ResponsavelTecnico(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.nome} - {self.get_tipo_display()}"
+
+
+class AnexoResponsavelTecnico(UUIDMixin, CriacaoMixin, SoftDeleteMixin):
+    """Representa o anexo de um responsável técnico de uma empresa."""
+
+    responsavel_tecnico = models.ForeignKey(
+        ResponsavelTecnico,
+        on_delete=models.CASCADE,
+        related_name="anexos",
+    )
+    nome = models.CharField(max_length=1000)
+    arquivo_url = models.URLField(max_length=1000, blank=True, null=True)
+    arquivo = models.FileField(
+        upload_to="anexos_responsaveis_tecnicos/",
+        storage=get_private_storage,
+    )
+
+    class Meta:
+        verbose_name = "Anexo do Responsável Técnico"
+        verbose_name_plural = "Anexos dos Responsáveis Técnicos"
+        ordering = ["-id"]
+
+    def __str__(self) -> str:
+        return f"Anexo de {self.responsavel_tecnico.nome}"
