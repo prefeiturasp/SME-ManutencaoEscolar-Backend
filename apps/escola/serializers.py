@@ -83,7 +83,8 @@ class UnidadeEducacionalSerializer(serializers.ModelSerializer):
     ) -> dict | None:
         """Retorna o lote associado à diretoria regional da unidade."""
         lote_diretoria = obj.diretoria_regional.vinculo_lote.filter(
-            lote__status=True).first()
+            lote__status=True
+        ).first()
 
         if not lote_diretoria:
             return None

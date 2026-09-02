@@ -41,9 +41,7 @@ _LOTE_EXEMPLO_SAIDA: dict[str, object] = {
     "periodo_inicial": "2026-08-01",
     "periodo_final": "2026-12-31",
     "status": True,
-    "diretorias_regionais": [
-        1
-    ],
+    "diretorias_regionais": [1],
 }
 
 _LOTE_EXEMPLO_ATUALIZACAO: dict[str, object] = {

@@ -1,6 +1,7 @@
 """Repositório de lotes."""
 
 from collections.abc import Sequence
+from datetime import date
 from typing import Any, cast
 
 from django.db import transaction
@@ -68,15 +69,14 @@ class LoteRepository:
         lote_ignorado: Lote | None = None,
     ) -> list[tuple[str, str]]:
         """Obtém DREs já vinculadas a outros lotes ativos."""
-
         diretoria_regional_ids = [
-            diretoria.pk
-            for diretoria in diretorias_regionais
+            diretoria.pk for diretoria in diretorias_regionais
         ]
 
         vinculos = self.vinculo_model.objects.filter(
             diretoria_regional_id__in=diretoria_regional_ids,
             lote__status=True,
+            lote__deletado_em__isnull=True,
         )
 
         if lote_ignorado is not None:
@@ -96,6 +96,24 @@ class LoteRepository:
             )
             for vinculo in vinculos
         ]
+
+    def inativar_lotes_com_prazo_finalizado(
+        self,
+        data_referencia: date,
+    ) -> int:
+        """Inativa os lotes cujo período final já terminou.
+
+        Args:
+            data_referencia: Data utilizada para identificar lotes vencidos.
+
+        Returns:
+            Quantidade de lotes inativados.
+        """
+        return self.model.objects.filter(
+            status=True,
+            periodo_final__lt=data_referencia,
+            deletado_em__isnull=True,
+        ).update(status=False)
 
     @transaction.atomic
     def criar(
@@ -182,9 +200,8 @@ class LoteRepository:
             Dados serializados do lote atualizado.
         """
         lista_diretorias_regionais = dados.get("diretorias_regionais")
-        print("vamos caralho >>>>", dados.get("diretorias_regionais"))
 
-        if  lista_diretorias_regionais:
+        if lista_diretorias_regionais:
             dados.pop("diretorias_regionais")
 
         for campo, valor in dados.items():

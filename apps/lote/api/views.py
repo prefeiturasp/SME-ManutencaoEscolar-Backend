@@ -144,7 +144,6 @@ class LoteViewSet(viewsets.ModelViewSet):
 
         serializer.instance = lote
 
-
     def _obter_usuario(self) -> Usuario:
         """Retorna o usuário autenticado."""
         usuario = self.request.user
