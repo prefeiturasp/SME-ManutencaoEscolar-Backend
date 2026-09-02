@@ -1,12 +1,19 @@
 """Testes para o repositório de Empresa."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
 
 from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
-from apps.empresa.models import Empresa, ResponsavelTecnico
+from apps.empresa.models import (
+    AnexoResponsavelTecnico,
+    Empresa,
+    ResponsavelTecnico,
+)
+from apps.empresa.repository.anexo_repository import (
+    AnexoResponsavelTecnicoRepository,
+)
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
@@ -135,6 +142,65 @@ class TestEmpresaRepository:
         empresa.refresh_from_db()
         assert empresa.deletado_em is not None
         assert empresa.deletado_por is None
+
+
+class TestAnexoResponsavelTecnicoRepository:
+    """Testes para o repositório de anexos de responsáveis técnicos."""
+
+    def test_bulk_criar_persiste_e_serializa_anexos(self):
+        """Deve persistir os anexos e devolver seus dados serializados."""
+        repository = AnexoResponsavelTecnicoRepository()
+        anexo = AnexoResponsavelTecnico(
+            nome="art.pdf",
+            arquivo_url="https://minio.local/art.pdf",
+        )
+
+        with patch.object(
+            AnexoResponsavelTecnico.objects,
+            "bulk_create",
+            return_value=[anexo],
+        ) as bulk_create:
+            resultado = repository.bulk_criar([anexo])
+
+        bulk_create.assert_called_once_with([anexo])
+        assert resultado == [
+            {
+                "uuid": str(anexo.uuid),
+                "nome": "art.pdf",
+                "arquivo_url": "https://minio.local/art.pdf",
+            }
+        ]
+
+    def test_excluir_nao_preservados_atualiza_anexos(self):
+        """Deve excluir logicamente apenas os anexos não preservados."""
+        repository = AnexoResponsavelTecnicoRepository()
+        uuid_preservado = AnexoResponsavelTecnico().uuid
+        usuario = Mock()
+        queryset = Mock()
+
+        with (
+            patch.object(
+                AnexoResponsavelTecnico.objects,
+                "filter",
+                return_value=queryset,
+            ) as filter_mock,
+            patch(
+                "apps.empresa.repository.anexo_repository.timezone.now"
+            ) as now_mock,
+        ):
+            quantidade = repository.excluir_nao_preservados(
+                responsavel_id=1,
+                uuids_preservados=[uuid_preservado],
+                usuario=usuario,
+            )
+
+        filter_mock.assert_called_once_with(responsavel_tecnico_id=1)
+        queryset.exclude.assert_called_once_with(uuid__in=[uuid_preservado])
+        queryset.exclude.return_value.update.assert_called_once_with(
+            deletado_em=now_mock.return_value,
+            deletado_por=usuario,
+        )
+        assert quantidade == queryset.exclude.return_value.update.return_value
 
 
 class TestResponsavelTecnicoRepository:
