@@ -1,26 +1,21 @@
 """Testes das tarefas assíncronas relacionadas aos lotes."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
-from apps.lote.tasks import inativar_lotes_com_prazo_finalizado
+from apps.lote.tasks import executar_validade_lote
 
 
-def test_inativa_lotes_com_prazo_finalizado() -> None:
-    """Deve executar o serviço e retornar a quantidade de lotes inativados."""
-    with patch(
-        "apps.lote.tasks.LoteService",
-        autospec=True,
-    ) as service_class:
-        service = service_class.return_value
-        service.inativar_lotes_com_prazo_finalizado.return_value = 3
+@patch("apps.lote.tasks.call_command", autospec=True)
+def test_executar_validade_lote_chama_management_command(
+    mock_call_command: Mock,
+) -> None:
+    """Deve executar o comando que inativa os lotes expirados."""
+    resultado = executar_validade_lote.run()
 
-        resultado = inativar_lotes_com_prazo_finalizado.run()
-
-    service_class.assert_called_once_with()
-    service.inativar_lotes_com_prazo_finalizado.assert_called_once_with()
-
-    assert resultado == 3
+    mock_call_command.assert_called_once_with(
+        "inativar_lotes_expirados",
+    )
+    assert resultado is None
     assert (
-        inativar_lotes_com_prazo_finalizado.name
-        == "lote.inativar_lotes_com_prazo_finalizado"
+        executar_validade_lote.name == "apps.lote.tasks.executar_validade_lote"
     )
