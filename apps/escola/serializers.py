@@ -4,7 +4,10 @@ from rest_framework import serializers
 
 from apps.escola.models import DiretoriaRegional, TipoEscola
 from apps.escola.models.subprefeitura import Subprefeitura
-from apps.escola.models.unidade_educacional import Unidadeeducacional
+from apps.escola.models.unidade_educacional import (
+    DadosUnidadeEducacional,
+    Unidadeeducacional,
+)
 
 
 class TipoEscolaSerializer(serializers.ModelSerializer):
@@ -54,6 +57,23 @@ class LoteUnidadeEducacionalSerializer(serializers.Serializer):
     status = serializers.BooleanField()
 
 
+class DadosUnidadeEducacionalSerializer(serializers.ModelSerializer):
+    """Serializa os dados de contato e endereço da unidade educacional."""
+
+    class Meta:
+        model = DadosUnidadeEducacional
+        fields = (
+            "email",
+            "telefone",
+            "logradouro",
+            "numero",
+            "bairro",
+            "cep",
+            "municipio",
+            "uf",
+        )
+
+
 class UnidadeEducacionalSerializer(serializers.ModelSerializer):
     """Serializa os dados das unidades educacionais e seus relacionamentos."""
 
@@ -62,6 +82,7 @@ class UnidadeEducacionalSerializer(serializers.ModelSerializer):
     subprefeitura = SubprefeituraSerializer(read_only=True)
 
     lote = serializers.SerializerMethodField()
+    dados = DadosUnidadeEducacionalSerializer(read_only=True)
 
     class Meta:
         model = Unidadeeducacional
@@ -75,6 +96,7 @@ class UnidadeEducacionalSerializer(serializers.ModelSerializer):
             "subprefeitura",
             "lote",
             "status",
+            "dados",
         )
 
     def get_lote(
