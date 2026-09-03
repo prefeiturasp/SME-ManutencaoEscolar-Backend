@@ -142,31 +142,6 @@ def test_obtem_diretorias_desconsiderando_lote_informado() -> None:
     assert resultado == []
 
 
-def test_inativa_lotes_com_prazo_finalizado() -> None:
-    """Deve inativar lotes ativos, vencidos e não excluídos."""
-    repository = LoteRepository()
-    model = Mock()
-    queryset = Mock()
-    data_referencia = date(2026, 9, 18)
-
-    model.objects.filter.return_value = queryset
-    queryset.update.return_value = 3
-    repository.model = model
-
-    quantidade = repository.inativar_lotes_com_prazo_finalizado(
-        data_referencia=data_referencia,
-    )
-
-    model.objects.filter.assert_called_once_with(
-        status=True,
-        periodo_final__lt=data_referencia,
-        deletado_em__isnull=True,
-    )
-    queryset.update.assert_called_once_with(status=False)
-
-    assert quantidade == 3
-
-
 @pytest.mark.django_db
 def test_cria_lote_com_diretorias_regionais() -> None:
     """Deve criar o lote e seus vínculos com as diretorias."""

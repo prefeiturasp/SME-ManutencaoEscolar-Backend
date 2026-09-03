@@ -1,7 +1,6 @@
 """Repositório de lotes."""
 
 from collections.abc import Sequence
-from datetime import date
 from typing import Any, cast
 
 from django.db import transaction
@@ -96,24 +95,6 @@ class LoteRepository:
             )
             for vinculo in vinculos
         ]
-
-    def inativar_lotes_com_prazo_finalizado(
-        self,
-        data_referencia: date,
-    ) -> int:
-        """Inativa os lotes cujo período final já terminou.
-
-        Args:
-            data_referencia: Data utilizada para identificar lotes vencidos.
-
-        Returns:
-            Quantidade de lotes inativados.
-        """
-        return self.model.objects.filter(
-            status=True,
-            periodo_final__lt=data_referencia,
-            deletado_em__isnull=True,
-        ).update(status=False)
 
     @transaction.atomic
     def criar(

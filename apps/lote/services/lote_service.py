@@ -2,8 +2,6 @@
 
 from typing import Any, cast
 
-from django.utils import timezone
-
 from apps.escola.models import DiretoriaRegional
 from apps.lote.constants import LoteErrorMessages
 from apps.lote.exceptions import DiretoriaRegionalJaVinculadaError
@@ -21,18 +19,6 @@ class LoteService:
     ) -> None:
         """Inicializa o serviço com o repositório informado ou o padrão."""
         self.repository = repository or LoteRepository()
-
-    def inativar_lotes_com_prazo_finalizado(self) -> int:
-        """Inativa os lotes cujo prazo da licitação já terminou.
-
-        Returns:
-            Quantidade de lotes inativados.
-        """
-        data_atual = timezone.localdate()
-
-        return self.repository.inativar_lotes_com_prazo_finalizado(
-            data_referencia=data_atual,
-        )
 
     def criar(
         self,

@@ -34,29 +34,6 @@ def test_inicializa_com_repository_informado() -> None:
     assert service.repository is repository
 
 
-def test_inativa_lotes_com_prazo_finalizado() -> None:
-    """Deve inativar lotes usando a data local atual."""
-    repository = Mock(spec=LoteRepository)
-    repository.inativar_lotes_com_prazo_finalizado.return_value = 2
-
-    service = LoteService(repository=repository)
-    data_atual = date(2026, 9, 18)
-
-    with patch(
-        "apps.lote.services.lote_service.timezone.localdate",
-        return_value=data_atual,
-    ) as localdate:
-        quantidade = service.inativar_lotes_com_prazo_finalizado()
-
-    localdate.assert_called_once_with()
-
-    repository.inativar_lotes_com_prazo_finalizado.assert_called_once_with(
-        data_referencia=data_atual,
-    )
-
-    assert quantidade == 2
-
-
 def test_cria_lote_com_dados_normalizados() -> None:
     """Deve normalizar os dados e encaminhar a criação ao repository."""
     repository = Mock(spec=LoteRepository)
