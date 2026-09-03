@@ -1,374 +1,352 @@
 """Testes do repositório de lotes."""
 
-from typing import Any, cast
-from unittest.mock import Mock, patch
+from datetime import date
+from types import SimpleNamespace
+from unittest.mock import Mock, call, patch
 from uuid import uuid4
 
 import pytest
-from django.core.exceptions import ValidationError
 
 from apps.escola.models import DiretoriaRegional
-from apps.lote.models import Lote, LoteDiretoriaRegional
+from apps.lote.models import Lote
 from apps.lote.repository.lote_repository import LoteRepository
 from apps.usuarios.models.usuario import Usuario
 
-
-def criar_usuario_mock() -> Usuario:
-    """Cria um usuário simulado para os testes."""
-    return cast(Usuario, Mock(spec=Usuario))
+MODULO_REPOSITORY = "apps.lote.repository.lote_repository"
 
 
-def criar_vinculo_mock(
-    nome_dre: str,
-    codigo_lote: str,
-) -> LoteDiretoriaRegional:
-    """Cria um vínculo simulado entre uma DRE e um lote.
-
-    Args:
-        nome_dre: Nome curto da diretoria regional.
-        codigo_lote: Código de cadastro do lote.
-
-    Returns:
-        Vínculo simulado contendo uma diretoria regional e um lote.
-    """
-    diretoria_regional = Mock(spec=DiretoriaRegional)
-    diretoria_regional.nome_curto = nome_dre
-
+def test_atualiza_diretorias_regionais() -> None:
+    """Deve remover vínculos antigos e criar somente os novos."""
+    repository = LoteRepository()
     lote = Mock(spec=Lote)
-    lote.codigo_cadastro = codigo_lote
+    usuario = Mock(spec=Usuario)
 
-    vinculo = Mock(spec=LoteDiretoriaRegional)
-    vinculo.diretoria_regional = diretoria_regional
-    vinculo.lote = lote
+    diretoria_existente = Mock(spec=DiretoriaRegional)
+    diretoria_existente.pk = 1
 
-    return cast(LoteDiretoriaRegional, vinculo)
+    diretoria_nova = Mock(spec=DiretoriaRegional)
+    diretoria_nova.pk = 2
+
+    vinculo_novo = Mock()
+    vinculos_atuais = Mock()
+    vinculos_atuais.values_list.return_value = [1]
+
+    with patch(
+        f"{MODULO_REPOSITORY}.LoteDiretoriaRegional",
+    ) as vinculo_model:
+        vinculo_model.objects.filter.return_value = vinculos_atuais
+        vinculo_model.return_value = vinculo_novo
+
+        repository.atualizar_diretorias_regionais(
+            lote=lote,
+            diretorias_regionais=[
+                diretoria_existente,
+                diretoria_nova,
+            ],
+            usuario=usuario,
+        )
+
+    vinculo_model.objects.filter.assert_called_once_with(lote=lote)
+
+    vinculos_atuais.exclude.assert_called_once_with(
+        diretoria_regional_id__in={1, 2},
+    )
+    vinculos_atuais.exclude.return_value.delete.assert_called_once_with()
+
+    vinculos_atuais.values_list.assert_called_once_with(
+        "diretoria_regional_id",
+        flat=True,
+    )
+
+    vinculo_model.assert_called_once_with(
+        lote=lote,
+        diretoria_regional=diretoria_nova,
+        criado_por=usuario,
+    )
+    vinculo_model.objects.bulk_create.assert_called_once_with(
+        [vinculo_novo],
+    )
 
 
 def test_obtem_diretorias_regionais_vinculadas() -> None:
-    """Deve retornar os nomes das DREs e os códigos dos lotes."""
+    """Deve retornar as DREs vinculadas a lotes ativos."""
     repository = LoteRepository()
-    vinculo_model_mock = Mock()
+    vinculo_model = Mock()
+    queryset = Mock()
 
-    repository.vinculo_model = cast(
-        type[LoteDiretoriaRegional],
-        vinculo_model_mock,
+    diretoria = Mock(spec=DiretoriaRegional)
+    diretoria.pk = 4
+
+    vinculo = SimpleNamespace(
+        diretoria_regional=SimpleNamespace(
+            nome_curto="DRE CAPELA DO SOCORRO",
+        ),
+        lote=SimpleNamespace(
+            codigo_cadastro="LOTE-002",
+        ),
     )
 
-    diretorias_regionais = [
-        DiretoriaRegional(pk=1),
-        DiretoriaRegional(pk=2),
-    ]
-
-    vinculos = [
-        criar_vinculo_mock(
-            nome_dre="Centro",
-            codigo_lote="LOTE-001",
-        ),
-        criar_vinculo_mock(
-            nome_dre="Norte",
-            codigo_lote="LOTE-002",
-        ),
-    ]
-
-    filtro_mock = vinculo_model_mock.objects.filter.return_value
-    filtro_mock.select_related.return_value = vinculos
+    vinculo_model.objects.filter.return_value = queryset
+    queryset.select_related.return_value = [vinculo]
+    repository.vinculo_model = vinculo_model
 
     resultado = repository._obter_diretorias_regionais_vinculadas(
-        diretorias_regionais,
+        [diretoria],
+    )
+
+    vinculo_model.objects.filter.assert_called_once_with(
+        diretoria_regional_id__in=[4],
+        lote__status=True,
+        lote__deletado_em__isnull=True,
+    )
+    queryset.exclude.assert_not_called()
+    queryset.select_related.assert_called_once_with(
+        "diretoria_regional",
+        "lote",
     )
 
     assert resultado == [
-        ("Centro", "LOTE-001"),
-        ("Norte", "LOTE-002"),
+        ("DRE CAPELA DO SOCORRO", "LOTE-002"),
     ]
 
-    vinculo_model_mock.objects.filter.assert_called_once_with(
-        diretoria_regional_id__in=[1, 2],
+
+def test_obtem_diretorias_desconsiderando_lote_informado() -> None:
+    """Deve ignorar os vínculos pertencentes ao lote informado."""
+    repository = LoteRepository()
+    vinculo_model = Mock()
+    queryset = Mock()
+    queryset_sem_lote_ignorado = Mock()
+
+    diretoria = Mock(spec=DiretoriaRegional)
+    diretoria.pk = 4
+
+    lote_ignorado = Mock(spec=Lote)
+    lote_ignorado.pk = 10
+
+    vinculo_model.objects.filter.return_value = queryset
+    queryset.exclude.return_value = queryset_sem_lote_ignorado
+    queryset_sem_lote_ignorado.select_related.return_value = []
+    repository.vinculo_model = vinculo_model
+
+    resultado = repository._obter_diretorias_regionais_vinculadas(
+        [diretoria],
+        lote_ignorado=lote_ignorado,
     )
-    filtro_mock.select_related.assert_called_once_with(
+
+    queryset.exclude.assert_called_once_with(lote_id=10)
+    queryset_sem_lote_ignorado.select_related.assert_called_once_with(
         "diretoria_regional",
         "lote",
     )
-
-
-def test_obtem_lista_vazia_quando_nao_existem_vinculos() -> None:
-    """Deve retornar uma lista vazia quando não existem vínculos."""
-    repository = LoteRepository()
-    vinculo_model_mock = Mock()
-
-    repository.vinculo_model = cast(
-        type[LoteDiretoriaRegional],
-        vinculo_model_mock,
-    )
-
-    filtro_mock = vinculo_model_mock.objects.filter.return_value
-    filtro_mock.select_related.return_value = []
-
-    resultado = repository._obter_diretorias_regionais_vinculadas([])
 
     assert resultado == []
 
-    vinculo_model_mock.objects.filter.assert_called_once_with(
-        diretoria_regional_id__in=[],
-    )
-    filtro_mock.select_related.assert_called_once_with(
-        "diretoria_regional",
-        "lote",
-    )
-
 
 @pytest.mark.django_db
-def test_cria_lote_e_vinculos() -> None:
-    """Deve criar um lote e seus vínculos com as DREs."""
+def test_cria_lote_com_diretorias_regionais() -> None:
+    """Deve criar o lote e seus vínculos com as diretorias."""
     repository = LoteRepository()
-    usuario = criar_usuario_mock()
+    model = Mock()
+    vinculo_model = Mock()
+
+    usuario = Mock(spec=Usuario)
     empresa = Mock()
 
-    diretoria_regional_1 = DiretoriaRegional(pk=1)
-    diretoria_regional_2 = DiretoriaRegional(pk=2)
+    diretoria_um = Mock(spec=DiretoriaRegional)
+    diretoria_dois = Mock(spec=DiretoriaRegional)
+    diretorias = [diretoria_um, diretoria_dois]
 
-    lote_uuid = uuid4()
-    lote_mock = Mock(spec=Lote)
-    lote_mock.id = 10
-    lote_mock.uuid = lote_uuid
-    lote_mock.empresa = empresa
-    lote_mock.diretorias_regionais = [
-        diretoria_regional_1,
-        diretoria_regional_2,
-    ]
+    lote = Mock(spec=Lote)
+    lote.id = 1
+    lote.uuid = uuid4()
+    lote.empresa = empresa
+    lote.diretorias_regionais = diretorias
 
-    model_mock = Mock(return_value=lote_mock)
-    repository.model = cast(
-        type[Lote],
-        model_mock,
-    )
+    vinculo_um = Mock()
+    vinculo_dois = Mock()
 
-    vinculo_1 = Mock(spec=LoteDiretoriaRegional)
-    vinculo_2 = Mock(spec=LoteDiretoriaRegional)
+    model.return_value = lote
+    vinculo_model.side_effect = [vinculo_um, vinculo_dois]
 
-    vinculo_model_mock = Mock(
-        side_effect=[
-            vinculo_1,
-            vinculo_2,
-        ],
-    )
-    repository.vinculo_model = cast(
-        type[LoteDiretoriaRegional],
-        vinculo_model_mock,
-    )
+    repository.model = model
+    repository.vinculo_model = vinculo_model
 
-    dados: dict[str, Any] = {
-        "nome": "Lote Centro",
+    dados = {
         "codigo_cadastro": "LOTE-001",
-        "empresa": empresa,
+        "nome": "Lote Norte",
         "status": True,
-        "diretorias_regionais": [
-            diretoria_regional_1,
-            diretoria_regional_2,
-        ],
+        "empresa": empresa,
+        "periodo_inicial": date(2026, 9, 1),
+        "periodo_final": date(2026, 9, 30),
+        "diretorias_regionais": diretorias,
+    }
+
+    dados_modelo = {
+        "codigo_cadastro": "LOTE-001",
+        "nome": "Lote Norte",
+        "status": True,
     }
 
     with patch(
-        "apps.lote.repository.lote_repository.model_to_dict",
-        return_value={
-            "id": 10,
-            "nome": "Lote Centro",
-            "codigo_cadastro": "LOTE-001",
-            "status": True,
-        },
-    ) as model_to_dict_mock:
+        f"{MODULO_REPOSITORY}.model_to_dict",
+        return_value=dados_modelo.copy(),
+    ) as model_to_dict:
         resultado = repository.criar(
             dados=dados,
             usuario=usuario,
         )
 
-    model_mock.assert_called_once_with(
-        nome="Lote Centro",
+    model.assert_called_once_with(
         codigo_cadastro="LOTE-001",
-        empresa=empresa,
+        nome="Lote Norte",
         status=True,
+        empresa=empresa,
+        periodo_inicial=date(2026, 9, 1),
+        periodo_final=date(2026, 9, 30),
         criado_por=usuario,
         atualizado_por=usuario,
     )
 
-    lote_mock.full_clean.assert_called_once_with()
-    lote_mock.save.assert_called_once_with()
+    lote.full_clean.assert_called_once_with()
+    lote.save.assert_called_once_with()
 
-    assert vinculo_model_mock.call_count == 2
-    vinculo_model_mock.assert_any_call(
-        lote=lote_mock,
-        diretoria_regional=diretoria_regional_1,
-    )
-    vinculo_model_mock.assert_any_call(
-        lote=lote_mock,
-        diretoria_regional=diretoria_regional_2,
-    )
-
-    vinculo_model_mock.objects.bulk_create.assert_called_once_with(
+    vinculo_model.assert_has_calls(
         [
-            vinculo_1,
-            vinculo_2,
+            call(
+                lote=lote,
+                diretoria_regional=diretoria_um,
+            ),
+            call(
+                lote=lote,
+                diretoria_regional=diretoria_dois,
+            ),
         ]
     )
-
-    model_to_dict_mock.assert_called_once_with(lote_mock)
+    vinculo_model.objects.bulk_create.assert_called_once_with(
+        [vinculo_um, vinculo_dois],
+    )
+    model_to_dict.assert_called_once_with(lote)
 
     assert resultado == {
-        "id": 10,
-        "nome": "Lote Centro",
-        "codigo_cadastro": "LOTE-001",
+        **dados_modelo,
+        "empresa": empresa,
+        "diretorias_regionais": diretorias,
+        "uuid": lote.uuid,
+        "pk": 1,
+    }
+
+    assert "diretorias_regionais" in dados
+
+
+def test_atualiza_lote_com_diretorias_regionais() -> None:
+    """Deve atualizar o lote e sincronizar suas diretorias."""
+    repository = LoteRepository()
+    lote = Mock(spec=Lote)
+    usuario = Mock(spec=Usuario)
+    diretoria = Mock(spec=DiretoriaRegional)
+
+    dados = {
+        "nome": "Lote atualizado",
+        "status": False,
+        "diretorias_regionais": [diretoria],
+    }
+    resultado_esperado = {
+        "id": 1,
+        "nome": "Lote atualizado",
+        "status": False,
+    }
+
+    with (
+        patch.object(
+            repository,
+            "atualizar_diretorias_regionais",
+        ) as atualizar_diretorias,
+        patch.object(
+            repository,
+            "_serializar",
+            return_value=resultado_esperado,
+        ) as serializar,
+    ):
+        resultado = repository.atualizar(
+            lote=lote,
+            dados=dados,
+            usuario=usuario,
+        )
+
+    assert lote.nome == "Lote atualizado"
+    assert lote.status is False
+    assert lote.atualizado_por is usuario
+
+    atualizar_diretorias.assert_called_once_with(
+        lote=lote,
+        diretorias_regionais=[diretoria],
+        usuario=usuario,
+    )
+    lote.full_clean.assert_called_once_with()
+    assert lote.save.call_count == 2
+    serializar.assert_called_once_with(lote)
+
+    assert resultado == resultado_esperado
+
+
+def test_atualiza_lote_sem_diretorias_regionais() -> None:
+    """Deve atualizar o lote sem sincronizar as diretorias."""
+    repository = LoteRepository()
+    lote = Mock(spec=Lote)
+    usuario = Mock(spec=Usuario)
+
+    dados = {
+        "nome": "Lote atualizado",
         "status": True,
-        "empresa": empresa,
-        "diretorias_regionais": [
-            diretoria_regional_1,
-            diretoria_regional_2,
-        ],
-        "uuid": lote_uuid,
-        "pk": 10,
+    }
+    resultado_esperado = {
+        "id": 1,
+        "nome": "Lote atualizado",
+        "status": True,
     }
 
+    with (
+        patch.object(
+            repository,
+            "atualizar_diretorias_regionais",
+        ) as atualizar_diretorias,
+        patch.object(
+            repository,
+            "_serializar",
+            return_value=resultado_esperado,
+        ) as serializar,
+    ):
+        resultado = repository.atualizar(
+            lote=lote,
+            dados=dados,
+            usuario=usuario,
+        )
 
-@pytest.mark.django_db
-def test_cria_lote_sem_diretorias_regionais() -> None:
-    """Deve criar um lote sem vínculos quando nenhuma DRE é informada."""
+    atualizar_diretorias.assert_not_called()
+    lote.full_clean.assert_called_once_with()
+    assert lote.save.call_count == 2
+    serializar.assert_called_once_with(lote)
+
+    assert resultado == resultado_esperado
+
+
+def test_serializa_lote() -> None:
+    """Deve acrescentar o ID e o UUID aos dados serializados."""
     repository = LoteRepository()
-    usuario = criar_usuario_mock()
-    empresa = Mock()
-
-    lote_uuid = uuid4()
-    lote_mock = Mock(spec=Lote)
-    lote_mock.id = 10
-    lote_mock.uuid = lote_uuid
-    lote_mock.empresa = empresa
-    lote_mock.diretorias_regionais = []
-
-    model_mock = Mock(return_value=lote_mock)
-    repository.model = cast(
-        type[Lote],
-        model_mock,
-    )
-
-    vinculo_model_mock = Mock()
-    repository.vinculo_model = cast(
-        type[LoteDiretoriaRegional],
-        vinculo_model_mock,
-    )
-
-    dados: dict[str, Any] = {
-        "nome": "Lote Centro",
-        "codigo_cadastro": "LOTE-001",
-        "empresa": empresa,
-    }
+    lote = Mock(spec=Lote)
+    lote.id = 15
+    lote.uuid = uuid4()
 
     with patch(
-        "apps.lote.repository.lote_repository.model_to_dict",
-        return_value={},
-    ):
-        resultado = repository.criar(
-            dados=dados,
-            usuario=usuario,
-        )
+        f"{MODULO_REPOSITORY}.model_to_dict",
+        return_value={"nome": "Lote Norte"},
+    ) as model_to_dict:
+        resultado = repository._serializar(lote)
 
-    model_mock.assert_called_once_with(
-        nome="Lote Centro",
-        codigo_cadastro="LOTE-001",
-        empresa=empresa,
-        criado_por=usuario,
-        atualizado_por=usuario,
-    )
+    model_to_dict.assert_called_once_with(lote)
 
-    vinculo_model_mock.assert_not_called()
-    vinculo_model_mock.objects.bulk_create.assert_called_once_with([])
-
-    assert resultado["diretorias_regionais"] == []
-    assert resultado["empresa"] is empresa
-    assert resultado["uuid"] == lote_uuid
-    assert resultado["pk"] == 10
-
-
-@pytest.mark.django_db
-def test_criar_nao_altera_dados_originais() -> None:
-    """Deve preservar o dicionário recebido pelo repositório."""
-    repository = LoteRepository()
-    usuario = criar_usuario_mock()
-    empresa = Mock()
-
-    lote_mock = Mock(spec=Lote)
-    lote_mock.id = 10
-    lote_mock.uuid = uuid4()
-    lote_mock.empresa = empresa
-    lote_mock.diretorias_regionais = []
-
-    model_mock = Mock(return_value=lote_mock)
-    repository.model = cast(
-        type[Lote],
-        model_mock,
-    )
-
-    vinculo_model_mock = Mock()
-    repository.vinculo_model = cast(
-        type[LoteDiretoriaRegional],
-        vinculo_model_mock,
-    )
-
-    dados: dict[str, Any] = {
-        "nome": "Lote Centro",
-        "codigo_cadastro": "LOTE-001",
-        "empresa": empresa,
-        "diretorias_regionais": [],
+    assert resultado == {
+        "nome": "Lote Norte",
+        "id": 15,
+        "uuid": str(lote.uuid),
     }
-    dados_originais = dados.copy()
-
-    with patch(
-        "apps.lote.repository.lote_repository.model_to_dict",
-        return_value={},
-    ):
-        repository.criar(
-            dados=dados,
-            usuario=usuario,
-        )
-
-    assert dados == dados_originais
-
-
-@pytest.mark.django_db
-def test_criar_propaga_erro_de_validacao() -> None:
-    """Deve propagar o erro quando o lote não passa pela validação."""
-    repository = LoteRepository()
-    usuario = criar_usuario_mock()
-
-    lote_mock = Mock(spec=Lote)
-    lote_mock.full_clean.side_effect = ValidationError(
-        "Dados inválidos.",
-    )
-
-    model_mock = Mock(return_value=lote_mock)
-    repository.model = cast(
-        type[Lote],
-        model_mock,
-    )
-
-    vinculo_model_mock = Mock()
-    repository.vinculo_model = cast(
-        type[LoteDiretoriaRegional],
-        vinculo_model_mock,
-    )
-
-    dados: dict[str, Any] = {
-        "nome": "",
-        "codigo_cadastro": "LOTE-001",
-        "diretorias_regionais": [],
-    }
-
-    with pytest.raises(
-        ValidationError,
-        match="Dados inválidos",
-    ):
-        repository.criar(
-            dados=dados,
-            usuario=usuario,
-        )
-
-    lote_mock.full_clean.assert_called_once_with()
-    lote_mock.save.assert_not_called()
-    vinculo_model_mock.objects.bulk_create.assert_not_called()

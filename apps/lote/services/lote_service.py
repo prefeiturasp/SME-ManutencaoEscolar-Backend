@@ -5,6 +5,7 @@ from typing import Any, cast
 from apps.escola.models import DiretoriaRegional
 from apps.lote.constants import LoteErrorMessages
 from apps.lote.exceptions import DiretoriaRegionalJaVinculadaError
+from apps.lote.models import Lote
 from apps.lote.repository.lote_repository import LoteRepository
 from apps.usuarios.models.usuario import Usuario
 
@@ -83,6 +84,66 @@ class LoteService:
         dados_normalizados["codigo_cadastro"] = codigo_cadastro
 
         return self.repository.criar(
+            dados_normalizados,
+            usuario=usuario,
+        )
+
+    def atualizar(
+        self,
+        lote: Lote,
+        dados: dict[str, Any],
+        usuario: Usuario,
+    ) -> dict[str, Any]:
+        """Atualiza um lote existente e retorna seus dados serializados.
+
+        O nome e o código de cadastro são normalizados, e o usuário logado é
+        registrado como responsável pela atualização. Quando ``dados`` contém a
+        chave ``diretorias_regionais``, os vínculos informados são validados e
+        sincronizados dentro de uma transação.
+
+        Args:
+            lote (Lote): Instância do lote a ser atualizado.
+            dados (dict[str, Any]): Dados a serem aplicados na atualização,
+                podendo incluir as diretorias regionais em
+                ``diretorias_regionais``.
+            usuario (Usuario): Usuário logado responsável pela atualização.
+
+        Returns:
+            dict[str, Any]: Dados serializados do lote atualizado.
+
+        Raises:
+            DiretoriaRegionalJaVinculadaError: Quando uma ou mais diretorias
+                regionais informadas já estão vinculadas a outro lote.
+            ValidationError: Quando os dados do lote não passam pelas
+                validações definidas no modelo.
+            IntegrityError: Quando ocorre uma violação de integridade durante
+                a atualização do lote ou de seus vínculos.
+        """
+        dados_normalizados = dados.copy()
+
+        diretorias_regionais = cast(
+            list[DiretoriaRegional],
+            dados_normalizados.get("diretorias_regionais", []),
+        )
+
+        diretorias_regionais_vinculadas = (
+            self.repository._obter_diretorias_regionais_vinculadas(
+                diretorias_regionais,
+                lote_ignorado=lote,
+            )
+        )
+
+        if diretorias_regionais_vinculadas:
+            raise DiretoriaRegionalJaVinculadaError(
+                title=LoteErrorMessages.DIRETORIA_REGIONAL_VINCULADA_TITULO,
+                detail={
+                    "message": LoteErrorMessages.DIRETORIA_REGIONAL_VINCULADA,
+                    "vinculados": diretorias_regionais_vinculadas,
+                },
+            )
+
+        return self.repository.atualizar(
+            lote,
             dados_normalizados,
             usuario=usuario,
         )

@@ -86,9 +86,9 @@ class UnidadeEducacionalViewSet(viewsets.ReadOnlyModelViewSet):
         "diretoria_regional",
         "tipo_escola",
         "subprefeitura",
-        "diretoria_regional__vinculo_lote",
+    ).prefetch_related(
         "diretoria_regional__vinculo_lote__lote",
-    ).all()
+    )
     serializer_class = UnidadeEducacionalSerializer
     lookup_field = "uuid"
 
