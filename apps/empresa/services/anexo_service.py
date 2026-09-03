@@ -1,6 +1,7 @@
 """Serviços para os anexos de responsáveis técnicos."""
 
 from typing import Any
+from uuid import UUID
 
 from django.db import transaction
 
@@ -21,14 +22,23 @@ class AnexoResponsavelTecnicoService:
         self.repository = repository or AnexoResponsavelTecnicoRepository()
 
     @transaction.atomic
-    def salvar_arquivos(
+    def sincronizar_arquivos(
         self,
-        responsavel_id: int,
+        responsavel_uuid: str | UUID,
         arquivos: list[dict[str, Any]],
         usuario: Usuario | None = None,
     ) -> list[dict[str, Any]]:
-        """Sincroniza os anexos informados com os anexos do responsável."""
-        responsavel = ResponsavelTecnico.objects.get(pk=responsavel_id)
+        """Sincroniza os anexos informados com os anexos do responsável.
+
+        Args:
+            responsavel_uuid: UUID do responsável técnico.
+            arquivos: Anexos novos ou existentes que devem ser preservados.
+            usuario: Usuário responsável pela operação.
+
+        Returns:
+            Lista dos novos anexos criados.
+        """
+        responsavel = ResponsavelTecnico.objects.get(uuid=responsavel_uuid)
         anexos_uuids_preservados = [
             dados["uuid"]
             for dados in arquivos
@@ -56,9 +66,8 @@ class AnexoResponsavelTecnicoService:
         )
 
         self.repository.excluir_nao_preservados(
-            responsavel_id=responsavel_id,
+            responsavel_id=responsavel.id,
             uuids_preservados=anexos_uuids_preservados,
-            usuario=usuario,
         )
 
         return anexos_criados

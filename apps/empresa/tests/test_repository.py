@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.db.models.fields.files import FieldFile
 
 from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
 from apps.empresa.models import (
@@ -171,36 +172,63 @@ class TestAnexoResponsavelTecnicoRepository:
             }
         ]
 
-    def test_excluir_nao_preservados_atualiza_anexos(self):
-        """Deve excluir logicamente apenas os anexos não preservados."""
+    def test_excluir_nao_preservados_remove_arquivos_e_registros(self):
+        """Deve excluir do storage e banco os anexos não preservados."""
         repository = AnexoResponsavelTecnicoRepository()
         uuid_preservado = AnexoResponsavelTecnico().uuid
-        usuario = Mock()
         queryset = Mock()
+        queryset_filtrado = Mock()
+        anexo = Mock(spec=AnexoResponsavelTecnico)
+        queryset.exclude.return_value = queryset_filtrado
+        queryset_filtrado.__iter__ = Mock(return_value=iter([anexo]))
+        queryset_filtrado.delete.return_value = (
+            1,
+            {"empresa.AnexoResponsavelTecnico": 1},
+        )
 
-        with (
-            patch.object(
-                AnexoResponsavelTecnico.objects,
-                "filter",
-                return_value=queryset,
-            ) as filter_mock,
-            patch(
-                "apps.empresa.repository.anexo_repository.timezone.now"
-            ) as now_mock,
-        ):
-            quantidade = repository.excluir_nao_preservados(
+        with patch.object(
+            AnexoResponsavelTecnico.objects,
+            "filter",
+            return_value=queryset,
+        ) as filter_mock:
+            resultado = repository.excluir_nao_preservados(
                 responsavel_id=1,
                 uuids_preservados=[uuid_preservado],
-                usuario=usuario,
             )
 
         filter_mock.assert_called_once_with(responsavel_tecnico_id=1)
         queryset.exclude.assert_called_once_with(uuid__in=[uuid_preservado])
-        queryset.exclude.return_value.update.assert_called_once_with(
-            deletado_em=now_mock.return_value,
-            deletado_por=usuario,
+        anexo.arquivo.delete.assert_called_once_with(save=False)
+        queryset_filtrado.delete.assert_called_once_with()
+        assert resultado is None
+
+    @pytest.mark.django_db
+    def test_excluir_nao_preservados_remove_fisicamente_do_banco(
+        self, responsavel_payload_valido
+    ):
+        """Deve remover o registro inclusive do manager sem filtro."""
+        responsavel = ResponsavelTecnico.objects.create(
+            **responsavel_payload_valido
         )
-        assert quantidade == queryset.exclude.return_value.update.return_value
+        anexo = AnexoResponsavelTecnico.objects.create(
+            responsavel_tecnico=responsavel,
+            nome="art.pdf",
+            arquivo="anexos_responsaveis_tecnicos/art.pdf",
+        )
+
+        with patch.object(FieldFile, "delete") as arquivo_delete:
+            resultado = (
+                AnexoResponsavelTecnicoRepository().excluir_nao_preservados(
+                    responsavel_id=responsavel.id,
+                    uuids_preservados=[],
+                )
+            )
+
+        arquivo_delete.assert_called_once_with(save=False)
+        assert resultado is None
+        assert not AnexoResponsavelTecnico.dm_objects.filter(
+            pk=anexo.pk
+        ).exists()
 
 
 class TestResponsavelTecnicoRepository:

@@ -3,10 +3,7 @@
 from typing import Any
 from uuid import UUID
 
-from django.utils import timezone
-
 from apps.empresa.models import AnexoResponsavelTecnico
-from apps.usuarios.models import Usuario
 
 
 class AnexoResponsavelTecnicoRepository:
@@ -34,24 +31,22 @@ class AnexoResponsavelTecnicoRepository:
         self,
         responsavel_id: int,
         uuids_preservados: list[str | UUID],
-        usuario: Usuario | None = None,
-    ) -> int:
-        """Exclui logicamente os anexos que não foram preservados.
+    ) -> None:
+        """Exclui fisicamente os anexos que não foram preservados.
 
         Args:
             responsavel_id: ID do responsável técnico dono dos anexos.
             uuids_preservados: UUIDs dos anexos que devem permanecer ativos.
-            usuario: Usuário responsável pela exclusão.
-
-        Returns:
-            Quantidade de anexos marcados como deletados.
 
         """
-        return (
-            self.model.objects.filter(responsavel_tecnico_id=responsavel_id)
-            .exclude(uuid__in=uuids_preservados)
-            .update(deletado_em=timezone.now(), deletado_por=usuario)
-        )
+        anexos_nao_preservados = self.model.objects.filter(
+            responsavel_tecnico_id=responsavel_id
+        ).exclude(uuid__in=uuids_preservados)
+
+        for anexo in anexos_nao_preservados:
+            anexo.arquivo.delete(save=False)
+
+        anexos_nao_preservados.delete()
 
     @staticmethod
     def _serializar(anexo: AnexoResponsavelTecnico) -> dict[str, Any]:

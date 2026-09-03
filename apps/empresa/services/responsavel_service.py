@@ -161,15 +161,13 @@ class ResponsavelTecnicoService:
         Returns:
             Lista de responsáveis com anexos associados.
         """
-        if any(arquivos_por_tipo.values()):
-            for responsavel in responsaveis:
-                arquivos = arquivos_por_tipo.get(responsavel["tipo"], [])
-                if arquivos:
-                    responsavel["anexos"] = self.anexo_service.salvar_arquivos(
-                        responsavel_id=responsavel["id"],
-                        arquivos=arquivos,
-                        usuario=usuario,
-                    )
+        for responsavel in responsaveis:
+            tipo = responsavel["tipo"]
+            responsavel["anexos"] = self.anexo_service.sincronizar_arquivos(
+                responsavel_uuid=responsavel["uuid"],
+                arquivos=arquivos_por_tipo.get(tipo, []),
+                usuario=usuario,
+            )
         return responsaveis
 
     @staticmethod
