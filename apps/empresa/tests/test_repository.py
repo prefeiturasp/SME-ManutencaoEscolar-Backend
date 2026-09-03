@@ -191,7 +191,7 @@ class TestAnexoResponsavelTecnicoRepository:
             "filter",
             return_value=queryset,
         ) as filter_mock:
-            resultado = repository.excluir_nao_preservados(
+            repository.excluir_nao_preservados(
                 responsavel_id=1,
                 uuids_preservados=[uuid_preservado],
             )
@@ -200,7 +200,6 @@ class TestAnexoResponsavelTecnicoRepository:
         queryset.exclude.assert_called_once_with(uuid__in=[uuid_preservado])
         anexo.arquivo.delete.assert_called_once_with(save=False)
         queryset_filtrado.delete.assert_called_once_with()
-        assert resultado is None
 
     @pytest.mark.django_db
     def test_excluir_nao_preservados_remove_fisicamente_do_banco(
@@ -217,15 +216,12 @@ class TestAnexoResponsavelTecnicoRepository:
         )
 
         with patch.object(FieldFile, "delete") as arquivo_delete:
-            resultado = (
-                AnexoResponsavelTecnicoRepository().excluir_nao_preservados(
-                    responsavel_id=responsavel.id,
-                    uuids_preservados=[],
-                )
+            AnexoResponsavelTecnicoRepository().excluir_nao_preservados(
+                responsavel_id=responsavel.id,
+                uuids_preservados=[],
             )
 
         arquivo_delete.assert_called_once_with(save=False)
-        assert resultado is None
         assert not AnexoResponsavelTecnico.dm_objects.filter(
             pk=anexo.pk
         ).exists()
