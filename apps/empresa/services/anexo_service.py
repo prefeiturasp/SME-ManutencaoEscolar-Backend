@@ -5,6 +5,7 @@ from uuid import UUID
 
 from django.db import transaction
 
+from apps.core.services.anexo_service import AnexoService
 from apps.empresa.models import AnexoResponsavelTecnico, ResponsavelTecnico
 from apps.empresa.repository.anexo_repository import (
     AnexoResponsavelTecnicoRepository,
@@ -18,8 +19,10 @@ class AnexoResponsavelTecnicoService:
     def __init__(
         self,
         repository: AnexoResponsavelTecnicoRepository | None = None,
+        anexo_service: AnexoService | None = None,
     ) -> None:
         self.repository = repository or AnexoResponsavelTecnicoRepository()
+        self.anexo_service = anexo_service or AnexoService()
 
     @transaction.atomic
     def sincronizar_arquivos(
@@ -44,23 +47,26 @@ class AnexoResponsavelTecnicoService:
             for dados in arquivos
             if dados.get("uuid") is not None
         ]
-        novos_anexos = []
+        anexos_criados = []
 
         for dados in arquivos:
             if dados.get("uuid") is None:
                 arquivo = dados["arquivo"]
+                dados_anexo = self.anexo_service.validar_e_preparar_anexo(
+                    arquivo=arquivo,
+                    id_usuario=usuario.id if usuario is not None else None,
+                )
                 anexo = AnexoResponsavelTecnico(
                     responsavel_tecnico=responsavel,
-                    nome=arquivo.name,
+                    nome_original=dados_anexo["nome_original"],
+                    tipo=dados_anexo["tipo"],
+                    tipo_mime=dados_anexo["tipo_mime"],
+                    tamanho_bytes=dados_anexo["tamanho_bytes"],
+                    arquivo=dados_anexo["arquivo"],
                     criado_por=usuario,
                 )
-                anexo.arquivo.save(arquivo.name, arquivo, save=False)
-                anexo.arquivo_url = anexo.arquivo.url
-                novos_anexos.append(anexo)
+                anexos_criados.append(self.repository.criar(anexo))
 
-        anexos_criados = (
-            self.repository.bulk_criar(novos_anexos) if novos_anexos else []
-        )
         anexos_uuids_preservados.extend(
             anexo["uuid"] for anexo in anexos_criados
         )

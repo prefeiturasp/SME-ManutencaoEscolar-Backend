@@ -1,6 +1,6 @@
 """Testes para o repositório de Empresa."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -148,29 +148,30 @@ class TestEmpresaRepository:
 class TestAnexoResponsavelTecnicoRepository:
     """Testes para o repositório de anexos de responsáveis técnicos."""
 
-    def test_bulk_criar_persiste_e_serializa_anexos(self):
-        """Deve persistir os anexos e devolver seus dados serializados."""
+    def test_criar_persiste_e_serializa_anexo(self):
+        """Deve persistir o anexo e devolver seus dados serializados."""
         repository = AnexoResponsavelTecnicoRepository()
         anexo = AnexoResponsavelTecnico(
-            nome="art.pdf",
-            arquivo_url="https://minio.local/art.pdf",
+            nome_original="art.pdf",
         )
 
-        with patch.object(
-            AnexoResponsavelTecnico.objects,
-            "bulk_create",
-            return_value=[anexo],
-        ) as bulk_create:
-            resultado = repository.bulk_criar([anexo])
+        with (
+            patch.object(anexo, "save") as save,
+            patch.object(
+                type(anexo),
+                "url",
+                return_value="https://minio.local/art.pdf",
+                new_callable=PropertyMock,
+            ),
+        ):
+            resultado = repository.criar(anexo)
 
-        bulk_create.assert_called_once_with([anexo])
-        assert resultado == [
-            {
-                "uuid": str(anexo.uuid),
-                "nome": "art.pdf",
-                "arquivo_url": "https://minio.local/art.pdf",
-            }
-        ]
+        save.assert_called_once_with()
+        assert resultado == {
+            "uuid": str(anexo.uuid),
+            "nome": "art.pdf",
+            "arquivo_url": "https://minio.local/art.pdf",
+        }
 
     def test_excluir_nao_preservados_remove_arquivos_e_registros(self):
         """Deve excluir do storage e banco os anexos não preservados."""
@@ -211,7 +212,8 @@ class TestAnexoResponsavelTecnicoRepository:
         )
         anexo = AnexoResponsavelTecnico.objects.create(
             responsavel_tecnico=responsavel,
-            nome="art.pdf",
+            nome_original="art.pdf",
+            tipo="documento",
             arquivo="anexos_responsaveis_tecnicos/art.pdf",
         )
 

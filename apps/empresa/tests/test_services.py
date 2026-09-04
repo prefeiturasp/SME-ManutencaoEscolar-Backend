@@ -1,13 +1,14 @@
 """Testes para os serviços de Empresa."""
 
-from unittest.mock import Mock, PropertyMock, patch
+from unittest.mock import Mock, patch
 from uuid import uuid4
 
 import pytest
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db.models.fields.files import FieldFile
 
+from apps.core.constants import TipoArquivo
+from apps.core.services.anexo_service import AnexoService
 from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.models import (
     Empresa,
@@ -33,57 +34,66 @@ class TestAnexoResponsavelTecnicoService:
     """Testes para o upload dos anexos de responsáveis técnicos."""
 
     @pytest.mark.django_db
-    def test_sincronizar_arquivos_envia_ao_storage_e_persiste_url(
+    def test_sincronizar_arquivos_prepara_e_persiste_anexo(
         self, usuario_ativo
     ):
-        """Deve usar o FileField configurado com MinIO e guardar sua URL."""
+        """Deve preparar os metadados e delegar a persistência do anexo."""
         repository = Mock(spec=AnexoResponsavelTecnicoRepository)
-        repository.bulk_criar.side_effect = lambda anexos: [
-            {
-                "uuid": str(anexo.uuid),
-                "nome": anexo.nome,
-                "arquivo_url": anexo.arquivo_url,
-            }
-            for anexo in anexos
-        ]
-        service = AnexoResponsavelTecnicoService(repository=repository)
+        repository.criar.return_value = {
+            "uuid": "uuid-anexo",
+            "nome": "art.pdf",
+            "arquivo_url": "https://minio.local/art.pdf",
+        }
+        anexo_service = Mock(spec=AnexoService)
+        service = AnexoResponsavelTecnicoService(
+            repository=repository,
+            anexo_service=anexo_service,
+        )
         responsavel = ResponsavelTecnico(id=1)
-        arquivo = SimpleUploadedFile("art.pdf", b"conteudo")
-        url = "https://minio.local/anexos_responsaveis_tecnicos/art.pdf"
-
-        with (
-            patch(
-                "apps.empresa.services.anexo_service."
-                "ResponsavelTecnico.objects.get",
-                return_value=responsavel,
-            ),
-            patch.object(FieldFile, "save") as storage_save,
-            patch.object(
-                FieldFile, "url", new_callable=PropertyMock
-            ) as file_url,
+        arquivo = SimpleUploadedFile(
+            "art.pdf", b"conteudo", content_type="application/pdf"
+        )
+        arquivo.name = "uuid-gerado.pdf"
+        anexo_service.validar_e_preparar_anexo.return_value = {
+            "nome_original": "art.pdf",
+            "tipo": TipoArquivo.DOCUMENTO,
+            "tipo_mime": "application/pdf",
+            "tamanho_bytes": len(b"conteudo"),
+            "arquivo": arquivo,
+            "usuario_id": usuario_ativo.id,
+        }
+        with patch(
+            "apps.empresa.services.anexo_service."
+            "ResponsavelTecnico.objects.get",
+            return_value=responsavel,
         ):
-            file_url.return_value = url
             resultado = service.sincronizar_arquivos(
                 responsavel_uuid=responsavel.uuid,
                 arquivos=[{"arquivo": arquivo}],
                 usuario=usuario_ativo,
             )
 
-        storage_save.assert_called_once_with("art.pdf", arquivo, save=False)
-        anexos = repository.bulk_criar.call_args.args[0]
-        assert len(anexos) == 1
-        anexo = anexos[0]
-        assert anexo.arquivo_url == url
+        anexo_service.validar_e_preparar_anexo.assert_called_once_with(
+            arquivo=arquivo,
+            id_usuario=usuario_ativo.id,
+        )
+        anexo = repository.criar.call_args.args[0]
+        assert anexo.nome_original == "art.pdf"
+        assert anexo.tipo == TipoArquivo.DOCUMENTO
+        assert anexo.tipo_mime == arquivo.content_type
+        assert anexo.tamanho_bytes == len(b"conteudo")
+        assert anexo.arquivo.name == "uuid-gerado.pdf"
+        assert anexo.criado_por == usuario_ativo
         assert resultado == [
             {
-                "uuid": str(anexo.uuid),
+                "uuid": "uuid-anexo",
                 "nome": "art.pdf",
-                "arquivo_url": url,
+                "arquivo_url": "https://minio.local/art.pdf",
             }
         ]
         repository.excluir_nao_preservados.assert_called_once_with(
             responsavel_id=responsavel.id,
-            uuids_preservados=[str(anexo.uuid)],
+            uuids_preservados=["uuid-anexo"],
         )
 
     @pytest.mark.django_db

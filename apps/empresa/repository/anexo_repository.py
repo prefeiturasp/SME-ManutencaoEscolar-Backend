@@ -11,21 +11,17 @@ class AnexoResponsavelTecnicoRepository:
 
     model = AnexoResponsavelTecnico
 
-    def bulk_criar(
-        self, anexos: list[AnexoResponsavelTecnico]
-    ) -> list[dict[str, Any]]:
-        """
-        Persista os metadados de arquivos já enviados ao storage.
+    def criar(self, anexo: AnexoResponsavelTecnico) -> dict[str, Any]:
+        """Persistir e serializar um anexo.
 
         Args:
-            anexos: Instâncias de ``AnexoResponsavelTecnico`` a persistir.
+            anexo: Anexo que será persistido.
 
         Returns:
-            Os dados dos anexos persistidos em formato de dicionário.
-
+            Dados serializados do anexo criado.
         """
-        criados = self.model.objects.bulk_create(anexos)
-        return [self._serializar(anexo) for anexo in criados]
+        anexo.save()
+        return self._serializar(anexo)
 
     def excluir_nao_preservados(
         self,
@@ -53,6 +49,6 @@ class AnexoResponsavelTecnicoRepository:
         """Serializa um anexo em formato de dicionário."""
         return {
             "uuid": str(anexo.uuid),
-            "nome": anexo.nome,
-            "arquivo_url": anexo.arquivo_url,
+            "nome": anexo.nome_original,
+            "arquivo_url": anexo.url,
         }

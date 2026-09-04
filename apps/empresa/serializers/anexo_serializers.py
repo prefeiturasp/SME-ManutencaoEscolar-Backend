@@ -25,7 +25,8 @@ class AnexoResponsavelTecnicoSerializer(serializers.ModelSerializer):
             )
         ],
     )
-    arquivo_url = serializers.URLField(read_only=True)
+    nome = serializers.CharField(source="nome_original", read_only=True)
+    arquivo_url = serializers.URLField(source="url", read_only=True)
     anexado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(
             source="criado_por",
