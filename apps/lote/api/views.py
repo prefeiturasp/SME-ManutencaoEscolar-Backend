@@ -43,7 +43,7 @@ class LoteViewSet(viewsets.ModelViewSet):
     Delegando regras de negócio ao LotesService.
     """
 
-    http_method_names = ["get", "post", "options"]
+    http_method_names = ["get", "post", "patch", "options"]
     queryset = Lote.objects.all()
     lookup_field = "uuid"
 
@@ -53,14 +53,14 @@ class LoteViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def _obter_lote(serializer: BaseSerializer) -> Lote:
-        """Retorna a instância de serviço do serializer."""
+        """Retorna a instância de lote do serializer."""
         lote = serializer.instance
 
         if not isinstance(lote, Lote):
             raise DRFValidationError(
                 {
                     "title": "Erro",
-                    "detail": "Serviço inválido ou não encontrado.",
+                    "detail": "Lote inválido ou não encontrado.",
                 }
             )
 
@@ -71,18 +71,9 @@ class LoteViewSet(viewsets.ModelViewSet):
         super().__init__(**kwargs)
         self.service = LoteService()
 
-    def _obter_usuario(self) -> Usuario:
-        """Retorna o usuário autenticado."""
-        usuario = self.request.user
-
-        if not isinstance(usuario, Usuario):
-            raise NotAuthenticated("Usuário não identificado.")
-
-        return usuario
-
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer adequado para cada ação."""
-        if self.action == "create":
+        if self.action in ("create", "partial_update"):
             return LoteCriarSerializer
 
         return LoteSerializer
@@ -119,3 +110,45 @@ class LoteViewSet(viewsets.ModelViewSet):
             ) from exc
 
         serializer.instance = lote
+
+    def perform_update(self, serializer: BaseSerializer) -> None:
+        """Atualiza um lote delegando as regras ao service."""
+        usuario = self._obter_usuario()
+        lote = self._obter_lote(serializer)
+
+        try:
+            self.service.atualizar(
+                lote=lote,
+                dados=serializer.validated_data,
+                usuario=usuario,
+            )
+        except DiretoriaRegionalJaVinculadaError as exc:
+            raise DRFValidationError(
+                {
+                    "title": exc.title,
+                    "detail": exc.detail,
+                }
+            ) from exc
+        except DjangoValidationError as exc:
+            if hasattr(exc, "message_dict"):
+                raise DRFValidationError(exc.message_dict) from exc
+
+            raise DRFValidationError(exc.messages) from exc
+        except Exception as exc:
+            raise LoteInstabilidadeError(
+                {
+                    "title": "Erro",
+                    "detail": LoteErrorMessages.INSTABILIDADE,
+                }
+            ) from exc
+
+        serializer.instance = lote
+
+    def _obter_usuario(self) -> Usuario:
+        """Retorna o usuário autenticado."""
+        usuario = self.request.user
+
+        if not isinstance(usuario, Usuario):
+            raise NotAuthenticated("Usuário não identificado.")
+
+        return usuario

@@ -21,7 +21,15 @@ const empresa = {
   numero: Cypress.env('NUMERO'),
   complemento: Cypress.env('COMPLEMENTO'),
   cidade: Cypress.env('CIDADE'),
-  estado: Cypress.env('ESTADO')
+  estado: Cypress.env('ESTADO'),
+  responsaveis_tecnicos: [
+    {
+      tipo: 'preposto',
+      nome: faker.person.fullName(),
+      email: faker.internet.email(),
+      telefone: faker.string.numeric(11)
+    }
+  ]
 }
 
 Dado('que possuo um token de acesso', function () {

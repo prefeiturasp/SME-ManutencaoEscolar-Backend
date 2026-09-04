@@ -65,7 +65,7 @@ class LoteDiretoriaRegional(BaseModel):
         on_delete=models.CASCADE,
         related_name="vinculos_diretoria_regional",
     )
-    diretoria_regional = models.OneToOneField(
+    diretoria_regional = models.ForeignKey(
         "escola.DiretoriaRegional",
         verbose_name="Diretoria Regional",
         on_delete=models.PROTECT,
