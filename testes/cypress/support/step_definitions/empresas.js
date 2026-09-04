@@ -79,3 +79,12 @@ Quando('filtro por {string} inexistente na empresa', (campo) => {
 Então('o sistema não busca por {string} no cadastro de emrpesa', () => {
   cy.validar_dados_nao_encontrados_empresa()
 })
+
+Quando('crio cadastro com responsável técnico {string}',
+  (tipoResponsavel) => {
+    cy.criar_empresa_responsavel_tecnico(tipoResponsavel)
+})
+
+Então('o sistema salva a empresa com responsável técnico', function () { 
+  cy.validar_cadastro_empresa()
+})

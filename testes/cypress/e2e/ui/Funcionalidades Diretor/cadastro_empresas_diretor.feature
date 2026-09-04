@@ -49,3 +49,14 @@ Funcionalidade: Cadastro de Empresa
       | Número       | numero       |
       | Cidade       | cidade       |
       | Estado       | estado       |
+
+  Esquema do Cenário: Cadastrar responsável técnico: <caso>
+    E acesso a tela Empresas
+    Quando crio cadastro com responsável técnico "<tipo>"
+    Então o sistema salva a empresa com responsável técnico
+
+    Exemplos:
+      | tipo                | caso                   |
+      | Preposto            | Preposto               |
+      | Engenheiro Civil    | Engenheiro Civil       |
+      | Engenheiro Elétrico | Engenheiro Eletricista |
