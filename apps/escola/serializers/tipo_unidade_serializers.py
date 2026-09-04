@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Serializers de Tipo de Escola."""
 
 from rest_framework import serializers
 

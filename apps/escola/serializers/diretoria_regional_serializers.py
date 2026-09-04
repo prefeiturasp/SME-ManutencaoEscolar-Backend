@@ -1,4 +1,4 @@
-"""_summary_."""
+"""Serializers de DiretoriaRegional."""
 
 from rest_framework import serializers
 

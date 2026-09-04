@@ -1,30 +1,61 @@
-"""Serializers do app escola."""
+"""Serializers de UnidadeEducacional."""
 
 from rest_framework import serializers
 
+from apps.escola.models.diretoria_regional import DiretoriaRegional
+from apps.escola.models.subprefeitura import Subprefeitura
+from apps.escola.models.tipos_escola import TipoEscola
 from apps.escola.models.unidade_educacional import (
     DadosUnidadeEducacional,
     Unidadeeducacional,
 )
-from apps.escola.serializers.diretoria_regional_serializers import (
-    DiretoriaRegionalSerializer,
-)
-from apps.escola.serializers.subprefeitura_serializers import (
-    SubprefeituraSerializer,
-)
-from apps.escola.serializers.tipo_unidade_serializers import (
-    TipoEscolaSerializer,
-)
+from apps.lote.models import Lote
 
 
-class LoteUnidadeEducacionalSerializer(serializers.Serializer):
-    """Serializa os dados do lote associado à unidade educacional."""
+class TipoEscolaUnidadeEducacionalSerializer(serializers.ModelSerializer):
+    """Serializa os dados do tipo de escola."""
 
-    id = serializers.IntegerField()
-    uuid = serializers.UUIDField()
-    codigo_cadastro = serializers.CharField()
-    nome = serializers.CharField()
-    status = serializers.BooleanField()
+    class Meta:
+        model = TipoEscola
+        fields = (
+            "uuid",
+            "sigla",
+        )
+
+
+class DiretoriaRegionalUnidadeEducacionalSerializer(
+    serializers.ModelSerializer
+):
+    """Serializa os dados resumidos da diretoria regional."""
+
+    class Meta:
+        model = DiretoriaRegional
+        fields = (
+            "id",
+            "nome_curto",
+        )
+
+
+class SubprefeituraUnidadeEducacionalSerializer(serializers.ModelSerializer):
+    """Serializa os dados das subprefeituras."""
+
+    class Meta:
+        model = Subprefeitura
+        fields = (
+            "uuid",
+            "nome",
+        )
+
+
+class LoteUnidadeEducacionalSerializer(serializers.ModelSerializer):
+    """Serializa o lote associado à unidade educacional."""
+
+    class Meta:
+        model = Lote
+        fields = (
+            "uuid",
+            "nome",
+        )
 
 
 class DadosUnidadeEducacionalSerializer(serializers.ModelSerializer):
@@ -47,10 +78,12 @@ class DadosUnidadeEducacionalSerializer(serializers.ModelSerializer):
 class UnidadeEducacionalSerializer(serializers.ModelSerializer):
     """Serializa os dados das unidades educacionais e seus relacionamentos."""
 
-    diretoria_regional = DiretoriaRegionalSerializer(read_only=True)
-    tipo_escola = TipoEscolaSerializer(read_only=True)
-    subprefeitura = SubprefeituraSerializer(read_only=True)
-    lote = serializers.SerializerMethodField()
+    diretoria_regional = DiretoriaRegionalUnidadeEducacionalSerializer(
+        read_only=True
+    )
+    tipo_escola = TipoEscolaUnidadeEducacionalSerializer(read_only=True)
+    subprefeitura = SubprefeituraUnidadeEducacionalSerializer(read_only=True)
+    lote = LoteUnidadeEducacionalSerializer(read_only=True)
     dados = DadosUnidadeEducacionalSerializer(read_only=True)
 
     class Meta:
@@ -68,22 +101,31 @@ class UnidadeEducacionalSerializer(serializers.ModelSerializer):
             "dados",
         )
 
-    def get_lote(
-        self,
-        obj: Unidadeeducacional,
-    ) -> dict | None:
-        """Retorna o lote associado à diretoria regional da unidade."""
-        lote_diretoria = obj.diretoria_regional.vinculo_lote.filter(
-            lote__status=True
-        ).first()
 
-        if not lote_diretoria:
-            return None
+class UnidadeEducacionalListSerializer(
+    serializers.ModelSerializer,
+):
+    """Serializa unidades educacionais para listagem."""
 
-        lote = getattr(
-            lote_diretoria,
+    tipo_escola = TipoEscolaUnidadeEducacionalSerializer(read_only=True)
+
+    diretoria_regional = DiretoriaRegionalUnidadeEducacionalSerializer(
+        read_only=True,
+    )
+
+    subprefeitura = SubprefeituraUnidadeEducacionalSerializer(read_only=True)
+
+    lote = LoteUnidadeEducacionalSerializer(read_only=True)
+
+    class Meta:
+        model = Unidadeeducacional
+        fields = (
+            "uuid",
+            "codigo_eol",
+            "nome",
+            "tipo_escola",
+            "diretoria_regional",
+            "subprefeitura",
             "lote",
-            None,
+            "status",
         )
-
-        return LoteUnidadeEducacionalSerializer(lote).data
