@@ -1,16 +1,22 @@
 """Testes para os serializers de Empresa."""
 
 from unittest.mock import patch
+from uuid import uuid4
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.exceptions import ValidationError
 
+from apps.core.constants import MAPA_EXTENSOES_TIPO_ARQUIVO
 from apps.core.exceptions import (
     CepInvalidoError,
     CnpjInvalidoError,
     LinkRastreioInvalidoError,
 )
 from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.serializers.anexo_serializers import (
+    AnexoResponsavelTecnicoSerializer,
+)
 from apps.empresa.serializers.empresa_serializers import (
     EmpresaCriarAtualizarSerializer,
     EmpresaSerializer,
@@ -20,6 +26,52 @@ from apps.empresa.serializers.responsavel_serializers import (
 )
 
 pytestmark = pytest.mark.django_db
+
+
+class TestAnexoResponsavelTecnicoSerializer:
+    """Testes para o serializer de anexos do responsável técnico."""
+
+    def test_deve_expor_campos_do_frontend(self):
+        """Deve expor os nomes esperados pelo frontend."""
+        serializer = AnexoResponsavelTecnicoSerializer()
+
+        assert set(serializer.fields.keys()) == {
+            "uuid",
+            "nome",
+            "arquivo_url",
+            "arquivo",
+            "anexado_por",
+            "anexado_em",
+        }
+
+    def test_deve_manter_uuid_de_arquivo_ja_salvo(self):
+        """Deve encaminhar o UUID recebido para a sincronização dos anexos."""
+        uuid = uuid4()
+
+        serializer = AnexoResponsavelTecnicoSerializer(data={"uuid": uuid})
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data == {"uuid": uuid}
+
+    @pytest.mark.parametrize(
+        "extensao",
+        MAPA_EXTENSOES_TIPO_ARQUIVO,
+    )
+    def test_deve_aceitar_formatos_de_arquivo_suportados(self, extensao):
+        """Deve aceitar todas as extensões configuradas no mapa global."""
+        arquivo = SimpleUploadedFile(f"documento.{extensao}", b"conteudo")
+        serializer = AnexoResponsavelTecnicoSerializer(data=arquivo)
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data == {"arquivo": arquivo}
+
+    def test_deve_rejeitar_formato_de_arquivo_nao_suportado(self):
+        """Deve rejeitar extensões diferentes das permitidas."""
+        arquivo = SimpleUploadedFile("documento.docx", b"conteudo")
+        serializer = AnexoResponsavelTecnicoSerializer(data=arquivo)
+
+        assert not serializer.is_valid()
+        assert "arquivo" in serializer.errors
 
 
 class TestEmpresaSerializer:
@@ -63,6 +115,21 @@ class TestEmpresaCriarAtualizarSerializer:
         )
 
         assert serializer.is_valid(), serializer.errors
+
+    def test_deve_aceitar_lista_de_arquivos_do_responsavel(
+        self, responsavel_tecnico_payload_valido
+    ):
+        """Deve aceitar os arquivos puros enviados em cada responsável."""
+        arquivo = SimpleUploadedFile("art.pdf", b"conteudo")
+        serializer = ResponsavelTecnicoSerializer(
+            data={
+                **responsavel_tecnico_payload_valido,
+                "arquivos": [arquivo],
+            }
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["anexos"] == [{"arquivo": arquivo}]
 
     @pytest.mark.parametrize(
         ("campo", "valor_invalido"),
@@ -214,6 +281,7 @@ class TestResponsavelTecnicoSerializer:
             "numero_crea",
             "telefone",
             "numero_art",
+            "arquivos",
             "criado_por",
             "criado_em",
             "atualizado_por",
@@ -241,6 +309,20 @@ class TestResponsavelTecnicoSerializer:
 
         assert not serializer.is_valid()
         assert campo in serializer.errors
+
+    @pytest.mark.parametrize(
+        "tipo",
+        ["engenheiro_civil", "engenheiro_eletricista"],
+    )
+    def test_deve_exigir_arquivos_para_engenheiros(
+        self, responsavel_tecnico_payload_valido, tipo
+    ):
+        """Engenheiros devem informar anexos ao menos."""
+        payload = {**responsavel_tecnico_payload_valido, "tipo": tipo}
+        serializer = ResponsavelTecnicoSerializer(data=payload)
+
+        assert not serializer.is_valid()
+        assert "arquivos" in serializer.errors
 
     def test_valida_telefone_lanca_excecao(self):
         """Deve lançar exceção ao validar telefone com formato inválido."""

@@ -39,7 +39,7 @@ def test_enviar_arquivo_valido_prepara_metadados_e_delega_ao_repository(
     assert upload.name == "uuid-gerado.pdf"
     mock_repository_anexo.criar.assert_called_once_with(
         nome_original="documento.pdf",
-        tipo=MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
+        tipo=MAPA_EXTENSOES_TIPO_ARQUIVO["pdf"],
         tipo_mime="application/pdf",
         tamanho_bytes=8,
         arquivo=upload,
@@ -61,6 +61,23 @@ def test_enviar_arquivo_nao_envia_quando_usuario_nao_existe(
     ):
         anexo_service.enviar_arquivo(arquivo, id_usuario=999)
 
+    mock_repository_anexo.criar.assert_not_called()
+
+
+def test_validar_e_preparar_anexo_rejeita_usuario_nao_informado(
+    anexo_service, mock_repository_anexo, arquivo
+):
+    """Verifica se rejeita a preparação quando o usuário não é informado."""
+    with (
+        patch(
+            "apps.core.services.anexo_service.UsuarioRepository."
+            "usuario_existe_por_id"
+        ) as usuario_existe,
+        pytest.raises(UsuarioNaoEncontradoError),
+    ):
+        anexo_service.validar_e_preparar_anexo(arquivo, id_usuario=None)
+
+    usuario_existe.assert_not_called()
     mock_repository_anexo.criar.assert_not_called()
 
 
@@ -195,7 +212,7 @@ def test_enviar_arquivo_rejeita_extensao_nao_permitida(
     mock_repository_anexo.criar.assert_not_called()
 
 
-def test_salvar_remove_caminho_do_nome_e_inferir_mime(
+def test_preparar_anexo_remove_caminho_do_nome_e_infere_mime(
     anexo_service, mock_repository_anexo
 ):
     """Verifica se normaliza o nome e identifica o MIME do arquivo."""
@@ -207,22 +224,50 @@ def test_salvar_remove_caminho_do_nome_e_inferir_mime(
         "_gerar_nome_arquivo",
         return_value="uuid-gerado.pdf",
     ):
-        anexo_service._salvar(
+        resultado = anexo_service._preparar_anexo(
             arquivo=upload,
-            tipo=MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
+            tipo=MAPA_EXTENSOES_TIPO_ARQUIVO["pdf"],
             nome_original="/caminho/arquivo.pdf",
             tamanho_bytes=9,
             id_usuario=10,
         )
 
-    mock_repository_anexo.criar.assert_called_once_with(
-        nome_original="arquivo.pdf",
-        tipo=MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
-        tipo_mime="application/pdf",
-        tamanho_bytes=9,
-        arquivo=upload,
-        usuario_id=10,
-    )
+    assert resultado == {
+        "nome_original": "arquivo.pdf",
+        "tipo": MAPA_EXTENSOES_TIPO_ARQUIVO["pdf"],
+        "tipo_mime": "application/pdf",
+        "tamanho_bytes": 9,
+        "arquivo": upload,
+        "usuario_id": 10,
+    }
+    assert upload.name == "uuid-gerado.pdf"
+    mock_repository_anexo.criar.assert_not_called()
+
+
+def test_validar_e_preparar_anexo_nao_persiste(
+    anexo_service, mock_repository_anexo, arquivo
+):
+    """Verifica se a preparação não antecipa a persistência."""
+    with (
+        patch(
+            "apps.core.services.anexo_service.UsuarioRepository."
+            "usuario_existe_por_id",
+            return_value=True,
+        ),
+        patch.object(
+            anexo_service,
+            "_gerar_nome_arquivo",
+            return_value="uuid-gerado.pdf",
+        ),
+    ):
+        resultado = anexo_service.validar_e_preparar_anexo(
+            arquivo, id_usuario=10
+        )
+
+    assert resultado["nome_original"] == "documento.pdf"
+    assert resultado["arquivo"] is arquivo
+    assert arquivo.name == "uuid-gerado.pdf"
+    mock_repository_anexo.criar.assert_not_called()
 
 
 @pytest.mark.parametrize(

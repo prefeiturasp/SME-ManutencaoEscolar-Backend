@@ -1,12 +1,20 @@
 """Testes para o repositório de Empresa."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.db.models.fields.files import FieldFile
 
 from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
-from apps.empresa.models import Empresa, ResponsavelTecnico
+from apps.empresa.models import (
+    AnexoResponsavelTecnico,
+    Empresa,
+    ResponsavelTecnico,
+)
+from apps.empresa.repository.anexo_repository import (
+    AnexoResponsavelTecnicoRepository,
+)
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
@@ -135,6 +143,90 @@ class TestEmpresaRepository:
         empresa.refresh_from_db()
         assert empresa.deletado_em is not None
         assert empresa.deletado_por is None
+
+
+class TestAnexoResponsavelTecnicoRepository:
+    """Testes para o repositório de anexos de responsáveis técnicos."""
+
+    def test_criar_persiste_e_serializa_anexo(self):
+        """Deve persistir o anexo e devolver seus dados serializados."""
+        repository = AnexoResponsavelTecnicoRepository()
+        anexo = AnexoResponsavelTecnico(
+            nome_original="art.pdf",
+        )
+
+        with (
+            patch.object(anexo, "save") as save,
+            patch.object(
+                type(anexo),
+                "url",
+                return_value="https://minio.local/art.pdf",
+                new_callable=PropertyMock,
+            ),
+        ):
+            resultado = repository.criar(anexo)
+
+        save.assert_called_once_with()
+        assert resultado == {
+            "uuid": str(anexo.uuid),
+            "nome": "art.pdf",
+            "arquivo_url": "https://minio.local/art.pdf",
+        }
+
+    def test_excluir_nao_preservados_remove_arquivos_e_registros(self):
+        """Deve excluir do storage e banco os anexos não preservados."""
+        repository = AnexoResponsavelTecnicoRepository()
+        uuid_preservado = AnexoResponsavelTecnico().uuid
+        queryset = Mock()
+        queryset_filtrado = Mock()
+        anexo = Mock(spec=AnexoResponsavelTecnico)
+        queryset.exclude.return_value = queryset_filtrado
+        queryset_filtrado.__iter__ = Mock(return_value=iter([anexo]))
+        queryset_filtrado.delete.return_value = (
+            1,
+            {"empresa.AnexoResponsavelTecnico": 1},
+        )
+
+        with patch.object(
+            AnexoResponsavelTecnico.objects,
+            "filter",
+            return_value=queryset,
+        ) as filter_mock:
+            repository.excluir_nao_preservados(
+                responsavel_id=1,
+                uuids_preservados=[uuid_preservado],
+            )
+
+        filter_mock.assert_called_once_with(responsavel_tecnico_id=1)
+        queryset.exclude.assert_called_once_with(uuid__in=[uuid_preservado])
+        anexo.arquivo.delete.assert_called_once_with(save=False)
+        queryset_filtrado.delete.assert_called_once_with()
+
+    @pytest.mark.django_db
+    def test_excluir_nao_preservados_remove_fisicamente_do_banco(
+        self, responsavel_payload_valido
+    ):
+        """Deve remover o registro inclusive do manager sem filtro."""
+        responsavel = ResponsavelTecnico.objects.create(
+            **responsavel_payload_valido
+        )
+        anexo = AnexoResponsavelTecnico.objects.create(
+            responsavel_tecnico=responsavel,
+            nome_original="art.pdf",
+            tipo="documento",
+            arquivo="anexos_responsaveis_tecnicos/art.pdf",
+        )
+
+        with patch.object(FieldFile, "delete") as arquivo_delete:
+            AnexoResponsavelTecnicoRepository().excluir_nao_preservados(
+                responsavel_id=responsavel.id,
+                uuids_preservados=[],
+            )
+
+        arquivo_delete.assert_called_once_with(save=False)
+        assert not AnexoResponsavelTecnico.dm_objects.filter(
+            pk=anexo.pk
+        ).exists()
 
 
 class TestResponsavelTecnicoRepository:

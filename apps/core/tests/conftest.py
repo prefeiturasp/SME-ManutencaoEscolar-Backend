@@ -136,7 +136,7 @@ def mock_repository_anexo() -> Mock:
     repository.criar.return_value = {
         "uuid": "12345678-1234-5678-1234-567812345678",
         "nome": DOCUMENTO_PDF,
-        "tipo": MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
+        "tipo": MAPA_EXTENSOES_TIPO_ARQUIVO["pdf"],
         "tipo_mime": TYPE_PDF,
         "tamanho": 8,
         "url": URL_ARQUIVO,
