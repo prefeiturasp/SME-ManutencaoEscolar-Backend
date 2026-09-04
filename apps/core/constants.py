@@ -9,8 +9,8 @@ ENDPOINT_DADOS_PARA_COMAPRE = "/AutenticacaoCOMAPRE/{registro_funcional}/dados"
 
 TIMEOUT_DEFAULT = 30
 
-EXTENSOES_IMAGENS = [".jpg", ".jpeg", ".png"]
-EXTENSOES_DOCUMENTOS = [".pdf"]
+EXTENSOES_IMAGENS = ["jpg", "jpeg", "png"]
+EXTENSOES_DOCUMENTOS = ["pdf"]
 
 TAMANHO_MAXIMO_ARQUIVO = 2 * 1024 * 1024
 

@@ -345,9 +345,7 @@ class AnexoService:
         Returns:
             str: Tipo de arquivo correspondente à extensão informada.
         """
-        extensao = self._obter_extensao(
-            nome_arquivo,
-        )
+        extensao = self._obter_extensao(nome_arquivo).lstrip(".")
         try:
             return MAPA_EXTENSOES_TIPO_ARQUIVO[extensao]
         except KeyError as exc:

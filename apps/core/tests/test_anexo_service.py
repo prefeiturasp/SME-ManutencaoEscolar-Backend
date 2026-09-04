@@ -39,7 +39,7 @@ def test_enviar_arquivo_valido_prepara_metadados_e_delega_ao_repository(
     assert upload.name == "uuid-gerado.pdf"
     mock_repository_anexo.criar.assert_called_once_with(
         nome_original="documento.pdf",
-        tipo=MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
+        tipo=MAPA_EXTENSOES_TIPO_ARQUIVO["pdf"],
         tipo_mime="application/pdf",
         tamanho_bytes=8,
         arquivo=upload,
@@ -226,7 +226,7 @@ def test_preparar_anexo_remove_caminho_do_nome_e_infere_mime(
     ):
         resultado = anexo_service._preparar_anexo(
             arquivo=upload,
-            tipo=MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
+            tipo=MAPA_EXTENSOES_TIPO_ARQUIVO["pdf"],
             nome_original="/caminho/arquivo.pdf",
             tamanho_bytes=9,
             id_usuario=10,
@@ -234,7 +234,7 @@ def test_preparar_anexo_remove_caminho_do_nome_e_infere_mime(
 
     assert resultado == {
         "nome_original": "arquivo.pdf",
-        "tipo": MAPA_EXTENSOES_TIPO_ARQUIVO[".pdf"],
+        "tipo": MAPA_EXTENSOES_TIPO_ARQUIVO["pdf"],
         "tipo_mime": "application/pdf",
         "tamanho_bytes": 9,
         "arquivo": upload,

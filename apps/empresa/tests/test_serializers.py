@@ -7,6 +7,7 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.exceptions import ValidationError
 
+from apps.core.constants import MAPA_EXTENSOES_TIPO_ARQUIVO
 from apps.core.exceptions import (
     CepInvalidoError,
     CnpjInvalidoError,
@@ -52,9 +53,12 @@ class TestAnexoResponsavelTecnicoSerializer:
         assert serializer.is_valid(), serializer.errors
         assert serializer.validated_data == {"uuid": uuid}
 
-    @pytest.mark.parametrize("extensao", ["pdf", "png", "jpeg", "jpg"])
+    @pytest.mark.parametrize(
+        "extensao",
+        MAPA_EXTENSOES_TIPO_ARQUIVO,
+    )
     def test_deve_aceitar_formatos_de_arquivo_suportados(self, extensao):
-        """Deve aceitar PDF, PNG, JPEG e JPG."""
+        """Deve aceitar todas as extensões configuradas no mapa global."""
         arquivo = SimpleUploadedFile(f"documento.{extensao}", b"conteudo")
         serializer = AnexoResponsavelTecnicoSerializer(data=arquivo)
 
