@@ -38,28 +38,47 @@ class AnexoService:
     def enviar_arquivo(
         self, arquivo: UploadedFile, id_usuario: int
     ) -> dict[str, Any]:
-        """Valida, armazena e registra um arquivo.
-
-        O arquivo recebido é validado quanto ao nome, tamanho e extensão.
-        Após as validações, seus metadados são preparados e o arquivo é
-        persistido no armazenamento, sendo associado ao usuário informado.
+        """Valida e persiste um arquivo anexado.
 
         Args:
-            arquivo (UploadedFile): Arquivo que será validado e armazenado.
-            id_usuario (int): Identificador do usuário responsável pelo envio
-                do arquivo.
+            arquivo: Arquivo que será validado e armazenado.
+            id_usuario: Identificador do usuário responsável pelo envio.
 
         Returns:
-            dict[str, Any]: Dicionário contendo os dados do anexo criado e
-            persistido, incluindo seu identificador, nome, tipo, tipo MIME,
-            tamanho e URL para acesso ao arquivo.
+            Dados do anexo persistido.
+
+        Raises:
+            AnexoArquivoError: Se o arquivo informado for inválido.
+            UsuarioNaoEncontradoError: Se o usuário não existir.
+        """
+        dados_anexo = self.validar_e_preparar_anexo(arquivo, id_usuario)
+        return self.repository.criar(**dados_anexo)
+
+    def validar_e_preparar_anexo(
+        self, arquivo: UploadedFile, id_usuario: int | None
+    ) -> dict[str, Any]:
+        """Valida um arquivo e prepara seus dados para persistência.
+
+        O arquivo recebido é validado quanto ao nome, tamanho e extensão.
+        Após as validações, seus metadados são preparados para que o
+        repositório possa persistir o anexo.
+
+        Args:
+            arquivo: Arquivo que será validado e preparado.
+            id_usuario: Identificador do usuário responsável pelo envio.
+
+        Returns:
+            Metadados do anexo prontos para persistência.
 
         Raises:
             AnexoArquivoError: Se o arquivo for inválido, estiver vazio,
             possuir uma extensão não permitida ou ultrapassar o tamanho máximo
             permitido de 2 MB.
+            UsuarioNaoEncontradoError: Se o usuário não existir.
         """
-        if not UsuarioRepository.usuario_existe_por_id(id_usuario):
+        if id_usuario is None or not UsuarioRepository.usuario_existe_por_id(
+            id_usuario
+        ):
             raise UsuarioNaoEncontradoError(
                 title="Usuário não encontrado",
                 detail="O usuário responsável pelo anexo não foi encontrado.",
@@ -75,7 +94,7 @@ class AnexoService:
 
         tipo = self._validar_extensao_arquivo(nome_arquivo)
 
-        return self._salvar(
+        return self._preparar_anexo(
             arquivo=arquivo,
             tipo=tipo,
             nome_original=nome_arquivo,
@@ -173,7 +192,7 @@ class AnexoService:
             )
         return str(url)
 
-    def _salvar(
+    def _preparar_anexo(
         self,
         arquivo: UploadedFile,
         tipo: str,
@@ -220,14 +239,14 @@ class AnexoService:
             or "application/octet-stream"
         )
 
-        return self.repository.criar(
-            nome_original=nome_original,
-            tipo=tipo,
-            tipo_mime=tipo_mime,
-            tamanho_bytes=tamanho_bytes,
-            arquivo=arquivo,
-            usuario_id=id_usuario,
-        )
+        return {
+            "nome_original": nome_original,
+            "tipo": tipo,
+            "tipo_mime": tipo_mime,
+            "tamanho_bytes": tamanho_bytes,
+            "arquivo": arquivo,
+            "usuario_id": id_usuario,
+        }
 
     @staticmethod
     def _gerar_nome_arquivo(
