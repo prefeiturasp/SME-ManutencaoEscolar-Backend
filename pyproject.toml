@@ -69,6 +69,8 @@ omit = [
     "*/site-packages/*",
     "manage.py",
     "setup.py",
+    "conftest.py",
+    "**/*schemas.py",
 ]
 
 [tool.coverage.report]
