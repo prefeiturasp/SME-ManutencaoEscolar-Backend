@@ -2,49 +2,19 @@
 
 from rest_framework import serializers
 
-from apps.escola.models import DiretoriaRegional, TipoEscola
-from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import (
     DadosUnidadeEducacional,
     Unidadeeducacional,
 )
-
-
-class TipoEscolaSerializer(serializers.ModelSerializer):
-    """Serializa e valida os dados dos tipos de escola."""
-
-    class Meta:
-        model = TipoEscola
-        fields = (
-            "id",
-            "uuid",
-            "codigo_eol",
-            "sigla",
-        )
-
-
-class DiretoriaRegionalSerializer(serializers.ModelSerializer):
-    """Serializa e valida os dados dos tipos de escola."""
-
-    class Meta:
-        model = DiretoriaRegional
-        fields = (
-            "id",
-            "codigo",
-            "nome",
-            "abreviacao",
-            "nome_curto",
-        )
-
-
-class SubprefeituraSerializer(serializers.ModelSerializer):
-    """Serializa e valida os dados das subprefeituras."""
-
-    diretoria_regional = DiretoriaRegionalSerializer(read_only=True)
-
-    class Meta:
-        model = Subprefeitura
-        fields = ("id", "uuid", "codigo_eol", "nome", "diretoria_regional")
+from apps.escola.serializers.diretoria_regional_serializers import (
+    DiretoriaRegionalSerializer,
+)
+from apps.escola.serializers.subprefeitura_serializers import (
+    SubprefeituraSerializer,
+)
+from apps.escola.serializers.tipo_unidade_serializers import (
+    TipoEscolaSerializer,
+)
 
 
 class LoteUnidadeEducacionalSerializer(serializers.Serializer):
@@ -80,7 +50,6 @@ class UnidadeEducacionalSerializer(serializers.ModelSerializer):
     diretoria_regional = DiretoriaRegionalSerializer(read_only=True)
     tipo_escola = TipoEscolaSerializer(read_only=True)
     subprefeitura = SubprefeituraSerializer(read_only=True)
-
     lote = serializers.SerializerMethodField()
     dados = DadosUnidadeEducacionalSerializer(read_only=True)
 
@@ -116,8 +85,5 @@ class UnidadeEducacionalSerializer(serializers.ModelSerializer):
             "lote",
             None,
         )
-
-        if lote is None:
-            return None
 
         return LoteUnidadeEducacionalSerializer(lote).data

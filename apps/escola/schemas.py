@@ -8,8 +8,10 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 
-from apps.escola.serializers import (
+from apps.escola.serializers.diretoria_regional_serializers import (
     DiretoriaRegionalSerializer,
+)
+from apps.escola.serializers.tipo_unidade_serializers import (
     TipoEscolaSerializer,
 )
 

@@ -1,7 +1,9 @@
 import pytest
 
 from apps.escola.models.diretoria_regional import DiretoriaRegional
-from apps.escola.serializers import DiretoriaRegionalSerializer
+from apps.escola.serializers.diretoria_regional_serializers import (
+    DiretoriaRegionalSerializer,
+)
 
 pytestmark = pytest.mark.django_db
 

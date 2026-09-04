@@ -22,10 +22,16 @@ from apps.escola.schemas import (
     TIPO_ESCOLA,
     UNIDADE_EDUCACIONAL,
 )
-from apps.escola.serializers import (
+from apps.escola.serializers.diretoria_regional_serializers import (
     DiretoriaRegionalSerializer,
+)
+from apps.escola.serializers.subprefeitura_serializers import (
     SubprefeituraSerializer,
+)
+from apps.escola.serializers.tipo_unidade_serializers import (
     TipoEscolaSerializer,
+)
+from apps.escola.serializers.unidade_educacional_serializers import (
     UnidadeEducacionalSerializer,
 )
 

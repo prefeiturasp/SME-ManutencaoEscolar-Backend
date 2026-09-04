@@ -2,7 +2,9 @@
 
 import pytest
 
-from apps.escola.serializers import UnidadeEducacionalSerializer
+from apps.escola.serializers.unidade_educacional_serializers import (
+    UnidadeEducacionalSerializer,
+)
 
 pytestmark = pytest.mark.django_db
 
