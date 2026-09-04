@@ -10,20 +10,8 @@ ENDPOINT_DADOS_PARA_COMAPRE = "/AutenticacaoCOMAPRE/{registro_funcional}/dados"
 TIMEOUT_DEFAULT = 30
 
 EXTENSOES_IMAGENS = [".jpg", ".jpeg", ".png"]
-EXTENSOES_DOCUMENTOS = [
-    ".pdf",
-    ".doc",
-    ".docx",
-    ".xls",
-    ".xlsx",
-    ".csv",
-    ".txt",
-]
+EXTENSOES_DOCUMENTOS = [".pdf"]
 
-EXTENSOES_COMPACTADOS = [
-    ".zip",
-    ".rar",
-]
 TAMANHO_MAXIMO_ARQUIVO = 2 * 1024 * 1024
 
 
@@ -70,5 +58,4 @@ class TipoArquivo(models.TextChoices):
 MAPA_EXTENSOES_TIPO_ARQUIVO = {
     **dict.fromkeys(EXTENSOES_IMAGENS, TipoArquivo.IMAGEM),
     **dict.fromkeys(EXTENSOES_DOCUMENTOS, TipoArquivo.DOCUMENTO),
-    **dict.fromkeys(EXTENSOES_COMPACTADOS, TipoArquivo.COMPACTADO),
 }
