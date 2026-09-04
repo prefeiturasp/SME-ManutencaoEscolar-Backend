@@ -46,7 +46,18 @@ class AnexoResponsavelTecnicoRepository:
 
     @staticmethod
     def _serializar(anexo: AnexoResponsavelTecnico) -> dict[str, Any]:
-        """Serializa um anexo em formato de dicionário."""
+        """
+        Serializa um anexo em formato de dicionário.
+
+        Args:
+            anexo: Anexo a ser serializado.
+
+        Returns:
+            dict: Dicionário contendo os seguintes dados:
+            - ``uuid``: UUID do anexo.
+            - ``nome``: Nome original do arquivo.
+            - ``arquivo_url``: URL de acesso ao arquivo.
+        """
         return {
             "uuid": str(anexo.uuid),
             "nome": anexo.nome_original,

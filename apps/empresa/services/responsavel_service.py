@@ -174,7 +174,19 @@ class ResponsavelTecnicoService:
     def _separar_arquivos(
         dados_lista: list[dict[str, Any]],
     ) -> tuple[list[dict[str, Any]], dict[str, list[dict[str, Any]]]]:
-        """Remove os uploads dos dados usados para persistir responsáveis."""
+        """
+        Remove os uploads dos dados usados para persistir responsáveis.
+
+        Args:
+            dados_lista: Lista de dicionários com os dados dos responsáveis
+                técnicos, incluindo os uploads.
+
+        Returns:
+            Uma tupla contendo:
+            - dados_sem_arquivos: Dados dos responsáveis técnicos sem os
+              uploads.
+            - arquivos_por_tipo: Arquivos agrupados por tipo.
+        """
         dados_sem_arquivos = []
         arquivos_por_tipo = {}
         for dados in dados_lista:

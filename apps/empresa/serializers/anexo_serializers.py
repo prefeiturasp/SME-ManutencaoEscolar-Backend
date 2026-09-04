@@ -4,24 +4,30 @@ from typing import Any, cast
 
 from django.core.files.uploadedfile import UploadedFile
 from django.core.validators import FileExtensionValidator
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.core.constants import MAPA_EXTENSOES_TIPO_ARQUIVO
 from apps.empresa.models import AnexoResponsavelTecnico
 from apps.usuarios.models import Usuario
 
-EXTENSOES_ANEXO_RESPONSAVEL_TECNICO = ("pdf", "png", "jpeg", "jpg")
+
+@extend_schema_field(OpenApiTypes.BINARY)
+class ArquivoUploadField(serializers.FileField):
+    """Representa um arquivo enviado como conteúdo binário no OpenAPI."""
 
 
 class AnexoResponsavelTecnicoSerializer(serializers.ModelSerializer):
     """Serializa os arquivos associados a um responsável técnico."""
 
     uuid = serializers.UUIDField(required=False)
-    arquivo = serializers.FileField(
+    arquivo = ArquivoUploadField(
         write_only=True,
         required=False,
         validators=[
             FileExtensionValidator(
-                allowed_extensions=EXTENSOES_ANEXO_RESPONSAVEL_TECNICO
+                allowed_extensions=MAPA_EXTENSOES_TIPO_ARQUIVO
             )
         ],
     )
