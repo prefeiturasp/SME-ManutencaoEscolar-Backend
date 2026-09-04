@@ -16,6 +16,13 @@ class Empresas_Localizadores {
   campo_cidade = () => '#cidade'
   campo_estado = () => '#estado'
   btn_salvar_cadastro = () => 'div.justify-between > .flex > .bg-primary'
+  tipo_responsavel_tecnico = () => '#responsaveis_tecnicos\\.0\\.tipo'
+  campo_nome_responsavel_tecnico = () => '#responsaveis_tecnicos\\.0\\.nome'
+  campo_telefone_responsavel_tecnico = () => '#responsaveis_tecnicos\\.0\\.telefone'
+  campo_email_responsavel_tecnico = () => '#responsaveis_tecnicos\\.0\\.email'
+  campo_numero_crea_responsavel_tecnico = () => '#responsaveis_tecnicos\\.0\\.numero_crea'
+  campo_numero_art_responsavel_tecnico = () => '#responsaveis_tecnicos\\.0\\.numero_art'
+  documento_responsavel_tecnico = () => '.space-y-1.col-span-3 > div.flex > .group\\/button'
 
   // consultar
   btn_abrir_empresa = () => ':nth-child(1) > .py-2 > .group\\/button'
