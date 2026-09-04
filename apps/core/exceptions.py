@@ -73,3 +73,7 @@ class AnexoArquivoError(Exception):
         self.title = title
         self.detail = detail
         super().__init__(title, detail)
+
+
+class EmailInvalidoError(Exception):
+    """Erro lançado quando o e-mail possui formato inválido."""

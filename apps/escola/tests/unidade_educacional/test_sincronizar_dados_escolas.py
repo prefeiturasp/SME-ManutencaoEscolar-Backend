@@ -126,7 +126,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         )
 
         assert dados.email == "escolaemef@mail.com"
-        assert dados.telefone == "12345678"
+        assert dados.telefone == "1112345678"
         assert dados.logradouro == "RUA LOGRADOURO"
         assert dados.numero == "001"
         assert dados.bairro == "BAIRRO TESTE"
@@ -167,7 +167,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         dados_existentes.refresh_from_db()
 
         assert dados_existentes.email == ("escolaemef@mail.com")
-        assert dados_existentes.telefone == "12345678"
+        assert dados_existentes.telefone == "1112345678"
         assert dados_existentes.logradouro == "RUA LOGRADOURO"
         assert dados_existentes.numero == "001"
         assert dados_existentes.bairro == "BAIRRO TESTE"
@@ -247,7 +247,7 @@ class TestSincronizarDadosUnidadesEducacionais:
             {
                 **self.DADOS_API,
                 "email": "  escola@email.com  ",
-                "telefone": " 11999999999 ",
+                "telefone": " 999999999 ",
                 "tipoLogradouro": " Rua ",
                 "logradouro": " LOGRADOURO ",
                 "numero": " 001 ",
@@ -753,3 +753,61 @@ class TestSincronizarDadosUnidadesEducacionais:
         resultado = Command()._normalizar_string("  texto de teste  ")
 
         assert resultado == "texto de teste"
+
+    @pytest.mark.parametrize(
+        ("telefone", "resultado_esperado"),
+        [
+            ("12345678", "1112345678"),
+            ("912345678", "11912345678"),
+            ("  12345678  ", "1112345678"),
+            ("  912345678  ", "11912345678"),
+            ("1199999999", ""),
+            ("1234567", ""),
+            ("123456789012", ""),
+            ("telefone", ""),
+            ("", ""),
+            ("   ", ""),
+            (None, ""),
+            (12345678, "1112345678"),
+        ],
+    )
+    def test_deve_normalizar_telefone(
+        self,
+        telefone,
+        resultado_esperado,
+    ):
+        """Deve validar e normalizar telefones com oito ou nove dígitos."""
+        resultado = Command._normalizar_telefone(telefone)
+
+        assert resultado == resultado_esperado
+
+    @pytest.mark.parametrize(
+        ("email", "resultado_esperado"),
+        [
+            ("escola@email.com", "escola@email.com"),
+            ("  escola@email.com  ", "escola@email.com"),
+            ("ESCOLA@EMAIL.COM", "escola@email.com"),
+            ("Escola123@Email.com", "escola123@email.com"),
+            ("escola.teste@email.com.br", "escola.teste@email.com.br"),
+            ("teste+email@email.com", "teste+email@email.com"),
+            ("123456", ""),
+            ("escola@email", ""),
+            ("escola.com", ""),
+            ("@email.com", ""),
+            ("escola@", ""),
+            ("", ""),
+            ("   ", ""),
+            (None, ""),
+            (123, ""),
+            (False, ""),
+        ],
+    )
+    def test_deve_normalizar_email(
+        self,
+        email,
+        resultado_esperado,
+    ):
+        """Deve normalizar e validar endereços de e-mail."""
+        resultado = Command._normalizar_email(email)
+
+        assert resultado == resultado_esperado

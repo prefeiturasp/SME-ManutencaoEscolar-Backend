@@ -7,6 +7,7 @@ from django.core.validators import RegexValidator
 from apps.core.exceptions import (
     CepInvalidoError,
     CnpjInvalidoError,
+    EmailInvalidoError,
     LinkRastreioInvalidoError,
     TelefoneInvalidoError,
 )
@@ -31,6 +32,10 @@ link_formato_validacao = RegexValidator(
 apenas_digitos_validator = RegexValidator(
     regex=r"^\d+$",
     message="Este campo deve conter apenas dígitos numéricos.",
+)
+
+EMAIL_FORMATO_REGEX = re.compile(
+    r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 )
 
 
@@ -76,4 +81,12 @@ def validar_telefone(telefone: str) -> None:
     if not re.match(r"^\d{10,11}$", telefone or ""):
         raise TelefoneInvalidoError(
             "Telefone inválido. Deve conter 10 ou 11 dígitos numéricos."
+        )
+
+
+def validar_email(email: str) -> None:
+    """Valida apenas o formato de um endereço de e-mail."""
+    if not EMAIL_FORMATO_REGEX.match(email or ""):
+        raise EmailInvalidoError(
+            "E-mail inválido. Deve possuir um endereço de e-mail válido."
         )
