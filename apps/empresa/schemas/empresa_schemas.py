@@ -15,6 +15,9 @@ from apps.empresa.serializers.empresa_serializers import (
     EmpresaSerializer,
 )
 
+_USUARIO_EXEMPLO = "Usuário Exemplo"
+_DATA_HORA_EXEMPLO = "2026-09-04T10:00:00-03:00"
+
 _EMPRESA_EXEMPLO_BASE = {
     "nome": "Empresa Exemplo",
     "cnpj": "12345678000195",
@@ -59,19 +62,19 @@ _EMPRESA_EXEMPLO_SAIDA = {
     "id": 1,
     "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
     **_EMPRESA_EXEMPLO_BASE,
-    "criado_por": "Usuário Exemplo",
-    "criado_em": "2026-09-04T10:00:00-03:00",
-    "atualizado_por": "Usuário Exemplo",
-    "atualizado_em": "2026-09-04T10:00:00-03:00",
+    "criado_por": _USUARIO_EXEMPLO,
+    "criado_em": _DATA_HORA_EXEMPLO,
+    "atualizado_por": _USUARIO_EXEMPLO,
+    "atualizado_em": _DATA_HORA_EXEMPLO,
     "responsaveis_tecnicos": [
         {
             **responsavel,
             "uuid": uuid,
             "arquivos": arquivos,
-            "criado_por": "Usuário Exemplo",
-            "criado_em": "2026-09-04T10:00:00-03:00",
-            "atualizado_por": "Usuário Exemplo",
-            "atualizado_em": "2026-09-04T10:00:00-03:00",
+            "criado_por": _USUARIO_EXEMPLO,
+            "criado_em": _DATA_HORA_EXEMPLO,
+            "atualizado_por": _USUARIO_EXEMPLO,
+            "atualizado_em": _DATA_HORA_EXEMPLO,
         }
         for responsavel, uuid, arquivos in (
             (
@@ -89,8 +92,8 @@ _EMPRESA_EXEMPLO_SAIDA = {
                         "arquivo_url": (
                             "https://arquivos.exemplo.com/art-engenheiro.pdf"
                         ),
-                        "anexado_por": "Usuário Exemplo",
-                        "anexado_em": "2026-09-04T10:00:00-03:00",
+                        "anexado_por": _USUARIO_EXEMPLO,
+                        "anexado_em": _DATA_HORA_EXEMPLO,
                     }
                 ],
             ),
