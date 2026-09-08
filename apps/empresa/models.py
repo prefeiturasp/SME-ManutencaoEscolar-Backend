@@ -17,7 +17,6 @@ class Empresa(BaseModel):
     nome = models.CharField(max_length=255)
     cnpj = models.CharField(
         max_length=14,
-        unique=True,
         validators=[cnpj_formato_validacao],
     )
     status = models.BooleanField(default=True)
