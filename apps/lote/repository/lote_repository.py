@@ -221,3 +221,26 @@ class LoteRepository:
         dados_lote["uuid"] = str(lote.uuid)
 
         return dados_lote
+
+    def deletar(
+        self,
+        usuario: Usuario,
+        model_lote: Lote,
+    ) -> tuple[int, dict[str, int]]:
+        """
+        Marca uma lote como deletada e registra o usuário.
+
+        Args:
+            lote (Lote): Instância da lote a ser deletada.
+            usuario (Usuario | None): Usuário que está realizando a deleção.
+        Returns:
+            Tupla contendo a quantidade de registros deletados e um dicionário
+                com a quantidade de exclusões por tipo de objeto.
+        """
+        model_lote.deletado_por = usuario
+
+        model_lote.save(
+            update_fields=["deletado_por"],
+        )
+
+        return model_lote.soft_delete(usuario=usuario)

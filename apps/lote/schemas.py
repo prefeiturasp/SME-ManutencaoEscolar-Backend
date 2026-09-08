@@ -22,6 +22,8 @@ _DADOS_INVALIDOS = "Dados inválidos, lote duplicado ou DRE já vinculada."
 
 _ERRO_NO_SERVIDOR = "Erro no servidor"
 
+_LOTE_NAO_ENCONTRADO = "Lote não encontrado"
+
 _ESCOLA_CONST = "ESCOLA EMEF ADMIN"
 
 _LOTE_EXEMPLO_ENTRADA: dict[str, object] = {
@@ -242,7 +244,7 @@ LOTE_SCHEMA = extend_schema_view(
                 description=_CREDENCIAIS_INVALIDAS,
             ),
             404: OpenApiResponse(
-                description="Lote não encontrado",
+                description=_LOTE_NAO_ENCONTRADO,
             ),
             500: OpenApiResponse(
                 description=_ERRO_NO_SERVIDOR,
@@ -279,7 +281,7 @@ LOTE_SCHEMA = extend_schema_view(
                 description=_CREDENCIAIS_INVALIDAS,
             ),
             404: OpenApiResponse(
-                description="Lote não encontrado",
+                description=_LOTE_NAO_ENCONTRADO,
             ),
             500: OpenApiResponse(
                 description=_ERRO_NO_SERVIDOR,
@@ -293,5 +295,28 @@ LOTE_SCHEMA = extend_schema_view(
                 value=_LOTE_EXEMPLO_SAIDA,
             ),
         ],
+    ),
+    destroy=extend_schema(
+        tags=[_TAG_LOTE],
+        summary="Exclui um lote",
+        description=(
+            "Realiza a exclusão lógica de um lote identificado pelo UUID."
+        ),
+        operation_id="excluirLote",
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Lote excluído com sucesso",
+            ),
+            401: OpenApiResponse(
+                description=_CREDENCIAIS_INVALIDAS,
+            ),
+            404: OpenApiResponse(
+                description=_LOTE_NAO_ENCONTRADO,
+            ),
+            500: OpenApiResponse(
+                description=_ERRO_NO_SERVIDOR,
+            ),
+        },
     ),
 )
