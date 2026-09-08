@@ -88,6 +88,21 @@ class LoteService:
             usuario=usuario,
         )
 
+    def deletar(
+        self,
+        model_lote: Lote,
+        usuario: Usuario,
+    ) -> tuple[int, dict[str, int]]:
+        """Realiza a exclusão lógica do serviço.
+
+        Registra o usuário logado como responsável pela exclusão.
+
+        Args:
+            model_lote: Instância do lote a ser deletada.
+            usuario: Usuário logado responsável pela exclusão.
+        """
+        return self.repository.deletar(usuario, model_lote)
+
     def atualizar(
         self,
         lote: Lote,

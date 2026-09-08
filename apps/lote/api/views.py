@@ -43,7 +43,7 @@ class LoteViewSet(viewsets.ModelViewSet):
     Delegando regras de negócio ao LotesService.
     """
 
-    http_method_names = ["get", "post", "patch", "options"]
+    http_method_names = ["get", "post", "patch", "options", "delete"]
     queryset = Lote.objects.all()
     lookup_field = "uuid"
 
@@ -152,3 +152,15 @@ class LoteViewSet(viewsets.ModelViewSet):
             raise NotAuthenticated("Usuário não identificado.")
 
         return usuario
+
+    def perform_destroy(self, instance: Lote) -> None:
+        """
+        Deleta um lote existente usando o serviço.
+
+        Args:
+            instance (Lote): Instância do lote a ser deletada.
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
+
+        self.service.deletar(instance, self._obter_usuario())
