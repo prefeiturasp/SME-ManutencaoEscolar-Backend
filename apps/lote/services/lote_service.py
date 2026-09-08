@@ -93,7 +93,7 @@ class LoteService:
         model_lote: Lote,
         usuario: Usuario,
     ) -> tuple[int, dict[str, int]]:
-        """Realiza a exclusão lógica do serviço.
+        """Realiza a exclusão lógica de um lote.
 
         Registra o usuário logado como responsável pela exclusão.
 

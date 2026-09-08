@@ -1,7 +1,6 @@
 """Repositório de lotes."""
 
 from collections.abc import Sequence
-from re import U
 from typing import Any, cast
 
 from django.db import transaction
@@ -223,13 +222,18 @@ class LoteRepository:
 
         return dados_lote
 
-
     def deletar(
         self,
         usuario: Usuario,
         model_lote: Lote,
     ) -> tuple[int, dict[str, int]]:
-        """Marca o regristro como deletado sem removê-lo fisicamente"""
+        """
+        Marca uma lote como deletada e registra o usuário.
+
+        Args:
+            lote (Lote): Instância da lote a ser deletada.
+            usuario (Usuario | None): Usuário que está realizando a deleção.
+        """
         model_lote.deletado_por = usuario
 
         model_lote.save(

@@ -162,5 +162,4 @@ class LoteViewSet(viewsets.ModelViewSet):
         Raises:
             DRFValidationError: Se ocorrer algum erro de validação.
         """
-
         self.service.deletar(instance, self._obter_usuario())
