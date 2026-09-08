@@ -4,6 +4,7 @@ from django.db import models
 
 from apps.core.models.mixins import UUIDMixin
 from apps.escola.models import ResponsavelUnidade
+from apps.lote.models import Lote
 
 
 class Unidadeeducacional(UUIDMixin):
@@ -89,6 +90,28 @@ class Unidadeeducacional(UUIDMixin):
         )
 
         return historico.responsavel if historico else None
+
+    @property
+    def lote(self) -> Lote | None:
+        """Retorna o lote ativo vinculado à Diretoria Regional da unidade.
+
+        A unidade educacional obtém seu lote por meio da Diretoria Regional.
+        Caso exista um vínculo com um lote ativo, retorna o objeto ``Lote``.
+        Caso contrário, retorna ``None``.
+
+        Returns:
+            Lote | None: O lote ativo da Diretoria Regional ou ``None`` quando
+            não houver lote ativo vinculado.
+        """
+        lote_diretoria = (
+            self.diretoria_regional.vinculo_lote.filter(
+                lote__status=True,
+            )
+            .select_related("lote")
+            .first()
+        )
+
+        return lote_diretoria.lote if lote_diretoria else None
 
 
 class DadosUnidadeEducacional(models.Model):

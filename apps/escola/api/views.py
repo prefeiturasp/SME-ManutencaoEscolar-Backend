@@ -2,6 +2,7 @@
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
+from rest_framework.serializers import BaseSerializer
 
 from apps.core.pagination import PaginacaoPadrao
 from apps.escola.filters import (
@@ -22,10 +23,17 @@ from apps.escola.schemas import (
     TIPO_ESCOLA,
     UNIDADE_EDUCACIONAL,
 )
-from apps.escola.serializers import (
+from apps.escola.serializers.diretoria_regional_serializers import (
     DiretoriaRegionalSerializer,
+)
+from apps.escola.serializers.subprefeitura_serializers import (
     SubprefeituraSerializer,
+)
+from apps.escola.serializers.tipo_unidade_serializers import (
     TipoEscolaSerializer,
+)
+from apps.escola.serializers.unidade_educacional_serializers import (
+    UnidadeEducacionalListSerializer,
     UnidadeEducacionalSerializer,
 )
 
@@ -89,9 +97,15 @@ class UnidadeEducacionalViewSet(viewsets.ReadOnlyModelViewSet):
     ).prefetch_related(
         "diretoria_regional__vinculo_lote__lote",
     )
-    serializer_class = UnidadeEducacionalSerializer
+
     lookup_field = "uuid"
 
     filter_backends = [DjangoFilterBackend]
     filterset_class = UnidadeEducacionalFilter
     pagination_class = PaginacaoPadrao
+
+    def get_serializer_class(self) -> type[BaseSerializer]:
+        """Retorna o serializer adequado para cada operação."""
+        if self.action == "list":
+            return UnidadeEducacionalListSerializer
+        return UnidadeEducacionalSerializer

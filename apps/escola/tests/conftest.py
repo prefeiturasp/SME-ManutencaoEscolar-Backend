@@ -7,7 +7,10 @@ from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
 from apps.escola.models.responsavel_unidade import ResponsavelUnidade
 from apps.escola.models.subprefeitura import Subprefeitura
-from apps.escola.models.unidade_educacional import Unidadeeducacional
+from apps.escola.models.unidade_educacional import (
+    DadosUnidadeEducacional,
+    Unidadeeducacional,
+)
 from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
@@ -364,3 +367,19 @@ def resposta_dados_unidade():
     }
 
     return resposta
+
+
+@pytest.fixture
+def dados_unidade_emef(unidade_educacional_emef):
+    """Fixture de DadosUnidadeEducacional."""
+    return DadosUnidadeEducacional.objects.create(
+        unidade_educacional=unidade_educacional_emef,
+        email="escola@email.com",
+        telefone="1122223333",
+        logradouro="RUA TAPERA",
+        numero="415",
+        bairro="VILA NOVA CURUCA",
+        cep="08032450",
+        municipio="SAO PAULO",
+        uf="SP",
+    )

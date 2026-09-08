@@ -9,7 +9,9 @@ import pytest
 from rest_framework import serializers
 
 from apps.escola.models import DiretoriaRegional
-from apps.escola.serializers import DiretoriaRegionalSerializer
+from apps.escola.serializers.diretoria_regional_serializers import (
+    DiretoriaRegionalSerializer,
+)
 from apps.lote.models import Lote
 from apps.lote.serializers import (
     LoteCriarSerializer,
@@ -92,8 +94,7 @@ def test_rejeita_diretorias_regionais_repetidas() -> None:
         )
 
     mensagem = (
-        "Não é permitido informar a mesma diretoria regional "
-        "mais de uma vez."
+        "Não é permitido informar a mesma diretoria regional mais de uma vez."
     )
     assert str(exc_info.value.detail[0]) == mensagem
 
