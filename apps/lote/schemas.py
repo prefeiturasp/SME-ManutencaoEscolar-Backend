@@ -244,7 +244,7 @@ LOTE_SCHEMA = extend_schema_view(
                 description=_CREDENCIAIS_INVALIDAS,
             ),
             404: OpenApiResponse(
-                description="Lote não encontrado",
+                description=_LOTE_NAO_ENCONTRADO,
             ),
             500: OpenApiResponse(
                 description=_ERRO_NO_SERVIDOR,
@@ -281,7 +281,7 @@ LOTE_SCHEMA = extend_schema_view(
                 description=_CREDENCIAIS_INVALIDAS,
             ),
             404: OpenApiResponse(
-                description="Lote não encontrado",
+                description=_LOTE_NAO_ENCONTRADO,
             ),
             500: OpenApiResponse(
                 description=_ERRO_NO_SERVIDOR,
