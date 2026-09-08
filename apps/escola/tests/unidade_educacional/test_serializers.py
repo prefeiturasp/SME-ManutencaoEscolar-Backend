@@ -124,13 +124,18 @@ class TestUnidadeEducacionalListSerializer:
         }
 
         assert resultado["uuid"] == str(unidade_educacional_emef.uuid)
-        assert resultado["codigo_eol"] == unidade_educacional_emef.codigo_eol
-        assert resultado["nome"] == unidade_educacional_emef.nome
         assert resultado["status"] == unidade_educacional_emef.status
+        assert resultado["nome"] == unidade_educacional_emef.nome
+        assert resultado["codigo_eol"] == unidade_educacional_emef.codigo_eol
 
-        assert resultado["tipo_escola"] == {
-            "uuid": str(unidade_educacional_emef.tipo_escola.uuid),
-            "sigla": unidade_educacional_emef.tipo_escola.sigla,
+        assert resultado["lote"] == {
+            "uuid": str(lote_centro.uuid),
+            "nome": lote_centro.nome,
+        }
+
+        assert resultado["subprefeitura"] == {
+            "uuid": str(unidade_educacional_emef.subprefeitura.uuid),
+            "nome": unidade_educacional_emef.subprefeitura.nome,
         }
 
         assert resultado["diretoria_regional"] == {
@@ -140,14 +145,9 @@ class TestUnidadeEducacionalListSerializer:
             ),
         }
 
-        assert resultado["subprefeitura"] == {
-            "uuid": str(unidade_educacional_emef.subprefeitura.uuid),
-            "nome": unidade_educacional_emef.subprefeitura.nome,
-        }
-
-        assert resultado["lote"] == {
-            "uuid": str(lote_centro.uuid),
-            "nome": lote_centro.nome,
+        assert resultado["tipo_escola"] == {
+            "uuid": str(unidade_educacional_emef.tipo_escola.uuid),
+            "sigla": unidade_educacional_emef.tipo_escola.sigla,
         }
 
     def test_nao_deve_retornar_dados_complementares(
