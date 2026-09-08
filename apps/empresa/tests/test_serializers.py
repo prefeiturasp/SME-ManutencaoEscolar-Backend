@@ -1,5 +1,6 @@
 """Testes para os serializers de Empresa."""
 
+from typing import Any
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -14,6 +15,7 @@ from apps.core.exceptions import (
     LinkRastreioInvalidoError,
 )
 from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.models import Empresa
 from apps.empresa.serializers.anexo_serializers import (
     AnexoResponsavelTecnicoSerializer,
 )
@@ -112,6 +114,48 @@ class TestEmpresaCriarAtualizarSerializer:
         """Deve validar um payload válido."""
         serializer = EmpresaCriarAtualizarSerializer(
             data=empresa_payload_valido_com_responsaveis
+        )
+
+        assert serializer.is_valid(), serializer.errors
+
+    @pytest.mark.parametrize("apagada", [False, True])
+    @pytest.mark.parametrize("atualizacao", [False, True])
+    def test_duplicacao_considera_apenas_empresa_nao_apagada(
+        self,
+        empresa_payload_valido: dict[str, Any],
+        apagada: bool,
+        atualizacao: bool,
+    ) -> None:
+        """Deve permitir reutilizar CNPJ somente de empresa apagada."""
+        existente = Empresa.objects.create(**empresa_payload_valido)
+        if apagada:
+            existente.soft_delete()
+        instancia = (
+            Empresa.objects.create(
+                **{**empresa_payload_valido, "cnpj": "43210987654321"}
+            )
+            if atualizacao
+            else None
+        )
+        serializer = EmpresaCriarAtualizarSerializer(
+            instance=instancia,
+            data={"cnpj": existente.cnpj},
+            partial=True,
+        )
+
+        assert serializer.is_valid() is apagada
+        if not apagada:
+            assert serializer.errors["cnpj"][0] == (
+                EmpresaErrorMessages.CNPJ_JA_CADASTRADO
+            )
+
+    def test_atualizacao_permite_manter_proprio_cnpj(
+        self, empresa_payload_valido: dict[str, Any]
+    ) -> None:
+        """Deve ignorar a própria empresa na verificação de duplicação."""
+        empresa = Empresa.objects.create(**empresa_payload_valido)
+        serializer = EmpresaCriarAtualizarSerializer(
+            instance=empresa, data={"cnpj": empresa.cnpj}, partial=True
         )
 
         assert serializer.is_valid(), serializer.errors

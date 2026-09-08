@@ -1,12 +1,13 @@
 """Testes para o repositório de Empresa."""
 
+from functools import partial
+from typing import Any
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
 from django.db.models.fields.files import FieldFile
 
-from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
 from apps.empresa.models import (
     AnexoResponsavelTecnico,
     Empresa,
@@ -69,49 +70,30 @@ class TestEmpresaRepository:
         mock_full_clean.assert_called_once_with()
         mock_save.assert_called_once_with()
 
-    @pytest.mark.django_db
-    def test_criar_com_cnpj_duplicado_levanta_erro_de_dominio(
-        self, empresa_payload_valido
-    ):
-        """Deve traduzir a violação de unicidade do CNPJ em erro de domínio."""
+    @pytest.mark.parametrize("operacao", ["criar", "atualizar"])
+    def test_erro_de_validacao_propaga_sem_salvar(
+        self, empresa_payload_valido: dict[str, Any], operacao: str
+    ) -> None:
+        """Deve propagar a validação do modelo sem converter ou salvar."""
         repository = EmpresaRepository()
-        repository.criar(empresa_payload_valido)
+        erro_validacao = ValidationError("valor inválido")
 
-        with pytest.raises(EmpresaCnpjDuplicadoError):
-            repository.criar(empresa_payload_valido)
-
-    def test_criar_com_erro_de_validacao_nao_relacionado_a_cnpj_propaga_erro(
-        self, empresa_payload_valido
-    ):
-        """Deve propagar o erro original quando não for de CNPJ duplicado."""
-        repository = EmpresaRepository()
-        erro_validacao = ValidationError({"nome": ["campo obrigatório"]})
+        if operacao == "criar":
+            executar = partial(repository.criar, empresa_payload_valido)
+        else:
+            executar = partial(
+                repository.atualizar, Empresa(**empresa_payload_valido), {}
+            )
 
         with (
             patch.object(Empresa, "full_clean", side_effect=erro_validacao),
+            patch.object(Empresa, "save") as mock_save,
             pytest.raises(ValidationError) as exc_info,
         ):
-            repository.criar(empresa_payload_valido)
+            executar()
 
         assert exc_info.value is erro_validacao
-
-    @pytest.mark.django_db
-    def test_atualizar_com_cnpj_duplicado_levanta_erro_de_dominio(
-        self, empresa_payload_valido
-    ):
-        """Deve traduzir a violação de unicidade do CNPJ ao atualizar."""
-        repository = EmpresaRepository()
-        repository.criar(empresa_payload_valido)
-
-        outra_empresa = repository.criar(
-            {**empresa_payload_valido, "cnpj": "43210987654321"}
-        )
-        empresa = Empresa.objects.get(uuid=outra_empresa["uuid"])
-
-        with pytest.raises(EmpresaCnpjDuplicadoError):
-            repository.atualizar(
-                empresa, {"cnpj": empresa_payload_valido["cnpj"]}
-            )
+        mock_save.assert_not_called()
 
     @pytest.mark.django_db
     def test_deletar_marca_empresa_como_deletada(
