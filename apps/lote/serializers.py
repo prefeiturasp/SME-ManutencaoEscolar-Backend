@@ -7,7 +7,7 @@ from rest_framework import serializers
 from apps.empresa.models import Empresa
 from apps.empresa.serializers.empresa_serializers import EmpresaSerializer
 from apps.escola.models import DiretoriaRegional
-from apps.escola.serializers import (
+from apps.escola.serializers.diretoria_regional_serializers import (
     DiretoriaRegionalSerializer,
 )
 from apps.lote.models import Lote

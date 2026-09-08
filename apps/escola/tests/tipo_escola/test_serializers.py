@@ -3,7 +3,9 @@
 import pytest
 
 from apps.escola.models import TipoEscola
-from apps.escola.serializers import TipoEscolaSerializer
+from apps.escola.serializers.tipo_unidade_serializers import (
+    TipoEscolaSerializer,
+)
 
 pytestmark = pytest.mark.django_db
 

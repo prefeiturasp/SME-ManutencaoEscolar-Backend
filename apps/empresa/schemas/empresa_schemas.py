@@ -1,5 +1,7 @@
 """Schemas para a API de Empresa."""
 
+from typing import Any
+
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiParameter,
@@ -13,7 +15,10 @@ from apps.empresa.serializers.empresa_serializers import (
     EmpresaSerializer,
 )
 
-_EMPRESA_EXEMPLO_ENTRADA = {
+_USUARIO_EXEMPLO = "Usuário Exemplo"
+_DATA_HORA_EXEMPLO = "2026-09-04T10:00:00-03:00"
+
+_EMPRESA_EXEMPLO_BASE = {
     "nome": "Empresa Exemplo",
     "cnpj": "12345678000195",
     "status": True,
@@ -27,11 +32,100 @@ _EMPRESA_EXEMPLO_ENTRADA = {
     "estado": "SP",
 }
 
+_RESPONSAVEIS_EXEMPLO_ENTRADA: list[dict[str, Any]] = [
+    {
+        "tipo": "preposto",
+        "nome": "Maria da Silva",
+        "email": "maria.silva@exemplo.com",
+        "numero_crea": "",
+        "telefone": "11987654321",
+        "numero_art": "",
+        "arquivos": [],
+    },
+    {
+        "tipo": "engenheiro_civil",
+        "nome": "João Souza",
+        "email": "joao.souza@exemplo.com",
+        "numero_crea": "1234567890",
+        "telefone": "11912345678",
+        "numero_art": "ART123456",
+        "arquivos": [{"arquivo": "art-engenheiro.pdf"}],
+    },
+]
+
+_EMPRESA_EXEMPLO_ENTRADA = {
+    **_EMPRESA_EXEMPLO_BASE,
+    "responsaveis_tecnicos": _RESPONSAVEIS_EXEMPLO_ENTRADA,
+}
+
 _EMPRESA_EXEMPLO_SAIDA = {
     "id": 1,
     "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
-    **_EMPRESA_EXEMPLO_ENTRADA,
+    **_EMPRESA_EXEMPLO_BASE,
+    "criado_por": _USUARIO_EXEMPLO,
+    "criado_em": _DATA_HORA_EXEMPLO,
+    "atualizado_por": _USUARIO_EXEMPLO,
+    "atualizado_em": _DATA_HORA_EXEMPLO,
+    "responsaveis_tecnicos": [
+        {
+            **responsavel,
+            "uuid": uuid,
+            "arquivos": arquivos,
+            "criado_por": _USUARIO_EXEMPLO,
+            "criado_em": _DATA_HORA_EXEMPLO,
+            "atualizado_por": _USUARIO_EXEMPLO,
+            "atualizado_em": _DATA_HORA_EXEMPLO,
+        }
+        for responsavel, uuid, arquivos in (
+            (
+                _RESPONSAVEIS_EXEMPLO_ENTRADA[0],
+                "5c48fbbc-b488-423c-9bd8-81d46fba45b1",
+                [],
+            ),
+            (
+                _RESPONSAVEIS_EXEMPLO_ENTRADA[1],
+                "221fbbdd-c1e0-4144-a852-620c466de8f7",
+                [
+                    {
+                        "uuid": "504b59f5-01a4-48f8-8118-ae158f31c312",
+                        "nome": "art-engenheiro.pdf",
+                        "arquivo_url": (
+                            "https://arquivos.exemplo.com/art-engenheiro.pdf"
+                        ),
+                        "anexado_por": _USUARIO_EXEMPLO,
+                        "anexado_em": _DATA_HORA_EXEMPLO,
+                    }
+                ],
+            ),
+        )
+    ],
 }
+
+_EMPRESA_EXEMPLO_ATUALIZACAO = {
+    **_EMPRESA_EXEMPLO_ENTRADA,
+    "responsaveis_tecnicos": [
+        {
+            **_RESPONSAVEIS_EXEMPLO_ENTRADA[0],
+            "uuid": "5c48fbbc-b488-423c-9bd8-81d46fba45b1",
+        },
+        {
+            **_RESPONSAVEIS_EXEMPLO_ENTRADA[1],
+            "uuid": "221fbbdd-c1e0-4144-a852-620c466de8f7",
+            "arquivos": [
+                {"uuid": "504b59f5-01a4-48f8-8118-ae158f31c312"},
+                {"arquivo": "novo-laudo.pdf"},
+            ],
+        },
+    ],
+}
+
+_REGRAS_RESPONSAVEIS_DESCRIPTION = (
+    " Deve ser informado ao menos um responsável técnico, sem repetir o "
+    "tipo (`preposto`, `engenheiro_civil` ou `engenheiro_eletricista`). "
+    "Engenheiros devem possuir ao menos um item em `arquivos`. Cada item "
+    "pode enviar um novo arquivo em `arquivo` ou informar o `uuid` de um "
+    "anexo existente para preservá-lo durante a atualização."
+)
 
 _CREDENCIAL_INVALID_DESCRIPTION = "Credenciais inválidas"
 _ERRO_SERVIDOR_DESCRIPTION = "Erro no servidor"
@@ -82,7 +176,7 @@ EMPRESA_SCHEMA = extend_schema_view(
             OpenApiExample(
                 name="Lista de empresas",
                 response_only=True,
-                value=[_EMPRESA_EXEMPLO_SAIDA],
+                value=_EMPRESA_EXEMPLO_SAIDA,
             ),
         ],
     ),
@@ -111,11 +205,17 @@ EMPRESA_SCHEMA = extend_schema_view(
     create=extend_schema(
         tags=["Empresa"],
         summary="Cria uma nova empresa",
-        description="Adiciona uma nova empresa ao sistema.",
+        description=(
+            "Adiciona uma nova empresa ao sistema."
+            + _REGRAS_RESPONSAVEIS_DESCRIPTION
+        ),
         operation_id="cadastrarEmpresa",
         request=EmpresaCriarAtualizarSerializer,
         responses={
-            201: OpenApiResponse(description="Empresa criada com sucesso"),
+            201: OpenApiResponse(
+                response=EmpresaSerializer,
+                description="Empresa criada com sucesso",
+            ),
             400: OpenApiResponse(description="Dados inválidos"),
             401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
             503: OpenApiResponse(description="Instabilidade"),
@@ -139,11 +239,15 @@ EMPRESA_SCHEMA = extend_schema_view(
         summary="Atualiza uma empresa",
         description=(
             "Atualiza integralmente os dados de uma empresa existente."
+            + _REGRAS_RESPONSAVEIS_DESCRIPTION
         ),
         operation_id="atualizarEmpresa",
         request=EmpresaCriarAtualizarSerializer,
         responses={
-            200: OpenApiResponse(description="Empresa atualizada com sucesso"),
+            200: OpenApiResponse(
+                response=EmpresaSerializer,
+                description="Empresa atualizada com sucesso",
+            ),
             400: OpenApiResponse(description="Dados inválidos"),
             401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
             404: OpenApiResponse(
@@ -156,7 +260,7 @@ EMPRESA_SCHEMA = extend_schema_view(
             OpenApiExample(
                 name="Exemplo de atualização de empresa",
                 request_only=True,
-                value=_EMPRESA_EXEMPLO_ENTRADA,
+                value=_EMPRESA_EXEMPLO_ATUALIZACAO,
             ),
             OpenApiExample(
                 name="Empresa atualizada com sucesso",

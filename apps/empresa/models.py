@@ -3,7 +3,7 @@
 from django.db import models
 
 from apps.core.constants import EstadoChoices
-from apps.core.models.mixins import BaseModel
+from apps.core.models.mixins import AnexoMixin, BaseModel
 from apps.core.validacoes import (
     apenas_digitos_validator,
     cnpj_formato_validacao,
@@ -82,3 +82,24 @@ class ResponsavelTecnico(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.nome} - {self.get_tipo_display()}"
+
+
+class AnexoResponsavelTecnico(AnexoMixin):
+    """Representa o anexo de um responsável técnico de uma empresa."""
+
+    responsavel_tecnico = models.ForeignKey(
+        ResponsavelTecnico,
+        on_delete=models.CASCADE,
+        related_name="anexos",
+    )
+    arquivo = models.FileField(
+        upload_to="empresas/anexos_responsaveis_tecnicos/"
+    )
+
+    class Meta:
+        verbose_name = "Anexo do Responsável Técnico"
+        verbose_name_plural = "Anexos dos Responsáveis Técnicos"
+        ordering = ["-id"]
+
+    def __str__(self) -> str:
+        return f"Anexo de {self.responsavel_tecnico.nome}"

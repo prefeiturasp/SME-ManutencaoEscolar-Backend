@@ -1,20 +1,124 @@
 """Testes para os serviços de Empresa."""
 
 from unittest.mock import Mock, patch
+from uuid import uuid4
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 
+from apps.core.constants import TipoArquivo
+from apps.core.services.anexo_service import AnexoService
 from apps.empresa.constants import EmpresaErrorMessages
-from apps.empresa.models import Empresa
+from apps.empresa.models import (
+    Empresa,
+    ResponsavelTecnico,
+)
+from apps.empresa.repository.anexo_repository import (
+    AnexoResponsavelTecnicoRepository,
+)
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
 from apps.empresa.repository.responsavel_repository import (
     ResponsavelTecnicoRepository,
 )
+from apps.empresa.services.anexo_service import (
+    AnexoResponsavelTecnicoService,
+)
 from apps.empresa.services.empresa_service import EmpresaService
 from apps.empresa.services.responsavel_service import ResponsavelTecnicoService
+
+
+class TestAnexoResponsavelTecnicoService:
+    """Testes para o upload dos anexos de responsáveis técnicos."""
+
+    @pytest.mark.django_db
+    def test_sincronizar_arquivos_prepara_e_persiste_anexo(
+        self, usuario_ativo
+    ):
+        """Deve preparar os metadados e delegar a persistência do anexo."""
+        repository = Mock(spec=AnexoResponsavelTecnicoRepository)
+        repository.criar.return_value = {
+            "uuid": "uuid-anexo",
+            "nome": "art.pdf",
+            "arquivo_url": "https://minio.local/art.pdf",
+        }
+        anexo_service = Mock(spec=AnexoService)
+        service = AnexoResponsavelTecnicoService(
+            repository=repository,
+            anexo_service=anexo_service,
+        )
+        responsavel = ResponsavelTecnico(id=1)
+        arquivo = SimpleUploadedFile(
+            "art.pdf", b"conteudo", content_type="application/pdf"
+        )
+        arquivo.name = "uuid-gerado.pdf"
+        anexo_service.validar_e_preparar_anexo.return_value = {
+            "nome_original": "art.pdf",
+            "tipo": TipoArquivo.DOCUMENTO,
+            "tipo_mime": "application/pdf",
+            "tamanho_bytes": len(b"conteudo"),
+            "arquivo": arquivo,
+            "usuario_id": usuario_ativo.id,
+        }
+        with patch(
+            "apps.empresa.services.anexo_service."
+            "ResponsavelTecnico.objects.get",
+            return_value=responsavel,
+        ):
+            resultado = service.sincronizar_arquivos(
+                responsavel_uuid=responsavel.uuid,
+                arquivos=[{"arquivo": arquivo}],
+                usuario=usuario_ativo,
+            )
+
+        anexo_service.validar_e_preparar_anexo.assert_called_once_with(
+            arquivo=arquivo,
+            id_usuario=usuario_ativo.id,
+        )
+        anexo = repository.criar.call_args.args[0]
+        assert anexo.nome_original == "art.pdf"
+        assert anexo.tipo == TipoArquivo.DOCUMENTO
+        assert anexo.tipo_mime == arquivo.content_type
+        assert anexo.tamanho_bytes == len(b"conteudo")
+        assert anexo.arquivo.name == "uuid-gerado.pdf"
+        assert anexo.criado_por == usuario_ativo
+        assert resultado == [
+            {
+                "uuid": "uuid-anexo",
+                "nome": "art.pdf",
+                "arquivo_url": "https://minio.local/art.pdf",
+            }
+        ]
+        repository.excluir_nao_preservados.assert_called_once_with(
+            responsavel_id=responsavel.id,
+            uuids_preservados=["uuid-anexo"],
+        )
+
+    @pytest.mark.django_db
+    def test_sincronizar_arquivos_preserva_sem_retornar_anexo_existente(self):
+        """Deve preservar sem retornar o anexo cujo UUID está no payload."""
+        uuid = uuid4()
+        repository = Mock(spec=AnexoResponsavelTecnicoRepository)
+        service = AnexoResponsavelTecnicoService(repository=repository)
+
+        responsavel = Mock(id=1)
+        with patch.object(
+            ResponsavelTecnico.objects,
+            "get",
+            return_value=responsavel,
+        ):
+            resultado = service.sincronizar_arquivos(
+                responsavel_uuid=uuid4(),
+                arquivos=[{"uuid": uuid}],
+            )
+
+        assert resultado == []
+        repository.excluir_nao_preservados.assert_called_once_with(
+            responsavel_id=1,
+            uuids_preservados=[uuid],
+        )
 
 
 class TestEmpresaService:
@@ -251,9 +355,21 @@ class TestResponsavelTecnicoService:
             {"empresa_id": 1, "tipo": "preposto", "nome": "João"},
             {"empresa_id": 1, "tipo": "engenheiro_civil", "nome": "Maria"},
         ]
-        responsaveis_criados = [{"nome": "João"}, {"nome": "Maria"}]
+        responsaveis_criados = [
+            {"uuid": "uuid-preposto", "tipo": "preposto", "nome": "João"},
+            {
+                "uuid": "uuid-engenheiro",
+                "tipo": "engenheiro_civil",
+                "nome": "Maria",
+            },
+        ]
         repository.bulk_criar.return_value = responsaveis_criados
-        service = ResponsavelTecnicoService(repository=repository)
+        anexo_service = Mock(spec=AnexoResponsavelTecnicoService)
+        anexo_service.sincronizar_arquivos.return_value = []
+        service = ResponsavelTecnicoService(
+            repository=repository,
+            anexo_service=anexo_service,
+        )
 
         resultado = service.bulk_criar(dados_lista)
 
@@ -284,6 +400,120 @@ class TestResponsavelTecnicoService:
         }
         repository.bulk_criar.assert_not_called()
 
+    def test_bulk_criar_salva_arquivos_para_cada_responsavel(self):
+        """Deve encaminhar os arquivos após criar o responsável técnico."""
+        repository = Mock(spec=ResponsavelTecnicoRepository)
+        repository.existe_por_empresa_e_tipo.return_value = False
+        usuario = Mock()
+        arquivo = Mock()
+        repository.bulk_criar.return_value = [
+            {"uuid": "uuid-preposto", "tipo": "preposto", "nome": "João"}
+        ]
+        anexo_service = Mock(spec=AnexoResponsavelTecnicoService)
+        anexo_service.sincronizar_arquivos.return_value = [{"nome": "art.pdf"}]
+        service = ResponsavelTecnicoService(
+            repository=repository,
+            anexo_service=anexo_service,
+        )
+
+        resultado = service.bulk_criar(
+            [
+                {
+                    "empresa_id": 1,
+                    "tipo": "preposto",
+                    "nome": "João",
+                    "criado_por": usuario,
+                    "anexos": [{"arquivo": arquivo}],
+                }
+            ]
+        )
+
+        repository.bulk_criar.assert_called_once_with(
+            [
+                {
+                    "empresa_id": 1,
+                    "tipo": "preposto",
+                    "nome": "João",
+                    "criado_por": usuario,
+                }
+            ]
+        )
+        anexo_service.sincronizar_arquivos.assert_called_once_with(
+            responsavel_uuid="uuid-preposto",
+            arquivos=[{"arquivo": arquivo}],
+            usuario=usuario,
+        )
+        assert resultado == [
+            {
+                "uuid": "uuid-preposto",
+                "tipo": "preposto",
+                "nome": "João",
+                "anexos": [{"nome": "art.pdf"}],
+            }
+        ]
+
+    def test_bulk_criar_sincroniza_lista_vazia_quando_nao_tem_arquivos(
+        self,
+    ):
+        """Deve sincronizar lista vazia para remover anexos ausentes."""
+        repository = Mock(spec=ResponsavelTecnicoRepository)
+        repository.existe_por_empresa_e_tipo.return_value = False
+        repository.bulk_criar.return_value = [
+            {"uuid": "uuid-preposto", "tipo": "preposto", "nome": "João"}
+        ]
+        anexo_service = Mock(spec=AnexoResponsavelTecnicoService)
+        anexo_service.sincronizar_arquivos.return_value = []
+        service = ResponsavelTecnicoService(
+            repository=repository,
+            anexo_service=anexo_service,
+        )
+
+        resultado = service.bulk_criar(
+            [{"empresa_id": 1, "tipo": "preposto", "nome": "João"}]
+        )
+
+        anexo_service.sincronizar_arquivos.assert_called_once_with(
+            responsavel_uuid="uuid-preposto",
+            arquivos=[],
+            usuario=None,
+        )
+        assert resultado == [
+            {
+                "uuid": "uuid-preposto",
+                "tipo": "preposto",
+                "nome": "João",
+                "anexos": [],
+            }
+        ]
+
+    def test_salvar_anexos_processa_lista_vazia_para_excluir_existentes(self):
+        """Deve sincronizar uma lista vazia para excluir anexos existentes."""
+        anexo_service = Mock(spec=AnexoResponsavelTecnicoService)
+        anexo_service.sincronizar_arquivos.return_value = [{"nome": "art.pdf"}]
+        service = ResponsavelTecnicoService(anexo_service=anexo_service)
+        responsaveis = [
+            {"uuid": "uuid-preposto", "tipo": "preposto"},
+            {"uuid": "uuid-engenheiro", "tipo": "engenheiro_civil"},
+        ]
+
+        resultado = service._salvar_anexos_dos_responsaveis(
+            responsaveis=responsaveis,
+            arquivos_por_tipo={
+                "preposto": [{"arquivo": Mock()}],
+                "engenheiro_civil": [],
+            },
+            usuario=None,
+        )
+
+        assert anexo_service.sincronizar_arquivos.call_count == 2
+        anexo_service.sincronizar_arquivos.assert_any_call(
+            responsavel_uuid="uuid-engenheiro",
+            arquivos=[],
+            usuario=None,
+        )
+        assert resultado[0]["anexos"] == [{"nome": "art.pdf"}]
+        assert resultado[1]["anexos"] == [{"nome": "art.pdf"}]
+
     def test_sincronizar_atualiza_por_uuid_cria_sem_uuid_e_remove_ausentes(
         self,
     ):
@@ -298,12 +528,25 @@ class TestResponsavelTecnicoService:
             engenheiro_civil,
         ]
         repository.bulk_atualizar.return_value = [
-            {"tipo": "preposto", "nome": "Preposto Novo"}
+            {
+                "uuid": "uuid-preposto",
+                "tipo": "preposto",
+                "nome": "Preposto Novo",
+            }
         ]
         repository.bulk_criar.return_value = [
-            {"tipo": "engenheiro_eletricista", "nome": "Eletricista"}
+            {
+                "uuid": "uuid-eletricista",
+                "tipo": "engenheiro_eletricista",
+                "nome": "Eletricista",
+            }
         ]
-        service = ResponsavelTecnicoService(repository=repository)
+        anexo_service = Mock(spec=AnexoResponsavelTecnicoService)
+        anexo_service.sincronizar_arquivos.return_value = []
+        service = ResponsavelTecnicoService(
+            repository=repository,
+            anexo_service=anexo_service,
+        )
         usuario = Mock()
         dados_lista = [
             {
@@ -339,8 +582,18 @@ class TestResponsavelTecnicoService:
         )
         repository.remover.assert_called_once_with([engenheiro_civil], usuario)
         assert resultado == [
-            {"tipo": "preposto", "nome": "Preposto Novo"},
-            {"tipo": "engenheiro_eletricista", "nome": "Eletricista"},
+            {
+                "uuid": "uuid-preposto",
+                "tipo": "preposto",
+                "nome": "Preposto Novo",
+                "anexos": [],
+            },
+            {
+                "uuid": "uuid-eletricista",
+                "tipo": "engenheiro_eletricista",
+                "nome": "Eletricista",
+                "anexos": [],
+            },
         ]
 
     def test_sincronizar_nao_cria_nem_remove_quando_todos_tem_uuid(self):
@@ -349,9 +602,18 @@ class TestResponsavelTecnicoService:
         preposto = Mock(id=1, uuid="uuid-preposto", tipo="preposto")
         repository.listar_por_empresa.return_value = [preposto]
         repository.bulk_atualizar.return_value = [
-            {"tipo": "preposto", "nome": "Preposto Novo"}
+            {
+                "uuid": "uuid-preposto",
+                "tipo": "preposto",
+                "nome": "Preposto Novo",
+            }
         ]
-        service = ResponsavelTecnicoService(repository=repository)
+        anexo_service = Mock(spec=AnexoResponsavelTecnicoService)
+        anexo_service.sincronizar_arquivos.return_value = []
+        service = ResponsavelTecnicoService(
+            repository=repository,
+            anexo_service=anexo_service,
+        )
 
         resultado = service.sincronizar(
             1,
@@ -367,7 +629,14 @@ class TestResponsavelTecnicoService:
 
         repository.remover.assert_not_called()
         repository.bulk_criar.assert_not_called()
-        assert resultado == [{"tipo": "preposto", "nome": "Preposto Novo"}]
+        assert resultado == [
+            {
+                "uuid": "uuid-preposto",
+                "tipo": "preposto",
+                "nome": "Preposto Novo",
+                "anexos": [],
+            }
+        ]
 
     def test_sincronizar_com_uuid_desconhecido_levanta_validation_error(self):
         """Deve falhar quando um uuid informado não pertence à empresa."""

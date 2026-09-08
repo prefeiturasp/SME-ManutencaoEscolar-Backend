@@ -27,6 +27,9 @@ class EmpresaErrorMessages:
         "Não é permitido informar mais de um responsável técnico "
         "do mesmo tipo."
     )
+    RESPONSAVEL_TECNICO_ANEXOS_OBRIGATORIOS = (
+        "Anexos são obrigatórios para engenheiros civis e eletricistas."
+    )
     RESPONSAVEL_TECNICO_NAO_ENCONTRADO = (
         "Responsável técnico não encontrado para esta empresa."
     )
