@@ -6,7 +6,7 @@ from apps.escola.models import DiretoriaRegional
 
 
 class DiretoriaRegionalSerializer(serializers.ModelSerializer):
-    """Serializa e valida os dados dos tipos de escola."""
+    """Serializa os dados dos tipos de escola."""
 
     class Meta:
         model = DiretoriaRegional

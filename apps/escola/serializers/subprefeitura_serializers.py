@@ -6,7 +6,7 @@ from apps.escola.models.subprefeitura import Subprefeitura
 
 
 class SubprefeituraSerializer(serializers.ModelSerializer):
-    """Serializa e valida os dados das subprefeituras."""
+    """Serializa os dados das subprefeituras."""
 
     class Meta:
         model = Subprefeitura
