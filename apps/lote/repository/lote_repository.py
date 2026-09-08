@@ -233,6 +233,9 @@ class LoteRepository:
         Args:
             lote (Lote): Instância da lote a ser deletada.
             usuario (Usuario | None): Usuário que está realizando a deleção.
+        Returns:
+            Tupla contendo a quantidade de registros deletados e um dicionário
+                com a quantidade de exclusões por tipo de objeto.
         """
         model_lote.deletado_por = usuario
 

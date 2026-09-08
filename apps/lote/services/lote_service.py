@@ -100,6 +100,10 @@ class LoteService:
         Args:
             model_lote: Instância do lote a ser deletada.
             usuario: Usuário logado responsável pela exclusão.
+
+        Returns:
+            Tupla contendo a quantidade de registros deletados e um dicionário
+            com a quantidade de exclusões por tipo de objeto.
         """
         return self.repository.deletar(usuario, model_lote)
 

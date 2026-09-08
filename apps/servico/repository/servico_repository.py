@@ -19,7 +19,17 @@ class ServicoRepository:
         nome: str,
         excluir_uuid: UUID | None = None,
     ) -> bool:
-        """Verifica se existe serviço cadastrado com o mesmo nome."""
+        """Verifica se existe um serviço ativo com o nome informado.
+
+        Args:
+            nome: Nome do serviço a ser consultado.
+            excluir_uuid: UUID do serviço que deve ser desconsiderado
+                na consulta.
+
+        Returns:
+            True se existir um serviço com o mesmo nome; caso contrário,
+            False.
+        """
         queryset = self.model.objects.filter(
             nome__iexact=nome,
             deletado_em__isnull=True,
@@ -35,9 +45,19 @@ class ServicoRepository:
         dados: dict[str, Any],
         usuario: Usuario,
     ) -> dict[str, Any]:
-        """Cria e persiste um serviço."""
+        """Cria e persiste um serviço.
+
+        Args:
+            dados: Dados utilizados na criação do serviço.
+            usuario: Usuário responsável pela criação do serviço.
+
+        Returns:
+            Dicionário contendo os dados do serviço criado.
+        """
         servico = self.model(
-            **dados, criado_por=usuario, atualizado_por=usuario
+            **dados,
+            criado_por=usuario,
+            atualizado_por=usuario,
         )
         servico.full_clean()
         servico.save()
@@ -54,7 +74,16 @@ class ServicoRepository:
         dados: dict[str, Any],
         usuario: Usuario,
     ) -> dict[str, Any]:
-        """Atualiza e persiste um serviço existente."""
+        """Atualiza e persiste um serviço existente.
+
+        Args:
+            servico: Instância do serviço a ser atualizada.
+            dados: Dados que serão atualizados no serviço.
+            usuario: Usuário responsável pela atualização.
+
+        Returns:
+            Dicionário contendo os dados atualizados do serviço.
+        """
         if "nome" in dados:
             servico.nome = dados["nome"]
 
@@ -62,7 +91,6 @@ class ServicoRepository:
             servico.status = dados["status"]
 
         servico.atualizado_por = usuario
-
         servico.full_clean()
         servico.save()
 
@@ -73,11 +101,20 @@ class ServicoRepository:
         usuario: Usuario,
         model_servico: Servico,
     ) -> tuple[int, dict[str, int]]:
-        """Marca o registro como deletado sem removê-lo fisicamente."""
-        model_servico.deletado_por = usuario
+        """Realiza a exclusão lógica de do serviço.
 
-        model_servico.save(
-            update_fields=["deletado_por"],
-        )
+        Registra o usuário responsável e marca o serviço como deletado,
+        sem removê-lo fisicamente do banco de dados.
+
+        Args:
+            usuario: Usuário responsável pela exclusão lógica.
+            model_servico: Instância do serviço a ser deletada.
+
+        Returns:
+            Tupla contendo a quantidade de registros deletados e um
+            dicionário com a quantidade de exclusões por tipo de objeto.
+        """
+        model_servico.deletado_por = usuario
+        model_servico.save(update_fields=["deletado_por"])
 
         return model_servico.soft_delete(usuario=usuario)
