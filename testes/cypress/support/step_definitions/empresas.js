@@ -88,3 +88,7 @@ Quando('crio cadastro com responsável técnico {string}',
 Então('o sistema salva a empresa com responsável técnico', function () { 
   cy.validar_cadastro_empresa()
 })
+
+When('crio cadastro com responsáveis técnicos', () => {
+  cy.criar_empresa_responsaveis_tecnicos()
+})
