@@ -37,6 +37,7 @@ class Command(BaseCommand):
         diretorio_projeto = Path(settings.BASE_DIR)
         diretorio_dominios = diretorio_projeto / "docs" / "dominios"
         diretorio_dominio = diretorio_dominios / configuracao_app.label
+        diretorio_codigo = diretorio_dominio / "codigo"
 
         self.stdout.write(
             f"Criando documentação para: {configuracao_app.name}"
@@ -45,6 +46,10 @@ class Command(BaseCommand):
         self.criar_estrutura_dominio(
             diretorio_dominio=diretorio_dominio,
             configuracao_app=configuracao_app,
+        )
+        self.gerar_documentacao_modulos(
+            configuracao_app=configuracao_app,
+            diretorio_codigo=diretorio_codigo,
         )
 
         self.atualizar_indice_dominios(
@@ -388,6 +393,7 @@ class Command(BaseCommand):
     def criar_conteudo_indice_codigo(
         self,
         configuracao_app: AppConfig,
+        modulos: list[str] | None = None,
     ) -> str:
         """
         Cria o índice da documentação técnica do código.
@@ -397,6 +403,7 @@ class Command(BaseCommand):
 
         Args:
             configuracao_app: Configuração do app Django.
+            modulos: Lista dos arquivos RST dos módulos.
 
         Returns:
             Conteúdo inicial do arquivo codigo/index.rst.
@@ -405,8 +412,15 @@ class Command(BaseCommand):
         titulo = "Código"
         separador = "=" * len(titulo)
 
-        return dedent(
-            f"""\
+        linhas_modulos = "\n".join(
+            f"   {modulo}" for modulo in sorted(modulos or [])
+        )
+        if linhas_modulos:
+            linhas_modulos = f"\n{linhas_modulos}"
+
+        return (
+            dedent(
+                f"""\
             {separador}
             {titulo}
             {separador}
@@ -420,6 +434,9 @@ class Command(BaseCommand):
                 :maxdepth: 2
                 :caption: Módulos:
             """
+            )
+            + linhas_modulos
+            + "\n"
         )
 
     def criar_conteudo_indice_dominios(
@@ -470,3 +487,123 @@ class Command(BaseCommand):
             Nome formatado para apresentação na documentação.
         """
         return nome_app.replace("_", " ").title()
+
+    def gerar_documentacao_modulos(
+        self,
+        configuracao_app: AppConfig,
+        diretorio_codigo: Path,
+    ) -> None:
+        """Gera a documentação automática dos módulos Python do app.
+
+        Args:
+            configuracao_app: Configuração do app Django.
+            diretorio_codigo: Diretório da documentação automática.
+        """
+        modulos = self.obter_modulos_python(configuracao_app)
+
+        nomes_arquivos: list[str] = []
+
+        for modulo in modulos:
+            nome_arquivo = modulo.replace(".", "_")
+            caminho_arquivo = diretorio_codigo / f"{nome_arquivo}.rst"
+
+            caminho_arquivo.write_text(
+                self.criar_conteudo_modulo(modulo),
+                encoding="utf-8",
+            )
+
+            nomes_arquivos.append(nome_arquivo)
+            self.stdout.write(
+                self.style.SUCCESS(f"Código documentado: {caminho_arquivo}")
+            )
+
+        self.atualizar_indice_codigo(
+            configuracao_app=configuracao_app,
+            diretorio_codigo=diretorio_codigo,
+            modulos=nomes_arquivos,
+        )
+
+    def obter_modulos_python(
+        self,
+        configuracao_app: AppConfig,
+    ) -> list[str]:
+        """Retorna os módulos Python encontrados no app.
+
+        Args:
+            configuracao_app: Configuração do app Django.
+
+        Returns:
+            Lista ordenada dos módulos Python encontrados.
+        """
+        diretorio_app = Path(configuracao_app.path)
+        modulos: list[str] = []
+
+        for arquivo in sorted(diretorio_app.rglob("*.py")):
+            if arquivo.name == "__init__.py":
+                continue
+
+            if "migrations" in arquivo.parts:
+                continue
+            if "tests" in arquivo.parts:
+                continue
+
+            caminho_relativo = arquivo.relative_to(diretorio_app)
+            partes = caminho_relativo.with_suffix("").parts
+
+            modulo = ".".join([configuracao_app.name, *partes])
+
+            modulos.append(modulo)
+
+        return modulos
+
+    def criar_conteudo_modulo(
+        self,
+        modulo: str,
+    ) -> str:
+        """Cria o conteúdo RST para documentação automática de um módulo.
+
+        Args:
+            modulo: Caminho completo do módulo Python.
+
+        Returns:
+            Conteúdo RST do módulo.
+        """
+        return (
+            f"{modulo}\n"
+            f"{'=' * len(modulo)}\n\n"
+            f".. automodule:: {modulo}\n"
+            "   :members:\n"
+            "   :undoc-members:\n"
+            "   :show-inheritance:\n"
+        )
+
+    def atualizar_indice_codigo(
+        self,
+        configuracao_app: AppConfig,
+        diretorio_codigo: Path,
+        modulos: list[str],
+    ) -> None:
+        """Atualiza o índice da documentação automática do código.
+
+        Args:
+            configuracao_app: Configuração do app Django.
+            diretorio_codigo: Diretório da documentação automática.
+            modulos: Lista dos nomes dos arquivos RST dos módulos.
+        """
+        caminho_indice = diretorio_codigo / INDEX
+
+        conteudo = self.criar_conteudo_indice_codigo(
+            configuracao_app=configuracao_app,
+            modulos=modulos,
+        )
+
+        caminho_indice.write_text(
+            conteudo,
+            encoding="utf-8",
+        )
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Índice de código atualizado: {caminho_indice}"
+            )
+        )

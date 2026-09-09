@@ -6,6 +6,8 @@ import os
 import sys
 from pathlib import Path
 
+import django
+
 DOCS_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = DOCS_DIR.parent
 
@@ -15,6 +17,8 @@ os.environ.setdefault(
     "DJANGO_SETTINGS_MODULE",
     "config.settings",
 )
+
+django.setup()
 
 # Configuration file for the Sphinx documentation builder.
 #
