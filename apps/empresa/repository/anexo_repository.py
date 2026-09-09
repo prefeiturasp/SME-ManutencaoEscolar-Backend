@@ -1,7 +1,10 @@
 """Repositório para os anexos de responsáveis técnicos."""
 
+from functools import partial
 from typing import Any
 from uuid import UUID
+
+from django.db import transaction
 
 from apps.empresa.models import AnexoResponsavelTecnico
 
@@ -23,12 +26,13 @@ class AnexoResponsavelTecnicoRepository:
         anexo.save()
         return self._serializar(anexo)
 
+    @transaction.atomic
     def excluir_nao_preservados(
         self,
         responsavel_id: int,
         uuids_preservados: list[str | UUID],
     ) -> None:
-        """Exclui fisicamente os anexos que não foram preservados.
+        """Exclui os registros e remove os arquivos após o commit.
 
         Args:
             responsavel_id: ID do responsável técnico dono dos anexos.
@@ -40,7 +44,7 @@ class AnexoResponsavelTecnicoRepository:
         ).exclude(uuid__in=uuids_preservados)
 
         for anexo in anexos_nao_preservados:
-            anexo.arquivo.delete(save=False)
+            transaction.on_commit(partial(anexo.arquivo.delete, save=False))
 
         anexos_nao_preservados.delete()
 
