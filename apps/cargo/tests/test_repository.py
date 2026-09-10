@@ -11,15 +11,16 @@ from apps.cargo.models import Cargo, DocumentoCargo
 from apps.cargo.repository.cargo_repository import CargoRepository
 from apps.usuarios.models.usuario import Usuario
 
+MocksRepository = tuple[
+    CargoRepository,
+    MagicMock,
+    MagicMock,
+]
 
 pytestmark = pytest.mark.django_db
 
 
-def criar_repository_com_mocks() -> tuple[
-    CargoRepository,
-    MagicMock,
-    MagicMock,
-]:
+def criar_mocks() -> MocksRepository:
     """Cria o repositório com os models simulados.
 
     Returns:
@@ -43,9 +44,7 @@ def test_criar_cargo_com_documentos(
     model_to_dict_mock: MagicMock,
 ) -> None:
     """Deve criar um cargo e seus documentos."""
-    repository, cargo_model, documento_model = (
-        criar_repository_com_mocks()
-    )
+    repository, cargo_model, documento_model = criar_mocks()
     usuario = MagicMock(spec=Usuario)
 
     cargo = MagicMock(spec=Cargo)
@@ -140,9 +139,7 @@ def test_criar_cargo_sem_documentos(
     model_to_dict_mock: MagicMock,
 ) -> None:
     """Deve criar um cargo quando documentos não forem informados."""
-    repository, cargo_model, documento_model = (
-        criar_repository_com_mocks()
-    )
+    repository, cargo_model, documento_model = criar_mocks()
     usuario = MagicMock(spec=Usuario)
 
     cargo = MagicMock(spec=Cargo)
@@ -194,9 +191,7 @@ def test_nao_alterar_dados_originais(
     model_to_dict_mock: MagicMock,
 ) -> None:
     """Não deve alterar o dicionário original recebido."""
-    repository, cargo_model, documento_model = (
-        criar_repository_com_mocks()
-    )
+    repository, cargo_model, documento_model = criar_mocks()
     usuario = MagicMock(spec=Usuario)
 
     cargo = MagicMock(spec=Cargo)
@@ -244,9 +239,7 @@ def test_nao_alterar_dados_originais(
 
 def test_nao_salvar_cargo_quando_validacao_falhar() -> None:
     """Não deve salvar o cargo quando sua validação falhar."""
-    repository, cargo_model, documento_model = (
-        criar_repository_com_mocks()
-    )
+    repository, cargo_model, documento_model = criar_mocks()
     usuario = MagicMock(spec=Usuario)
 
     cargo = MagicMock(spec=Cargo)
@@ -282,9 +275,7 @@ def test_nao_salvar_cargo_quando_validacao_falhar() -> None:
 
 def test_nao_criar_documentos_quando_validacao_falhar() -> None:
     """Não deve persistir documentos quando sua validação falhar."""
-    repository, cargo_model, documento_model = (
-        criar_repository_com_mocks()
-    )
+    repository, cargo_model, documento_model = criar_mocks()
     usuario = MagicMock(spec=Usuario)
 
     cargo = MagicMock(spec=Cargo)

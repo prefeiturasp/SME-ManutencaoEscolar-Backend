@@ -5,7 +5,6 @@ from django.db import IntegrityError, transaction
 
 from apps.cargo.models import Cargo, DocumentoCargo
 
-
 pytestmark = pytest.mark.django_db
 
 
@@ -42,18 +41,16 @@ def test_nao_permitir_cargos_ativos_com_nomes_iguais() -> None:
     """Não deve permitir cargos ativos com nomes iguais."""
     Cargo.objects.create(nome="Eletricista")
 
-    with pytest.raises(IntegrityError):
-        with transaction.atomic():
-            Cargo.objects.create(nome="Eletricista")
+    with pytest.raises(IntegrityError), transaction.atomic():
+        Cargo.objects.create(nome="Eletricista")
 
 
 def test_nao_permitir_cargos_com_nomes_iguais_ignorando_maiusculas() -> None:
     """Não deve permitir nomes iguais ignorando maiúsculas e minúsculas."""
     Cargo.objects.create(nome="Eletricista")
 
-    with pytest.raises(IntegrityError):
-        with transaction.atomic():
-            Cargo.objects.create(nome="ELETRICISTA")
+    with pytest.raises(IntegrityError), transaction.atomic():
+        Cargo.objects.create(nome="ELETRICISTA")
 
 
 def test_ordenar_cargos_por_status_e_id_decrescente() -> None:
@@ -92,7 +89,6 @@ def test_criar_documento_vinculado_ao_cargo() -> None:
         nome="Eletricista",
         exige_documento=True,
     )
-
     documento = DocumentoCargo.objects.create(
         nome="Certificado NR-10",
         cargo=cargo,
@@ -149,12 +145,11 @@ def test_nao_permitir_documentos_iguais_no_mesmo_cargo() -> None:
         cargo=cargo,
     )
 
-    with pytest.raises(IntegrityError):
-        with transaction.atomic():
-            DocumentoCargo.objects.create(
-                nome="Certificado NR-10",
-                cargo=cargo,
-            )
+    with pytest.raises(IntegrityError), transaction.atomic():
+        DocumentoCargo.objects.create(
+            nome="Certificado NR-10",
+            cargo=cargo,
+        )
 
 
 def test_nao_permitir_documentos_iguais_ignorando_maiusculas() -> None:
@@ -168,12 +163,11 @@ def test_nao_permitir_documentos_iguais_ignorando_maiusculas() -> None:
         cargo=cargo,
     )
 
-    with pytest.raises(IntegrityError):
-        with transaction.atomic():
-            DocumentoCargo.objects.create(
-                nome="CERTIFICADO NR-10",
-                cargo=cargo,
-            )
+    with pytest.raises(IntegrityError), transaction.atomic():
+        DocumentoCargo.objects.create(
+            nome="CERTIFICADO NR-10",
+            cargo=cargo,
+        )
 
 
 def test_permitir_documento_com_mesmo_nome_em_cargos_diferentes() -> None:
@@ -186,7 +180,6 @@ def test_permitir_documento_com_mesmo_nome_em_cargos_diferentes() -> None:
         nome="Engenheiro",
         exige_documento=True,
     )
-
     primeiro_documento = DocumentoCargo.objects.create(
         nome="Documento pessoal",
         cargo=primeiro_cargo,
@@ -227,7 +220,4 @@ def test_ordenar_documentos_por_nome() -> None:
 def test_configurar_nomes_amigaveis_do_documento() -> None:
     """Deve configurar os nomes amigáveis de DocumentoCargo."""
     assert DocumentoCargo._meta.verbose_name == "Documento do cargo"
-    assert (
-        DocumentoCargo._meta.verbose_name_plural
-        == "Documentos dos cargos"
-    )
+    assert DocumentoCargo._meta.verbose_name_plural == "Documentos dos cargos"

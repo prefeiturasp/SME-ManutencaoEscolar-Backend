@@ -1,193 +1,179 @@
-"""Testes das views de cargos."""
+"""Testes das views do domínio de cargos."""
 
 from types import SimpleNamespace
-from typing import Any, cast
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework.exceptions import (
-    NotAuthenticated,
-    ValidationError as DRFValidationError,
-)
-from rest_framework.serializers import BaseSerializer
+from rest_framework.exceptions import NotAuthenticated
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from apps.cargo.api.views import (
-    CargoInstabilidadeError,
-    CargoViewSet,
-)
+from apps.cargo.api.views import CargoViewSet
 from apps.cargo.constants import CargoErrorMessages
-from apps.cargo.services.cargo_service import CargoService
+from apps.cargo.exceptions import CargoInstabilidadeError
+from apps.cargo.models import Cargo
 from apps.usuarios.models.usuario import Usuario
 
 
-def criar_view(
-    service: MagicMock,
-    usuario: object | None = None,
-) -> CargoViewSet:
-    """Cria uma view com suas dependências simuladas.
-
-    Args:
-        service: Mock do serviço de cargos.
-        usuario: Usuário que será associado à requisição.
-
-    Returns:
-        Instância configurada da view de cargos.
-    """
-    view = CargoViewSet()
-    view.service = cast(CargoService, service)
-    view.request = cast(
-        Any,
-        SimpleNamespace(
-            user=usuario if usuario is not None else Usuario(),
-        ),
-    )
-
-    return view
+@pytest.fixture
+def usuario() -> Usuario:
+    """Retorna um usuário para os testes da view."""
+    return Usuario()
 
 
-def criar_serializer(
-    dados: dict[str, Any],
-) -> MagicMock:
-    """Cria um serializer simulado com dados validados.
+@pytest.fixture
+def view(usuario: Usuario) -> CargoViewSet:
+    """Retorna a view configurada com usuário e service mockado."""
+    cargo_view = CargoViewSet()
+    cargo_view.request = SimpleNamespace(user=usuario)
+    cargo_view.service = Mock()
 
-    Args:
-        dados: Dados validados que serão atribuídos ao serializer.
-
-    Returns:
-        Mock configurado do serializer.
-    """
-    serializer = MagicMock(spec=BaseSerializer)
-    serializer.validated_data = dados
-    serializer.instance = None
-
-    return serializer
+    return cargo_view
 
 
-@patch("apps.cargo.api.views.CargoService")
-def test_inicializar_view_com_cargo_service(
-    cargo_service_mock: MagicMock,
-) -> None:
-    """Deve inicializar a view com o serviço de cargos."""
-    service = MagicMock()
-    cargo_service_mock.return_value = service
-
-    view = CargoViewSet()
-
-    cargo_service_mock.assert_called_once_with()
-    assert view.service == service
-
-
-def test_criar_cargo_delegando_ao_service() -> None:
-    """Deve criar um cargo delegando a operação ao service."""
-    service = MagicMock()
-    usuario = Usuario()
-    view = criar_view(service, usuario)
-    serializer = criar_serializer(
-        {
-            "nome": "Eletricista",
-            "exige_documento": True,
-            "status": True,
-            "documentos": [
-                {"nome": "Certificado NR-10"},
-            ],
-        }
-    )
-    cargo_criado = {
-        "pk": 1,
-        "nome": "Eletricista",
+@pytest.fixture
+def serializer() -> Mock:
+    """Retorna um serializer mockado com dados validados."""
+    serializer_mock = Mock()
+    serializer_mock.validated_data = {
+        "nome": "Encanador",
         "exige_documento": True,
         "status": True,
+        "documentos": [
+            {
+                "nome": "NR10",
+            },
+        ],
     }
-    service.criar.return_value = cargo_criado
+    serializer_mock.instance = None
+
+    return serializer_mock
+
+
+def test_inicializar_view_com_cargo_service() -> None:
+    """Testa a inicialização da view com o service de cargos."""
+    service_mock = Mock()
+
+    with patch(
+        "apps.cargo.api.views.CargoService",
+        return_value=service_mock,
+    ) as cargo_service_mock:
+        cargo_view = CargoViewSet()
+
+    cargo_service_mock.assert_called_once_with()
+    assert cargo_view.service is service_mock
+
+
+def test_perform_create_deve_criar_cargo(
+    view: CargoViewSet,
+    serializer: Mock,
+    usuario: Usuario,
+) -> None:
+    """Testa a criação de um cargo por meio do service."""
+    cargo_criado = Cargo(
+        nome="Encanador",
+        exige_documento=True,
+        status=True,
+    )
+    view.service.criar.return_value = cargo_criado
 
     view.perform_create(serializer)
 
-    service.criar.assert_called_once_with(
+    view.service.criar.assert_called_once_with(
         dados=serializer.validated_data,
         usuario=usuario,
     )
-    assert serializer.instance == cargo_criado
+    assert serializer.instance is cargo_criado
 
 
-def test_converter_validacao_com_message_dict_para_erro_drf() -> None:
-    """Deve converter uma validação com campos para erro do DRF."""
-    service = MagicMock()
-    view = criar_view(service)
-    serializer = criar_serializer({"nome": ""})
-
-    service.criar.side_effect = DjangoValidationError(
+def test_perform_create_deve_converter_validation_error_com_dicionario(
+    view: CargoViewSet,
+    serializer: Mock,
+) -> None:
+    """Testa a conversão de ValidationError contendo message_dict."""
+    view.service.criar.side_effect = DjangoValidationError(
         {
-            "nome": ["Este campo não pode ficar em branco."],
-        }
+            "nome": [
+                "Já existe um cargo com este nome.",
+            ],
+        },
     )
 
     with pytest.raises(DRFValidationError) as exc_info:
         view.perform_create(serializer)
 
     assert exc_info.value.detail == {
-        "nome": ["Este campo não pode ficar em branco."],
+        "nome": [
+            "Já existe um cargo com este nome.",
+        ],
     }
     assert serializer.instance is None
 
 
-def test_converter_validacao_sem_message_dict_para_erro_drf() -> None:
-    """Deve converter uma validação sem campos para erro do DRF."""
-    service = MagicMock()
-    view = criar_view(service)
-    serializer = criar_serializer({"nome": "Eletricista"})
-
-    service.criar.side_effect = DjangoValidationError(
-        ["Dados inválidos."]
+def test_perform_create_deve_converter_validation_error_com_lista(
+    view: CargoViewSet,
+    serializer: Mock,
+) -> None:
+    """Testa a conversão de ValidationError contendo uma lista."""
+    view.service.criar.side_effect = DjangoValidationError(
+        [
+            "Dados do cargo inválidos.",
+        ],
     )
 
     with pytest.raises(DRFValidationError) as exc_info:
         view.perform_create(serializer)
 
-    assert exc_info.value.detail == ["Dados inválidos."]
+    assert exc_info.value.detail == [
+        "Dados do cargo inválidos.",
+    ]
     assert serializer.instance is None
 
 
-def test_retornar_instabilidade_quando_ocorrer_erro_inesperado() -> None:
-    """Deve retornar instabilidade quando ocorrer um erro inesperado."""
-    service = MagicMock()
-    view = criar_view(service)
-    serializer = criar_serializer({"nome": "Eletricista"})
-
-    service.criar.side_effect = RuntimeError("Falha inesperada")
+def test_perform_create_deve_lancar_erro_de_instabilidade(
+    view: CargoViewSet,
+    serializer: Mock,
+) -> None:
+    """Testa o tratamento de uma falha inesperada do service."""
+    erro_original = RuntimeError("Falha inesperada")
+    view.service.criar.side_effect = erro_original
 
     with pytest.raises(CargoInstabilidadeError) as exc_info:
         view.perform_create(serializer)
 
-    assert exc_info.value.status_code == 500
     assert exc_info.value.detail == {
         "title": "Erro",
         "detail": CargoErrorMessages.INSTABILIDADE,
     }
+    assert exc_info.value.__cause__ is erro_original
     assert serializer.instance is None
 
 
-def test_obter_usuario_autenticado() -> None:
-    """Deve retornar o usuário autenticado da requisição."""
-    service = MagicMock()
-    usuario = Usuario()
-    view = criar_view(service, usuario)
-
+def test_obter_usuario_deve_retornar_usuario_autenticado(
+    view: CargoViewSet,
+    usuario: Usuario,
+) -> None:
+    """Testa o retorno do usuário autenticado."""
     resultado = view._obter_usuario()
 
     assert resultado is usuario
 
 
-def test_rejeitar_usuario_nao_identificado() -> None:
-    """Deve rejeitar uma requisição sem usuário identificado."""
-    service = MagicMock()
-    view = criar_view(
-        service,
-        usuario=object(),
-    )
+def test_obter_usuario_deve_lancar_not_authenticated() -> None:
+    """Testa a ausência de um usuário válido na requisição."""
+    cargo_view = CargoViewSet()
+    cargo_view.request = SimpleNamespace(user=Mock())
 
     with pytest.raises(
         NotAuthenticated,
         match="Usuário não identificado.",
     ):
-        view._obter_usuario()
+        cargo_view._obter_usuario()
+
+
+def test_view_deve_permitir_somente_post_e_options() -> None:
+    """Testa os métodos HTTP permitidos pela view."""
+    assert CargoViewSet.http_method_names == [
+        "post",
+        "options",
+    ]

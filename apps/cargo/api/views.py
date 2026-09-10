@@ -3,25 +3,18 @@
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework import status, viewsets
-from rest_framework.exceptions import APIException, NotAuthenticated
+from rest_framework import viewsets
+from rest_framework.exceptions import NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.serializers import BaseSerializer
 
 from apps.cargo.constants import CargoErrorMessages
+from apps.cargo.exceptions import CargoInstabilidadeError
 from apps.cargo.models import Cargo
 from apps.cargo.schemas import CARGO_SCHEMA
 from apps.cargo.serializers import CargoCriarSerializer
 from apps.cargo.services.cargo_service import CargoService
 from apps.usuarios.models.usuario import Usuario
-
-
-class CargoInstabilidadeError(APIException):
-    """Representa uma instabilidade durante o cadastro do cargo."""
-
-    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    default_detail = "Não foi possível cadastrar o cargo."
-    default_code = "cargo_instabilidade"
 
 
 @CARGO_SCHEMA

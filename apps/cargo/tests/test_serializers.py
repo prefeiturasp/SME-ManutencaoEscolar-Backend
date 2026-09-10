@@ -7,7 +7,6 @@ from apps.cargo.serializers import (
     DocumentoCargoCriarSerializer,
 )
 
-
 pytestmark = pytest.mark.django_db
 
 
