@@ -311,7 +311,7 @@ class Command(BaseCommand):
                regras_negocio
 
             Documentação do código
-            ======
+            ======================
 
             Esta seção apresenta a documentação técnica dos componentes que
             implementam o domínio **{nome_dominio}**.
@@ -440,7 +440,7 @@ class Command(BaseCommand):
     def criar_conteudo_indice_codigo(
         self,
         configuracao_app: AppConfig,
-        modulos: list[str] | None = None,
+        modulos: list[tuple[str, str]] | None = None,
     ) -> str:
         """
         Cria o índice da documentação técnica do código.
@@ -456,28 +456,55 @@ class Command(BaseCommand):
             Conteúdo inicial do arquivo codigo/index.rst.
         """
         nome_dominio = self.formatar_nome_dominio(configuracao_app.label)
-        linhas_modulos = "\n".join(
-            f"   {modulo}" for modulo in sorted(modulos or [])
-        )
-        if linhas_modulos:
-            linhas_modulos = f"\n{linhas_modulos}"
+        categorias = [
+            "Models",
+            "Serializers",
+            "Views",
+            "Services",
+            "Repositories",
+            "Commands",
+            "Outros Módulos",
+        ]
 
-        return (
-            dedent(
-                f"""\
-            Esta seção contém a documentação técnica gerada a partir do
-            código-fonte do domínio **{nome_dominio}**.
+        modulos_por_categoria: dict[str, list[str]] = {
+            categoria: [] for categoria in categorias
+        }
 
-            A documentação de código complementa a documentação de negócio.
+        for modulo, nome_arquivo in modulos or []:
+            categoria = self.classificar_modulo(modulo)
+            modulos_por_categoria[categoria].append(nome_arquivo)
 
-            .. toctree::
-                :maxdepth: 2
-                :caption: Módulos:
-            """
+        linhas = [
+            "Esta seção contém a documentação técnica gerada a partir do",
+            f"código-fonte do domínio **{nome_dominio}**.",
+            "",
+            "A documentação de código complementa a documentação de negócio.",
+            "",
+        ]
+
+        for categoria in categorias:
+            modulos_categoria = sorted(modulos_por_categoria[categoria])
+
+            if not modulos_categoria:
+                continue
+
+            linhas.extend(
+                [
+                    categoria,
+                    "-" * len(categoria),
+                    "",
+                    ".. toctree::",
+                    "   :maxdepth: 2",
+                    "",
+                ]
             )
-            + linhas_modulos
-            + "\n"
-        )
+
+            for nome_arquivo in modulos_categoria:
+                linhas.append(f"   {nome_arquivo}")
+
+            linhas.append("")
+
+        return "\n".join(linhas)
 
     def criar_conteudo_indice_dominios(
         self,
@@ -540,8 +567,7 @@ class Command(BaseCommand):
             diretorio_codigo: Diretório da documentação automática.
         """
         modulos = self.obter_modulos_python(configuracao_app)
-
-        nomes_arquivos: list[str] = []
+        modulos_documentados: list[tuple[str, str]] = []
 
         for modulo in modulos:
             nome_arquivo = modulo.replace(".", "_")
@@ -552,7 +578,7 @@ class Command(BaseCommand):
                 encoding="utf-8",
             )
 
-            nomes_arquivos.append(nome_arquivo)
+            modulos_documentados.append((modulo, nome_arquivo))
             self.stdout.write(
                 self.style.SUCCESS(f"Código documentado: {caminho_arquivo}")
             )
@@ -560,7 +586,7 @@ class Command(BaseCommand):
         self.atualizar_indice_codigo(
             configuracao_app=configuracao_app,
             diretorio_codigo=diretorio_codigo,
-            modulos=nomes_arquivos,
+            modulos=modulos_documentados,
         )
 
     def obter_modulos_python(
@@ -581,7 +607,6 @@ class Command(BaseCommand):
         for arquivo in sorted(diretorio_app.rglob("*.py")):
             if arquivo.name == "__init__.py":
                 continue
-
             if "migrations" in arquivo.parts:
                 continue
             if "tests" in arquivo.parts:
@@ -621,7 +646,7 @@ class Command(BaseCommand):
         self,
         configuracao_app: AppConfig,
         diretorio_codigo: Path,
-        modulos: list[str],
+        modulos: list[tuple[str, str]],
     ) -> None:
         """Atualiza o índice da documentação automática do código.
 
@@ -647,3 +672,38 @@ class Command(BaseCommand):
                 f"Índice de código atualizado: {caminho_indice}"
             )
         )
+
+    def classificar_modulo(
+        self,
+        modulo: str,
+    ) -> str:
+        """
+        Classifica um módulo Python conforme sua responsabilidade.
+
+        Args:
+            modulo: Caminho completo do módulo Python.
+
+        Returns:
+            Categoria do módulo.
+        """
+        partes = modulo.split(".")
+
+        if "models" in partes:
+            return "Models"
+
+        if "serializers" in partes:
+            return "Serializers"
+
+        if "views" in partes:
+            return "Views"
+
+        if "services" in partes:
+            return "Services"
+
+        if "repository" in partes:
+            return "Repositories"
+
+        if "management" in partes and "commands" in partes:
+            return "Commands"
+
+        return "Outros Módulos"
