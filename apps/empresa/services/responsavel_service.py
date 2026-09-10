@@ -5,6 +5,7 @@ from typing import Any
 from django.core.exceptions import ValidationError
 
 from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.models import ResponsavelTecnico
 from apps.empresa.repository.responsavel_repository import (
     ResponsavelTecnicoRepository,
 )
@@ -62,6 +63,25 @@ class ResponsavelTecnicoService:
         return self._salvar_anexos_dos_responsaveis(
             responsaveis, arquivos_por_tipo, usuario
         )
+
+    def remover(
+        self,
+        responsaveis: list[ResponsavelTecnico],
+        usuario: Usuario | None = None,
+    ) -> None:
+        """Exclui fisicamente os anexos e logicamente os responsáveis.
+
+        Args:
+            responsaveis: Instâncias dos responsáveis técnicos a remover.
+            usuario: Usuário responsável pela exclusão.
+        """
+        for responsavel in responsaveis:
+            self.anexo_service.sincronizar_arquivos(
+                responsavel_uuid=responsavel.uuid,
+                arquivos=[],
+                usuario=usuario,
+            )
+            self.repository.remover(responsavel, usuario)
 
     def sincronizar(
         self,
@@ -128,7 +148,7 @@ class ResponsavelTecnicoService:
         ]
 
         if para_remover:
-            self.repository.remover(para_remover, usuario)
+            self.remover(para_remover, usuario)
 
         sincronizados: dict[str, dict[str, Any]] = {}
         if dados_para_atualizar:

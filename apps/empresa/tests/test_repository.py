@@ -6,6 +6,7 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models.fields.files import FieldFile
 
 from apps.empresa.models import (
@@ -155,7 +156,10 @@ class TestAnexoResponsavelTecnicoRepository:
             "arquivo_url": "https://minio.local/art.pdf",
         }
 
-    def test_excluir_nao_preservados_remove_arquivos_e_registros(self):
+    @pytest.mark.django_db
+    def test_excluir_nao_preservados_remove_arquivos_e_registros(
+        self, django_capture_on_commit_callbacks: Any
+    ) -> None:
         """Deve excluir do storage e banco os anexos não preservados."""
         repository = AnexoResponsavelTecnicoRepository()
         uuid_preservado = AnexoResponsavelTecnico().uuid
@@ -169,11 +173,14 @@ class TestAnexoResponsavelTecnicoRepository:
             {"empresa.AnexoResponsavelTecnico": 1},
         )
 
-        with patch.object(
-            AnexoResponsavelTecnico.objects,
-            "filter",
-            return_value=queryset,
-        ) as filter_mock:
+        with (
+            patch.object(
+                AnexoResponsavelTecnico.objects,
+                "filter",
+                return_value=queryset,
+            ) as filter_mock,
+            django_capture_on_commit_callbacks(execute=True),
+        ):
             repository.excluir_nao_preservados(
                 responsavel_id=1,
                 uuids_preservados=[uuid_preservado],
@@ -186,8 +193,10 @@ class TestAnexoResponsavelTecnicoRepository:
 
     @pytest.mark.django_db
     def test_excluir_nao_preservados_remove_fisicamente_do_banco(
-        self, responsavel_payload_valido
-    ):
+        self,
+        responsavel_payload_valido: dict[str, Any],
+        django_capture_on_commit_callbacks: Any,
+    ) -> None:
         """Deve remover o registro inclusive do manager sem filtro."""
         responsavel = ResponsavelTecnico.objects.create(
             **responsavel_payload_valido
@@ -199,16 +208,63 @@ class TestAnexoResponsavelTecnicoRepository:
             arquivo="anexos_responsaveis_tecnicos/art.pdf",
         )
 
-        with patch.object(FieldFile, "delete") as arquivo_delete:
+        with (
+            patch.object(FieldFile, "delete") as arquivo_delete,
+            django_capture_on_commit_callbacks(execute=True),
+        ):
             AnexoResponsavelTecnicoRepository().excluir_nao_preservados(
                 responsavel_id=responsavel.id,
                 uuids_preservados=[],
             )
 
+            arquivo_delete.assert_not_called()
+
         arquivo_delete.assert_called_once_with(save=False)
         assert not AnexoResponsavelTecnico.dm_objects.filter(
             pk=anexo.pk
         ).exists()
+
+    @pytest.mark.django_db
+    def test_rollback_preserva_arquivo_e_registro(
+        self,
+        responsavel_payload_valido: dict[str, Any],
+        django_capture_on_commit_callbacks: Any,
+    ) -> None:
+        """Preserva o arquivo e o registro se a transação externa falhar."""
+        responsavel = ResponsavelTecnico.objects.create(
+            **responsavel_payload_valido
+        )
+        anexo = AnexoResponsavelTecnico.objects.create(
+            responsavel_tecnico=responsavel,
+            nome_original="art.pdf",
+            tipo="documento",
+            arquivo="anexos_responsaveis_tecnicos/art.pdf",
+        )
+
+        repository = AnexoResponsavelTecnicoRepository()
+
+        def excluir_e_falhar() -> None:
+            """Simula uma falha após excluir o anexo na mesma transação."""
+            with transaction.atomic():
+                repository.excluir_nao_preservados(
+                    responsavel_id=responsavel.id,
+                    uuids_preservados=[],
+                )
+                assert not AnexoResponsavelTecnico.dm_objects.filter(
+                    pk=anexo.pk
+                ).exists()
+                raise ValueError("Falha na exclusão")
+
+        with (
+            patch.object(FieldFile, "delete") as arquivo_delete,
+            django_capture_on_commit_callbacks(execute=True) as callbacks,
+            pytest.raises(ValueError, match="Falha na exclusão"),
+        ):
+            excluir_e_falhar()
+
+        arquivo_delete.assert_not_called()
+        assert callbacks == []
+        assert AnexoResponsavelTecnico.dm_objects.filter(pk=anexo.pk).exists()
 
 
 class TestResponsavelTecnicoRepository:
@@ -337,7 +393,7 @@ class TestResponsavelTecnicoRepository:
         repository.bulk_criar([responsavel_payload_valido])
         responsavel = ResponsavelTecnico.objects.get()
 
-        repository.remover([responsavel], usuario_ativo)
+        repository.remover(responsavel, usuario_ativo)
 
         responsavel.refresh_from_db()
         assert responsavel.deletado_em is not None

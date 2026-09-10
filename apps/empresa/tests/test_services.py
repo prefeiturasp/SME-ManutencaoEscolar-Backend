@@ -1,16 +1,19 @@
 """Testes para os serviços de Empresa."""
 
+from typing import Any
 from unittest.mock import Mock, patch
 from uuid import uuid4
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.core.files.storage import InMemoryStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.core.constants import TipoArquivo
 from apps.core.services.anexo_service import AnexoService
 from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.models import (
+    AnexoResponsavelTecnico,
     Empresa,
     ResponsavelTecnico,
 )
@@ -28,6 +31,7 @@ from apps.empresa.services.anexo_service import (
 )
 from apps.empresa.services.empresa_service import EmpresaService
 from apps.empresa.services.responsavel_service import ResponsavelTecnicoService
+from apps.usuarios.models import Usuario
 
 
 class TestAnexoResponsavelTecnicoService:
@@ -312,10 +316,11 @@ class TestEmpresaService:
             "responsaveis_tecnicos": [{"tipo": "preposto"}],
         }
 
+    @pytest.mark.django_db
     def test_deletar_delega_para_repository(self, empresa_payload_valido):
         """Deve delegar a exclusão da empresa ao repositório."""
         empresa_repository = Mock(spec=EmpresaRepository)
-        instancia = Empresa(**empresa_payload_valido)
+        instancia = Empresa.objects.create(**empresa_payload_valido)
         service = EmpresaService(empresa_repository=empresa_repository)
         usuario = Mock()
 
@@ -323,17 +328,59 @@ class TestEmpresaService:
 
         empresa_repository.deletar.assert_called_once_with(instancia, usuario)
 
+    @pytest.mark.django_db
     def test_deletar_sem_usuario_delega_usuario_como_none(
         self, empresa_payload_valido
     ):
         """Deve delegar usuário None ao repositório quando não informado."""
         empresa_repository = Mock(spec=EmpresaRepository)
-        instancia = Empresa(**empresa_payload_valido)
+        instancia = Empresa.objects.create(**empresa_payload_valido)
         service = EmpresaService(empresa_repository=empresa_repository)
 
         service.deletar(instancia)
 
         empresa_repository.deletar.assert_called_once_with(instancia, None)
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize("com_usuario", [True, False])
+    def test_deletar_exclui_logicamente_responsaveis(
+        self, empresa: Empresa, usuario_ativo: Usuario, com_usuario: bool
+    ) -> None:
+        """Deve preservar os registros e auditar a exclusão lógica."""
+        responsaveis = [
+            ResponsavelTecnico.objects.create(
+                empresa=empresa, nome=tipo, tipo=tipo
+            )
+            for tipo in ("preposto", "engenheiro_civil")
+        ]
+        usuario = usuario_ativo if com_usuario else None
+        EmpresaService().deletar(empresa, usuario)
+        empresa.refresh_from_db()
+        assert empresa.deletado_em is not None
+        assert empresa.deletado_por == usuario
+        assert not empresa.responsaveis_tecnicos.exists()
+        for responsavel in responsaveis:
+            responsavel.refresh_from_db()
+            assert responsavel.deletado_em is not None
+            assert responsavel.deletado_por == usuario
+
+    @pytest.mark.django_db
+    def test_deletar_reverte_responsaveis_se_empresa_falhar(
+        self, empresa: Empresa
+    ) -> None:
+        """Deve reverter a exclusão dos responsáveis se a operação falhar."""
+        responsavel = ResponsavelTecnico.objects.create(
+            empresa=empresa, nome="Preposto", tipo="preposto"
+        )
+        repository = Mock(spec=EmpresaRepository)
+        repository.deletar.side_effect = RuntimeError("Falha na exclusão")
+        service = EmpresaService(empresa_repository=repository)
+        with pytest.raises(RuntimeError, match="Falha na exclusão"):
+            service.deletar(empresa)
+        responsavel.refresh_from_db()
+        empresa.refresh_from_db()
+        assert responsavel.deletado_em is None
+        assert empresa.deletado_em is None
 
 
 class TestResponsavelTecnicoService:
@@ -580,7 +627,7 @@ class TestResponsavelTecnicoService:
                 }
             ]
         )
-        repository.remover.assert_called_once_with([engenheiro_civil], usuario)
+        repository.remover.assert_called_once_with(engenheiro_civil, usuario)
         assert resultado == [
             {
                 "uuid": "uuid-preposto",
@@ -657,3 +704,59 @@ class TestResponsavelTecnicoService:
         repository.bulk_atualizar.assert_not_called()
         repository.bulk_criar.assert_not_called()
         repository.remover.assert_not_called()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("sincronizar", [True, False])
+def test_remover_responsavel_exclui_todos_os_anexos(
+    empresa: Empresa,
+    usuario_ativo: Usuario,
+    sincronizar: bool,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    """Deve excluir os anexos e preservar os de outro responsável."""
+    responsavel = ResponsavelTecnico.objects.create(
+        empresa=empresa, nome="Preposto", tipo="preposto"
+    )
+    outro = ResponsavelTecnico.objects.create(
+        empresa=empresa, nome="Engenheiro", tipo="engenheiro_civil"
+    )
+    storage = InMemoryStorage()
+    campo = AnexoResponsavelTecnico._meta.get_field("arquivo")
+    with patch.object(campo, "storage", storage):
+        anexos = [
+            AnexoResponsavelTecnico.objects.create(
+                responsavel_tecnico=dono,
+                nome_original="art.pdf",
+                tipo="documento",
+                arquivo=SimpleUploadedFile("art.pdf", b"conteudo"),
+            )
+            for dono in (responsavel, responsavel, outro)
+        ]
+        nomes = [anexo.arquivo.name for anexo in anexos]
+        service = ResponsavelTecnicoService()
+        with django_capture_on_commit_callbacks(execute=True):
+            if sincronizar:
+                service.sincronizar(
+                    empresa.id,
+                    [
+                        {
+                            "uuid": str(outro.uuid),
+                            "tipo": outro.tipo,
+                            "anexos": [{"uuid": str(anexos[2].uuid)}],
+                        }
+                    ],
+                    usuario_ativo,
+                )
+            else:
+                service.remover([responsavel], usuario_ativo)
+
+        assert not AnexoResponsavelTecnico.objects.filter(
+            responsavel_tecnico=responsavel
+        ).exists()
+        assert all(not storage.exists(nome) for nome in nomes[:2])
+        assert storage.exists(nomes[2])
+        assert AnexoResponsavelTecnico.objects.filter(pk=anexos[2].pk).exists()
+        responsavel.refresh_from_db()
+        assert responsavel.deletado_em is not None
+        assert responsavel.deletado_por == usuario_ativo

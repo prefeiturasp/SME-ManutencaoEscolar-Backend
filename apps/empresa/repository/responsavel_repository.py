@@ -85,18 +85,17 @@ class ResponsavelTecnicoRepository:
 
     def remover(
         self,
-        responsaveis: list[ResponsavelTecnico],
+        responsavel: ResponsavelTecnico,
         usuario: Usuario | None = None,
     ) -> None:
         """
-        Marca os responsáveis técnicos informados como deletados.
+        Marca o responsável técnico informado como deletado.
 
         Args:
-            responsaveis (list[ResponsavelTecnico]): Instâncias a remover.
+            responsavel (ResponsavelTecnico): Instância a remover.
             usuario (Usuario | None): Usuário responsável pela remoção.
         """
-        for responsavel in responsaveis:
-            responsavel.soft_delete(usuario=usuario)
+        responsavel.soft_delete(usuario=usuario)
 
     def existe_por_empresa_e_tipo(self, empresa_id: int, tipo: str) -> bool:
         """
