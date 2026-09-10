@@ -12,7 +12,7 @@ class CargoInstabilidadeError(APIException):
     default_code = "cargo_instabilidade"
 
 
-class CargoOuDDocumentoJaVinculadaError(Exception):
+class CargoOuDocumentoJaVinculadaError(Exception):
     """Representa um cargo ou documento que já está vinculado a um usuário."""
 
     def __init__(self, title: str, detail: str | dict) -> None:

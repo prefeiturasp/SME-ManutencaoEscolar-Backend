@@ -3,7 +3,7 @@
 from typing import Any, cast
 
 from apps.cargo.constants import CargoErrorMessages
-from apps.cargo.exceptions import CargoOuDDocumentoJaVinculadaError
+from apps.cargo.exceptions import CargoOuDocumentoJaVinculadaError
 from apps.cargo.repository.cargo_repository import CargoRepository
 from apps.usuarios.models.usuario import Usuario
 
@@ -39,7 +39,7 @@ class CargoService:
             Dicionário contendo os dados do cargo criado e seus documentos.
 
         Raises:
-            CargoOuDDocumentoJaVinculadaError: Quando já existe um cargo com
+            CargoOuDocumentoJaVinculadaError: Quando já existe um cargo com
                 o nome informado ou existem documentos com nomes duplicados.
         """
         dados_normalizados = dados.copy()
@@ -80,11 +80,11 @@ class CargoService:
             nome: Nome normalizado do cargo.
 
         Raises:
-            CargoOuDDocumentoJaVinculadaError: Quando já existe um cargo
+            CargoOuDocumentoJaVinculadaError: Quando já existe um cargo
                 não deletado com o mesmo nome.
         """
         if self.repository.existe_por_nome(nome):
-            raise CargoOuDDocumentoJaVinculadaError(
+            raise CargoOuDocumentoJaVinculadaError(
                 title=CargoErrorMessages.CARGO_VINCULADO_TITULO,
                 detail={
                     "message": CargoErrorMessages.CARGO_VINCULADO_CORPO.format(
@@ -105,7 +105,7 @@ class CargoService:
             nome_cargo: Nome do cargo ao qual os documentos serão vinculados.
 
         Raises:
-            CargoOuDDocumentoJaVinculadaError: Quando dois ou mais documentos
+            CargoOuDocumentoJaVinculadaError: Quando dois ou mais documentos
                 possuem o mesmo nome.
         """
         nomes_encontrados: set[str] = set()
@@ -115,7 +115,7 @@ class CargoService:
             nome_normalizado = nome_documento.casefold()
 
             if nome_normalizado in nomes_encontrados:
-                raise CargoOuDDocumentoJaVinculadaError(
+                raise CargoOuDocumentoJaVinculadaError(
                     title=(CargoErrorMessages.DOCUMENTO_VINCULADO_TITULO),
                     detail={
                         "message": (

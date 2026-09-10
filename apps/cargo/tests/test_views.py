@@ -13,7 +13,7 @@ from apps.cargo.api.views import CargoViewSet
 from apps.cargo.constants import CargoErrorMessages
 from apps.cargo.exceptions import (
     CargoInstabilidadeError,
-    CargoOuDDocumentoJaVinculadaError,
+    CargoOuDocumentoJaVinculadaError,
 )
 from apps.usuarios.models.usuario import Usuario
 
@@ -118,7 +118,7 @@ def test_perform_create_deve_tratar_cargo_ou_documento_duplicado(
     serializer: MagicMock,
 ) -> None:
     """Deve converter o erro de duplicidade em erro de validação DRF."""
-    erro_original = CargoOuDDocumentoJaVinculadaError(
+    erro_original = CargoOuDocumentoJaVinculadaError(
         title="Cargo já cadastrado",
         detail={
             "message": (

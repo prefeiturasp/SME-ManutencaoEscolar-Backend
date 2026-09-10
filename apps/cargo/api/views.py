@@ -11,7 +11,7 @@ from rest_framework.serializers import BaseSerializer
 from apps.cargo.constants import CargoErrorMessages
 from apps.cargo.exceptions import (
     CargoInstabilidadeError,
-    CargoOuDDocumentoJaVinculadaError,
+    CargoOuDocumentoJaVinculadaError,
 )
 from apps.cargo.models import Cargo
 from apps.cargo.schemas import CARGO_SCHEMA
@@ -59,7 +59,7 @@ class CargoViewSet(viewsets.ModelViewSet):
                 dados=serializer.validated_data,
                 usuario=usuario,
             )
-        except CargoOuDDocumentoJaVinculadaError as exc:
+        except CargoOuDocumentoJaVinculadaError as exc:
             raise DRFValidationError(
                 {
                     "title": exc.title,

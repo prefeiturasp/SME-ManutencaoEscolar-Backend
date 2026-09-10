@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from apps.cargo.constants import CargoErrorMessages
-from apps.cargo.exceptions import CargoOuDDocumentoJaVinculadaError
+from apps.cargo.exceptions import CargoOuDocumentoJaVinculadaError
 from apps.cargo.repository.cargo_repository import CargoRepository
 from apps.cargo.services.cargo_service import CargoService
 from apps.usuarios.models.usuario import Usuario
@@ -221,7 +221,7 @@ def test_rejeitar_cargo_com_nome_duplicado(
     repository.existe_por_nome.return_value = True
 
     with pytest.raises(
-        CargoOuDDocumentoJaVinculadaError,
+        CargoOuDocumentoJaVinculadaError,
     ) as exc_info:
         service.criar(
             dados={
@@ -252,7 +252,7 @@ def test_rejeitar_documentos_com_nomes_duplicados(
 ) -> None:
     """Deve rejeitar documentos que possuam o mesmo nome."""
     with pytest.raises(
-        CargoOuDDocumentoJaVinculadaError,
+        CargoOuDocumentoJaVinculadaError,
     ) as exc_info:
         service.criar(
             dados={
@@ -296,7 +296,7 @@ def test_rejeitar_documentos_duplicados_ignorando_espacos_e_caixa(
 ) -> None:
     """Deve ignorar espaços e caixa ao verificar nomes duplicados."""
     with pytest.raises(
-        CargoOuDDocumentoJaVinculadaError,
+        CargoOuDocumentoJaVinculadaError,
     ) as exc_info:
         service.criar(
             dados={
