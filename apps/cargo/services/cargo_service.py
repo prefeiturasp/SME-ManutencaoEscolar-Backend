@@ -2,8 +2,8 @@
 
 from typing import Any, cast
 
-from django.core.exceptions import ValidationError
-
+from apps.cargo.constants import CargoErrorMessages
+from apps.cargo.exceptions import CargoOuDDocumentoJaVinculadaError
 from apps.cargo.repository.cargo_repository import CargoRepository
 from apps.usuarios.models.usuario import Usuario
 
@@ -39,10 +39,13 @@ class CargoService:
             Dicionário contendo os dados do cargo criado e seus documentos.
 
         Raises:
-            ValidationError: Quando existem documentos com nomes duplicados.
+            CargoOuDDocumentoJaVinculadaError: Quando já existe um cargo com
+                o nome informado ou existem documentos com nomes duplicados.
         """
         dados_normalizados = dados.copy()
-        dados_normalizados["nome"] = dados_normalizados["nome"].strip()
+        nome = dados_normalizados["nome"].strip()
+
+        self._validar_cargo_duplicado(nome)
 
         documentos = cast(
             list[dict[str, Any]],
@@ -57,8 +60,12 @@ class CargoService:
             for documento in documentos
         ]
 
-        self._validar_documentos_duplicados(documentos_normalizados)
+        self._validar_documentos_duplicados(
+            documentos=documentos_normalizados,
+            nome_cargo=nome,
+        )
 
+        dados_normalizados["nome"] = nome
         dados_normalizados["documentos"] = documentos_normalizados
 
         return self.repository.criar(
@@ -66,29 +73,58 @@ class CargoService:
             usuario=usuario,
         )
 
+    def _validar_cargo_duplicado(self, nome: str) -> None:
+        """Valida se já existe um cargo com o nome informado.
+
+        Args:
+            nome: Nome normalizado do cargo.
+
+        Raises:
+            CargoOuDDocumentoJaVinculadaError: Quando já existe um cargo
+                não deletado com o mesmo nome.
+        """
+        if self.repository.existe_por_nome(nome):
+            raise CargoOuDDocumentoJaVinculadaError(
+                title=CargoErrorMessages.CARGO_VINCULADO_TITULO,
+                detail={
+                    "message": CargoErrorMessages.CARGO_VINCULADO_CORPO.format(
+                        nome=nome,
+                    ),
+                },
+            )
+
     @staticmethod
     def _validar_documentos_duplicados(
         documentos: list[dict[str, Any]],
+        nome_cargo: str,
     ) -> None:
         """Valida se existem documentos com nomes duplicados.
 
         Args:
             documentos: Documentos informados no cadastro do cargo.
+            nome_cargo: Nome do cargo ao qual os documentos serão vinculados.
 
         Raises:
-            ValidationError: Quando dois ou mais documentos possuem o
-                mesmo nome.
+            CargoOuDDocumentoJaVinculadaError: Quando dois ou mais documentos
+                possuem o mesmo nome.
         """
-        nomes_normalizados = [
-            documento["nome"].casefold() for documento in documentos
-        ]
+        nomes_encontrados: set[str] = set()
 
-        if len(nomes_normalizados) != len(set(nomes_normalizados)):
-            raise ValidationError(
-                {
-                    "documentos": [
-                        "Não é permitido informar documentos com nomes "
-                        "duplicados.",
-                    ],
-                }
-            )
+        for documento in documentos:
+            nome_documento = documento["nome"]
+            nome_normalizado = nome_documento.casefold()
+
+            if nome_normalizado in nomes_encontrados:
+                raise CargoOuDDocumentoJaVinculadaError(
+                    title=(CargoErrorMessages.DOCUMENTO_VINCULADO_TITULO),
+                    detail={
+                        "message": (
+                            CargoErrorMessages.DOCUMENTO_VINCULADO_CORPO.format(
+                                nome_documento=nome_documento,
+                                nome_cargo=nome_cargo,
+                            )
+                        ),
+                    },
+                )
+
+            nomes_encontrados.add(nome_normalizado)

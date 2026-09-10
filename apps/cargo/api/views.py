@@ -9,7 +9,10 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.serializers import BaseSerializer
 
 from apps.cargo.constants import CargoErrorMessages
-from apps.cargo.exceptions import CargoInstabilidadeError
+from apps.cargo.exceptions import (
+    CargoInstabilidadeError,
+    CargoOuDDocumentoJaVinculadaError,
+)
 from apps.cargo.models import Cargo
 from apps.cargo.schemas import CARGO_SCHEMA
 from apps.cargo.serializers import CargoCriarSerializer
@@ -56,6 +59,13 @@ class CargoViewSet(viewsets.ModelViewSet):
                 dados=serializer.validated_data,
                 usuario=usuario,
             )
+        except CargoOuDDocumentoJaVinculadaError as exc:
+            raise DRFValidationError(
+                {
+                    "title": exc.title,
+                    "detail": exc.detail,
+                }
+            ) from exc
         except DjangoValidationError as exc:
             if hasattr(exc, "message_dict"):
                 raise DRFValidationError(exc.message_dict) from exc

@@ -15,6 +15,20 @@ class CargoRepository:
     model: type[Cargo] = Cargo
     documento_model: type[DocumentoCargo] = DocumentoCargo
 
+    def existe_por_nome(self, nome: str) -> bool:
+        """Verifica se existe um cargo com o nome informado.
+
+        Args:
+            nome: Nome do cargo consultado.
+
+        Returns:
+            True quando existe um cargo não deletado com o mesmo nome.
+        """
+        return self.model.objects.filter(
+            nome__iexact=nome,
+            deletado_em__isnull=True,
+        ).exists()
+
     @transaction.atomic
     def criar(
         self,
@@ -43,6 +57,7 @@ class CargoRepository:
                 a criação do cargo ou de seus documentos.
         """
         dados_cargo = dados.copy()
+
         documentos = cast(
             list[dict[str, Any]],
             dados_cargo.pop("documentos", []),
@@ -53,6 +68,7 @@ class CargoRepository:
             criado_por=usuario,
             atualizado_por=usuario,
         )
+
         cargo.full_clean()
         cargo.save()
 
