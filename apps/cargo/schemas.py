@@ -9,7 +9,6 @@ from drf_spectacular.utils import (
 
 from apps.cargo.serializers import CargoCriarSerializer
 
-
 _TAG_CARGO = "Cargo"
 
 _CREDENCIAIS_INVALIDAS = "Credenciais inválidas"

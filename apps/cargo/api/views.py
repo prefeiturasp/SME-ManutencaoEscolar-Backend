@@ -3,12 +3,11 @@
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework import mixins, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.exceptions import APIException, NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.serializers import BaseSerializer
 
-from apps.cargo.constants import CargoErrorMessages
 from apps.cargo.constants import CargoErrorMessages
 from apps.cargo.models import Cargo
 from apps.cargo.schemas import CARGO_SCHEMA
@@ -23,6 +22,7 @@ class CargoInstabilidadeError(APIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     default_detail = "Não foi possível cadastrar o cargo."
     default_code = "cargo_instabilidade"
+
 
 @CARGO_SCHEMA
 class CargoViewSet(viewsets.ModelViewSet):

@@ -1,3 +1,5 @@
+"""Configuração da aplicação Cargo."""
+
 from django.apps import AppConfig
 
 

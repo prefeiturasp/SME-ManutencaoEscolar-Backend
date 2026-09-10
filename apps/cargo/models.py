@@ -29,7 +29,6 @@ class Cargo(BaseModel):
 
     def __str__(self) -> str:
         """Retorna o nome do cargo."""
-
         return self.nome
 
 
@@ -63,5 +62,4 @@ class DocumentoCargo(BaseModel):
 
     def __str__(self) -> str:
         """Retorna o nome do documento."""
-
         return self.nome

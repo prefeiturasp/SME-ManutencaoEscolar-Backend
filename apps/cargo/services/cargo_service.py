@@ -80,8 +80,7 @@ class CargoService:
                 mesmo nome.
         """
         nomes_normalizados = [
-            documento["nome"].casefold()
-            for documento in documentos
+            documento["nome"].casefold() for documento in documentos
         ]
 
         if len(nomes_normalizados) != len(set(nomes_normalizados)):
