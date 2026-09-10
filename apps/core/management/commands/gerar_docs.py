@@ -284,23 +284,46 @@ class Command(BaseCommand):
             Visão Geral
             ===========
 
-            Descreva aqui a responsabilidade do domínio **{nome_dominio}**
-            dentro do sistema.
+            O domínio **{nome_dominio}** é responsável por concentrar as
+            funcionalidades relacionadas ao seu contexto de negócio.
 
-            Responsabilidades
+            O app disponibiliza operações para gerenciamento das informações
+            do domínio, incluindo, quando aplicável, funcionalidades de
+            cadastro, consulta, alteração e exclusão (CRUD).
+
+            Também podem existir comandos administrativos específicos para
+            criação, atualização ou manutenção de informações relacionadas
+            ao domínio.
+
+            Regras de Negócio
             =================
 
-            * Descreva as principais responsabilidades do domínio.
-            * Registre os limites e responsabilidades do contexto.
-            * Evite detalhes de implementação nesta seção.
+            Esta seção apresenta as regras de negócio que orientam o
+            funcionamento do domínio **{nome_dominio}**.
+
+            As regras descrevem comportamentos, restrições, validações
+            e condições que precisam ser respeitados pelas funcionalidades
+            do domínio.
 
             .. toctree::
-                :maxdepth: 2
-                :caption: Documentação do domínio:
+               :maxdepth: 1
 
-                regras_negocio
-                glossario
-                codigo/index
+               regras_negocio
+
+            Documentação do código
+            ======
+
+            Esta seção apresenta a documentação técnica dos componentes que
+            implementam o domínio **{nome_dominio}**.
+
+            A documentação é gerada automaticamente a partir dos módulos
+            Python do app e tem como objetivo facilitar a compreensão da
+            implementação e de suas responsabilidades técnicas.
+
+            .. toctree::
+               :maxdepth: 1
+
+               codigo/index
             """
         )
 
@@ -318,35 +341,59 @@ class Command(BaseCommand):
             Conteúdo inicial do arquivo regras-negocio.rst.
         """
         nome_dominio = self.formatar_nome_dominio(configuracao_app.label)
-        titulo = "Regras de Negócio"
-        separador = "=" * len(titulo)
 
         return dedent(
             f"""\
-            {separador}
-            {titulo}
-            {separador}
+            Esta seção documenta as regras de negócio que orientam o
+            funcionamento do domínio **{nome_dominio}**.
 
-            Esta seção documenta as regras de negócio do domínio
-            **{nome_dominio}**.
+            Identificador Único
+            -------------------
 
-            Titulo da Regra
-            ========================
-            Contexto
-            --------
+            Cada registro do domínio possui um identificador único no formato
+            **UUID (Universally Unique Identifier)**.
 
-            Descreva o contexto em que a regra é aplicada.
+            O identificador é gerado automaticamente pelo sistema no momento
+            da criação do registro e não pode ser alterado manualmente.
 
-            Regra
-            -----
+            O UUID deve ser utilizado para identificar de forma inequívoca
+            cada registro do domínio.
 
-            Descreva claramente a regra de negócio.
+            Auditoria de Criação
+            --------------------
 
-            Consequências
-            -------------
+            Os registros possuem informações de auditoria relacionadas à sua
+            criação.
 
-            Descreva o que acontece quando a regra é aplicada.
-            """
+            A data e hora de criação são registradas automaticamente pelo
+            sistema. Quando disponível, o usuário responsável pela criação
+            também é registrado.
+
+            Auditoria de Atualização
+            ------------------------
+
+            Os registros possuem informações de auditoria relacionadas às
+            alterações realizadas.
+
+            A data e hora da última atualização são atualizadas
+            automaticamente pelo sistema. Quando disponível, o usuário
+            responsável pela atualização também é registrado.
+
+            Exclusão e Restauração
+            ----------------------
+
+            Os registros utilizam exclusão lógica para preservar as
+            informações após uma exclusão.
+
+            Ao realizar uma exclusão lógica, o sistema registra a data e hora
+            da exclusão e, quando disponível, o usuário responsável pela ação.
+
+            Registros excluídos logicamente não são retornados pelo
+            gerenciamento padrão dos objetos.
+
+            Registros excluídos podem ser restaurados, retornando ao conjunto
+            de registros disponíveis para consulta e utilização.
+        """
         )
 
     def criar_conteudo_glossario(
@@ -409,9 +456,6 @@ class Command(BaseCommand):
             Conteúdo inicial do arquivo codigo/index.rst.
         """
         nome_dominio = self.formatar_nome_dominio(configuracao_app.label)
-        titulo = "Código"
-        separador = "=" * len(titulo)
-
         linhas_modulos = "\n".join(
             f"   {modulo}" for modulo in sorted(modulos or [])
         )
@@ -421,10 +465,6 @@ class Command(BaseCommand):
         return (
             dedent(
                 f"""\
-            {separador}
-            {titulo}
-            {separador}
-
             Esta seção contém a documentação técnica gerada a partir do
             código-fonte do domínio **{nome_dominio}**.
 
