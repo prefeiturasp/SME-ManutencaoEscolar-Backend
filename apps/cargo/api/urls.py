@@ -1,4 +1,4 @@
-"""Rotas da API do domínio Lote."""
+"""Rotas da API do domínio Cargo."""
 
 from rest_framework.routers import DefaultRouter
 
