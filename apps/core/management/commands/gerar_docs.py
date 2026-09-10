@@ -39,6 +39,7 @@ class Command(BaseCommand):
         diretorio_dominios = diretorio_projeto / "docs" / "dominios"
         diretorio_dominio = diretorio_dominios / configuracao_app.label
         diretorio_codigo = diretorio_dominio / "codigo"
+        caminho_glossario = diretorio_dominios / "glossario.rst"
 
         self.stdout.write(
             f"Criando documentação para: {configuracao_app.name}"
@@ -55,6 +56,10 @@ class Command(BaseCommand):
 
         self.atualizar_indice_dominios(
             diretorio_dominios=diretorio_dominios,
+        )
+
+        self.criar_glossario_geral(
+            caminho_glossario=caminho_glossario,
         )
 
         self.stdout.write(
@@ -144,7 +149,6 @@ class Command(BaseCommand):
 
         caminho_indice_dominio = diretorio_dominio / INDEX
         caminho_regras_negocio = diretorio_dominio / "regras_negocio.rst"
-        caminho_glossario = diretorio_dominio / "glossario.rst"
         caminho_indice_codigo = diretorio_codigo / INDEX
 
         arquivos: dict[Path, str] = {
@@ -152,9 +156,6 @@ class Command(BaseCommand):
                 configuracao_app=configuracao_app,
             ),
             caminho_regras_negocio: self.criar_conteudo_regras_negocio(
-                configuracao_app=configuracao_app,
-            ),
-            caminho_glossario: self.criar_conteudo_glossario(
                 configuracao_app=configuracao_app,
             ),
             caminho_indice_codigo: self.criar_conteudo_indice_codigo(
@@ -397,47 +398,6 @@ class Command(BaseCommand):
         """
         )
 
-    def criar_conteudo_glossario(
-        self,
-        configuracao_app: AppConfig,
-    ) -> str:
-        """
-        Cria o conteúdo inicial do glossário do domínio.
-
-        Args:
-            configuracao_app: Configuração do app Django.
-
-        Returns:
-            Conteúdo inicial do arquivo glossario.rst.
-        """
-        nome_dominio = self.formatar_nome_dominio(configuracao_app.label)
-        titulo = "Glossário"
-        separador = "=" * len(titulo)
-
-        return dedent(
-            f"""\
-            {separador}
-            {titulo}
-            {separador}
-
-            Esta seção contém termos de negócio utilizados pelo domínio
-            **{nome_dominio}**.
-
-            Termo
-            =====
-
-            Definição do termo.
-
-            Novo termo
-            ==========
-
-            Definição do novo termo.
-
-            Evite definições exclusivamente técnicas quando o termo possuir
-            um significado específico para o negócio.
-            """
-        )
-
     def criar_conteudo_indice_codigo(
         self,
         configuracao_app: AppConfig,
@@ -521,24 +481,29 @@ class Command(BaseCommand):
         Returns:
             Conteúdo do arquivo docs/dominios/index.rst.
         """
-        titulo = "Domínios"
+        titulo = "Documentação"
 
         linhas = [
             titulo,
             "=" * len(titulo),
             "",
-            "Esta seção apresenta os domínios de negócio do sistema.",
+            "Esta seção apresenta os domínios de negócio do sistema de "
+            "Manutenção Escolar.",
             "",
             ".. toctree::",
             "   :maxdepth: 2",
-            "   :caption: Domínios:",
             "",
         ]
 
         for dominio in dominios:
             linhas.append(f"   {dominio}/index")
 
-        linhas.append("")
+        linhas.extend(
+            [
+                "   glossario",
+                "",
+            ]
+        )
 
         return "\n".join(linhas)
 
@@ -778,3 +743,41 @@ class Command(BaseCommand):
                     break
 
         return sorted(tasks)
+
+    def criar_glossario_geral(
+        self,
+        caminho_glossario: Path,
+    ) -> None:
+        """Cria o glossário geral dos domínios.
+
+        O arquivo existente é preservado para evitar a perda de conteúdo
+        mantido manualmente.
+
+        Args:
+            caminho_glossario: Caminho do glossário geral.
+        """
+        conteudo = dedent(
+            """\
+            Glossário
+            =========
+
+            Esta seção apresenta os principais termos de negócio utilizados
+            pelos domínios do sistema.
+
+            UE
+            --
+
+            **Unidade Educacional**.
+
+            DRE
+            ---
+
+            **Diretoria Regional de Educação**.
+
+            """
+        )
+
+        self.criar_arquivo_se_nao_existir(
+            caminho_arquivo=caminho_glossario,
+            conteudo=conteudo,
+        )
