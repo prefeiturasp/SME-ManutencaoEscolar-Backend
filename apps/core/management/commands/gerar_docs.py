@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 from textwrap import dedent
 from typing import Any
@@ -463,6 +464,7 @@ class Command(BaseCommand):
             "Services",
             "Repositories",
             "Commands",
+            "Tasks",
             "Outros Módulos",
         ]
 
@@ -574,7 +576,10 @@ class Command(BaseCommand):
             caminho_arquivo = diretorio_codigo / f"{nome_arquivo}.rst"
 
             caminho_arquivo.write_text(
-                self.criar_conteudo_modulo(modulo),
+                self.criar_conteudo_modulo(
+                    modulo=modulo,
+                    configuracao_app=configuracao_app,
+                ),
                 encoding="utf-8",
             )
 
@@ -624,16 +629,20 @@ class Command(BaseCommand):
     def criar_conteudo_modulo(
         self,
         modulo: str,
+        configuracao_app: AppConfig,
     ) -> str:
         """Cria o conteúdo RST para documentação automática de um módulo.
 
         Args:
             modulo: Caminho completo do módulo Python.
+            configuracao_app: Configuração do app Django.
 
         Returns:
             Conteúdo RST do módulo.
         """
-        return (
+        partes = modulo.split(".")
+
+        conteudo = (
             f"{modulo}\n"
             f"{'=' * len(modulo)}\n\n"
             f".. automodule:: {modulo}\n"
@@ -641,6 +650,22 @@ class Command(BaseCommand):
             "   :undoc-members:\n"
             "   :show-inheritance:\n"
         )
+        if "tasks" not in partes:
+            return conteudo
+
+        tarefas = self.obter_tasks_celery(
+            configuracao_app=apps.get_app_config(partes[1]),
+        )
+
+        if not tarefas:
+            return conteudo
+
+        conteudo += ""
+
+        for tarefa in tarefas:
+            conteudo += f".. automethod:: {modulo}.{tarefa}.run\n\n"
+
+        return conteudo
 
     def atualizar_indice_codigo(
         self,
@@ -706,4 +731,50 @@ class Command(BaseCommand):
         if "management" in partes and "commands" in partes:
             return "Commands"
 
+        if "tasks" in partes:
+            return "Tasks"
+
         return "Outros Módulos"
+
+    def obter_tasks_celery(
+        self,
+        configuracao_app: AppConfig,
+    ) -> list[str]:
+        """Retorna os nomes das funções decoradas com shared_task.
+
+        Args:
+            configuracao_app: Configuração do app Django.
+
+        Returns:
+            Lista ordenada dos nomes das tasks Celery encontradas.
+        """
+        diretorio_app = Path(configuracao_app.path)
+        caminho_tasks = diretorio_app / "tasks.py"
+
+        if not caminho_tasks.exists():
+            return []
+
+        arvore = ast.parse(
+            caminho_tasks.read_text(encoding="utf-8"),
+            filename=str(caminho_tasks),
+        )
+
+        tasks: list[str] = []
+
+        for no in ast.walk(arvore):
+            if not isinstance(no, ast.FunctionDef | ast.AsyncFunctionDef):
+                continue
+
+            for decorator in no.decorator_list:
+                if (
+                    isinstance(decorator, ast.Name)
+                    and decorator.id == "shared_task"
+                ) or (
+                    isinstance(decorator, ast.Call)
+                    and isinstance(decorator.func, ast.Name)
+                    and decorator.func.id == "shared_task"
+                ):
+                    tasks.append(no.name)
+                    break
+
+        return sorted(tasks)
