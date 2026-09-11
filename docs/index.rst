@@ -3,11 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-====================================
-SME Manutenção Escolar documentation
-====================================
+===================================
+Documentação SME Manutenção Escolar
+===================================
 
-Documentação técnica e de negócio do sistema de Manutenção Escolar.
+Documentação técnica e de negócio do sistema de Manutenção Escolar da
+Coordenadoria de Contratos de Obras e Manutenção Predial - COMAPRE.
 
 Esta documentação apresenta os domínios do sistema, suas regras de negócio,
 decisões arquiteturais, integrações com sistemas legados e glossário de termos.

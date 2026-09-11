@@ -1,5 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import Mock
 
 import pytest
@@ -171,4 +172,4 @@ def app_config(tmp_path: Path) -> AppConfig:
     config.name = "apps.teste"
     config.label = "teste"
     config.path = str(tmp_path)
-    return config
+    return cast(AppConfig, config)

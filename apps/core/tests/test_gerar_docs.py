@@ -31,50 +31,61 @@ class TestAddArguments:
 class TestHandle:
     """Testes da execução principal do comando."""
 
-    @patch(
-        "apps.core.management.commands.gerar_docs.settings.BASE_DIR", "/tmp"
-    )
-    @patch(
-        "apps.core.management.commands.gerar_docs.Command."
-        "criar_glossario_geral"
-    )
-    @patch(
-        "apps.core.management.commands.gerar_docs.Command."
-        "atualizar_indice_dominios"
-    )
-    @patch(
-        "apps.core.management.commands.gerar_docs.Command."
-        "gerar_documentacao_modulos"
-    )
-    @patch(
-        "apps.core.management.commands.gerar_docs.Command."
-        "criar_estrutura_dominio"
-    )
-    @patch(
-        "apps.core.management.commands.gerar_docs.Command."
-        "obter_configuracao_app"
-    )
     def test_executa_fluxo_completo(
         self,
-        mock_obter: Mock,
-        mock_estrutura: Mock,
-        mock_documentacao: Mock,
-        mock_indice: Mock,
-        mock_glossario: Mock,
+        tmp_path: Path,
+        app_config: AppConfig,
     ) -> None:
-        """Deve executar todas as etapas da geração."""
-        config = Mock()
-        config.name = "apps.core"
-        config.label = "core"
-        mock_obter.return_value = config
+        """Testa a execução completa do comando."""
+        with (
+            patch(
+                "apps.core.management.commands.gerar_docs.settings.BASE_DIR",
+                str(tmp_path),
+            ),
+            patch.object(
+                Command,
+                "obter_configuracao_app",
+                return_value=app_config,
+            ),
+            patch.object(
+                Command,
+                "criar_estrutura_dominio",
+            ) as mock_criar_estrutura,
+            patch.object(
+                Command,
+                "gerar_documentacao_modulos",
+            ) as mock_gerar_documentacao,
+            patch.object(
+                Command,
+                "atualizar_indice_dominios",
+            ) as mock_atualizar_indice,
+            patch.object(
+                Command,
+                "criar_glossario_geral",
+            ) as mock_criar_glossario,
+        ):
+            Command().handle(nome_app="teste")
 
-        Command().handle(nome_app="core")
+        diretorio_projeto = tmp_path
+        diretorio_dominios = diretorio_projeto / "docs" / "dominios"
+        diretorio_dominio = diretorio_dominios / app_config.label
+        diretorio_codigo = diretorio_dominio / "codigo"
+        caminho_glossario = diretorio_dominios / "glossario.rst"
 
-        mock_obter.assert_called_once_with("core")
-        mock_estrutura.assert_called_once()
-        mock_documentacao.assert_called_once()
-        mock_indice.assert_called_once()
-        mock_glossario.assert_called_once()
+        mock_criar_estrutura.assert_called_once_with(
+            diretorio_dominio=diretorio_dominio,
+            configuracao_app=app_config,
+        )
+        mock_gerar_documentacao.assert_called_once_with(
+            configuracao_app=app_config,
+            diretorio_codigo=diretorio_codigo,
+        )
+        mock_atualizar_indice.assert_called_once_with(
+            diretorio_dominios=diretorio_dominios,
+        )
+        mock_criar_glossario.assert_called_once_with(
+            caminho_glossario=caminho_glossario,
+        )
 
 
 class TestObterConfiguracaoApp:

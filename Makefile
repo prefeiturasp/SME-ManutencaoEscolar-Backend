@@ -76,6 +76,7 @@ typecheck: ## Verifica a tipagem estática do código usando o MyPy
 # Documentação (Sphinx)
 # ==========================================
 docs: ## Gera a documentação do projeto em HTML usando o Sphinx (assume que existe uma pasta 'docs')
+	$(EXEC) rm -rf docs/_build/html
 	$(EXEC) sphinx-build -b html docs/ docs/_build/html
 
 # ==========================================
