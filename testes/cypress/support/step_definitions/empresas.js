@@ -20,7 +20,7 @@ Quando('clico em criar cadastro de empresa {string}', function () {
   cy.clicar_criar_empresa()
 })
 
-Então('o sistema não salva a empresa sem preenchimento dos campos', function () { 
+Então('o sistema não avançar em empresas sem preenchimento dos campos', function () { 
   cy.validar_cadastro_nao_preenchido_empresa()  
 })
 
@@ -89,6 +89,18 @@ Então('o sistema salva a empresa com responsável técnico', function () {
   cy.validar_cadastro_empresa()
 })
 
-When('crio cadastro com responsáveis técnicos', () => {
+Quando('crio cadastro com responsáveis técnicos', () => {
   cy.criar_empresa_responsaveis_tecnicos()
+})
+
+Então('o sistema não salva a empresa sem preenchimento dos campos', function () { 
+  cy.validar_cadastro_responsaveis_nao_preenchido_empresa()
+})
+
+Quando('valido o campo obrigatório {string} de responsáveis na empresa', (campo) => {
+  cy.campos_obrigatorios_responsavel_tecnico(campo)
+})
+
+Então('o sistema exibe campo obrigatório de responsável técnico', () => {
+  cy.validar_cadastro_responsaveis_nao_preenchido_empresa()
 })

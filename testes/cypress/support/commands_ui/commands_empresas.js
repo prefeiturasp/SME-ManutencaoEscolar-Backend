@@ -636,10 +636,7 @@ Cypress.Commands.add('criar_empresa_responsaveis_tecnicos', () => {
     .eq(0)
     .selectFile('cypress/fixtures/teste.pdf', { force: true })
 
-  cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {
-    timeout: 30000
-  })
-    .should('exist')
+  cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
     .should('be.visible')
     .click()
 
@@ -688,4 +685,58 @@ Cypress.Commands.add('criar_empresa_responsaveis_tecnicos', () => {
   cy.get(empresas_localizadores.btn_salvar_cadastro())
     .should('be.visible')
     .click()
+})
+
+Cypress.Commands.add('validar_cadastro_responsaveis_nao_preenchido_empresa', () => {
+  cy.contains('Cadastrar empresa')
+    .should('be.disabled')
+})
+
+Cypress.Commands.add('campos_obrigatorios_responsavel_tecnico', (campo) => {
+
+  switch (campo) {
+
+    case 'tipo':
+      cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
+        .should('be.visible')
+        .click()
+
+      break
+
+    case 'nome':
+      cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
+        .should('be.visible')
+        .click()
+
+      cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
+        .should('be.visible')
+        .click()
+
+      break
+
+    case 'tel':
+      cy.get(empresas_localizadores.campo_telefone_responsavel_tecnico())
+        .should('be.visible')
+        .click()
+
+      cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
+        .should('be.visible')
+        .click()
+
+      break
+
+    case 'email':
+      cy.get(empresas_localizadores.campo_email_responsavel_tecnico())
+        .should('be.visible')
+        .click()
+
+      cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
+        .should('be.visible')
+        .click()
+
+      break 
+
+    default:
+      throw new Error(`Campo não configurado: ${campo}`)
+  }
 })

@@ -24,16 +24,16 @@ Funcionalidade: Cadastro de Empresa
       | status  | caso                            |
       | inativa | Empresa cadastrada como inativa |
   
-  Esquema do Cenário: Validar: <caso>
+  Esquema do Cenário: <caso>
     E acesso a tela Empresas
     Quando clico em criar cadastro de empresa "<status>"
-    Então o sistema não salva a empresa sem preenchimento dos campos
+    Então o sistema não avançar em empresas sem preenchimento dos campos
 
     Exemplos:
-      | status | caso                                        |
-      | ativo  | Não permitir salvar sem campos obrigatórios |
+      | status | caso                                                   |
+      | ativo  | Não permitir avançar sem preencher campos obrigatórios |
 
-  Esquema do Cenário: Validar campo: <caso>
+  Esquema do Cenário: Informações Gerais — Validar campo obrigatório: <caso>
     E acesso a tela Empresas
     Quando valido o campo obrigatório "<campo>" na empresa
     Então o sistema exibe campo obrigatório de empresa
@@ -50,7 +50,7 @@ Funcionalidade: Cadastro de Empresa
       | Cidade       | cidade       |
       | Estado       | estado       |
 
-  Esquema do Cenário: Cadastrar responsável técnico: <caso>
+  Esquema do Cenário: Cadastrar Responsável Técnico: <caso>
     E acesso a tela Empresas
     Quando crio cadastro com responsável técnico "<caso>"
     Então o sistema salva a empresa com responsável técnico
@@ -61,7 +61,31 @@ Funcionalidade: Cadastro de Empresa
       | Engenheiro Civil       |
       | Engenheiro Eletricista |
 
-  Esquema do Cenário: Cadastrar mais de um responsável técnico
+  Esquema do Cenário: Cadastrar mais de um Responsável Técnico 
     E acesso a tela Empresas
     Quando crio cadastro com responsáveis técnicos
     Então o sistema salva a empresa com responsável técnico
+
+  Esquema do Cenário: <caso>
+    E acesso a tela Empresas
+    Quando crio cadastro de empresa "<status>"
+    Então o sistema não salva a empresa sem preenchimento dos campos
+
+    Exemplos:
+      | status | caso                                        |
+      | ativo  | Não permitir salvar sem responsável técnico |
+
+  Esquema do Cenário: Responsável Técnico — Validar campo obrigatório: <caso>
+    E acesso a tela Empresas
+    Quando crio cadastro de empresa "<status>"
+    E valido o campo obrigatório "<campo>" de responsáveis na empresa
+    Então o sistema exibe campo obrigatório de responsável técnico
+
+    Exemplos:
+      | status | caso                | campo |
+      | ativo  | Tipo de responsável | tipo  |
+      | ativo  | Nome completo       | nome  |
+      | ativo  | Telefone            | tel   |
+      | ativo  | E-mail              | email |
+
+     
