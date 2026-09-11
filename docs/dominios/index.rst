@@ -5,3 +5,6 @@ Esta seção apresenta os domínios de negócio do sistema de Manutenção Escol
 
 .. toctree::
    :maxdepth: 2
+
+   core/index
+   glossario
