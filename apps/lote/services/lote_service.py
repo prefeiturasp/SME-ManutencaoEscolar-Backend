@@ -38,16 +38,16 @@ class LoteService:
 
         Returns:
             dict[str, Any]: Dicionário contendo os dados do lote criado:
-            - codigo_cadastro (str): Código de cadastro do lote.
-            - nome (str): Nome normalizado do lote.
-            - status (bool): Status do lote.
-            - empresa (Empresa): Empresa associada ao lote.
-            - periodo_inicial (date): Data inicial do período do lote.
-            - periodo_final (date): Data final do período do lote.
-            - diretorias_regionais (list[DiretoriaRegional]): Diretorias
-                regionais vinculadas ao lote.
-            - uuid (str): Identificador único do lote.
-            - pk (int): Chave primária do lote.
+                - codigo_cadastro (str): Código de cadastro do lote.
+                - nome (str): Nome normalizado do lote.
+                - status (bool): Status do lote.
+                - empresa (Empresa): Empresa associada ao lote.
+                - periodo_inicial (date): Data inicial do período do lote.
+                - periodo_final (date): Data final do período do lote.
+                - diretorias_regionais (list[DiretoriaRegional]): Diretorias
+                    regionais vinculadas ao lote.
+                - uuid (str): Identificador único do lote.
+                - pk (int): Chave primária do lote.
 
         Raises:
             DiretoriaRegionalJaVinculadaError: Quando uma ou mais diretorias

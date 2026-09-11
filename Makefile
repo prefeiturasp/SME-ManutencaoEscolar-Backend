@@ -79,6 +79,12 @@ docs: ## Gera a documentação do projeto em HTML usando o Sphinx (assume que ex
 	$(EXEC) rm -rf docs/_build/html
 	$(EXEC) sphinx-build -b html docs/ docs/_build/html
 
+gerar-docs: ## Gera a documentação com o comado gerar_docs. make gerar-docs app=nome_do_app
+	@if [ -z "$(app)" ]; then echo "Erro: Informe o nome do app. Ex: make create-app app=core"; exit 1; fi
+	$(EXEC) python manage.py gerar_docs $(app)
+	$(EXEC) rm -rf docs/_build/html
+	$(EXEC) sphinx-build -b html docs/ docs/_build/html
+
 # ==========================================
 # Utilitários
 # ==========================================
