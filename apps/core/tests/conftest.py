@@ -1,7 +1,10 @@
+from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import Mock
 
 import pytest
+from django.apps import AppConfig
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection, models
 from rest_framework.test import APIRequestFactory
@@ -160,3 +163,13 @@ def arquivo(
 def anexo_service(mock_repository_anexo):
     """Cria o serviço de anexos usando o repository mockado."""
     return AnexoService(repository=mock_repository_anexo)
+
+
+@pytest.fixture
+def app_config(tmp_path: Path) -> AppConfig:
+    """Retorna uma configuração de app Django para os testes."""
+    config = Mock(spec=AppConfig)
+    config.name = "apps.teste"
+    config.label = "teste"
+    config.path = str(tmp_path)
+    return cast(AppConfig, config)
