@@ -574,12 +574,29 @@ class Command(BaseCommand):
         diretorio_app = Path(configuracao_app.path)
         modulos: list[str] = []
 
+        diretorios_ignorados = {
+            "migrations",
+            "tests",
+            "schemas",
+        }
+        palavras_ignoradas = {
+            "test",
+            "schemas",
+            "urls",
+        }
+
         for arquivo in sorted(diretorio_app.rglob("*.py")):
+            nome_arquivo = arquivo.name.casefold()
             if arquivo.name == "__init__.py":
                 continue
-            if "migrations" in arquivo.parts:
+
+            if any(
+                parte.casefold() in diretorios_ignorados
+                for parte in arquivo.parts
+            ):
                 continue
-            if "tests" in arquivo.parts:
+
+            if any(palavra in nome_arquivo for palavra in palavras_ignoradas):
                 continue
 
             caminho_relativo = arquivo.relative_to(diretorio_app)
@@ -619,7 +636,7 @@ class Command(BaseCommand):
             return conteudo
 
         tarefas = self.obter_tasks_celery(
-            configuracao_app=apps.get_app_config(partes[1]),
+            configuracao_app=configuracao_app,
         )
 
         if not tarefas:
