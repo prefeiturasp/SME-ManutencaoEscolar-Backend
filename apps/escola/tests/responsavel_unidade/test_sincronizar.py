@@ -868,7 +868,7 @@ class TestSincronizarDiretores:
 
     def test_deve_atualizar_responsavel_existente(
         self,
-        usuario_sincronizacao,
+        usuario_ativo,
     ):
         """Deve atualizar um responsável existente."""
         responsavel = ResponsavelUnidade.objects.create(
@@ -877,8 +877,8 @@ class TestSincronizarDiretores:
             email="antigo@email.com",
             telefone="11111111",
             esta_afastado=False,
-            criado_por=usuario_sincronizacao,
-            atualizado_por=usuario_sincronizacao,
+            criado_por=usuario_ativo,
+            atualizado_por=usuario_ativo,
         )
 
         registro = {
@@ -891,7 +891,7 @@ class TestSincronizarDiretores:
 
         resultado, foi_criado = Command()._salvar_responsavel(
             registro=registro,
-            usuario=usuario_sincronizacao,
+            usuario=usuario_ativo,
         )
 
         responsavel.refresh_from_db()
@@ -902,11 +902,11 @@ class TestSincronizarDiretores:
         assert responsavel.email == "novo@email.com"
         assert responsavel.telefone == "22222222"
         assert responsavel.esta_afastado is True
-        assert responsavel.atualizado_por == usuario_sincronizacao
+        assert responsavel.atualizado_por == usuario_ativo
 
     def test_deve_atualizar_historico_existente(
         self,
-        usuario_sincronizacao,
+        usuario_ativo,
         unidade_educacional_emef,
         cargo_perfil_diretor,
     ):
@@ -917,8 +917,8 @@ class TestSincronizarDiretores:
             email="diretor@email.com",
             telefone="11111111",
             esta_afastado=False,
-            criado_por=usuario_sincronizacao,
-            atualizado_por=usuario_sincronizacao,
+            criado_por=usuario_ativo,
+            atualizado_por=usuario_ativo,
         )
 
         historico = HistoricoResponsavel.objects.create(
@@ -926,8 +926,8 @@ class TestSincronizarDiretores:
             unidade_educacional=unidade_educacional_emef,
             cargo=cargo_perfil_diretor,
             ativo=False,
-            criado_por=usuario_sincronizacao,
-            atualizado_por=usuario_sincronizacao,
+            criado_por=usuario_ativo,
+            atualizado_por=usuario_ativo,
         )
 
         registro = {
@@ -938,7 +938,7 @@ class TestSincronizarDiretores:
         resultado, foi_criado = Command()._salvar_historico(
             responsavel=responsavel,
             registro=registro,
-            usuario=usuario_sincronizacao,
+            usuario=usuario_ativo,
         )
 
         historico.refresh_from_db()
@@ -946,7 +946,7 @@ class TestSincronizarDiretores:
         assert resultado.pk == historico.pk
         assert foi_criado is False
         assert historico.ativo is True
-        assert historico.atualizado_por == usuario_sincronizacao
+        assert historico.atualizado_por == usuario_ativo
 
     def test_deve_exibir_progresso_a_cada_500_e_ao_finalizar(
         self,

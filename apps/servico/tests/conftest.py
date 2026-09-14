@@ -1,15 +1,8 @@
 """Fixtures compartilhadas para os testes do app Serviço."""
 
 import pytest
-from rest_framework.test import APIClient
 
 from apps.servico.models import Servico
-
-
-@pytest.fixture
-def api_client():
-    """Fornece um cliente HTTP do DRF."""
-    return APIClient()
 
 
 @pytest.fixture
