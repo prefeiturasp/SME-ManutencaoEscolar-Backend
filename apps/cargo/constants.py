@@ -20,3 +20,16 @@ class CargoErrorMessages:
     ERRO_AO_EXCLUIR = (
         "Não conseguimos excluir o cargo. Por favor, tente novamente."
     )
+
+    CARGO_VINCULADO_TITULO = "Cargo já cadastrado"
+    CARGO_VINCULADO_CORPO = (
+        "Já existe um cargo com o nome {nome} cadastrado. "
+        "Para cadastrar um novo cargo, informe um nome diferente."
+    )
+
+    DOCUMENTO_VINCULADO_TITULO = "Documento já cadastrado"
+    DOCUMENTO_VINCULADO_CORPO = (
+        "Já existe um documento com o nome {nome_documento} cadastrado "
+        "no cargo {nome_cargo}. Para cadastrar um novo documento, "
+        "informe um nome diferente."
+    )

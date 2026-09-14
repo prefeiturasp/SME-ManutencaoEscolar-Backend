@@ -39,6 +39,34 @@ def criar_mocks() -> MocksRepository:
     return repository, cargo_model, documento_model
 
 
+@pytest.mark.parametrize(
+    ("resultado_exists", "resultado_esperado"),
+    [
+        (True, True),
+        (False, False),
+    ],
+)
+def test_existe_por_nome(
+    resultado_exists: bool,
+    resultado_esperado: bool,
+) -> None:
+    """Deve informar se existe um cargo ativo com o nome recebido."""
+    repository, cargo_model, _ = criar_mocks()
+    queryset = MagicMock()
+
+    cargo_model.objects.filter.return_value = queryset
+    queryset.exists.return_value = resultado_exists
+
+    resultado = repository.existe_por_nome("Eletricista")
+
+    cargo_model.objects.filter.assert_called_once_with(
+        nome__iexact="Eletricista",
+        deletado_em__isnull=True,
+    )
+    queryset.exists.assert_called_once_with()
+    assert resultado is resultado_esperado
+
+
 @patch("apps.cargo.repository.cargo_repository.model_to_dict")
 def test_criar_cargo_com_documentos(
     model_to_dict_mock: MagicMock,
@@ -117,8 +145,9 @@ def test_criar_cargo_com_documentos(
         [
             primeiro_documento,
             segundo_documento,
-        ]
+        ],
     )
+
     model_to_dict_mock.assert_called_once_with(cargo)
 
     assert resultado == {
@@ -138,7 +167,7 @@ def test_criar_cargo_com_documentos(
 def test_criar_cargo_sem_documentos(
     model_to_dict_mock: MagicMock,
 ) -> None:
-    """Deve criar um cargo quando documentos não forem informados."""
+    """Deve criar um cargo sem documentos."""
     repository, cargo_model, documento_model = criar_mocks()
     usuario = MagicMock(spec=Usuario)
 
@@ -153,12 +182,14 @@ def test_criar_cargo_sem_documentos(
         "status": True,
     }
 
+    dados = {
+        "nome": "Auxiliar",
+        "exige_documento": False,
+        "status": True,
+    }
+
     resultado = repository.criar(
-        dados={
-            "nome": "Auxiliar",
-            "exige_documento": False,
-            "status": True,
-        },
+        dados=dados,
         usuario=usuario,
     )
 
@@ -174,6 +205,7 @@ def test_criar_cargo_sem_documentos(
 
     documento_model.assert_not_called()
     documento_model.objects.bulk_create.assert_called_once_with([])
+
     model_to_dict_mock.assert_called_once_with(cargo)
 
     assert resultado == {
@@ -218,6 +250,7 @@ def test_nao_alterar_dados_originais(
             },
         ],
     }
+
     dados_esperados = {
         "nome": "Eletricista",
         "exige_documento": True,
@@ -248,7 +281,7 @@ def test_nao_salvar_cargo_quando_validacao_falhar() -> None:
             "nome": [
                 "Nome inválido.",
             ],
-        }
+        },
     )
     cargo_model.return_value = cargo
 
@@ -267,13 +300,14 @@ def test_nao_salvar_cargo_quando_validacao_falhar() -> None:
             "Nome inválido.",
         ],
     }
+
     cargo.full_clean.assert_called_once_with()
     cargo.save.assert_not_called()
     documento_model.assert_not_called()
     documento_model.objects.bulk_create.assert_not_called()
 
 
-def test_nao_criar_documentos_quando_validacao_falhar() -> None:
+def test_nao_persistir_documentos_quando_validacao_falhar() -> None:
     """Não deve persistir documentos quando sua validação falhar."""
     repository, cargo_model, documento_model = criar_mocks()
     usuario = MagicMock(spec=Usuario)
@@ -287,7 +321,7 @@ def test_nao_criar_documentos_quando_validacao_falhar() -> None:
             "nome": [
                 "Nome inválido.",
             ],
-        }
+        },
     )
     documento_model.return_value = documento
 
@@ -311,6 +345,7 @@ def test_nao_criar_documentos_quando_validacao_falhar() -> None:
             "Nome inválido.",
         ],
     }
+
     cargo.full_clean.assert_called_once_with()
     cargo.save.assert_called_once_with()
     documento.full_clean.assert_called_once_with()
