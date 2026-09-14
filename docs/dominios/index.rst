@@ -8,4 +8,5 @@ Esta seção apresenta os domínios de negócio do sistema de Manutenção Escol
 
    core/index
    empresa/index
+   lote/index
    glossario

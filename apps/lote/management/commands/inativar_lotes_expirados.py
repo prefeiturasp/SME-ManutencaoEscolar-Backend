@@ -17,6 +17,9 @@ class Command(BaseCommand):
     help = "Inativa lotes cujo período final já terminou."
 
     def handle(self, *args: Any, **options: Any) -> None:
+        """
+        Inativa lotes ativos cujo período final seja anterior à data atual.
+        """
         logger.info("Iniciando a validação das datas de vigência do lote.")
 
         data_atual = timezone.localdate()
