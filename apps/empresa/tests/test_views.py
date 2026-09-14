@@ -29,7 +29,7 @@ def test_requisicao_nao_autenticada_retorna_401(
 
 
 def test_criacao_retorna_empresa(
-    api_client, empresa_payload_valido_com_responsaveis, usuario_ativo
+    api_cliente, empresa_payload_valido_com_responsaveis, usuario_ativo
 ):
     """
     Testa a criação de uma empresa via API.
@@ -53,7 +53,7 @@ def test_criacao_retorna_empresa(
         "apps.empresa.api.views.empresa_views.EmpresaService.criar",
         side_effect=criar,
     ):
-        response = api_client.post(
+        response = api_cliente.post(
             "/api/v1/empresas/",
             empresa_payload_valido_com_responsaveis,
             format="json",
@@ -68,7 +68,7 @@ def test_criacao_retorna_empresa(
 
 
 def test_criacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
-    api_client, empresa_payload_valido_com_responsaveis
+    api_cliente, empresa_payload_valido_com_responsaveis
 ):
     """
     Testa se a criação de uma empresa.
@@ -81,7 +81,7 @@ def test_criacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
             "Já existe uma empresa cadastrada com este CNPJ."
         ),
     ):
-        response = api_client.post(
+        response = api_cliente.post(
             "/api/v1/empresas/",
             empresa_payload_valido_com_responsaveis,
             format="json",
@@ -94,7 +94,7 @@ def test_criacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
 
 
 def test_criacao_mapeia_validation_error_do_django(
-    api_client, empresa_payload_valido_com_responsaveis
+    api_cliente, empresa_payload_valido_com_responsaveis
 ):
     """
     Testa criação de uma empresa.
@@ -105,7 +105,7 @@ def test_criacao_mapeia_validation_error_do_django(
         "apps.empresa.api.views.empresa_views.EmpresaService.criar",
         side_effect=ValidationError({"nome": ["nome inválido"]}),
     ):
-        response = api_client.post(
+        response = api_cliente.post(
             "/api/v1/empresas/",
             empresa_payload_valido_com_responsaveis,
             format="json",
@@ -116,7 +116,7 @@ def test_criacao_mapeia_validation_error_do_django(
 
 
 def test_atualizacao_retorna_empresa(
-    api_client,
+    api_cliente,
     empresa_payload_valido,
     empresa_payload_valido_com_responsaveis,
     usuario_ativo,
@@ -148,7 +148,7 @@ def test_atualizacao_retorna_empresa(
         "apps.empresa.api.views.empresa_views.EmpresaService.atualizar",
         side_effect=atualizar,
     ):
-        response = api_client.put(
+        response = api_cliente.put(
             f"/api/v1/empresas/{empresa_existente.uuid}/",
             payload_atualizado,
             format="json",
@@ -159,7 +159,7 @@ def test_atualizacao_retorna_empresa(
 
 
 def test_atualizacao_sincroniza_responsaveis_tecnicos(
-    api_client, empresa_payload_valido, usuario_ativo
+    api_cliente, empresa_payload_valido, usuario_ativo
 ):
     """PUT deve atualizar a empresa e sincronizar os responsáveis por tipo."""
     empresa_existente = Empresa.objects.create(**empresa_payload_valido)
@@ -190,7 +190,7 @@ def test_atualizacao_sincroniza_responsaveis_tecnicos(
         ],
     }
 
-    response = api_client.put(
+    response = api_cliente.put(
         f"/api/v1/empresas/{empresa_existente.uuid}/",
         payload,
         format="json",
@@ -212,7 +212,9 @@ def test_atualizacao_sincroniza_responsaveis_tecnicos(
 
 
 def test_atualizacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
-    api_client, empresa_payload_valido, empresa_payload_valido_com_responsaveis
+    api_cliente,
+    empresa_payload_valido,
+    empresa_payload_valido_com_responsaveis,
 ):
     """
     Testa se a atualização de uma empresa.
@@ -227,7 +229,7 @@ def test_atualizacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
             "Já existe uma empresa cadastrada com este CNPJ."
         ),
     ):
-        response = api_client.put(
+        response = api_cliente.put(
             f"/api/v1/empresas/{empresa_existente.uuid}/",
             empresa_payload_valido_com_responsaveis,
             format="json",
@@ -240,7 +242,9 @@ def test_atualizacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
 
 
 def test_atualizacao_mapeia_validation_error_do_django(
-    api_client, empresa_payload_valido, empresa_payload_valido_com_responsaveis
+    api_cliente,
+    empresa_payload_valido,
+    empresa_payload_valido_com_responsaveis,
 ):
     """
     Testa atualização de uma empresa.
@@ -253,7 +257,7 @@ def test_atualizacao_mapeia_validation_error_do_django(
         "apps.empresa.api.views.empresa_views.EmpresaService.atualizar",
         side_effect=ValidationError({"nome": ["nome inválido"]}),
     ):
-        response = api_client.put(
+        response = api_cliente.put(
             f"/api/v1/empresas/{empresa_existente.uuid}/",
             empresa_payload_valido_com_responsaveis,
             format="json",
@@ -264,10 +268,10 @@ def test_atualizacao_mapeia_validation_error_do_django(
 
 
 def test_atualizacao_de_empresa_inexistente_retorna_404(
-    api_client, empresa_payload_valido
+    api_cliente, empresa_payload_valido
 ):
     """Testa se a atualização de uma empresa inexistente retorna 404."""
-    response = api_client.put(
+    response = api_cliente.put(
         "/api/v1/empresas/7ef06bb8-418f-43d1-bfe8-c392f13a2b1f/",
         empresa_payload_valido,
         format="json",
@@ -277,21 +281,21 @@ def test_atualizacao_de_empresa_inexistente_retorna_404(
 
 
 def test_recuperacao_retorna_empresa_por_uuid(
-    api_client, empresa_payload_valido
+    api_cliente, empresa_payload_valido
 ):
     """Testa se a recuperação de uma empresa via API é feita pelo uuid."""
     empresa_existente = Empresa.objects.create(**empresa_payload_valido)
 
-    response = api_client.get(f"/api/v1/empresas/{empresa_existente.uuid}/")
+    response = api_cliente.get(f"/api/v1/empresas/{empresa_existente.uuid}/")
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["uuid"] == str(empresa_existente.uuid)
     assert response.json()["nome"] == empresa_payload_valido["nome"]
 
 
-def test_recuperacao_de_empresa_inexistente_retorna_404(api_client):
+def test_recuperacao_de_empresa_inexistente_retorna_404(api_cliente):
     """Testa se a recuperação de uma empresa inexistente retorna 404."""
-    response = api_client.get(
+    response = api_cliente.get(
         "/api/v1/empresas/7ef06bb8-418f-43d1-bfe8-c392f13a2b1f/"
     )
 
@@ -299,12 +303,12 @@ def test_recuperacao_de_empresa_inexistente_retorna_404(api_client):
 
 
 def test_listagem_retorna_empresas_cadastrados(
-    api_client, empresa_payload_valido
+    api_cliente, empresa_payload_valido
 ):
     """Testa se a listagem retorna as empresas cadastradas."""
     Empresa.objects.create(**empresa_payload_valido)
 
-    response = api_client.get("/api/v1/empresas/")
+    response = api_cliente.get("/api/v1/empresas/")
 
     dados = response.json()
 
@@ -315,27 +319,29 @@ def test_listagem_retorna_empresas_cadastrados(
 
 
 def test_remocao_deleta_empresa_e_some_da_listagem(
-    api_client, empresa_payload_valido
+    api_cliente, empresa_payload_valido
 ):
     """Testa se a remoção via API faz a exclusão lógica da empresa."""
     empresa_existente = Empresa.objects.create(**empresa_payload_valido)
 
-    response = api_client.delete(f"/api/v1/empresas/{empresa_existente.uuid}/")
+    response = api_cliente.delete(
+        f"/api/v1/empresas/{empresa_existente.uuid}/"
+    )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert not Empresa.objects.filter(uuid=empresa_existente.uuid).exists()
 
 
-def test_remocao_de_empresa_inexistente_retorna_404(api_client):
+def test_remocao_de_empresa_inexistente_retorna_404(api_cliente):
     """Testa se a remoção de uma empresa inexistente retorna 404."""
-    response = api_client.delete(
+    response = api_cliente.delete(
         "/api/v1/empresas/7ef06bb8-418f-43d1-bfe8-c392f13a2b1f/"
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_listagem_filtra_por_nome(api_client, empresa_payload_valido):
+def test_listagem_filtra_por_nome(api_cliente, empresa_payload_valido):
     """Testa se a listagem filtra empresas pelo nome."""
     Empresa.objects.create(**empresa_payload_valido)
     Empresa.objects.create(
@@ -346,7 +352,7 @@ def test_listagem_filtra_por_nome(api_client, empresa_payload_valido):
         }
     )
 
-    response = api_client.get(
+    response = api_cliente.get(
         "/api/v1/empresas/",
         {"nome": "Exemplo"},
     )
@@ -360,7 +366,7 @@ def test_listagem_filtra_por_nome(api_client, empresa_payload_valido):
 
 
 def test_listagem_filtra_por_status(
-    api_client,
+    api_cliente,
     empresa_payload_valido,
 ):
     """Testa se a listagem filtra empresas pelo status."""
@@ -376,7 +382,7 @@ def test_listagem_filtra_por_status(
         }
     )
 
-    response = api_client.get(
+    response = api_cliente.get(
         "/api/v1/empresas/",
         {"status": "false"},
     )

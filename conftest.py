@@ -24,12 +24,6 @@ def api_cliente(usuario_ativo: Usuario) -> APIClient:
 
 
 @pytest.fixture
-def api_client(api_cliente: APIClient) -> APIClient:
-    """Mantém o nome usado pelos testes que adotam a nomenclatura do DRF."""
-    return api_cliente
-
-
-@pytest.fixture
 def usuario_ativo(cargo_perfil_diretor: CargoEOL) -> Usuario:
     """Fixture de usuario ativo."""
     return Usuario.objects.create(
