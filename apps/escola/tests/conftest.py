@@ -1,7 +1,6 @@
 from unittest.mock import Mock
 
 import pytest
-from rest_framework.test import APIClient
 
 from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
@@ -13,7 +12,6 @@ from apps.escola.models.unidade_educacional import (
 )
 from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.cargo_eol import CargoEOL
-from apps.usuarios.models.usuario import Usuario
 
 
 @pytest.fixture
@@ -22,27 +20,6 @@ def obter_cargo_diretor():
     return CargoEOL.objects.get(
         nome="DIRETOR DE ESCOLA",
     )
-
-
-@pytest.fixture
-def usuario_ativo(cargo_perfil_diretor):
-    """Fixture de usuario ativo."""
-    return Usuario.objects.create(
-        username="9876543219",
-        nome="João da Silva",
-        registro_funcional=None,
-        cpf="9876543219",
-        cargo=cargo_perfil_diretor,
-        is_active=True,
-    )
-
-
-@pytest.fixture
-def cliente_api(usuario_ativo):
-    """Retorna um cliente para requisições à API."""
-    cliente = APIClient()
-    cliente.force_authenticate(user=usuario_ativo)
-    return cliente
 
 
 @pytest.fixture
@@ -297,16 +274,14 @@ def resposta_dados_complementares():
 
 
 @pytest.fixture
-def usuario_sincronizacao(cargo_perfil_diretor):
-    """Fixture de usuario ativo."""
-    return Usuario.objects.create(
-        username="sincronizacao_eol",
-        nome="Sincronizador Dados do EOL",
-        registro_funcional=None,
-        cpf=None,
-        cargo=cargo_perfil_diretor,
-        is_active=False,
-    )
+def usuario_sincronizacao(usuario_ativo):
+    """Configura o usuário global como responsável pela sincronização."""
+    usuario_ativo.username = "sincronizacao_eol"
+    usuario_ativo.nome = "Sincronizador Dados do EOL"
+    usuario_ativo.cpf = None
+    usuario_ativo.is_active = False
+    usuario_ativo.save()
+    return usuario_ativo
 
 
 @pytest.fixture

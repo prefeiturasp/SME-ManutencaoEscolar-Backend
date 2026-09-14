@@ -17,12 +17,12 @@ class TestDiretoriaRegionalViewSet:
 
     def test_deve_listar_diretorias_regionais(
         self,
-        cliente_api,
+        api_cliente,
         diretoria_regional_centro,
         diretoria_regional_ipiranga,
     ):
         """Deve retornar as diretorias regionais cadastradas."""
-        resposta = cliente_api.get(self.url)
+        resposta = api_cliente.get(self.url)
 
         assert resposta.status_code == status.HTTP_200_OK
 
@@ -36,11 +36,11 @@ class TestDiretoriaRegionalViewSet:
 
     def test_deve_buscar_diretoria_regional_por_id(
         self,
-        cliente_api,
+        api_cliente,
         diretoria_regional_centro,
     ):
         """Deve retornar uma diretoria regional pelo ID."""
-        resposta = cliente_api.get(
+        resposta = api_cliente.get(
             f"{self.url}{diretoria_regional_centro.id}/",
         )
 
@@ -56,12 +56,12 @@ class TestDiretoriaRegionalViewSet:
 
     def test_deve_filtrar_por_nome(
         self,
-        cliente_api,
+        api_cliente,
         diretoria_regional_centro,
         diretoria_regional_ipiranga,
     ):
         """Deve filtrar diretorias regionais pelo nome."""
-        resposta = cliente_api.get(
+        resposta = api_cliente.get(
             self.url,
             {"nome": "centro"},
         )
@@ -75,11 +75,11 @@ class TestDiretoriaRegionalViewSet:
 
     def test_deve_filtrar_por_codigo(
         self,
-        cliente_api,
+        api_cliente,
         diretoria_regional_centro,
     ):
         """Deve filtrar diretorias regionais pelo código."""
-        resposta = cliente_api.get(
+        resposta = api_cliente.get(
             self.url,
             {"codigo": diretoria_regional_centro.codigo},
         )
@@ -93,11 +93,11 @@ class TestDiretoriaRegionalViewSet:
 
     def test_deve_filtrar_por_abreviacao(
         self,
-        cliente_api,
+        api_cliente,
         diretoria_regional_centro,
     ):
         """Deve filtrar diretorias regionais pela abreviação."""
-        resposta = cliente_api.get(
+        resposta = api_cliente.get(
             self.url,
             {"abreviacao": diretoria_regional_centro.abreviacao},
         )
@@ -111,19 +111,19 @@ class TestDiretoriaRegionalViewSet:
 
     def test_deve_retornar_404_para_id_inexistente(
         self,
-        cliente_api,
+        api_cliente,
     ):
         """Deve retornar 404 quando o ID não existir."""
-        resposta = cliente_api.get(f"{self.url}999999/")
+        resposta = api_cliente.get(f"{self.url}999999/")
 
         assert resposta.status_code == status.HTTP_404_NOT_FOUND
 
     def test_nao_deve_permitir_criacao(
         self,
-        cliente_api,
+        api_cliente,
     ):
         """Não deve permitir criação de diretorias regionais."""
-        resposta = cliente_api.post(
+        resposta = api_cliente.post(
             self.url,
             data={
                 "codigo": "DRE99",
@@ -137,11 +137,11 @@ class TestDiretoriaRegionalViewSet:
 
     def test_nao_deve_permitir_atualizacao(
         self,
-        cliente_api,
+        api_cliente,
         diretoria_regional_centro,
     ):
         """Não deve permitir atualização de diretorias regionais."""
-        resposta = cliente_api.put(
+        resposta = api_cliente.put(
             f"{self.url}{diretoria_regional_centro.id}/",
             data={
                 "codigo": "DRE99",
@@ -155,11 +155,11 @@ class TestDiretoriaRegionalViewSet:
 
     def test_nao_deve_permitir_atualizacao_parcial(
         self,
-        cliente_api,
+        api_cliente,
         diretoria_regional_centro,
     ):
         """Não deve permitir atualização parcial."""
-        resposta = cliente_api.patch(
+        resposta = api_cliente.patch(
             f"{self.url}{diretoria_regional_centro.id}/",
             data={"nome": "DIRETORIA ALTERADA"},
             format="json",
@@ -169,11 +169,11 @@ class TestDiretoriaRegionalViewSet:
 
     def test_nao_deve_permitir_exclusao(
         self,
-        cliente_api,
+        api_cliente,
         diretoria_regional_centro,
     ):
         """Não deve permitir exclusão de diretorias regionais."""
-        resposta = cliente_api.delete(
+        resposta = api_cliente.delete(
             f"{self.url}{diretoria_regional_centro.id}/",
         )
 

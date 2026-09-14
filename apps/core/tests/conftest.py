@@ -7,23 +7,14 @@ import pytest
 from django.apps import AppConfig
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection, models
-from rest_framework.test import APIRequestFactory
 
 from apps.core.constants import MAPA_EXTENSOES_TIPO_ARQUIVO
 from apps.core.models.mixins import BaseModel
 from apps.core.services.anexo_service import AnexoService
-from apps.usuarios.constants import PerfilAcesso
-from apps.usuarios.models.usuario import Usuario
 
 URL_ARQUIVO = "https://minio.local/documento.pdf"
 TYPE_PDF = "application/pdf"
 DOCUMENTO_PDF = "documento.pdf"
-
-
-@pytest.fixture
-def api_factory():
-    """Fixture que fornece uma instância do APIRequestFactory do DRF."""
-    return APIRequestFactory()
 
 
 class ModelBase(BaseModel):
@@ -51,53 +42,6 @@ def django_test_db_setup(django_db_setup, django_db_blocker):
         connection.schema_editor() as schema_editor,
     ):
         schema_editor.delete_model(ModelBase)
-
-
-@pytest.fixture
-def usuario_ativo(cargo_perfil_diretor):
-    """Fixture de usuario ativo."""
-    return Usuario.objects.create(
-        username="9876543219",
-        nome="João da Silva",
-        registro_funcional=None,
-        cpf="9876543219",
-        cargo=cargo_perfil_diretor,
-        is_active=True,
-    )
-
-
-@pytest.fixture
-def usuario_inativo(cargo_perfil_diretor):
-    """Fixture de usuario inativo."""
-    return Usuario.objects.create(
-        username="9876543211",
-        nome="Pedro da Silva",
-        registro_funcional=None,
-        cpf="9876543211",
-        cargo=cargo_perfil_diretor,
-        is_active=False,
-    )
-
-
-@pytest.fixture
-def usuario_ativo_dict(usuario_ativo):
-    """Fixture de usuario inativo retornando em diconario."""
-    return {
-        "id": usuario_ativo.id,
-        "uuid": usuario_ativo.uuid,
-        "nome": usuario_ativo.nome,
-        "email": usuario_ativo.email,
-        "registro_funcional": usuario_ativo.registro_funcional,
-        "cpf": usuario_ativo.cpf,
-        "username": usuario_ativo.username,
-        "perfil_acesso": {
-            "cargo": usuario_ativo.cargo.nome,
-            "perfil": {
-                "codigo": usuario_ativo.perfil,
-                "descricao": PerfilAcesso(usuario_ativo.perfil).label,
-            },
-        },
-    }
 
 
 @pytest.fixture(scope="module")
