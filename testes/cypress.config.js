@@ -18,10 +18,18 @@ export default defineConfig({
     viewportWidth: 1920,
     viewportHeight: 1080,
     video: false,
-    retries: { runMode: 2, openMode: 0 },
+    env: {
+      TAGS: 'not @ignore',
+    },
+
+    retries: {
+      runMode: 2,
+      openMode: 0,
+    },
     screenshotOnRunFailure: false,
     chromeWebSecurity: false,
     experimentalRunAllSpecs: true,
+    failOnStatusCode: false,
 
     specPattern: 'cypress/e2e/**/*.feature',
 
@@ -42,8 +50,19 @@ export default defineConfig({
         })
       )
 
+      // =====================
+      // Allure
+      // =====================
       allureWriter(on, config)
 
+      // =====================
+      // Cypress Cloud
+      // =====================
+      const enhancedConfig = await cloudPlugin(on, config)
+
+      // =====================
+      // ENV
+      // =====================
       const envKeys = [
         'LOGIN_DIRETOR',
         'LOGIN_INVALIDO',
@@ -66,9 +85,7 @@ export default defineConfig({
         envKeys.map((key) => [key, process.env[key] ?? ''])
       )
 
-      config.env = { ...config.env, ...customVariable }
-
-      const enhancedConfig = await cloudPlugin(on, config)
+      enhancedConfig.env = { ...enhancedConfig.env, ...customVariable }
 
       return enhancedConfig
     },

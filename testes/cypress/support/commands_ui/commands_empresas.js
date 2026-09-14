@@ -1,5 +1,5 @@
 import Empresas_Localizadores from '../locators/empresas_locators'
-import { faker } from '@faker-js/faker'
+import { faker } from '@faker-js/faker/locale/pt_BR'
 
 const empresas_localizadores = new Empresas_Localizadores()
 
@@ -12,7 +12,7 @@ Cypress.Commands.add('acessar_empresas', () => {
     .should('be.visible')
     .click()
 
-  cy.url({ timeout: 10000 }).should('include', 'cadastro/empresas')
+  cy.url({ timeout: 10000 }).should('include', 'empresas')
 })
 
 Cypress.Commands.add('criar_empresa', () => {
@@ -23,7 +23,7 @@ Cypress.Commands.add('criar_empresa', () => {
     .click()
 
   cy.url({ timeout: 30000 })
-    .should('include', '/cadastro/empresas/cadastrar')
+    .should('include', '/empresas/cadastrar')
 
   cy.get(empresas_localizadores.campo_nome())
     .should('be.visible')
@@ -83,7 +83,7 @@ Cypress.Commands.add('criar_empresa', () => {
 })
 
 Cypress.Commands.add('validar_cadastro_empresa', () => {
-  cy.contains('Sucesso')
+  cy.contains('Responsável técnico')
 })
 
 Cypress.Commands.add('clicar_criar_empresa', () => {
@@ -92,7 +92,7 @@ Cypress.Commands.add('clicar_criar_empresa', () => {
     .click()
 
   cy.url({ timeout: 30000 })
-    .should('include', '/cadastro/empresas/cadastrar') 
+    .should('include', '/empresas/cadastrar') 
 
   cy.get(empresas_localizadores.select_status())
     .should('be.visible')
@@ -104,7 +104,7 @@ Cypress.Commands.add('clicar_criar_empresa', () => {
 })
 
 Cypress.Commands.add('validar_cadastro_nao_preenchido_empresa', () => {
-  cy.contains('Cadastrar empresa')
+  cy.contains('Próximo')
     .should('be.disabled')
 })
 
@@ -116,7 +116,7 @@ Cypress.Commands.add('criar_empresa_inativa', () => {
     .click()
 
   cy.url({ timeout: 30000 })
-    .should('include', '/cadastro/empresas/cadastrar')
+    .should('include', '/empresas/cadastrar')
 
   cy.get(empresas_localizadores.campo_nome())
     .should('be.visible')
@@ -182,7 +182,7 @@ Cypress.Commands.add('campos_obrigatorios_criar_empresa', (campo) => {
     .click()
 
   cy.url({ timeout: 30000 })
-    .should('include', '/cadastro/empresas/cadastrar')
+    .should('include', '/empresas/cadastrar')
 
   switch (campo) {
 
@@ -392,7 +392,7 @@ Cypress.Commands.add('filtros_consulta_empresa', (campo) => {
 })
 
 Cypress.Commands.add('validar_filtros_empresa', () => {
-  cy.contains('Nome da empresa')  
+  cy.contains('Empresas cadastradas')  
 })
 
 Cypress.Commands.add('filtros_sem_dados_empresa', (campo) => {
@@ -417,4 +417,326 @@ Cypress.Commands.add('filtros_sem_dados_empresa', (campo) => {
 
 Cypress.Commands.add('validar_dados_nao_encontrados_empresa', () => {
   cy.contains('Não encontramos dados para esta busca')  
+})
+
+Cypress.Commands.add('criar_empresa_responsavel_tecnico', (tipoResponsavel) => {
+
+  const cnpjEmpresa = faker.string.numeric(14)
+  const nomeResponsavel = faker.person.fullName()
+  const telefoneResponsavel = faker.phone.number('119########')
+  const emailResponsavel = faker.internet.email()
+  const numeroCrea = faker.string.numeric(10)
+  const numeroArt = faker.string.numeric(12)
+
+  cy.get(empresas_localizadores.btn_cadastrar_empresa())
+    .contains('Cadastrar empresa')
+    .click()
+
+  cy.url({ timeout: 30000 })
+    .should('include', '/empresas/cadastrar')
+
+  cy.get(empresas_localizadores.campo_nome())
+    .should('be.visible')
+    .type(Cypress.env('NOME_EMPRESA'))
+
+  cy.get(empresas_localizadores.campo_cnpj())
+    .should('be.visible')
+    .type(cnpjEmpresa)
+
+  cy.get(empresas_localizadores.campo_razao_social())
+    .should('be.visible')
+    .type(Cypress.env('RAZAO_SOCIAL'))
+
+  cy.get(empresas_localizadores.select_status())
+    .should('be.visible')
+    .click()
+
+  cy.contains('Ativo')
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.link_rastreio())
+    .should('be.visible')
+    .type(Cypress.env('LINK_RASTREIO'))
+
+  cy.get(empresas_localizadores.campo_cep())
+    .should('be.visible')
+    .type(Cypress.env('CEP'))
+
+  cy.get(empresas_localizadores.campo_logradouro())
+    .should('be.visible')
+    .type(Cypress.env('LOGRADOURO'))
+
+  cy.get(empresas_localizadores.campo_numero())
+    .should('be.visible')
+    .type(Cypress.env('NUMERO'))
+
+  cy.get(empresas_localizadores.campo_complemento())
+    .should('be.visible')
+    .type(Cypress.env('COMPLEMENTO'))
+
+  cy.get(empresas_localizadores.campo_cidade())
+    .should('be.visible')
+    .type(Cypress.env('CIDADE'))
+
+  cy.get(empresas_localizadores.campo_estado())
+    .should('be.visible')
+    .type(Cypress.env('ESTADO'))
+
+  cy.contains('SP')
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.btn_salvar_cadastro())
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.tipo_responsavel_tecnico(tipoResponsavel))
+    .should('be.visible')
+    .click()
+
+  cy.contains(tipoResponsavel)
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
+    .should('be.visible')
+    .type(nomeResponsavel)
+
+  cy.get(empresas_localizadores.campo_telefone_responsavel_tecnico())
+    .should('be.visible')
+    .type(telefoneResponsavel)
+
+  cy.get(empresas_localizadores.campo_email_responsavel_tecnico())
+    .should('be.visible')
+    .type(emailResponsavel)
+
+  cy.get(empresas_localizadores.campo_numero_crea_responsavel_tecnico())
+    .should('be.visible')
+    .type(numeroCrea)
+
+  cy.get(empresas_localizadores.campo_numero_art_responsavel_tecnico())
+    .should('be.visible')
+    .type(numeroArt)
+
+  cy.get(empresas_localizadores.documento_responsavel_tecnico())
+     .selectFile('cypress/fixtures/teste.pdf', { force: true })
+
+  cy.get(empresas_localizadores.btn_salvar_cadastro())
+    .should('be.visible')
+    .click()  
+})
+
+Cypress.Commands.add('criar_empresa_responsaveis_tecnicos', () => {
+
+  const cnpjEmpresa = faker.string.numeric(14)
+
+  cy.get(empresas_localizadores.btn_cadastrar_empresa())
+    .contains('Cadastrar empresa')
+    .click()
+
+  cy.url({ timeout: 30000 })
+    .should('include', '/empresas/cadastrar')
+
+  cy.get(empresas_localizadores.campo_nome())
+    .should('be.visible')
+    .type(Cypress.env('NOME_EMPRESA'))
+
+  cy.get(empresas_localizadores.campo_cnpj())
+    .should('be.visible')
+    .type(cnpjEmpresa)
+
+  cy.get(empresas_localizadores.campo_razao_social())
+    .should('be.visible')
+    .type(Cypress.env('RAZAO_SOCIAL'))
+
+  cy.get(empresas_localizadores.select_status())
+    .should('be.visible')
+    .click()
+
+  cy.contains('Ativo')
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.link_rastreio())
+    .should('be.visible')
+    .type(Cypress.env('LINK_RASTREIO'))
+
+  cy.get(empresas_localizadores.campo_cep())
+    .should('be.visible')
+    .type(Cypress.env('CEP'))
+
+  cy.get(empresas_localizadores.campo_logradouro())
+    .should('be.visible')
+    .type(Cypress.env('LOGRADOURO'))
+
+  cy.get(empresas_localizadores.campo_numero())
+    .should('be.visible')
+    .type(Cypress.env('NUMERO'))
+
+  cy.get(empresas_localizadores.campo_complemento())
+    .should('be.visible')
+    .type(Cypress.env('COMPLEMENTO'))
+
+  cy.get(empresas_localizadores.campo_cidade())
+    .should('be.visible')
+    .type(Cypress.env('CIDADE'))
+
+  cy.get(empresas_localizadores.campo_estado())
+    .should('be.visible')
+    .type(Cypress.env('ESTADO'))
+
+  cy.contains('SP')
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.btn_salvar_cadastro())
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
+    .eq(0)
+    .should('be.visible')
+
+  cy.get(empresas_localizadores.tipo_responsavel_tecnico())
+    .eq(0)
+    .should('be.visible')
+    .click()
+
+  cy.contains('Preposto')
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
+    .eq(0)
+    .should('be.visible')
+    .type(faker.person.fullName())
+
+  cy.get(empresas_localizadores.campo_telefone_responsavel_tecnico())
+    .eq(0)
+    .should('be.visible')
+    .type(faker.phone.number('119########'))
+
+  cy.get(empresas_localizadores.campo_email_responsavel_tecnico())
+    .eq(0)
+    .should('be.visible')
+    .type(faker.internet.email())
+
+  cy.get(empresas_localizadores.campo_numero_crea_responsavel_tecnico())
+    .eq(0)
+    .should('be.visible')
+    .type(faker.string.numeric(10))
+
+  cy.get(empresas_localizadores.campo_numero_art_responsavel_tecnico())
+    .eq(0)
+    .should('be.visible')
+    .type(faker.string.numeric(12))
+
+  cy.get(empresas_localizadores.documento_responsavel_tecnico())
+    .eq(0)
+    .selectFile('cypress/fixtures/teste.pdf', { force: true })
+
+  cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
+    .eq(1)
+    .should('be.visible')
+
+  cy.get(empresas_localizadores.tipo_responsavel_tecnico())
+    .eq(1)
+    .should('be.visible')
+    .click()
+
+  cy.contains('Engenheiro Civil')
+    .should('be.visible')
+    .click()
+
+  cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
+    .eq(1)
+    .should('be.visible')
+    .type(faker.person.fullName())
+
+  cy.get(empresas_localizadores.campo_telefone_responsavel_tecnico())
+    .eq(1)
+    .should('be.visible')
+    .type(faker.phone.number('119########'))
+
+  cy.get(empresas_localizadores.campo_email_responsavel_tecnico())
+    .eq(1)
+    .should('be.visible')
+    .type(faker.internet.email())
+
+  cy.get(empresas_localizadores.campo_numero_crea_responsavel_tecnico())
+    .eq(1)
+    .should('be.visible')
+    .type(faker.string.numeric(10))
+
+  cy.get(empresas_localizadores.campo_numero_art_responsavel_tecnico())
+    .eq(1)
+    .should('be.visible')
+    .type(faker.string.numeric(12))
+
+  cy.get(empresas_localizadores.documento_responsavel_tecnico())
+    .eq(1)
+    .selectFile('cypress/fixtures/teste.pdf', { force: true })
+
+  cy.get(empresas_localizadores.btn_salvar_cadastro())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_cadastro_responsaveis_nao_preenchido_empresa', () => {
+  cy.contains('Cadastrar empresa')
+    .should('be.disabled')
+})
+
+Cypress.Commands.add('campos_obrigatorios_responsavel_tecnico', (campo) => {
+
+  switch (campo) {
+
+    case 'tipo':
+      cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
+        .should('be.visible')
+        .click()
+
+      break
+
+    case 'nome':
+      cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
+        .should('be.visible')
+        .click()
+
+      cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
+        .should('be.visible')
+        .click()
+
+      break
+
+    case 'tel':
+      cy.get(empresas_localizadores.campo_telefone_responsavel_tecnico())
+        .should('be.visible')
+        .click()
+
+      cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
+        .should('be.visible')
+        .click()
+
+      break
+
+    case 'email':
+      cy.get(empresas_localizadores.campo_email_responsavel_tecnico())
+        .should('be.visible')
+        .click()
+
+      cy.get(empresas_localizadores.btn_adicionar_responsavel_tecnico(), {timeout: 30000})    
+        .should('be.visible')
+        .click()
+
+      break 
+
+    default:
+      throw new Error(`Campo não configurado: ${campo}`)
+  }
 })

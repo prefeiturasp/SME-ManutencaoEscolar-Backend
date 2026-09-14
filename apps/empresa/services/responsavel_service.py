@@ -5,8 +5,12 @@ from typing import Any
 from django.core.exceptions import ValidationError
 
 from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.models import ResponsavelTecnico
 from apps.empresa.repository.responsavel_repository import (
     ResponsavelTecnicoRepository,
+)
+from apps.empresa.services.anexo_service import (
+    AnexoResponsavelTecnicoService,
 )
 from apps.usuarios.models import Usuario
 
@@ -14,7 +18,11 @@ from apps.usuarios.models import Usuario
 class ResponsavelTecnicoService:
     """Orquestra as regras de negócio relacionadas a Responsavel Técnico."""
 
-    def __init__(self, repository: ResponsavelTecnicoRepository | None = None):
+    def __init__(
+        self,
+        repository: ResponsavelTecnicoRepository | None = None,
+        anexo_service: AnexoResponsavelTecnicoService | None = None,
+    ):
         """Inicializa o serviço com o repositório informado ou o padrão.
 
         Args:
@@ -23,6 +31,7 @@ class ResponsavelTecnicoService:
                 de `ResponsavelTecnicoRepository` é criada.
         """
         self.repository = repository or ResponsavelTecnicoRepository()
+        self.anexo_service = anexo_service or AnexoResponsavelTecnicoService()
 
     def bulk_criar(
         self, dados_lista: list[dict[str, Any]]
@@ -34,7 +43,6 @@ class ResponsavelTecnicoService:
         Args:
             dados_lista: Lista de dicionários com os dados dos
                 responsáveis técnicos a serem criados.
-            usuario: Usuário logado responsável pela criação.
 
         Returns:
             Lista de dados serializados dos responsáveis técnicos criados.
@@ -43,11 +51,37 @@ class ResponsavelTecnicoService:
             ValidationError: Se já existir um responsável técnico do mesmo
                 tipo cadastrado para a mesma empresa.
         """
+        dados_lista, arquivos_por_tipo = self._separar_arquivos(dados_lista)
         for dados in dados_lista:
             self._validar_tipo_unico_na_empresa(
                 dados["empresa_id"], dados["tipo"]
             )
-        return self.repository.bulk_criar(dados_lista)
+
+        responsaveis = self.repository.bulk_criar(dados_lista)
+        usuario = dados_lista[0].get("criado_por") if dados_lista else None
+
+        return self._salvar_anexos_dos_responsaveis(
+            responsaveis, arquivos_por_tipo, usuario
+        )
+
+    def remover(
+        self,
+        responsaveis: list[ResponsavelTecnico],
+        usuario: Usuario | None = None,
+    ) -> None:
+        """Exclui fisicamente os anexos e logicamente os responsáveis.
+
+        Args:
+            responsaveis: Instâncias dos responsáveis técnicos a remover.
+            usuario: Usuário responsável pela exclusão.
+        """
+        for responsavel in responsaveis:
+            self.anexo_service.sincronizar_arquivos(
+                responsavel_uuid=responsavel.uuid,
+                arquivos=[],
+                usuario=usuario,
+            )
+            self.repository.remover(responsavel, usuario)
 
     def sincronizar(
         self,
@@ -97,6 +131,7 @@ class ResponsavelTecnicoService:
             for item in existentes
             if str(item.uuid) not in uuids_informados
         ]
+        dados_lista, arquivos_por_tipo = self._separar_arquivos(dados_lista)
         dados_para_atualizar = [
             {
                 **dados,
@@ -113,7 +148,7 @@ class ResponsavelTecnicoService:
         ]
 
         if para_remover:
-            self.repository.remover(para_remover, usuario)
+            self.remover(para_remover, usuario)
 
         sincronizados: dict[str, dict[str, Any]] = {}
         if dados_para_atualizar:
@@ -125,7 +160,60 @@ class ResponsavelTecnicoService:
             for responsavel in self.repository.bulk_criar(dados_para_criar):
                 sincronizados[responsavel["tipo"]] = responsavel
 
-        return [sincronizados[dados["tipo"]] for dados in dados_lista]
+        responsaveis = [sincronizados[dados["tipo"]] for dados in dados_lista]
+        return self._salvar_anexos_dos_responsaveis(
+            responsaveis, arquivos_por_tipo, usuario
+        )
+
+    def _salvar_anexos_dos_responsaveis(
+        self,
+        responsaveis: list[dict[str, Any]],
+        arquivos_por_tipo: dict[str, list[dict[str, Any]]],
+        usuario: Usuario | None,
+    ) -> list[dict[str, Any]]:
+        """Associa os arquivos aos responsáveis recém-salvos.
+
+        Args:
+            responsaveis: Lista de responsáveis criados/atualizados.
+            arquivos_por_tipo: Dicionário com arquivos agrupados por tipo.
+            usuario: Usuário responsável pela operação.
+
+        Returns:
+            Lista de responsáveis com anexos associados.
+        """
+        for responsavel in responsaveis:
+            tipo = responsavel["tipo"]
+            responsavel["anexos"] = self.anexo_service.sincronizar_arquivos(
+                responsavel_uuid=responsavel["uuid"],
+                arquivos=arquivos_por_tipo.get(tipo, []),
+                usuario=usuario,
+            )
+        return responsaveis
+
+    @staticmethod
+    def _separar_arquivos(
+        dados_lista: list[dict[str, Any]],
+    ) -> tuple[list[dict[str, Any]], dict[str, list[dict[str, Any]]]]:
+        """
+        Remove os uploads dos dados usados para persistir responsáveis.
+
+        Args:
+            dados_lista: Lista de dicionários com os dados dos responsáveis
+                técnicos, incluindo os uploads.
+
+        Returns:
+            Uma tupla contendo:
+            - dados_sem_arquivos: Dados dos responsáveis técnicos sem os
+              uploads.
+            - arquivos_por_tipo: Arquivos agrupados por tipo.
+        """
+        dados_sem_arquivos = []
+        arquivos_por_tipo = {}
+        for dados in dados_lista:
+            dados = {**dados}
+            arquivos_por_tipo[dados["tipo"]] = dados.pop("anexos", [])
+            dados_sem_arquivos.append(dados)
+        return dados_sem_arquivos, arquivos_por_tipo
 
     def _validar_tipo_unico_na_empresa(
         self, empresa_id: int, tipo: str

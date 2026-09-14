@@ -2,7 +2,7 @@ class Empresas_Localizadores {
 
   // criar
   menu_cadastro = () => '.p-1 > .cursor-pointer'
-  menu_empresas = () => '[href="/cadastro/empresas"]'
+  menu_empresas = () => '[href="/empresas"]'
   btn_cadastrar_empresa = () => 'div.flex.items-center.justify-between > a'
   campo_nome = () => '#nome'
   campo_cnpj = () => '#cnpj'
@@ -16,6 +16,14 @@ class Empresas_Localizadores {
   campo_cidade = () => '#cidade'
   campo_estado = () => '#estado'
   btn_salvar_cadastro = () => 'div.justify-between > .flex > .bg-primary'
+  tipo_responsavel_tecnico = () => '[id^="responsaveis_tecnicos."][id$=".tipo"]'
+  campo_nome_responsavel_tecnico = () => '[id^="responsaveis_tecnicos."][id$=".nome"]'
+  campo_telefone_responsavel_tecnico = () => '[id^="responsaveis_tecnicos."][id$=".telefone"]'
+  campo_email_responsavel_tecnico = () => '[id^="responsaveis_tecnicos."][id$=".email"]'
+  campo_numero_crea_responsavel_tecnico = () => '[id^="responsaveis_tecnicos."][id$=".numero_crea"]'
+  campo_numero_art_responsavel_tecnico = () => '[id^="responsaveis_tecnicos."][id$=".numero_art"]'
+  documento_responsavel_tecnico = () => 'input[type="file"]'
+  btn_adicionar_responsavel_tecnico = () => '.items-center.gap-4 > .group\\/button'
 
   // consultar
   btn_abrir_empresa = () => ':nth-child(1) > .py-2 > .group\\/button'

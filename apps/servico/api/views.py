@@ -151,5 +151,12 @@ class ServicoViewSet(viewsets.ModelViewSet):
         serializer.instance = servico_atualizado
 
     def perform_destroy(self, instance: Servico) -> None:
-        """Deleta uma empresa existente usando o serviço."""
+        """
+        Deleta um serviço existente usando o serviço.
+
+        Args:
+            instance (Servico): Instância do serviço a ser deletada.
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
         self.service.deletar(instance, self._obter_usuario())

@@ -29,6 +29,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.core.constants import TIMEOUT_DEFAULT
+from apps.core.exceptions import EmailInvalidoError, TelefoneInvalidoError
+from apps.core.validacoes import validar_email, validar_telefone
 from apps.escola.constants import ENDPOINT_DADOS_ESCOLA
 from apps.escola.models import DadosUnidadeEducacional, Unidadeeducacional
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
@@ -337,8 +339,8 @@ class Command(BaseCommand):
         logradouro = self._normalizar_string(dados.get("logradouro"))
 
         return {
-            "email": self._normalizar_string(dados.get("email")),
-            "telefone": self._normalizar_string(dados.get("telefone")),
+            "email": self._normalizar_email(dados.get("email")),
+            "telefone": self._normalizar_telefone(dados.get("telefone")),
             "logradouro": f"{tipo_logradouro.upper()} {logradouro}",
             "numero": self._normalizar_string(dados.get("numero")),
             "bairro": self._normalizar_string(dados.get("bairro")),
@@ -395,3 +397,56 @@ class Command(BaseCommand):
             return valor.strip()
 
         return ""
+
+    @staticmethod
+    def _normalizar_telefone(valor: Any) -> str:
+        """Normaliza um telefone para armazenamento.
+
+        O telefone deve possuir oito ou nove dígitos. Para valores válidos,
+        adiciona o DDD 11 como prefixo. Valores fora desse padrão retornam
+        uma string vazia.
+
+        Args:
+            valor (Any): Telefone retornado pela API EOL.
+
+        Returns:
+            str: Telefone normalizado com o DDD 11 ou string vazia.
+        """
+        if not isinstance(valor, str | int):
+            return ""
+
+        telefone = str(valor).strip().lower()
+
+        if len(telefone) not in (8, 9):
+            return ""
+
+        telefone = f"11{telefone}"
+
+        try:
+            validar_telefone(telefone)
+        except TelefoneInvalidoError:
+            return ""
+
+        return telefone
+
+    @staticmethod
+    def _normalizar_email(valor: Any) -> str:
+        """Normaliza e valida um endereço de e-mail.
+
+        Args:
+            valor (Any): E-mail retornado pela API EOL.
+
+        Returns:
+            str: E-mail normalizado ou string vazia quando inválido.
+        """
+        if not isinstance(valor, str):
+            return ""
+
+        email = valor.strip().lower()
+
+        try:
+            validar_email(email)
+        except EmailInvalidoError:
+            return ""
+
+        return email

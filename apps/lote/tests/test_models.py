@@ -115,7 +115,7 @@ def test_relacionamento_exclusivo_com_diretoria_regional() -> None:
         "diretoria_regional",
     )
 
-    assert isinstance(campo, models.OneToOneField)
+    assert isinstance(campo, models.ForeignKey)
     assert campo.remote_field is not None
     assert campo.remote_field.model is DiretoriaRegional
     assert campo.remote_field.on_delete is models.PROTECT

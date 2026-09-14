@@ -1,12 +1,22 @@
 """Testes para o repositório de Empresa."""
 
-from unittest.mock import patch
+from functools import partial
+from typing import Any
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models.fields.files import FieldFile
 
-from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
-from apps.empresa.models import Empresa, ResponsavelTecnico
+from apps.empresa.models import (
+    AnexoResponsavelTecnico,
+    Empresa,
+    ResponsavelTecnico,
+)
+from apps.empresa.repository.anexo_repository import (
+    AnexoResponsavelTecnicoRepository,
+)
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
@@ -61,49 +71,30 @@ class TestEmpresaRepository:
         mock_full_clean.assert_called_once_with()
         mock_save.assert_called_once_with()
 
-    @pytest.mark.django_db
-    def test_criar_com_cnpj_duplicado_levanta_erro_de_dominio(
-        self, empresa_payload_valido
-    ):
-        """Deve traduzir a violação de unicidade do CNPJ em erro de domínio."""
+    @pytest.mark.parametrize("operacao", ["criar", "atualizar"])
+    def test_erro_de_validacao_propaga_sem_salvar(
+        self, empresa_payload_valido: dict[str, Any], operacao: str
+    ) -> None:
+        """Deve propagar a validação do modelo sem converter ou salvar."""
         repository = EmpresaRepository()
-        repository.criar(empresa_payload_valido)
+        erro_validacao = ValidationError("valor inválido")
 
-        with pytest.raises(EmpresaCnpjDuplicadoError):
-            repository.criar(empresa_payload_valido)
-
-    def test_criar_com_erro_de_validacao_nao_relacionado_a_cnpj_propaga_erro(
-        self, empresa_payload_valido
-    ):
-        """Deve propagar o erro original quando não for de CNPJ duplicado."""
-        repository = EmpresaRepository()
-        erro_validacao = ValidationError({"nome": ["campo obrigatório"]})
+        if operacao == "criar":
+            executar = partial(repository.criar, empresa_payload_valido)
+        else:
+            executar = partial(
+                repository.atualizar, Empresa(**empresa_payload_valido), {}
+            )
 
         with (
             patch.object(Empresa, "full_clean", side_effect=erro_validacao),
+            patch.object(Empresa, "save") as mock_save,
             pytest.raises(ValidationError) as exc_info,
         ):
-            repository.criar(empresa_payload_valido)
+            executar()
 
         assert exc_info.value is erro_validacao
-
-    @pytest.mark.django_db
-    def test_atualizar_com_cnpj_duplicado_levanta_erro_de_dominio(
-        self, empresa_payload_valido
-    ):
-        """Deve traduzir a violação de unicidade do CNPJ ao atualizar."""
-        repository = EmpresaRepository()
-        repository.criar(empresa_payload_valido)
-
-        outra_empresa = repository.criar(
-            {**empresa_payload_valido, "cnpj": "43210987654321"}
-        )
-        empresa = Empresa.objects.get(uuid=outra_empresa["uuid"])
-
-        with pytest.raises(EmpresaCnpjDuplicadoError):
-            repository.atualizar(
-                empresa, {"cnpj": empresa_payload_valido["cnpj"]}
-            )
+        mock_save.assert_not_called()
 
     @pytest.mark.django_db
     def test_deletar_marca_empresa_como_deletada(
@@ -135,6 +126,145 @@ class TestEmpresaRepository:
         empresa.refresh_from_db()
         assert empresa.deletado_em is not None
         assert empresa.deletado_por is None
+
+
+class TestAnexoResponsavelTecnicoRepository:
+    """Testes para o repositório de anexos de responsáveis técnicos."""
+
+    def test_criar_persiste_e_serializa_anexo(self):
+        """Deve persistir o anexo e devolver seus dados serializados."""
+        repository = AnexoResponsavelTecnicoRepository()
+        anexo = AnexoResponsavelTecnico(
+            nome_original="art.pdf",
+        )
+
+        with (
+            patch.object(anexo, "save") as save,
+            patch.object(
+                type(anexo),
+                "url",
+                return_value="https://minio.local/art.pdf",
+                new_callable=PropertyMock,
+            ),
+        ):
+            resultado = repository.criar(anexo)
+
+        save.assert_called_once_with()
+        assert resultado == {
+            "uuid": str(anexo.uuid),
+            "nome": "art.pdf",
+            "arquivo_url": "https://minio.local/art.pdf",
+        }
+
+    @pytest.mark.django_db
+    def test_excluir_nao_preservados_remove_arquivos_e_registros(
+        self, django_capture_on_commit_callbacks: Any
+    ) -> None:
+        """Deve excluir do storage e banco os anexos não preservados."""
+        repository = AnexoResponsavelTecnicoRepository()
+        uuid_preservado = AnexoResponsavelTecnico().uuid
+        queryset = Mock()
+        queryset_filtrado = Mock()
+        anexo = Mock(spec=AnexoResponsavelTecnico)
+        queryset.exclude.return_value = queryset_filtrado
+        queryset_filtrado.__iter__ = Mock(return_value=iter([anexo]))
+        queryset_filtrado.delete.return_value = (
+            1,
+            {"empresa.AnexoResponsavelTecnico": 1},
+        )
+
+        with (
+            patch.object(
+                AnexoResponsavelTecnico.objects,
+                "filter",
+                return_value=queryset,
+            ) as filter_mock,
+            django_capture_on_commit_callbacks(execute=True),
+        ):
+            repository.excluir_nao_preservados(
+                responsavel_id=1,
+                uuids_preservados=[uuid_preservado],
+            )
+
+        filter_mock.assert_called_once_with(responsavel_tecnico_id=1)
+        queryset.exclude.assert_called_once_with(uuid__in=[uuid_preservado])
+        anexo.arquivo.delete.assert_called_once_with(save=False)
+        queryset_filtrado.delete.assert_called_once_with()
+
+    @pytest.mark.django_db
+    def test_excluir_nao_preservados_remove_fisicamente_do_banco(
+        self,
+        responsavel_payload_valido: dict[str, Any],
+        django_capture_on_commit_callbacks: Any,
+    ) -> None:
+        """Deve remover o registro inclusive do manager sem filtro."""
+        responsavel = ResponsavelTecnico.objects.create(
+            **responsavel_payload_valido
+        )
+        anexo = AnexoResponsavelTecnico.objects.create(
+            responsavel_tecnico=responsavel,
+            nome_original="art.pdf",
+            tipo="documento",
+            arquivo="anexos_responsaveis_tecnicos/art.pdf",
+        )
+
+        with (
+            patch.object(FieldFile, "delete") as arquivo_delete,
+            django_capture_on_commit_callbacks(execute=True),
+        ):
+            AnexoResponsavelTecnicoRepository().excluir_nao_preservados(
+                responsavel_id=responsavel.id,
+                uuids_preservados=[],
+            )
+
+            arquivo_delete.assert_not_called()
+
+        arquivo_delete.assert_called_once_with(save=False)
+        assert not AnexoResponsavelTecnico.dm_objects.filter(
+            pk=anexo.pk
+        ).exists()
+
+    @pytest.mark.django_db
+    def test_rollback_preserva_arquivo_e_registro(
+        self,
+        responsavel_payload_valido: dict[str, Any],
+        django_capture_on_commit_callbacks: Any,
+    ) -> None:
+        """Preserva o arquivo e o registro se a transação externa falhar."""
+        responsavel = ResponsavelTecnico.objects.create(
+            **responsavel_payload_valido
+        )
+        anexo = AnexoResponsavelTecnico.objects.create(
+            responsavel_tecnico=responsavel,
+            nome_original="art.pdf",
+            tipo="documento",
+            arquivo="anexos_responsaveis_tecnicos/art.pdf",
+        )
+
+        repository = AnexoResponsavelTecnicoRepository()
+
+        def excluir_e_falhar() -> None:
+            """Simula uma falha após excluir o anexo na mesma transação."""
+            with transaction.atomic():
+                repository.excluir_nao_preservados(
+                    responsavel_id=responsavel.id,
+                    uuids_preservados=[],
+                )
+                assert not AnexoResponsavelTecnico.dm_objects.filter(
+                    pk=anexo.pk
+                ).exists()
+                raise ValueError("Falha na exclusão")
+
+        with (
+            patch.object(FieldFile, "delete") as arquivo_delete,
+            django_capture_on_commit_callbacks(execute=True) as callbacks,
+            pytest.raises(ValueError, match="Falha na exclusão"),
+        ):
+            excluir_e_falhar()
+
+        arquivo_delete.assert_not_called()
+        assert callbacks == []
+        assert AnexoResponsavelTecnico.dm_objects.filter(pk=anexo.pk).exists()
 
 
 class TestResponsavelTecnicoRepository:
@@ -263,7 +393,7 @@ class TestResponsavelTecnicoRepository:
         repository.bulk_criar([responsavel_payload_valido])
         responsavel = ResponsavelTecnico.objects.get()
 
-        repository.remover([responsavel], usuario_ativo)
+        repository.remover(responsavel, usuario_ativo)
 
         responsavel.refresh_from_db()
         assert responsavel.deletado_em is not None

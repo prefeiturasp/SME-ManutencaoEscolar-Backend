@@ -2,11 +2,8 @@
 
 from typing import Any
 
-from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 
-from apps.empresa.constants import EmpresaErrorMessages
-from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
 from apps.empresa.models import Empresa
 from apps.usuarios.models import Usuario
 
@@ -27,7 +24,7 @@ class EmpresaRepository:
             dict[str, Any]: Dicionário contendo os dados da empresa.
         """
         empresa = self.model(**dados)
-        self._validar(empresa)
+        empresa.full_clean()
         empresa.save()
 
         return self._serializar(empresa)
@@ -48,7 +45,7 @@ class EmpresaRepository:
         """
         for campo, valor in dados.items():
             setattr(empresa, campo, valor)
-        self._validar(empresa)
+        empresa.full_clean()
         empresa.save()
 
         return self._serializar(empresa)
@@ -64,27 +61,6 @@ class EmpresaRepository:
             usuario (Usuario | None): Usuário que está realizando a deleção.
         """
         empresa.soft_delete(usuario=usuario)
-
-    def _validar(self, empresa: Empresa) -> None:
-        """
-        Executa full_clean traduzindo CNPJ duplicado em erro de domínio.
-
-        Args:
-            empresa (Empresa): Instância da empresa a ser validada.
-
-        Raises:
-            EmpresaCnpjDuplicadoError: Se o CNPJ já estiver cadastrado.
-            ValidationError: Se ocorrer qualquer outro erro de validação.
-        """
-        try:
-            empresa.full_clean()
-        except ValidationError as exc:
-            erros_cnpj = getattr(exc, "error_dict", {}).get("cnpj", [])
-            if any(erro.code == "unique" for erro in erros_cnpj):
-                raise EmpresaCnpjDuplicadoError(
-                    EmpresaErrorMessages.CNPJ_JA_CADASTRADO
-                ) from exc
-            raise
 
     def _serializar(self, empresa: Empresa) -> dict[str, Any]:
         """

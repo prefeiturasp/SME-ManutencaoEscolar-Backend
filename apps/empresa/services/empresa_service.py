@@ -123,10 +123,11 @@ class EmpresaService:
 
         return empresa_atualizada
 
+    @transaction.atomic
     def deletar(
         self, empresa: Empresa, usuario: Usuario | None = None
     ) -> None:
-        """Realiza a exclusão lógica de uma empresa.
+        """Realiza a exclusão lógica da empresa e de seus responsáveis.
 
         Registra o usuário logado como responsável pela exclusão.
 
@@ -134,4 +135,6 @@ class EmpresaService:
             empresa: Instância da empresa a ser deletada.
             usuario: Usuário logado responsável pela exclusão.
         """
+        responsaveis = list(empresa.responsaveis_tecnicos.all())
+        self.responsavel_tecnico_service.remover(responsaveis, usuario)
         self.empresa_repository.deletar(empresa, usuario)

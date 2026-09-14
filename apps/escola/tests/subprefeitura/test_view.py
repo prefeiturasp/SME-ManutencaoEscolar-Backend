@@ -19,12 +19,12 @@ class TestSubprefeituraViewSet:
 
     def test_deve_listar_subprefeituras(
         self,
-        cliente_api,
+        api_cliente,
         subprefeitura_se,
         subprefeitura_pirituba,
     ):
         """Deve retornar as subprefeituras cadastradas."""
-        resposta = cliente_api.get(self.url)
+        resposta = api_cliente.get(self.url)
 
         assert resposta.status_code == status.HTTP_200_OK
 
@@ -38,11 +38,11 @@ class TestSubprefeituraViewSet:
 
     def test_deve_buscar_subprefeitura_por_uuid(
         self,
-        cliente_api,
+        api_cliente,
         subprefeitura_se,
     ):
         """Deve retornar uma subprefeitura pelo UUID."""
-        resposta = cliente_api.get(
+        resposta = api_cliente.get(
             f"{self.url}{subprefeitura_se.uuid}/",
         )
 
@@ -56,12 +56,12 @@ class TestSubprefeituraViewSet:
 
     def test_deve_filtrar_por_nome(
         self,
-        cliente_api,
+        api_cliente,
         subprefeitura_se,
         subprefeitura_pirituba,
     ):
         """Deve filtrar subprefeituras pelo nome."""
-        resposta = cliente_api.get(
+        resposta = api_cliente.get(
             self.url,
             {"nome": "sé"},
         )
@@ -77,11 +77,11 @@ class TestSubprefeituraViewSet:
 
     def test_deve_filtrar_por_codigo_eol(
         self,
-        cliente_api,
+        api_cliente,
         subprefeitura_se,
     ):
         """Deve filtrar subprefeituras pelo código EOL."""
-        resposta = cliente_api.get(
+        resposta = api_cliente.get(
             self.url,
             {"codigo_eol": subprefeitura_se.codigo_eol},
         )
@@ -97,10 +97,10 @@ class TestSubprefeituraViewSet:
 
     def test_deve_retornar_404_para_uuid_inexistente(
         self,
-        cliente_api,
+        api_cliente,
     ):
         """Deve retornar 404 quando o UUID não existir."""
-        resposta = cliente_api.get(
+        resposta = api_cliente.get(
             f"{self.url}{uuid.uuid4()}/",
         )
 
@@ -108,10 +108,10 @@ class TestSubprefeituraViewSet:
 
     def test_nao_deve_permitir_criacao(
         self,
-        cliente_api,
+        api_cliente,
     ):
         """Não deve permitir criação de subprefeituras."""
-        resposta = cliente_api.post(
+        resposta = api_cliente.post(
             self.url,
             data={
                 "codigo_eol": "SP99",
@@ -124,11 +124,11 @@ class TestSubprefeituraViewSet:
 
     def test_nao_deve_permitir_atualizacao(
         self,
-        cliente_api,
+        api_cliente,
         subprefeitura_se,
     ):
         """Não deve permitir atualização de subprefeituras."""
-        resposta = cliente_api.put(
+        resposta = api_cliente.put(
             f"{self.url}{subprefeitura_se.uuid}/",
             data={
                 "codigo_eol": "SP99",
@@ -141,11 +141,11 @@ class TestSubprefeituraViewSet:
 
     def test_nao_deve_permitir_atualizacao_parcial(
         self,
-        cliente_api,
+        api_cliente,
         subprefeitura_se,
     ):
         """Não deve permitir atualização parcial."""
-        resposta = cliente_api.patch(
+        resposta = api_cliente.patch(
             f"{self.url}{subprefeitura_se.uuid}/",
             data={"nome": "Subprefeitura Alterada"},
             format="json",
@@ -155,11 +155,11 @@ class TestSubprefeituraViewSet:
 
     def test_nao_deve_permitir_exclusao(
         self,
-        cliente_api,
+        api_cliente,
         subprefeitura_se,
     ):
         """Não deve permitir exclusão de subprefeituras."""
-        resposta = cliente_api.delete(
+        resposta = api_cliente.delete(
             f"{self.url}{subprefeitura_se.uuid}/",
         )
 
