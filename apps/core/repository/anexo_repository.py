@@ -1,4 +1,10 @@
-"""Repositório responsável pelo acesso aos anexos da aplicação."""
+"""
+Repositório responsável pelo acesso aos anexos da aplicação.
+
+Este módulo centraliza as operações de persistência e consulta de anexos,
+incluindo criação, busca, listagem, download e exclusão de arquivos.
+
+"""
 
 from typing import Any
 
@@ -13,7 +19,21 @@ from apps.usuarios.models.usuario import Usuario
 
 
 class AnexoRepository:
-    """Repositório responsável pelo acesso aos anexos da aplicação."""
+    """
+    Centraliza o acesso e as operações de persistência de anexos.
+
+    O repositório encapsula o acesso ao modelo :class:`Anexo`, evitando que as
+    camadas superiores precisem lidar diretamente com consultas e operações de
+    persistência relacionadas aos arquivos.
+
+    As operações disponibilizadas incluem:
+
+    * criação de anexos;
+    * busca de um anexo pelo UUID;
+    * listagem de anexos, com filtro opcional por tipo;
+    * preparação dos dados necessários para download;
+    * exclusão do arquivo armazenado e do respectivo registro.
+    """
 
     model = Anexo
 
@@ -25,6 +45,12 @@ class AnexoRepository:
 
         Returns:
             dict[str, Any]: Dicionário contendo os principais dados do anexo.
+                - ``uuid``: Identificador único do anexo como string.
+                - ``nome``: Nome original do arquivo.
+                - ``tipo``: Tipo do arquivo.
+                - ``tipo_mime``: Tipo MIME do arquivo.
+                - ``tamanho``: Tamanho do arquivo em bytes.
+                - ``url``: URL de acesso ao arquivo.
         """
         return {
             "uuid": str(anexo.uuid),
@@ -72,8 +98,10 @@ class AnexoRepository:
     ) -> dict[str, Any]:
         """Cria e persiste um novo anexo.
 
-        O arquivo é armazenado no backend configurado e o anexo é
-        associado ao usuário responsável pela criação.
+        O usuário responsável é consultado antes da criação do anexo.
+        A operação é executada dentro de uma transação atômica para garantir
+        que as operações de banco de dados realizadas pelo método sejam
+        confirmadas ou revertidas.
 
         Args:
             nome_original (str): Nome original do arquivo enviado.
@@ -85,12 +113,12 @@ class AnexoRepository:
 
         Returns:
             dict[str, Any]: Dicionário contendo os dados do anexo criado:
-            - uuid: Identificador único do anexo.
-            - nome: Nome original do arquivo.
-            - tipo: Tipo do anexo.
-            - tipo_mime: Tipo MIME do arquivo.
-            - tamanho: Tamanho do arquivo em bytes.
-            - url: URL para acesso ao arquivo armazenado.
+                - uuid: Identificador único do anexo.
+                - nome: Nome original do arquivo.
+                - tipo: Tipo do anexo.
+                - tipo_mime: Tipo MIME do arquivo.
+                - tamanho: Tamanho do arquivo em bytes.
+                - url: URL para acesso ao arquivo armazenado.
         Raises:
             UsuarioNaoEncontradoError: Quando o usuário com o ID informado
                 não existe no sistema.
@@ -126,7 +154,8 @@ class AnexoRepository:
             identificador (str): UUID do anexo que será consultado.
 
         Returns:
-            dict[str, Any]: Dicionário contendo os dados do anexo encontrado.
+            dict[str, Any]: Dados do anexo encontrado, incluindo UUID, nome,
+                tipo, tipo MIME, tamanho e URL de acesso.
 
         Raises:
             AnexoArquivoError: Se o anexo não for encontrado
@@ -139,6 +168,10 @@ class AnexoRepository:
         tipo: str | None = None,
     ) -> dict[str, list[dict[str, Any]]]:
         """Lista os anexos, opcionalmente filtrados por tipo.
+
+        A consulta pode ser opcionalmente filtrada pelo tipo do anexo.
+        Quando nenhum tipo é informado, todos os anexos retornados pelo
+        gerenciador padrão do modelo são incluídos.
 
         Args:
             tipo (str | None): Tipo do anexo utilizado como filtro.
@@ -163,13 +196,19 @@ class AnexoRepository:
     def excluir(self, identificador: str) -> None:
         """Exclui um anexo do banco de dados.
 
-        A operação é executada dentro de uma transação atômica.
+        Primeiro, o arquivo associado ao anexo é removido do storage.
+        Em seguida, o registro do anexo é removido do banco de dados.
+
+        A operação é executada dentro de uma transação atômica para as
+        operações de banco de dados. A remoção do arquivo no storage é
+        realizada separadamente por meio do campo ``arquivo``.
 
         Args:
             identificador (str): Identificador UUID do anexo que será excluído.
 
         Raises:
-            AnexoArquivoError: Se o anexo não for encontrado.
+            AnexoArquivoError: Se o anexo não for encontrado com o UUID
+                informado.
         """
         anexo = self._consulta_por_uuid(identificador)
         anexo.arquivo.delete(
@@ -179,6 +218,11 @@ class AnexoRepository:
 
     def buscar_para_download(self, identificador: str) -> dict[str, Any]:
         """Busca os dados necessários para realizar o download de um anexo.
+
+        Diferentemente de :meth:`buscar_por_uuid`, este método não retorna a
+        URL do arquivo. Ele retorna diretamente a referência ao arquivo
+        armazenado, juntamente com os metadados necessários para construir uma
+        resposta de download.
 
         Args:
             identificador (str): Identificador UUID do anexo.
