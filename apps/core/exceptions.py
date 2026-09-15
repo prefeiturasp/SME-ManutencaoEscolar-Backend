@@ -1,53 +1,68 @@
-"""Erros mapedos do Sistema."""
+"""Exceções customizadas utilizadas por toda aplicação.
+
+Define exceções específicas para representar falhas de autenticação,
+integração, validação de dados, tokens, envio de e-mails e processamento
+de arquivos.
+"""
 
 
 class FalhaAutenticacaoError(Exception):
-    """Erro de autenticação."""
+    """Indica uma falha durante o processo de autenticação."""
 
     pass
 
 
 class InternalError(Exception):
-    """Erro interno do sistema."""
+    """Indica uma falha interna não tratada pela aplicação."""
 
     pass
 
 
 class SmeIntegracaoError(Exception):
-    """Problema na integração com a SME."""
+    """Indica uma falha na integração com serviços da SME."""
 
     pass
 
 
 class CnpjInvalidoError(ValueError):
-    """Levantado quando um CNPJ não obedece ao formato esperado."""
+    """Indica que um CNPJ não atende ao formato esperado."""
 
     pass
 
 
 class CepInvalidoError(ValueError):
-    """Levantado quando um CEP não obedece ao formato esperado."""
+    """Indica que um CEP não atende ao formato esperado."""
 
     pass
 
 
 class LinkRastreioInvalidoError(ValueError):
-    """Levantado quando um link de rastreio não obedece ao formato esperado."""
+    """Indica que um link de rastreamento não atende ao formato esperado."""
 
     pass
 
 
 class TelefoneInvalidoError(ValueError):
-    """Levantado quando um telefone não contem o número de dígitos esperado."""
+    """Indica que um telefone não possui a quantidade esperada de dígitos."""
 
     pass
 
 
 class TokenInvalidoError(Exception):
-    """Problema na geração de token JWT."""
+    """
+    Indica um problema relacionado à validação ou processamento de token.
+
+    Armazena um título e uma descrição destinados a serem utilizados
+    pelas camadas responsáveis pelo tratamento e apresentação do erro.
+    """
 
     def __init__(self, title: str, detail: str) -> None:
-        """Inicializa a exceção com título e descrição."""
+        """Inicializa a exceção com título e descrição.
+
+        Args:
+            title (str): Título resumido do erro.
+            detail (str): Descrição detalhada do erro.
+        """
         self.title = title
         self.detail = detail
 
@@ -55,10 +70,19 @@ class TokenInvalidoError(Exception):
 
 
 class EnvioEmailError(Exception):
-    """Erro ao enviar e-mail."""
+    """Indica uma falha durante o envio de e-mail.
+
+    Armazena informações estruturadas para apresentação do erro pela
+    camada responsável pelo tratamento da exceção.
+    """
 
     def __init__(self, title: str, detail: str) -> None:
-        """Inicializa a exceção com título e descrição."""
+        """Inicializa a exceção com título e descrição.
+
+        Args:
+            title (str): Título resumido do erro.
+            detail (str): Descrição detalhada do erro.
+        """
         self.title = title
         self.detail = detail
 
@@ -66,14 +90,24 @@ class EnvioEmailError(Exception):
 
 
 class AnexoArquivoError(Exception):
-    """Exceção para erros relacionados ao processamento de arquivos."""
+    """
+    Indica uma falha relacionada ao processamento de arquivos.
+
+    Armazena informações estruturadas para permitir que as camadas
+    superiores retornem uma mensagem apropriada ao cliente.
+    """
 
     def __init__(self, title: str, detail: str) -> None:
-        """Inicializa uma exceção de arquivo."""
+        """Inicializa a exceção com título e descrição.
+
+        Args:
+            title (str): Título resumido do erro.
+            detail (str): Descrição detalhada do erro.
+        """
         self.title = title
         self.detail = detail
         super().__init__(title, detail)
 
 
 class EmailInvalidoError(Exception):
-    """Erro lançado quando o e-mail possui formato inválido."""
+    """Indica que um endereço de e-mail possui formato inválido."""

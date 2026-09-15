@@ -1,4 +1,4 @@
-"""Serializers de Autenticação."""
+"""Serializers utilizados para autenticação e recuperação de senha."""
 
 from rest_framework import serializers
 
@@ -30,6 +30,21 @@ class AutenticacaoSerializer(serializers.Serializer):
     )
 
     def validate_login(self, value: str) -> str:
+        """Valida o tamanho do identificador utilizado no login.
+
+        O valor deve possuir exatamente 7 dígitos, correspondente ao RF,
+        ou 11 dígitos, correspondente ao CPF.
+
+        Args:
+            value (str): Identificador informado para autenticação.
+
+        Raises:
+            serializers.ValidationError: Se o identificador não possuir 7 ou
+                11 caracteres.
+
+        Returns:
+            str: Identificador validado.
+        """
         if len(value) not in {7, 11}:
             raise serializers.ValidationError(
                 "O login deve ser um RF com 7 dígitos ou um CPF com 11 "
@@ -39,7 +54,11 @@ class AutenticacaoSerializer(serializers.Serializer):
 
 
 class LoginResponseSerializer(serializers.Serializer):
-    """Resposta da autenticação."""
+    """Serializa a resposta retornada após uma autenticação bem-sucedida.
+
+    A resposta contém os tokens JWT, seus respectivos tempos de validade
+    e os dados do usuário autenticado.
+    """
 
     refresh = serializers.CharField(help_text="Token JWT de atualização.")
     access = serializers.CharField(help_text="Token JWT de acesso.")
@@ -53,7 +72,10 @@ class LoginResponseSerializer(serializers.Serializer):
 
 
 class AtualizarTokenSerializer(serializers.Serializer):
-    """Valida os dados da requisição de atualização de token."""
+    """Valida os dados utilizados na atualização de um token JWT.
+
+    Recebe o refresh token utilizado pelo fluxo de renovação da autenticação.
+    """
 
     refresh = serializers.CharField(
         required=True,
@@ -63,7 +85,11 @@ class AtualizarTokenSerializer(serializers.Serializer):
 
 
 class LogoutSerializer(serializers.Serializer):
-    """Valida os dados da requisição de logout do sistema."""
+    """Valida os dados da requisição de logout do sistema.
+
+    Recebe o refresh token que será validado e posteriormente revogado
+    durante o processo de logout.
+    """
 
     refresh = serializers.CharField(
         required=True,
@@ -74,7 +100,12 @@ class LogoutSerializer(serializers.Serializer):
 
 
 class RecuperarSenhaSerializer(serializers.Serializer):
-    """Valida os dados da requisição de recuperação de senha."""
+    """Valida os dados da requisição de recuperação de senha.
+
+    Recebe o registro funcional ou CPF utilizado para identificar o usuário
+    que deverá receber as instruções de recuperação de senha.
+
+    """
 
     registro_funcional_ou_cpf = serializers.CharField(
         required=True,
@@ -85,7 +116,12 @@ class RecuperarSenhaSerializer(serializers.Serializer):
 
 
 class AlterarSenhaSerializer(serializers.Serializer):
-    """Valida os dados da requisição de alteração de senha."""
+    """Valida os dados da requisição para redefinir a senha do usuário.
+
+    Recebe o identificador do usuário, o token de recuperação e a nova senha.
+    Também verifica se a confirmação da senha corresponde à nova senha
+    informada.
+    """
 
     registro_funcional_ou_cpf = serializers.CharField(
         required=True,
@@ -111,6 +147,21 @@ class AlterarSenhaSerializer(serializers.Serializer):
     )
 
     def validate_registro_funcional_ou_cpf(self, value: str) -> str:
+        """Valida o tamanho do identificador do usuário.
+
+        O valor deve possuir exatamente 7 dígitos, correspondente ao RF,
+        ou 11 dígitos, correspondente ao CPF.
+
+        Args:
+            value (str): Registro funcional ou CPF informado.
+
+        Raises:
+            serializers.ValidationError:  Se o identificador não possuir
+                7 ou 11 caracteres.
+
+        Returns:
+            str: Identificador validado.
+        """
         if len(value) not in {7, 11}:
             raise serializers.ValidationError(
                 "O registro_funcional_ou_cpf deve ser um RF com 7 dígitos ou "
@@ -120,6 +171,18 @@ class AlterarSenhaSerializer(serializers.Serializer):
         return value
 
     def validate(self, attrs: dict) -> dict:
+        """Valida a correspondência entre a senha e sua confirmação.
+
+        Args:
+            attrs (dict): Dados já validados individualmente pelo serializer.
+
+        Raises:
+            serializers.ValidationError: Se ``senha`` e ``confirmacao_senha``
+                forem diferentes.
+
+        Returns:
+            dict: Dados validados.
+        """
         if attrs["senha"] != attrs["confirmacao_senha"]:
             raise serializers.ValidationError(
                 {"confirmacao_senha": "As senhas não coincidem."}
