@@ -1,4 +1,12 @@
-"""Serviços responsáveis pela gerencia dos anexos."""
+"""Serviços responsáveis pela gerencia dos anexos.
+
+Este módulo centraliza a validação, preparação, armazenamento, consulta,
+listagem e exclusão de arquivos anexados à aplicação.
+
+As operações de persistência são delegadas ao :class:`AnexoRepository`,
+enquanto as validações e transformações específicas dos arquivos são
+realizadas neste serviço.
+"""
 
 import mimetypes
 import uuid
@@ -19,7 +27,24 @@ from apps.usuarios.repository.usuario_repository import UsuarioRepository
 
 
 class AnexoService:
-    """Regras de negócio relacionadas ao armazenamento de arquivos."""
+    """Centraliza as ações relacionadas aos anexos.
+
+    O serviço é responsável por validar os arquivos recebidos, preparar seus
+    metadados e delegar as operações de persistência ao
+    :class:`AnexoRepository`.
+
+    Entre as responsabilidades aplicadas estão:
+
+        - validação da existência do usuário responsável;
+        - validação da presença, nome e tamanho do arquivo;
+        - validação da extensão do arquivo;
+        - identificação do tipo do anexo;
+        - geração de um nome único para armazenamento;
+        - identificação do tipo MIME;
+        - obtenção de URL para acesso ao arquivo;
+        - preparação dos dados necessários para download;
+        - exclusão do anexo e do arquivo armazenado.
+    """
 
     def __init__(
         self,
@@ -39,6 +64,13 @@ class AnexoService:
         self, arquivo: UploadedFile, id_usuario: int
     ) -> dict[str, Any]:
         """Valida e persiste um arquivo anexado.
+
+        Executa o fluxo completo de envio de um arquivo: valida a existência
+        do usuário, valida os dados do arquivo, prepara seus metadados e
+        delega a persistência ao :class:`AnexoRepository`.
+
+        A operação é executada dentro de uma transação atômica para as
+        operações de banco de dados realizadas durante o fluxo.
 
         Args:
             arquivo: Arquivo que será validado e armazenado.
@@ -72,8 +104,8 @@ class AnexoService:
 
         Raises:
             AnexoArquivoError: Se o arquivo for inválido, estiver vazio,
-            possuir uma extensão não permitida ou ultrapassar o tamanho máximo
-            permitido de 2 MB.
+                possuir uma extensão não permitida ou ultrapassar o tamanho
+                máximo permitido de 2 MB.
             UsuarioNaoEncontradoError: Se o usuário não existir.
         """
         if id_usuario is None or not UsuarioRepository.usuario_existe_por_id(
@@ -140,7 +172,7 @@ class AnexoService:
 
         Returns:
             dict[str, list[dict[str, Any]]]: Dicionário contendo a chave
-                ``arquivos`` com a lista de anexos encontrados.
+            ``arquivos`` com a lista de anexos encontrados.
         """
         return self.repository.listar(
             tipo=tipo,
@@ -218,8 +250,13 @@ class AnexoService:
 
         Returns:
             dict[str, Any]: Dicionário contendo os dados do anexo criado e
-                persistido, incluindo seu identificador, nome, tipo, tipo MIME,
-                tamanho e URL para acesso ao arquivo.
+                persistido contendo:
+                - ``nome_original``: Nome original.
+                - ``tipo``: Tipo do arquivo.
+                - ``tipo_mime``: Tipo MIME identificado.
+                - ``tamanho_bytes``: Tamanho do arquivo em bytes.
+                - ``arquivo``: Arquivo com nome único para armazenamento.
+                - ``usuario_id``: Identificador do usuário responsável.
         """
         nome_original = Path(
             nome_original,
@@ -287,6 +324,9 @@ class AnexoService:
         arquivo: UploadedFile | None,
     ) -> tuple[str, int]:
         """Valida e retorna os metadados básicos de um arquivo.
+
+        Verifica se o arquivo foi informado, se possui nome, se seu tamanho
+        pode ser determinado e se possui conteúdo.
 
         Args:
             arquivo (UploadedFile): Arquivo recebido pela aplicação.
@@ -361,7 +401,10 @@ class AnexoService:
             identificador (str): Identificador UUID do anexo.
 
         Returns:
-            dict[str, Any]: Dicionário contendo o arquivo, nome original e
-                tipo MIME.
+            dict[str, Any]: Dicionário contendo:
+                - ``arquivo``: Referência ao arquivo armazenado.
+                - ``nome_original``: Nome original do arquivo.
+                - ``tipo_mime``: Tipo MIME do arquivo.
+
         """
         return self.repository.buscar_para_download(identificador)
