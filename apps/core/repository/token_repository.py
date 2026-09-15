@@ -72,12 +72,12 @@ class TokenRepository:
         Returns:
             dict[str, str]:  Dicionário contendo:
                 - ``refresh``: Token JWT utilizado para renovação da
-                    autenticação.
+                  autenticação.
                 - ``access``: Token JWT utilizado para autenticar requisições.
                 - ``access_expires_in``: Tempo de validade do token de acesso,
-                    em segundos.
+                  em segundos.
                 - ``refresh_expires_in``: Tempo de validade do token de
-                    renovação, em segundos.
+                  renovação, em segundos.
         """
         usuario = Usuario.objects.get(pk=usuario_id)
 

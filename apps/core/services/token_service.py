@@ -1,4 +1,9 @@
-"""Serviço para geração de tokens JWT e recuperação de senha."""
+"""Serviço para geração, validação e revogação de tokens JWT.
+
+Centraliza as operações relacionadas à autenticação baseada em tokens,
+delegando a geração e a validação de tokens de recuperação ao repositório
+especializado.
+"""
 
 import logging
 
@@ -15,22 +20,32 @@ logger = logging.getLogger(__name__)
 
 
 class TokenService:
-    """Responsável pela geração dos tokens JWT."""
+    """Serviço responsável pelo gerenciamento de tokens de autenticação.
+
+    Centraliza a geração de tokens JWT, a validação de refresh tokens,
+    o logout por revogação de tokens e a validação de tokens de recuperação
+    de senha.
+    """
 
     @classmethod
     def gerar_tokens(cls, id_usuario: int) -> dict[str, str | int]:
         """Gera tokens de acesso e refresh para um usuário.
 
         Este método atua como uma camada de serviço que delega a geração
-        efetiva dos tokens para o TokenRepository.
+        efetiva dos tokens para o :class:`TokenRepository`.
 
         Args:
             id_usuario (int): ID do usuário autenticado que solicita os tokens.
 
         Returns:
             dict[str, str]: Dicionário contendo:
-                - 'refresh': Token refresh para renovação de acesso
-                - 'access': Token de acesso para autenticação nas requisições
+                - ``refresh``: Token JWT utilizado para renovação da
+                  autenticação.
+                - ``access``: Token JWT utilizado para autenticar requisições.
+                - ``access_expires_in``: Tempo de validade do token de acesso,
+                  em segundos.
+                - ``refresh_expires_in``: Tempo de validade do token de
+                  renovação, em segundos.
         """
         return TokenRepository.gerar_tokens(id_usuario)
 
@@ -50,9 +65,9 @@ class TokenService:
 
         Raises:
             UsuarioNaoEncontradoError: Se o usuário associado ao token não
-            existir ou estiver inativo.
+                existir ou estiver inativo.
             TokenError: Se o refresh token for inválido, expirado ou não puder
-            ser validado.
+                ser validado.
         """
         try:
             refresh = RefreshToken(refresh_token)
@@ -106,7 +121,7 @@ class TokenService:
 
     @classmethod
     def validar_token_recuperar_senha(cls, username: str, token: str) -> None:
-        """Altera a senha de um usuário a partir de token de recuperação.
+        """Valida um token de recuperação de senha..
 
         Args:
             username (str): Nome de usuário (RF ou CPF) do usuário.
