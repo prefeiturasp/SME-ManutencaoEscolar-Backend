@@ -223,6 +223,16 @@ a referência existir.
 Integrações
 -----------
 
+Core
+~~~~
+
+O módulo utiliza o domínio Core para UUID, auditoria, exclusão lógica.
+
+Usuários
+~~~~~~~~
+
+O usuário autenticado é associado às operações de criação, atualização e exclusão. O envio de anexos também valida a existência do usuário responsável.
+
 Empresa
 ~~~~~~~
 
