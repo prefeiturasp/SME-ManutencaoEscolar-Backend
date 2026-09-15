@@ -1,4 +1,4 @@
-"""Exceções customizadas utilizadas pela aplicação Core.
+"""Exceções customizadas utilizadas por toda aplicação.
 
 Define exceções específicas para representar falhas de autenticação,
 integração, validação de dados, tokens, envio de e-mails e processamento
