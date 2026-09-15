@@ -7,5 +7,6 @@ Esta seção apresenta os domínios de negócio do sistema de Manutenção Escol
    :maxdepth: 2
 
    core/index
+   empresa/index
    lote/index
    glossario
