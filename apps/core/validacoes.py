@@ -1,4 +1,9 @@
-"""Utilitários de validação/normalização de campos."""
+"""Utilitários para validação e normalização de campos.
+
+Centraliza expressões regulares, validadores do Django e funções utilizadas
+para validar formatos de CNPJ, CEP, links de rastreamento, telefones e
+endereços de e-mail.
+"""
 
 import re
 
@@ -40,11 +45,18 @@ EMAIL_FORMATO_REGEX = re.compile(
 
 
 def formata_cnpj(valor: str) -> str:
-    """
-    Remove máscara (pontos, barra, hífen, espaços) e uppercase nas letras.
+    """Normaliza a representação de um CNPJ.
 
-    Não valida aqui — apenas formata a representação para uma forma
-    canônica de armazenamento/comparação.
+    Remove pontos, barras, hífens e espaços e converte as letras para
+    maiúsculas. A função não verifica se o valor possui um formato de CNPJ
+    válido.
+
+    Args:
+        valor (str): CNPJ que será normalizado.
+
+    Returns:
+        str: CNPJ sem máscara e com caracteres alfabéticos em maiúsculas.
+            Retorna uma string vazia quando ``valor`` for vazio.
     """
     if not valor:
         return ""
@@ -52,7 +64,17 @@ def formata_cnpj(valor: str) -> str:
 
 
 def validar_formato_cnpj(cnpj: str) -> None:
-    """Valida apenas o formato (14 posições, 12 alfanuméricas + 2 dígitos)."""
+    """Valida o formato estrutural de um CNPJ.
+
+    Verifica se o valor possui 14 posições, sendo as 12 primeiras
+    alfanuméricas e as duas últimas exclusivamente numéricas.
+
+    Args:
+        cnpj (str): CNPJ que será validado.
+
+    Raises:
+        CnpjInvalidoError: Se o CNPJ não atender ao formato esperado.
+    """
     if not CNPJ_FORMATO_REGEX.match(cnpj or ""):
         raise CnpjInvalidoError(
             "CNPJ deve ter 14 posições: as 12 primeiras alfanuméricas "
@@ -61,7 +83,17 @@ def validar_formato_cnpj(cnpj: str) -> None:
 
 
 def validar_formato_cep(cep: str) -> None:
-    """Valida apenas o formato (8 dígitos numéricos)."""
+    """Valida o formato estrutural de um CEP.
+
+    O valor deve conter exatamente oito dígitos numéricos.
+
+    Args:
+        cep (str): CEP que será validado.
+
+    Raises:
+        CepInvalidoError: Se o CEP não possuir exatamente oito dígitos
+            numéricos.
+    """
     if not re.match(r"^\d{8}$", cep or ""):
         raise CepInvalidoError(
             "CEP inválido. Deve conter 8 dígitos numéricos."
@@ -69,7 +101,17 @@ def validar_formato_cep(cep: str) -> None:
 
 
 def validar_formato_link_rastreio(link: str) -> None:
-    """Valida apenas o formato do link de rastreio (URL)."""
+    """Valida o formato de um link de rastreamento.
+
+    Verifica se o valor inicia com ``http://`` ou ``https://`` e não
+    contém espaços em branco.
+
+    Args:
+        link (str): URL de rastreamento que será validada.
+
+    Raises:
+        LinkRastreioInvalidoError: Se o link não atender ao formato esperado.
+    """
     if not LINK_FORMATO_REGEX.match(link or ""):
         raise LinkRastreioInvalidoError(
             "Link inválido. Deve ser uma URL válida."
@@ -77,7 +119,17 @@ def validar_formato_link_rastreio(link: str) -> None:
 
 
 def validar_telefone(telefone: str) -> None:
-    """Valida apenas o número de caracteres (10 ou 11 dígitos numéricos)."""
+    """Valida o formato de um número de telefone.
+
+    O valor deve conter exclusivamente dígitos e possuir 10 ou 11 posições.
+
+    Args:
+        telefone (str): Número de telefone que será validado.
+
+    Raises:
+        TelefoneInvalidoError: Se o telefone não possuir 10 ou 11 dígitos
+            numéricos.
+    """
     if not re.match(r"^\d{10,11}$", telefone or ""):
         raise TelefoneInvalidoError(
             "Telefone inválido. Deve conter 10 ou 11 dígitos numéricos."
@@ -85,7 +137,18 @@ def validar_telefone(telefone: str) -> None:
 
 
 def validar_email(email: str) -> None:
-    """Valida apenas o formato de um endereço de e-mail."""
+    """Valida o formato básico de um endereço de e-mail.
+
+    A validação verifica se o valor corresponde ao padrão de e-mail definido
+    pela expressão regular da aplicação. Não realiza validação da existência
+    ou acessibilidade do endereço.
+
+    Args:
+        email (str): Endereço de e-mail que será validado.
+
+    Raises:
+        EmailInvalidoError: Se o endereço não atender ao formato esperado.
+    """
     if not EMAIL_FORMATO_REGEX.match(email or ""):
         raise EmailInvalidoError(
             "E-mail inválido. Deve possuir um endereço de e-mail válido."
