@@ -1,4 +1,11 @@
-"""Repositório responsável pelo acesso aos dados da aplicação EOL."""
+"""Repositório responsável pelo acesso aos dados da aplicação EOL.
+
+Este módulo centraliza as requisições HTTP realizadas pela aplicação ao
+serviço EOL, incluindo autenticação, consulta de usuários e cargos,
+verificação de existência de usuários e alteração de senha.
+
+As operações de comunicação utilizam um timeout fixo de 10 segundos.
+"""
 
 import logging
 from typing import Any
@@ -12,17 +19,30 @@ logger = logging.getLogger(__name__)
 
 
 class ApiEOLRepository:
-    """Repositório responsável pela comunicação com o serviço EOL."""
+    """Centraliza a comunicação HTTP com o serviço EOL.
+
+    O repositório encapsula as chamadas realizadas à API do EOL e concentra o
+    tratamento das respostas HTTP relacionadas à integração. As operações
+    disponibilizadas incluem:
+
+        * autenticação de usuários;
+        * consulta de cargos;
+        * consulta de dados de usuários;
+        * verificação da existência de usuários;
+        * alteração de senha.
+
+    As requisições HTTP possuem timeout de 10 segundos.
+    """
 
     @staticmethod
     def post(
         url: str, headers: dict[str, str], data: str
     ) -> requests.Response:
         """
-        Realiza uma requisição POST ao serviço EOL.
+        Realiza uma requisição HTTP POST ao serviço EOL.
 
         Args:
-            url (str): URL completa do endpoint.
+            url (str): URL completa do endpoint do serviço EOL.
             headers (dict[str, str]): Cabeçalhos HTTP enviados na requisição.
             data (str): Corpo da requisição serializado em JSON.
 
@@ -40,10 +60,10 @@ class ApiEOLRepository:
     @staticmethod
     def get(url: str, headers: dict[str, str]) -> requests.Response:
         """
-        Realiza uma requisição GET ao serviço EOL.
+        Realiza uma requisição HTTP GET ao serviço EOL.
 
         Args:
-            url (str): URL completa do endpoint.
+            url (str): URL completa do endpoint do serviço EOL.
             headers (dict[str, str]): Cabeçalhos HTTP enviados na requisição.
 
         Returns:
@@ -60,6 +80,27 @@ class ApiEOLRepository:
     def autentica_usuario(
         cls, url: str, headers: dict[str, str], data: str
     ) -> dict:
+        """Autentica um usuário por meio da API do EOL.
+
+        Realiza uma requisição POST para o endpoint de autenticação e delega o
+        tratamento da resposta ao método :meth:`_tratar_resposta`.
+
+        Args:
+            url (str): URL do endpoint de autenticação.
+            headers (dict[str, str]): Cabeçalhos HTTP necessários para
+                autenticação.
+            data (str): Corpo da requisição contendo os dados de autenticação,
+                serializado conforme o formato esperado pela API.
+
+        Returns:
+            dict: Dados retornados pela API após uma autenticação bem-sucedida.
+
+        Raises:
+            FalhaAutenticacaoError: Se as credenciais forem inválidas
+                (HTTP 401).
+            SmeIntegracaoError: Se a API retornar HTTP 429, outro status HTTP
+                de erro ou uma resposta JSON inválida.
+        """
         response = cls.post(url, headers=headers, data=data)
         return cls._tratar_resposta(response)
 
@@ -67,6 +108,20 @@ class ApiEOLRepository:
     def usuario_existe(
         url: str, headers: dict[str, str], files: dict[str, tuple[None, str]]
     ) -> requests.Response:
+        """Consulta a API do EOL para verificar a existência de um usuário.
+
+        Realiza uma requisição POST enviando os dados por meio do parâmetro
+        ``files``, conforme o formato esperado pelo endpoint utilizado.
+
+        Args:
+            url (str): URL do endpoint responsável pela consulta.
+            headers (dict[str, str]): Cabeçalhos HTTP enviados na requisição.
+            files (dict[str, tuple[None, str]]): Dados enviados na requisição
+                multipart/form-data.
+
+        Returns:
+            requests.Response: Resposta HTTP retornada pela API do EOL.
+        """
         return requests.post(
             url,
             headers=headers,
@@ -114,6 +169,15 @@ class ApiEOLRepository:
     def _tratar_resposta(response: requests.Response) -> dict[str, Any]:
         """
         Processa a resposta retornada pelo serviço de autenticação EOL.
+
+        Centraliza o tratamento dos principais cenários de resposta da API de
+        autenticação:
+
+        * HTTP 401: credenciais inválidas;
+        * HTTP 429: limite de tentativas excedido;
+        * demais respostas HTTP de erro: falha na integração;
+        * resposta HTTP bem-sucedida com JSON inválido: resposta inválida do
+        serviço.
 
         Args:
             response (requests.Response): Resposta HTTP retornada pela API.
