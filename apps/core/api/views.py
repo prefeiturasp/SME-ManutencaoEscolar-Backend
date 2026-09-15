@@ -1,4 +1,8 @@
-"""Views da API da aplicação Core."""
+"""Views responsáveis pelos endpoints da aplicação Core.
+
+Disponibiliza endpoints para verificação de saúde da aplicação, autenticação,
+gerenciamento de tokens, recuperação de senha e gerenciamento de anexos.
+"""
 
 from typing import Any
 
@@ -57,7 +61,11 @@ from apps.usuarios.services.usuario_service import UsuarioService
 
 
 class HealthCheckView(APIView):
-    """View para verificação de integridade do sistema."""
+    """Disponibiliza o endpoint público de verificação da aplicação.
+
+    Permite que orquestradores e mecanismos de monitoramento verifiquem
+    se a aplicação está respondendo corretamente.
+    """
 
     permission_classes = [AllowAny]
 
@@ -83,7 +91,12 @@ class HealthCheckView(APIView):
 
 
 class LoginView(TokenObtainPairView):
-    """View responsavel por autenticação."""
+    """Disponibiliza o endpoint de autenticação do usuário.
+
+    Recebe as credenciais informadas pelo cliente, delega a autenticação
+    ao serviço de integração com o EOL/CoreSSO e retorna os tokens JWT
+    juntamente com os dados do usuário autenticado.
+    """
 
     # TokenObtainPairView herda de TokenViewBase, que define permission_classes
     # como uma tupla
@@ -91,6 +104,18 @@ class LoginView(TokenObtainPairView):
 
     @LOGIN
     def post(self, request: Request) -> Response:
+        """Autentica o usuário e retorna os dados da sessão.
+
+        Valida os dados de entrada, realiza a autenticação no EOL/CoreSSO
+        e serializa a resposta contendo os tokens JWT e os dados do usuário.
+
+        Args:
+            request (Request): Requisição HTTP contendo login e senha.
+
+        Returns:
+            Response: Resposta HTTP com os tokens e dados do usuário em caso
+                de sucesso.
+        """
         serializer = AutenticacaoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         login = serializer.validated_data["login"]
@@ -134,10 +159,31 @@ class LoginView(TokenObtainPairView):
 
 
 class AtualizarTokenView(TokenRefreshView):
-    """View responsavel por atualização de token."""
+    """Disponibiliza o endpoint de atualização do access token.
+
+    Antes de delegar a atualização ao fluxo padrão do Simple JWT, valida
+    o refresh token e verifica se o usuário associado ainda está autorizado
+    no CoreSSO.
+    """
 
     @ATUALIZA_TOKEN
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Valida o refresh token e solicita a renovação da autenticação.
+
+        O refresh token é validado e o usuário associado é consultado.
+        Em seguida, verifica-se se o usuário continua autorizado no CoreSSO.
+        Caso esteja válido, a implementação herdada de
+        :class:`TokenRefreshView` gera o novo access token.
+
+        Args:
+            request (Request): Requisição HTTP contendo o refresh token.
+            *args (Any): Argumentos posicionais recebidos pela view base.
+            **kwargs (Any): Argumentos nomeados recebidos pela view base.
+
+        Returns:
+            Response: Resposta HTTP contendo o novo access token ou um erro
+                de autenticação.
+        """
         serializer = AtualizarTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
@@ -167,10 +213,25 @@ class AtualizarTokenView(TokenRefreshView):
 
 
 class LogoutView(APIView):
-    """View responsável por realizar o logout do usuário autenticado."""
+    """Disponibiliza o endpoint de logout do usuário autenticado.
+
+    O logout revoga o refresh token informado, impedindo sua reutilização
+    para obtenção de novos tokens de acesso.
+    """
 
     @LOGOUT
     def post(self, request: Request) -> Response:
+        """Revoga o refresh token e encerra a sessão do usuário.
+
+        Valida o refresh token recebido e verifica sua associação com o
+        usuário autenticado antes de solicitar sua revogação.
+
+        Args:
+            request (Request): Requisição HTTP contendo o refresh token.
+
+        Returns:
+            Response: HTTP indicando o resultado da operação.
+        """
         serializer = LogoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         id_usuario = request.user.id
@@ -197,12 +258,28 @@ class LogoutView(APIView):
 
 
 class RedefinirSenhaView(APIView):
-    """View responsável por realizar o recuperar senha do usuário."""
+    """Disponibiliza o endpoint para iniciar a recuperação de senha.
+
+    Identifica o usuário pelo registro funcional ou CPF, solicita o envio
+    do e-mail de recuperação e retorna o endereço de e-mail mascarado.
+    """
 
     permission_classes = [AllowAny]
 
     @REDEFINIR_SENHA
     def post(self, request: Request) -> Response:
+        """Solicita o envio de instruções para recuperação de senha.
+
+        Após identificar o usuário e solicitar o envio do e-mail, mascara
+        parte do endereço eletrônico antes de retorná-lo ao cliente.
+
+        Args:
+            request (Request): Requisição HTTP contendo o registro funcional
+                ou CPF do usuário
+
+        Returns:
+            Response: Resposta HTTP contendo o e-mail mascarado.
+        """
         serializer = RecuperarSenhaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         rf_ou_cpf = serializer.validated_data["registro_funcional_ou_cpf"]
@@ -237,12 +314,29 @@ class RedefinirSenhaView(APIView):
 
 
 class AlterarSenhaView(APIView):
-    """View responsável por alterar a senha do usuário a partir do token."""
+    """Disponibiliza o endpoint para alteração da senha do usuário.
+
+    Valida o token de recuperação e, caso seja válido, solicita a alteração
+    da senha do usuário no CoreSSO.
+    """
 
     permission_classes = [AllowAny]
 
     @ALTERAR_SENHA
     def post(self, request: Request) -> Response:
+        """Valida o token e altera a senha do usuário.
+
+        Valida os dados da requisição, verifica o token de recuperação
+        e solicita ao serviço de autenticação a alteração da senha no
+        CoreSSO.
+
+        Args:
+            request (Request): Requisição HTTP contendo identificador,
+                token e nova senha.
+
+        Returns:
+            Response: Resposta HTTP indicando o resultado da alteração.
+        """
         serializer = AlterarSenhaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data["registro_funcional_ou_cpf"]
@@ -280,14 +374,31 @@ class AlterarSenhaView(APIView):
 
 
 class AnexoView(APIView):
-    """View responsável pelo gerenciamento de anexos."""
+    """
+    Disponibiliza os endpoints relacionados ao gerenciamento de anexos.
+
+    Suporta o recebimento de arquivos por requisições multipart e delega
+    a validação, preparação e persistência dos arquivos ao serviço
+    especializado.
+    """
 
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     lookup_field = "uuid"
 
     @UPLOAD_ARQUIVO
     def post(self, request: Request) -> Response:
-        """Recebe, valida e armazena um arquivo enviado pelo usuário."""
+        """Recebe, valida e armazena um arquivo enviado pelo usuário.
+
+        Valida o arquivo recebido pelo serializer, identifica o usuário
+        autenticado e delega o processamento ao :class:`AnexoService`.
+
+        Args:
+            request (Request): Requisição HTTP contendo o arquivo no campo
+                ``arquivo``.
+
+        Returns:
+            Response: Resposta HTTP com os dados do arquivo criado.
+        """
         serializer = ArquivoUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         arquivo = serializer.validated_data["arquivo"]

@@ -1,4 +1,8 @@
-"""Constantes utilizadas pela aplicação Core."""
+"""Constantes e escolhas compartilhadas pela aplicação Core.
+
+Centraliza endpoints de integração, configurações padrão, extensões de
+arquivos suportadas, limites de tamanho e escolhas utilizadas pelos modelos.
+"""
 
 from django.db import models
 
@@ -16,7 +20,12 @@ TAMANHO_MAXIMO_ARQUIVO = 2 * 1024 * 1024
 
 
 class EstadoChoices(models.TextChoices):
-    """UFs do Brasil."""
+    """Define as unidades federativas brasileiras.
+
+    Os valores armazenados correspondem às siglas oficiais dos estados
+    e do Distrito Federal, enquanto os rótulos representam seus nomes
+    por extenso.
+    """
 
     AC = "AC", "Acre"
     AL = "AL", "Alagoas"

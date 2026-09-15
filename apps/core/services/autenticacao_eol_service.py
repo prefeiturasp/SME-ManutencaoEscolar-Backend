@@ -1,4 +1,12 @@
-"""Serviços responsáveis pela autenticação de usuários no EOL."""
+"""Serviços responsáveis pela autenticaçãoe integração com o EOL/CoreSSO.
+
+Este módulo centraliza as operações necessárias para autenticar usuários no
+serviço EOL, consultar dados funcionais, sincronizar informações do usuário
+local e realizar operações relacionadas à senha no CoreSSO.
+
+O fluxo de autenticação também é responsável pela geração dos tokens JWT
+utilizados pela aplicação após a autenticação bem-sucedida.
+"""
 
 import json
 import logging
@@ -27,7 +35,23 @@ DADO_NAO_INFORMADO = "Não informado"
 
 
 class AutenticacaoEOLService:
-    """Serviço para autenticação de usuários no EOL."""
+    """Serviço para autenticação de usuários no EOL.
+
+    O serviço é responsável por coordenar a comunicação com o EOL/CoreSSO e
+    integrar os dados retornados pelo serviço externo com os usuários da
+    aplicação.
+
+    Entre as operações disponibilizadas estão:
+
+        - autenticação de credenciais no EOL;
+        - verificação da existência de usuários no CoreSSO;
+        - consulta de cargos funcionais;
+        - consulta de dados funcionais do usuário;
+        - sincronização do usuário local;
+        - geração de tokens JWT;
+        - alteração de senha no CoreSSO;
+        - atualização da senha do usuário na aplicação.
+    """
 
     @classmethod
     def autentica(cls, login: object, senha: object) -> dict[str, Any]:
@@ -167,7 +191,7 @@ class AutenticacaoEOLService:
     @staticmethod
     def _valida_url() -> None:
         """
-        Valida se a  URL existe.
+        Valida a configuração da URL base da integração com o EOL.
 
         Raises:
             InternalError:  Caso a URL base da integração não esteja
@@ -247,7 +271,8 @@ class AutenticacaoEOLService:
             dict: Dados do usuário retornados pela API.
 
         Raises:
-            SmeIntegracaoError: Quando a consulta falha.
+            SmeIntegracaoError: Se ocorrer uma falha durante a consulta à
+                API do EOL.
         """
         url = (
             f"{SME_API_EOL_URL}/AutenticacaoCOMAPRE/{registro_funcional}/dados"
@@ -267,6 +292,39 @@ class AutenticacaoEOLService:
 
     @classmethod
     def login(cls, login: object, senha: object) -> dict[str, Any]:
+        """Realiza o fluxo completo de login da aplicação.
+
+        Autentica as credenciais no EOL e, após a autenticação bem-sucedida:
+
+            #. obtém o registro funcional retornado pelo EOL;
+            #. consulta o cargo do servidor;
+            #. consulta os dados funcionais do usuário;
+            #. sincroniza o usuário com a base local;
+            #. gera os tokens JWT da aplicação;
+            #. combina os dados locais e funcionais na resposta final.
+
+        Args:
+            login (object): Identificador(RF ou CPF) utilizado para
+                autenticação no EOL.
+            senha (object): Senha utilizada para autenticação.
+
+        Returns:
+            dict[str, Any]: Dados da sessão autenticada, contendo:
+                - ``refresh``: Token JWT de renovação.
+                - ``access``: Token JWT de acesso.
+                - ``access_expires_in``: Tempo de validade do access token,
+                    em segundos.
+                - ``refresh_expires_in``: Tempo de validade do refresh token,
+                    em segundos.
+                - ``usuario``: Dados do usuário sincronizado, acrescidos das
+                    informações de diretoria regional e unidade educacional.
+        Raises:
+            FalhaAutenticacaoError: Se as credenciais forem inválidas.
+            SmeIntegracaoError: Se ocorrer falha na comunicação ou na
+                integração com o EOL/CoreSSO.
+            InternalError: Se ocorrer erro interno ou problema de configuração
+                durante o processo.
+        """
         dados_autenticacao = cls.autentica(
             login=login,
             senha=senha,

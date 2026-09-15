@@ -1,10 +1,14 @@
-"""Serializers de Anexo."""
+"""Serializers utilizados nas operações de arquivos e anexos."""
 
 from rest_framework import serializers
 
 
 class ArquivoResponseSerializer(serializers.Serializer):
-    """Representa os dados de um arquivo retornados pela API."""
+    """Serializa os dados de um arquivo retornados pela API.
+
+    Define a estrutura utilizada nas respostas que representam arquivos
+    armazenados, incluindo seus metadados e a URL para acesso ao conteúdo.
+    """
 
     uuid = serializers.UUIDField(
         help_text="Identificador único do arquivo.",
@@ -27,7 +31,11 @@ class ArquivoResponseSerializer(serializers.Serializer):
 
 
 class ArquivoUploadSerializer(serializers.Serializer):
-    """Representa os dados necessários para realizar o upload de um arquivo."""
+    """Valida os dados necessários para realizar o upload de um arquivo.
+
+    Recebe o arquivo que será encaminhado à camada de serviço para validação,
+    preparação e armazenamento.
+    """
 
     arquivo = serializers.FileField(
         help_text="Arquivo que será enviado para armazenamento.", required=True

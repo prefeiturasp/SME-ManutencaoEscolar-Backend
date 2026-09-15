@@ -1,4 +1,8 @@
-"""Task do app core."""
+"""Tasks assíncronas utilizadas pela aplicação Core.
+
+Define tarefas executadas pelo Celery, incluindo uma tarefa de verificação
+e o envio assíncrono de e-mails HTML.
+"""
 
 from smtplib import SMTPException
 from time import sleep
@@ -14,7 +18,11 @@ logger = get_task_logger(__name__)
 
 @shared_task
 def helchek() -> None:
-    """Task de teste do Celery."""
+    """Executa uma tarefa de teste para verificar o funcionamento do Celery.
+
+    Registra o início da execução, aguarda 60 segundos e registra a conclusão
+    da tarefa.
+    """
     logger.info("Executando tarefa...")
     sleep(60)
     logger.info("Tarefa finalizada!")
@@ -32,14 +40,15 @@ def enviar_email_task(
     destinatarios: list[str],
     anexos: list[dict] | None = None,
 ) -> None:
-    """Envie um e-mail HTML de forma assíncrona.
+    """Renderiza e envia um e-mail HTML de forma assíncrona.
 
-    Renderiza o template informado utilizando o contexto recebido,
-    adiciona anexos (quando informados) e realiza o envio do e-mail.
+    Renderiza o template informado utilizando o contexto recebido, cria
+    uma mensagem HTML, adiciona os anexos informados e realiza o envio
+    utilizando as configurações de e-mail da aplicação.
 
-    Em caso de falha durante o envio, a task será reexecutada
-    automaticamente pelo Celery conforme a política de retry
-    configurada.
+    A task está configurada para realizar novas tentativas automaticamente
+    em caso de exceções, utilizando backoff progressivo e um limite de
+    cinco tentativas.
 
     Args:
         assunto (str): Assunto do e-mail.
@@ -49,6 +58,13 @@ def enviar_email_task(
         anexos (list[dict] | None, optional): Lista de anexos. Cada
             anexo deve possuir as chaves ``nome``, ``conteudo`` e
             ``tipo_conteudo``. Defaults to ``None``.
+    Returns:
+        None: A task não retorna dados após o envio.
+
+    Raises:
+        Exception: Exceções ocorridas durante a execução podem provocar
+            uma nova tentativa automática pelo Celery, conforme a política
+            configurada para a task.
     """
     html = render_to_string(
         template,
