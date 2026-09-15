@@ -1,6 +1,4 @@
-Este documento reúne as regras funcionais identificadas no módulo de lotes.
-As regras foram extraídas exclusivamente dos arquivos disponibilizados para
-análise.
+Esta seção documenta as regras de negócio que orientam o funcionamento do domínio **Lote**.
 
 Cadastro
 --------

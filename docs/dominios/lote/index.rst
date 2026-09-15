@@ -223,6 +223,16 @@ a referência existir.
 Integrações
 -----------
 
+Core
+~~~~
+
+O módulo utiliza o domínio Core para UUID, auditoria, exclusão lógica.
+
+Usuários
+~~~~~~~~
+
+O usuário autenticado é associado às operações de criação, atualização e exclusão. O envio de anexos também valida a existência do usuário responsável.
+
 Empresa
 ~~~~~~~
 
@@ -259,11 +269,6 @@ As operações de criação, atualização e exclusão exigem que
 ``request.user`` seja uma instância válida de usuário da aplicação. Caso
 contrário, a operação é rejeitada como não autenticada.
 
-Não foram identificadas permissões específicas por perfil ou papel nos
-arquivos analisados. Também não foi disponibilizada a configuração global do
-Django REST Framework, necessária para determinar as regras de autenticação
-das consultas.
-
 Processamento assíncrono
 ------------------------
 
@@ -294,10 +299,6 @@ exclusão.
 As consultas apresentam os identificadores e nomes dos usuários responsáveis,
 além das datas de criação e atualização fornecidas pelo modelo base.
 
-A implementação do modelo base não foi disponibilizada. Por isso, não foi
-possível confirmar todos os detalhes de preenchimento dos timestamps,
-filtragem padrão de excluídos e restauração.
-
 Estados e transições
 --------------------
 
@@ -322,26 +323,6 @@ A inativação automática executa a seguinte transição:
 
 Não foram identificadas restrições que impeçam a reativação manual de um lote
 por meio de alteração parcial.
-
-Regras de negócio
------------------
-
-As regras de negócio do módulo estão documentadas no arquivo
-``regras_negocio.rst``.
-
-Observações
------------
-
-* A atualização não remove todos os vínculos quando uma lista vazia de DREs é
-  enviada. Essa entrada pode provocar erro durante a atribuição dos dados.
-* A atualização não remove espaços externos do nome e do código, embora a
-  documentação interna do serviço afirme que esses valores são normalizados.
-* Não há restrição de unicidade no modelo para ``codigo_cadastro`` ou
-  ``nome``.
-* A exclusividade de uma DRE não é garantida por restrição de banco de dados;
-  ela depende da validação executada pela aplicação.
-* O contrato OpenAPI não foi analisado porque o conteúdo do schema não foi
-  disponibilizado.
 
 Regras de Negócio
 =================
