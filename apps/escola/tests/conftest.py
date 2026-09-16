@@ -4,7 +4,10 @@ import pytest
 
 from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
-from apps.escola.models.responsavel_unidade import ResponsavelUnidade
+from apps.escola.models.responsavel_unidade import (
+    HistoricoResponsavel,
+    ResponsavelUnidade,
+)
 from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import (
     DadosUnidadeEducacional,
@@ -296,6 +299,19 @@ def responsavel_unidade() -> ResponsavelUnidade:
         email="responsavel.emef@teste.com",
         telefone="11999999999",
         esta_afastado=False,
+    )
+
+
+@pytest.fixture
+def historico_responsavel(
+    responsavel_unidade, unidade_educacional_emef, obter_cargo_diretor
+) -> HistoricoResponsavel:
+    """Cria um histórico de responsável de unidade para os testes."""
+    return HistoricoResponsavel.objects.create(
+        responsavel=responsavel_unidade,
+        unidade_educacional=unidade_educacional_emef,
+        cargo=obter_cargo_diretor,
+        ativo=True,
     )
 
 
