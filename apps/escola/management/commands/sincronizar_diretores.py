@@ -838,8 +838,8 @@ class Command(BaseCommand):
             }
 
         if not (
-            responsavel.atualizado_por is None
-            or responsavel.atualizado_por == usuario
+            historico.atualizado_por is None
+            or historico.atualizado_por == usuario
         ):
             usuario_atualizacao = historico.atualizado_por
             if usuario_atualizacao is not None:
