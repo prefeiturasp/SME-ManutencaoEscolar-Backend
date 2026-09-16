@@ -10,6 +10,7 @@ from apps.escola.management.commands.sincronizar_diretores import Command
 from apps.escola.models import HistoricoResponsavel, ResponsavelUnidade
 from apps.escola.models.unidade_educacional import Unidadeeducacional
 from apps.usuarios.models.cargo_eol import CargoEOL
+from apps.usuarios.models.usuario import Usuario
 
 pytestmark = pytest.mark.django_db
 
@@ -1252,7 +1253,7 @@ class TestSincronizarDiretores:
         responsavel = ResponsavelUnidade.objects.create(
             registro_funcional="0000014",
             nome="DIRETOR TESTE",
-            atualizado_por=usuario_sincronizacao,
+            atualizado_por=usuario_ativo,
         )
 
         historico = HistoricoResponsavel.objects.create(
@@ -1280,3 +1281,137 @@ class TestSincronizarDiretores:
         assert resultado["foi_atualizado"] is False
         assert historico.ativo is False
         assert historico.atualizado_por == usuario_ativo
+
+    def test_deve_falhar_quando_usuario_de_sincronizacao_nao_existir(
+        self,
+        configurar_api_eol,
+        unidade_educacional_emef,
+    ):
+        """Deve falhar quando o usuário da sincronização não existir."""
+        with patch.object(
+            Command,
+            "_coletar_registros",
+            return_value=[],
+        ):
+            Usuario.objects.filter(
+                username="sincronizacao_eol",
+            ).delete()
+
+            with pytest.raises(
+                CommandError,
+                match="Usuário de sincronização de dados não encontrado",
+            ):
+                call_command("sincronizar_diretores")
+
+    def test_deve_contabilizar_responsavel_e_historico(
+        self,
+        usuario_ativo,
+        usuario_sincronizacao,
+        configurar_api_eol,
+        unidade_educacional_emef,
+        cargo_perfil_diretor,
+    ):
+        """Deve contabilizar criados, atualizados e ignorados."""
+        responsavel_atualizado = ResponsavelUnidade.objects.create(
+            registro_funcional="0000020",
+            nome="NOME ANTIGO",
+            email="antigo@email.com",
+            telefone="11111111",
+            esta_afastado=False,
+            atualizado_por=usuario_sincronizacao,
+        )
+
+        responsavel_ignorado = ResponsavelUnidade.objects.create(
+            registro_funcional="0000021",
+            nome="NOME MANUAL",
+            email="manual@email.com",
+            telefone="22222222",
+            esta_afastado=True,
+            atualizado_por=usuario_ativo,
+        )
+
+        historico_atualizado = HistoricoResponsavel.objects.create(
+            responsavel=responsavel_atualizado,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=cargo_perfil_diretor,
+            ativo=False,
+            atualizado_por=usuario_sincronizacao,
+        )
+
+        historico_ignorado = HistoricoResponsavel.objects.create(
+            responsavel=responsavel_ignorado,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=cargo_perfil_diretor,
+            ativo=False,
+            atualizado_por=usuario_ativo,
+        )
+
+        registros = [
+            {
+                "registro_funcional": "0000019",
+                "nome": "DIRETOR NOVO",
+                "email": "novo@email.com",
+                "telefone": "99999999",
+                "esta_afastado": False,
+                "unidade_educacional": unidade_educacional_emef,
+                "cargo_diretor": cargo_perfil_diretor,
+            },
+            {
+                "registro_funcional": "0000020",
+                "nome": "DIRETOR ATUALIZADO",
+                "email": "atualizado@email.com",
+                "telefone": "88888888",
+                "esta_afastado": True,
+                "unidade_educacional": unidade_educacional_emef,
+                "cargo_diretor": cargo_perfil_diretor,
+            },
+            {
+                "registro_funcional": "0000021",
+                "nome": "DIRETOR EOL",
+                "email": "eol@email.com",
+                "telefone": "77777777",
+                "esta_afastado": False,
+                "unidade_educacional": unidade_educacional_emef,
+                "cargo_diretor": cargo_perfil_diretor,
+            },
+        ]
+
+        with patch.object(
+            Command,
+            "_coletar_registros",
+            return_value=registros,
+        ):
+            call_command("sincronizar_diretores")
+
+        responsavel_atualizado.refresh_from_db()
+        responsavel_ignorado.refresh_from_db()
+        historico_atualizado.refresh_from_db()
+        historico_ignorado.refresh_from_db()
+
+        responsavel_novo = ResponsavelUnidade.objects.get(
+            registro_funcional="0000019",
+        )
+        historico_novo = HistoricoResponsavel.objects.get(
+            responsavel=responsavel_novo,
+        )
+
+        assert responsavel_novo.nome == "DIRETOR NOVO"
+        assert responsavel_novo.atualizado_por == usuario_sincronizacao
+        assert historico_novo.ativo is True
+        assert historico_novo.atualizado_por == usuario_sincronizacao
+
+        assert responsavel_atualizado.nome == "DIRETOR ATUALIZADO"
+        assert responsavel_atualizado.email == "atualizado@email.com"
+        assert responsavel_atualizado.telefone == "88888888"
+        assert responsavel_atualizado.esta_afastado is True
+        assert responsavel_atualizado.atualizado_por == usuario_sincronizacao
+        assert historico_atualizado.ativo is True
+        assert historico_atualizado.atualizado_por == usuario_sincronizacao
+
+        assert responsavel_ignorado.nome == "NOME MANUAL"
+        assert responsavel_ignorado.email == "manual@email.com"
+        assert responsavel_ignorado.telefone == "22222222"
+        assert responsavel_ignorado.esta_afastado is True
+        assert responsavel_ignorado.atualizado_por == usuario_ativo
+        assert historico_ignorado.ativo is False
+        assert historico_ignorado.atualizado_por == usuario_ativo

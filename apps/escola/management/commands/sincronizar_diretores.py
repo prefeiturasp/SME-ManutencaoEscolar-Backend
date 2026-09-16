@@ -845,14 +845,13 @@ class Command(BaseCommand):
             or historico.atualizado_por == usuario
         ):
             usuario_atualizacao = historico.atualizado_por
-            if usuario_atualizacao is not None:
-                logger.info(
-                    f"Histórico do responsável RF "
-                    f"{responsavel.registro_funcional} na unidade "
-                    f"{registro['unidade_educacional'].nome} não atualizado: "
-                    f"última alteração realizada pelo usuário "
-                    f"{usuario_atualizacao.username}"
-                )
+            logger.info(
+                f"Histórico do responsável RF "
+                f"{responsavel.registro_funcional} na unidade "
+                f"{registro['unidade_educacional'].nome} não atualizado: "
+                f"última alteração realizada pelo usuário "
+                f"{usuario_atualizacao.username}"
+            )
             return {
                 "historico": historico,
                 "foi_criado": False,
