@@ -151,12 +151,10 @@ class Command(BaseCommand):
                     "responsavel"
                 ]
 
-                if resultado_responsavel["foi_criado"]:
-                    quantidades["criados"] += 1
-                elif resultado_responsavel["foi_atualizado"]:
-                    quantidades["atualizados"] += 1
-                else:
-                    quantidades["ignorados"] += 1
+                self._contabilizar_resultado(
+                    quantidades=quantidades,
+                    resultado=resultado_responsavel,
+                )
 
                 resultado_historico = self._salvar_historico(
                     responsavel=responsavel,
@@ -164,12 +162,11 @@ class Command(BaseCommand):
                     usuario=usuario,
                 )
 
-                if resultado_historico["foi_criado"]:
-                    quantidades["historicos_criados"] += 1
-                elif resultado_historico["foi_atualizado"]:
-                    quantidades["historicos_atualizados"] += 1
-                else:
-                    quantidades["historicos_ignorados"] += 1
+                self._contabilizar_resultado(
+                    quantidades=quantidades,
+                    resultado=resultado_historico,
+                    prefixo="historicos_",
+                )
 
                 if numero % 500 == 0 or numero == len(lista_diretores):
                     logger.info(
@@ -866,3 +863,23 @@ class Command(BaseCommand):
             "foi_criado": False,
             "foi_atualizado": True,
         }
+
+    @staticmethod
+    def _contabilizar_resultado(
+        quantidades: dict[str, int],
+        resultado: dict[str, Any],
+        prefixo: str = "",
+    ) -> None:
+        """Contabiliza o resultado de uma operação de persistência.
+
+        Args:
+            quantidades (dict[str, int]): Contadores da sincronização.
+            resultado (dict[str, Any]): Resultado retornado pela operação.
+            prefixo (str): Prefixo utilizado para os contadores de histórico.
+        """
+        if resultado["foi_criado"]:
+            quantidades[f"{prefixo}criados"] += 1
+        elif resultado["foi_atualizado"]:
+            quantidades[f"{prefixo}atualizados"] += 1
+        else:
+            quantidades[f"{prefixo}ignorados"] += 1

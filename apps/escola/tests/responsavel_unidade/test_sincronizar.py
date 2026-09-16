@@ -1415,3 +1415,84 @@ class TestSincronizarDiretores:
         assert responsavel_ignorado.atualizado_por == usuario_ativo
         assert historico_ignorado.ativo is False
         assert historico_ignorado.atualizado_por == usuario_ativo
+
+    def test_deve_contabilizar_criacao(self):
+        quantidades = {
+            "criados": 0,
+            "atualizados": 0,
+            "ignorados": 0,
+        }
+        resultado = {
+            "foi_criado": True,
+            "foi_atualizado": False,
+        }
+
+        Command._contabilizar_resultado(
+            quantidades=quantidades,
+            resultado=resultado,
+        )
+
+        assert quantidades["criados"] == 1
+        assert quantidades["atualizados"] == 0
+        assert quantidades["ignorados"] == 0
+
+    def test_deve_contabilizar_atualizacao(self):
+        quantidades = {
+            "criados": 0,
+            "atualizados": 0,
+            "ignorados": 0,
+        }
+        resultado = {
+            "foi_criado": False,
+            "foi_atualizado": True,
+        }
+
+        Command._contabilizar_resultado(
+            quantidades=quantidades,
+            resultado=resultado,
+        )
+
+        assert quantidades["criados"] == 0
+        assert quantidades["atualizados"] == 1
+        assert quantidades["ignorados"] == 0
+
+    def test_deve_contabilizar_ignorados(self):
+        quantidades = {
+            "criados": 0,
+            "atualizados": 0,
+            "ignorados": 0,
+        }
+        resultado = {
+            "foi_criado": False,
+            "foi_atualizado": False,
+        }
+
+        Command._contabilizar_resultado(
+            quantidades=quantidades,
+            resultado=resultado,
+        )
+
+        assert quantidades["criados"] == 0
+        assert quantidades["atualizados"] == 0
+        assert quantidades["ignorados"] == 1
+
+    def test_deve_contabilizar_historico_com_prefixo(self):
+        quantidades = {
+            "historicos_criados": 0,
+            "historicos_atualizados": 0,
+            "historicos_ignorados": 0,
+        }
+        resultado = {
+            "foi_criado": True,
+            "foi_atualizado": False,
+        }
+
+        Command._contabilizar_resultado(
+            quantidades=quantidades,
+            resultado=resultado,
+            prefixo="historicos_",
+        )
+
+        assert quantidades["historicos_criados"] == 1
+        assert quantidades["historicos_atualizados"] == 0
+        assert quantidades["historicos_ignorados"] == 0
