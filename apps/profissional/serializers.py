@@ -1,0 +1,1 @@
+"""Serializers do domínio Profissional."""

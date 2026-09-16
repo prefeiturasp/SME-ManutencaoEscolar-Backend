@@ -1,0 +1,1 @@
+"""Repositório do domínio Profissional."""

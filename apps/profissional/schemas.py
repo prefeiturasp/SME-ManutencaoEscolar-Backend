@@ -1,0 +1,1 @@
+"""Esquemas do domínio Profissional."""
