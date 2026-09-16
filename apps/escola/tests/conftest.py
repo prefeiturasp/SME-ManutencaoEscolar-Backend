@@ -12,6 +12,7 @@ from apps.escola.models.unidade_educacional import (
 )
 from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.cargo_eol import CargoEOL
+from apps.usuarios.models.usuario import Usuario
 
 
 @pytest.fixture
@@ -274,14 +275,16 @@ def resposta_dados_complementares():
 
 
 @pytest.fixture
-def usuario_sincronizacao(usuario_ativo):
+def usuario_sincronizacao(cargo_perfil_diretor):
     """Configura o usuário global como responsável pela sincronização."""
-    usuario_ativo.username = "sincronizacao_eol"
-    usuario_ativo.nome = "Sincronizador Dados do EOL"
-    usuario_ativo.cpf = None
-    usuario_ativo.is_active = False
-    usuario_ativo.save()
-    return usuario_ativo
+    return Usuario.objects.create(
+        username="sincronizacao_eol",
+        nome="Sincronizador Dados do EOL",
+        registro_funcional=None,
+        cpf=None,
+        cargo=cargo_perfil_diretor,
+        is_active=False,
+    )
 
 
 @pytest.fixture

@@ -185,8 +185,11 @@ class Command(BaseCommand):
             f"{tempo_execucao_minutos:.2f} minutos:\n"
             f"{quantidades['criados']} responsáveis criados\n"
             f"{quantidades['atualizados']} responsáveis atualizados\n"
+            f"{quantidades['ignorados']} responsáveis não atualizados\n"
             f"{quantidades['historicos_criados']} históricos criados\n"
             f"{quantidades['historicos_atualizados']} históricos atualizados\n"
+            f"{quantidades['historicos_ignorados']} históricos não "
+            "atualizados.\n"
         )
 
     def _coletar_registros(
