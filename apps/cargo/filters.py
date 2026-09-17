@@ -33,10 +33,6 @@ class CargoFilter(filters.FilterSet):
         coerce=_converter_exige_documento,
     )
 
-
     class Meta:
         model = Cargo
-        fields = [
-            "nome",
-            "exige_documento"
-        ]
+        fields = ["nome", "exige_documento"]

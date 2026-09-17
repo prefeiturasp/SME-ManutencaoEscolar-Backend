@@ -61,6 +61,7 @@ class CargoSerializer(serializers.ModelSerializer):
             "atualizado_em",
         )
 
+
 class CargoCriarSerializer(serializers.ModelSerializer):
     """Valida os dados necessários para cadastrar um cargo."""
 

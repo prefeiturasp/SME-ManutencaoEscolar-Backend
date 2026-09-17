@@ -3,11 +3,11 @@
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.serializers import BaseSerializer
-from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.cargo.constants import CargoErrorMessages
 from apps.cargo.exceptions import (
