@@ -3,6 +3,10 @@
 from rest_framework import serializers
 
 from apps.escola.models.diretoria_regional import DiretoriaRegional
+from apps.escola.models.responsavel_unidade import (
+    HistoricoResponsavel,
+    ResponsavelUnidade,
+)
 from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.tipos_escola import TipoEscola
 from apps.escola.models.unidade_educacional import (
@@ -10,6 +14,7 @@ from apps.escola.models.unidade_educacional import (
     Unidadeeducacional,
 )
 from apps.lote.models import Lote
+from apps.usuarios.models.cargo_eol import CargoEOL
 
 
 class TipoEscolaUnidadeEducacionalSerializer(serializers.ModelSerializer):
@@ -75,6 +80,42 @@ class DadosUnidadeEducacionalSerializer(serializers.ModelSerializer):
         )
 
 
+class ResponsavelUnidadeSerializer(serializers.ModelSerializer):
+    """Serializa os dados de um responsável da unidade."""
+
+    class Meta:
+        model = ResponsavelUnidade
+        fields = (
+            "registro_funcional",
+            "nome",
+            "email",
+            "telefone",
+            "celular",
+        )
+
+
+class CargoResponsavelUnidadeSerializer(serializers.ModelSerializer):
+    """Serializa os dados do cargo exercido pelo responsável."""
+
+    class Meta:
+        model = CargoEOL
+        fields = (
+            "codigo",
+            "nome",
+        )
+
+
+class ResponsavelAtualUnidadeSerializer(serializers.ModelSerializer):
+    """Serializa um vínculo atual de responsável com a unidade."""
+
+    responsavel = ResponsavelUnidadeSerializer(read_only=True)
+    cargo = CargoResponsavelUnidadeSerializer(read_only=True)
+
+    class Meta:
+        model = HistoricoResponsavel
+        fields = ("responsavel", "cargo", "ativo")
+
+
 class UnidadeEducacionalSerializer(serializers.ModelSerializer):
     """Serializa os dados das unidades educacionais e seus relacionamentos."""
 
@@ -85,6 +126,11 @@ class UnidadeEducacionalSerializer(serializers.ModelSerializer):
     subprefeitura = SubprefeituraUnidadeEducacionalSerializer(read_only=True)
     lote = LoteUnidadeEducacionalSerializer(read_only=True)
     dados = DadosUnidadeEducacionalSerializer(read_only=True)
+    responsaveis = ResponsavelAtualUnidadeSerializer(
+        source="responsaveis_atuais",
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = Unidadeeducacional
@@ -99,6 +145,7 @@ class UnidadeEducacionalSerializer(serializers.ModelSerializer):
             "lote",
             "status",
             "dados",
+            "responsaveis",
         )
 
 

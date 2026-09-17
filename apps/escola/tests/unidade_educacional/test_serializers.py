@@ -2,6 +2,10 @@
 
 import pytest
 
+from apps.escola.models.responsavel_unidade import (
+    HistoricoResponsavel,
+    ResponsavelUnidade,
+)
 from apps.escola.serializers.unidade_educacional_serializers import (
     UnidadeEducacionalListSerializer,
     UnidadeEducacionalSerializer,
@@ -94,6 +98,125 @@ class TestUnidadeEducacionalSerializer:
             "cep": unidade_educacional_emef.dados.cep,
             "municipio": unidade_educacional_emef.dados.municipio,
             "uf": unidade_educacional_emef.dados.uf,
+        }
+
+    def test_deve_retornar_lista_vazia_quando_unidade_nao_possuir_responsaveis(
+        self,
+        unidade_educacional_emef,
+    ):
+        """Deve retornar lista vazia quando não houver responsáveis atuais."""
+        serializer = UnidadeEducacionalSerializer(
+            unidade_educacional_emef,
+        )
+
+        assert serializer.data["responsaveis"] == []
+
+    def test_deve_retornar_responsavel_atual_da_unidade(
+        self,
+        unidade_educacional_emef,
+        responsavel_unidade,
+        obter_cargo_diretor,
+        historico_responsavel,
+    ):
+        """Deve serializar o responsável atualmente vinculado à unidade."""
+        serializer = UnidadeEducacionalSerializer(
+            unidade_educacional_emef,
+        )
+        responsavel = serializer.data["responsaveis"][0]
+
+        assert responsavel["responsavel"]["registro_funcional"] == (
+            responsavel_unidade.registro_funcional
+        )
+        assert responsavel["responsavel"]["nome"] == responsavel_unidade.nome
+        assert responsavel["responsavel"]["email"] == responsavel_unidade.email
+        assert (
+            responsavel["responsavel"]["telefone"]
+            == responsavel_unidade.telefone
+        )
+        assert (
+            responsavel["responsavel"]["celular"]
+            == responsavel_unidade.celular
+        )
+
+        assert responsavel["cargo"]["codigo"] == obter_cargo_diretor.codigo
+        assert responsavel["cargo"]["nome"] == obter_cargo_diretor.nome
+
+        assert responsavel["ativo"] is True
+
+    def test_deve_retornar_apenas_responsaveis_atuais(
+        self,
+        unidade_educacional_emef,
+        responsavel_unidade,
+        obter_cargo_diretor,
+        usuario_sincronizacao,
+        historico_responsavel,
+    ):
+        """Deve ignorar históricos de responsáveis inativos."""
+        responsavel_inativo = ResponsavelUnidade.objects.create(
+            registro_funcional="000000012",
+            nome="RESPONSAVEL INATIVO",
+            email="inativo@email.com",
+            telefone="11988888888",
+            esta_afastado=False,
+        )
+
+        HistoricoResponsavel.objects.create(
+            responsavel=responsavel_inativo,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=obter_cargo_diretor,
+            ativo=False,
+        )
+
+        serializer = UnidadeEducacionalSerializer(
+            unidade_educacional_emef,
+        )
+
+        responsaveis = serializer.data["responsaveis"]
+
+        assert len(responsaveis) == 1
+        assert (
+            responsaveis[0]["responsavel"]["registro_funcional"]
+            == responsavel_unidade.registro_funcional
+        )
+
+    def test_deve_retornar_multiplos_responsaveis_atuais(
+        self,
+        unidade_educacional_emef,
+        responsavel_unidade,
+        obter_cargo_diretor,
+        historico_responsavel,
+    ):
+        """Deve serializar todos os responsáveis atuais da unidade."""
+        segundo_responsavel = ResponsavelUnidade.objects.create(
+            registro_funcional="000000012",
+            nome="SEGUNDO RESPONSAVEL",
+            email="segundo@email.com",
+            telefone="11988888888",
+            esta_afastado=False,
+        )
+
+        HistoricoResponsavel.objects.create(
+            responsavel=segundo_responsavel,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=obter_cargo_diretor,
+            ativo=True,
+        )
+
+        serializer = UnidadeEducacionalSerializer(
+            unidade_educacional_emef,
+        )
+
+        responsaveis = serializer.data["responsaveis"]
+
+        assert len(responsaveis) == 2
+
+        registros_funcionais = {
+            item["responsavel"]["registro_funcional"] for item in responsaveis
+        }
+
+        assert registros_funcionais == {
+            responsavel_unidade.registro_funcional,
+            segundo_responsavel.registro_funcional,
         }
 
 
