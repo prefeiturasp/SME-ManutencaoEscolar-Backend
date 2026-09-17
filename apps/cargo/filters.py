@@ -1,15 +1,8 @@
-"""Filtros do domínio Lote."""
+"""Filtros do domínio Cargo."""
 
 from django_filters import rest_framework as filters
 
 from apps.cargo.models import Cargo
-
-
-class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
-    """Filtre por múltiplos valores numéricos."""
-
-    pass
-
 
 class CargoFilter(filters.FilterSet):
     """Filtros disponíveis para cargos."""
