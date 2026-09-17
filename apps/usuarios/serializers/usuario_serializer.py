@@ -1,4 +1,8 @@
-"""Serializer do app usuarios."""
+"""Serializers responsáveis pela representação dos dados de usuários.
+
+Define os serializers utilizados para representar perfis de acesso e os dados
+do usuário autenticado nas respostas da API.
+"""
 
 from rest_framework import serializers
 
