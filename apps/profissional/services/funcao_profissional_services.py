@@ -51,6 +51,10 @@ class FuncaoProfissionalService:
             profissional_id: ID do profissional ao qual as funções pertencem.
             funcoes_lista: Lista de dicionários contendo os dados das funções.
             usuario: Usuário que está realizando a operação.
+
+        Returns:
+            Lista de funções criadas.
+
         Raises:
             ValidationError: Se uma função exigir documentos e não houver
                 documentos informados.

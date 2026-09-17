@@ -24,6 +24,8 @@ class DocumentoFuncaoProfissionalService:
             repository: Repositório de documentos das funções profissionais
                 a ser utilizado. Quando não informado, uma instância padrão de
                 `DocumentoFuncaoProfissionalRepository` é criada.
+            anexo_service: Serviço de anexos a ser utilizado. Quando
+                não informado, uma instância padrão de `AnexoService` é criada.
         """
         self.repository = repository or DocumentoFuncaoProfissionalRepository()
         self.anexo_service = anexo_service or AnexoService()

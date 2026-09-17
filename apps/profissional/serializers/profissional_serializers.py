@@ -70,7 +70,18 @@ class ProfissionalCriarAtualizarSerializer(serializers.ModelSerializer):
     def validate_funcoes(
         self, value: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
-        """Valida se o profissional possui pelo menos uma função."""
+        """Valida as funções informadas para o profissional.
+
+        Args:
+            value: Funções a serem validadas.
+
+        Returns:
+            As funções validadas.
+
+        Raises:
+            serializers.ValidationError: Se nenhuma função for informada ou
+                se houver cargos duplicados.
+        """
         if not value:
             raise serializers.ValidationError(
                 ProfissionalErrorMessages.FUNCAO_PROFISSIONAL_OBRIGATORIA
@@ -83,7 +94,17 @@ class ProfissionalCriarAtualizarSerializer(serializers.ModelSerializer):
         return value
 
     def validate_cpf(self, value: str) -> str:
-        """Impede CPF duplicado entre profissionais não excluídos."""
+        """Valida se o CPF já está cadastrado para outro profissional.
+
+        Args:
+            value: CPF a ser validado.
+
+        Returns:
+            O CPF validado.
+
+        Raises:
+            serializers.ValidationError: Se o CPF já estiver cadastrado.
+        """
         profissionais = Profissional.objects.filter(cpf=value)
         if self.instance is not None:
             profissionais = profissionais.exclude(pk=self.instance.pk)
@@ -94,7 +115,17 @@ class ProfissionalCriarAtualizarSerializer(serializers.ModelSerializer):
         return value
 
     def validate_rg(self, value: str) -> str:
-        """Impede RG duplicado entre profissionais não excluídos."""
+        """Valida se o RG já está cadastrado para outro profissional.
+
+        Args:
+            value: RG a ser validado.
+
+        Returns:
+            O RG validado.
+
+        Raises:
+            serializers.ValidationError: Se o RG já estiver cadastrado.
+        """
         profissionais = Profissional.objects.filter(rg=value)
         if self.instance is not None:
             profissionais = profissionais.exclude(pk=self.instance.pk)
