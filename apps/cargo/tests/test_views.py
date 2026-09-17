@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
@@ -15,6 +16,9 @@ from apps.cargo.exceptions import (
     CargoInstabilidadeError,
     CargoOuDocumentoJaVinculadaError,
 )
+from apps.cargo.filters import CargoFilter
+from apps.cargo.serializers import CargoCriarSerializer, CargoSerializer
+from apps.core.pagination import PaginacaoPadrao
 from apps.usuarios.models.usuario import Usuario
 
 
@@ -236,8 +240,41 @@ def test_obter_usuario_deve_rejeitar_usuario_invalido() -> None:
 
 
 def test_configurar_metodos_http_permitidos() -> None:
-    """Deve permitir somente POST e OPTIONS."""
-    assert CargoViewSet.http_method_names == [
+    """Deve permitir somente POST, GET e  OPTIONS."""
+    view = CargoViewSet()
+
+    assert view.http_method_names == [
+        "get",
         "post",
         "options",
     ]
+    assert view.lookup_field == "uuid"
+    assert view.filter_backends == [DjangoFilterBackend]
+    assert view.filterset_class is CargoFilter
+    assert view.pagination_class is PaginacaoPadrao
+
+
+@pytest.mark.parametrize("acao", ["create", "partial_update"])
+def test_get_serializer_class_deve_usar_serializer_de_criacao(
+    view: CargoViewSet,
+    acao: str,
+) -> None:
+    """Usa o serializer de escrita nas ações de criação e edição parcial."""
+    view.action = acao
+
+    resultado = view.get_serializer_class()
+
+    assert resultado is CargoCriarSerializer
+
+
+@pytest.mark.parametrize("acao", ["list", "retrieve"])
+def test_get_serializer_class_deve_usar_serializer_de_leitura(
+    view: CargoViewSet,
+    acao: str,
+) -> None:
+    """Usa o serializer de leitura nas ações de consulta."""
+    view.action = acao
+
+    resultado = view.get_serializer_class()
+
+    assert resultado is CargoSerializer
