@@ -40,7 +40,11 @@ class DocumentoFuncaoProfissionalRepository:
         return {
             "id": documento.id,
             "uuid": str(documento.uuid),
-            "nome": documento.nome,
+            "nome_original": documento.nome_original,
+            "arquivo": documento.arquivo,
+            "tipo": documento.tipo,
+            "tipo_mime": documento.tipo_mime,
+            "tamanho_bytes": documento.tamanho_bytes,
             "funcao_profissional": documento.funcao_profissional,
             "criado_por": documento.criado_por,
             "criado_em": documento.criado_em,

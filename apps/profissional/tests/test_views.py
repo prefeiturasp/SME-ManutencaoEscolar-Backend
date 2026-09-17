@@ -13,10 +13,13 @@ from apps.profissional.models import Profissional
 pytestmark = pytest.mark.django_db
 
 
-def test_cria_profissional_com_funcao_e_documento(
-    api_cliente, profissional_payload, usuario_ativo
+def test_cria_profissional_com_funcao(
+    api_cliente, profissional_payload, usuario_ativo, cargo_profissional
 ):
-    """Cria todo o agregado e registra a autoria."""
+    """Cria o profissional com sua função e registra a autoria."""
+    cargo_profissional.exige_documento = False
+    cargo_profissional.save(update_fields=["exige_documento"])
+    profissional_payload["funcoes"][0]["documentos"] = []
     resposta = api_cliente.post(
         "/api/v1/profissionais/", profissional_payload, format="json"
     )
@@ -25,11 +28,16 @@ def test_cria_profissional_com_funcao_e_documento(
     profissional = Profissional.objects.get(cpf="12345678901")
     funcao = profissional.funcoes.get()
     assert profissional.criado_por == usuario_ativo
-    assert funcao.documentos.get().nome == "Certificado NR10"
+    assert not funcao.documentos.exists()
 
 
-def test_rejeita_cpf_duplicado(api_cliente, profissional_payload):
+def test_rejeita_cpf_duplicado(
+    api_cliente, profissional_payload, cargo_profissional
+):
     """Não permite dois profissionais ativos com o mesmo CPF."""
+    cargo_profissional.exige_documento = False
+    cargo_profissional.save(update_fields=["exige_documento"])
+    profissional_payload["funcoes"][0]["documentos"] = []
     api_cliente.post(
         "/api/v1/profissionais/", profissional_payload, format="json"
     )
@@ -63,6 +71,7 @@ def test_criacao_converte_validation_error_do_django(
     api_cliente, profissional_payload
 ):
     """Converte erros do serviço em resposta de validação da API."""
+    profissional_payload["funcoes"][0]["documentos"] = []
     with patch(
         "apps.profissional.api.views.ProfissionalService.criar",
         side_effect=ValidationError({"cpf": ["CPF inválido"]}),

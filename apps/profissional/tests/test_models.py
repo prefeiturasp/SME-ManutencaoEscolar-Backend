@@ -2,7 +2,10 @@
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 
+from apps.core.constants import TipoArquivo
+from apps.core.models.mixins import AnexoMixin
 from apps.profissional.models import (
     DocumentoFuncaoProfissional,
     FuncaoProfissional,
@@ -21,12 +24,18 @@ def test_representacoes_textuais(cargo_profissional):
         profissional=profissional, cargo=cargo_profissional
     )
     documento = DocumentoFuncaoProfissional.objects.create(
-        nome="NR10", funcao_profissional=funcao
+        nome_original="NR10.pdf",
+        arquivo=SimpleUploadedFile("NR10.pdf", b"conteudo"),
+        tipo=TipoArquivo.DOCUMENTO,
+        tipo_mime="application/pdf",
+        tamanho_bytes=len(b"conteudo"),
+        funcao_profissional=funcao,
     )
 
     assert str(profissional) == "José - 12345678901"
     assert str(funcao) == "José - Eletricista"
-    assert str(documento) == "NR10 - José - Eletricista"
+    assert isinstance(documento, AnexoMixin)
+    assert str(documento) == "NR10.pdf - José - Eletricista"
 
 
 def test_profissional_valida_cpf_e_rg_unicos():

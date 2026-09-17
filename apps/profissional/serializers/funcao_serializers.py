@@ -3,14 +3,35 @@
 from rest_framework import serializers
 
 from apps.cargo.models import Cargo
-from apps.profissional.models import FuncaoProfissional
+from apps.profissional.models import (
+    DocumentoFuncaoProfissional,
+    FuncaoProfissional,
+)
 from apps.usuarios.models.usuario import Usuario
 
 
-class DocumentoFuncaoProfissionalSerializer(serializers.Serializer):
+class DocumentoFuncaoProfissionalSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de documentos de funções profissionais."""
 
-    nome: serializers.CharField = serializers.CharField()
+    class Meta:
+        """Configura os campos do documento da função profissional."""
+
+        model = DocumentoFuncaoProfissional
+        fields = (
+            "uuid",
+            "nome_original",
+            "arquivo",
+            "tipo",
+            "tipo_mime",
+            "tamanho_bytes",
+        )
+        read_only_fields = (
+            "uuid",
+            "nome_original",
+            "tipo",
+            "tipo_mime",
+            "tamanho_bytes",
+        )
 
 
 class FuncaoProfissionalSerializer(serializers.ModelSerializer):

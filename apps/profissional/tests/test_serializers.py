@@ -1,7 +1,9 @@
 """Testes dos serializers do domínio Profissional."""
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 
+from apps.core.constants import TipoArquivo
 from apps.profissional.constants import ProfissionalErrorMessages
 from apps.profissional.models import Profissional
 from apps.profissional.serializers.profissional_serializers import (
@@ -110,10 +112,20 @@ def test_serializer_de_leitura_inclui_funcao_e_documento(
         criado_por=usuario_ativo,
     )
     funcao = profissional.funcoes.create(cargo=cargo_profissional)
-    funcao.documentos.create(nome="NR10")
+    funcao.documentos.create(
+        nome_original="NR10.pdf",
+        arquivo=SimpleUploadedFile("NR10.pdf", b"conteudo"),
+        tipo=TipoArquivo.DOCUMENTO,
+        tipo_mime="application/pdf",
+        tamanho_bytes=len(b"conteudo"),
+    )
 
     dados = ProfissionalSerializer(profissional).data
 
     assert dados["criado_por"] == usuario_ativo.nome
     assert dados["funcoes"][0]["nome_cargo"] == cargo_profissional.nome
-    assert dados["funcoes"][0]["documentos"][0]["nome"] == "NR10"
+    documento = dados["funcoes"][0]["documentos"][0]
+    assert documento["nome_original"] == "NR10.pdf"
+    assert documento["tipo"] == TipoArquivo.DOCUMENTO
+    assert documento["tipo_mime"] == "application/pdf"
+    assert documento["tamanho_bytes"] == len(b"conteudo")

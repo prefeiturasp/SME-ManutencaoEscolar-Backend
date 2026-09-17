@@ -1,6 +1,7 @@
 """Fixtures dos testes do domínio Profissional."""
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.cargo.models import Cargo
 
@@ -22,7 +23,15 @@ def profissional_payload(cargo_profissional: Cargo) -> dict[str, object]:
         "funcoes": [
             {
                 "uuid_cargo": str(cargo_profissional.uuid),
-                "documentos": [{"nome": "Certificado NR10"}],
+                "documentos": [
+                    {
+                        "arquivo": SimpleUploadedFile(
+                            "certificado-nr10.pdf",
+                            b"conteudo",
+                            content_type="application/pdf",
+                        )
+                    }
+                ],
             }
         ],
     }

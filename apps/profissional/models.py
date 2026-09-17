@@ -3,7 +3,7 @@
 from django.db import models
 
 from apps.cargo.models import Cargo
-from apps.core.models.mixins import BaseModel
+from apps.core.models.mixins import AnexoMixin, BaseModel
 from apps.profissional.constants import ProfissionalErrorMessages
 
 
@@ -73,20 +73,22 @@ class FuncaoProfissional(BaseModel):
         return f"{self.profissional.nome} - {self.cargo.nome}"
 
 
-class DocumentoFuncaoProfissional(BaseModel):
+class DocumentoFuncaoProfissional(AnexoMixin):
     """Representa um documento exigido para uma função profissional."""
 
-    nome = models.CharField(max_length=255)
     funcao_profissional = models.ForeignKey(
         FuncaoProfissional,
         on_delete=models.CASCADE,
         related_name="documentos",
     )
+    arquivo = models.FileField(
+        upload_to="profissionais/anexos_funcoes_profissionais/"
+    )
 
     class Meta:
         verbose_name = "Documento da Função profissional"
         verbose_name_plural = "Documentos das Funções profissionais"
-        ordering = ["nome", "-id"]
+        ordering = ["-id"]
 
     def __str__(self) -> str:
-        return f"{self.nome} - {self.funcao_profissional}"
+        return f"{self.nome_original} - {self.funcao_profissional}"

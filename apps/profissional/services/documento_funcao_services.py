@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from apps.core.services.anexo_service import AnexoService
 from apps.profissional.repository.documento_funcao_repository import (
     DocumentoFuncaoProfissionalRepository,
 )
@@ -12,7 +13,9 @@ class DocumentoFuncaoProfissionalService:
     """Sincroniza documentos vinculados a uma função profissional."""
 
     def __init__(
-        self, repository: DocumentoFuncaoProfissionalRepository | None = None
+        self,
+        repository: DocumentoFuncaoProfissionalRepository | None = None,
+        anexo_service: AnexoService | None = None,
     ) -> None:
         """
         Inicializa o repositório de documentos das funções profissionais.
@@ -23,6 +26,7 @@ class DocumentoFuncaoProfissionalService:
                 `DocumentoFuncaoProfissionalRepository` é criada.
         """
         self.repository = repository or DocumentoFuncaoProfissionalRepository()
+        self.anexo_service = anexo_service or AnexoService()
 
     def sincronizar(
         self,
@@ -43,7 +47,11 @@ class DocumentoFuncaoProfissionalService:
         """
         documentos = []
         for documento in documentos_lista:
-            dados = {**documento}
+            arquivo = documento["arquivo"]
+            dados = self.anexo_service.validar_e_preparar_anexo(
+                arquivo=arquivo,
+                id_usuario=usuario.id if usuario is not None else None,
+            )
             documento = self.repository.criar(
                 {
                     **dados,
