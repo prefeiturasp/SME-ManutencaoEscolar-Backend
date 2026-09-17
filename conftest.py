@@ -66,7 +66,11 @@ def usuario_ativo_dict(usuario_ativo: Usuario) -> dict[str, object]:
             "cargo": usuario_ativo.cargo.nome,
             "perfil": {
                 "codigo": usuario_ativo.perfil,
-                "descricao": PerfilAcesso(usuario_ativo.perfil).label,
+                "descricao": (
+                    PerfilAcesso(usuario_ativo.perfil).label
+                    if usuario_ativo.perfil is not None
+                    else None
+                ),
             },
         },
     }

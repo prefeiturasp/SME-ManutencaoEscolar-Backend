@@ -21,6 +21,8 @@ class CargoEOL(models.Model):
     perfil = models.CharField(
         max_length=70,
         choices=PerfilAcesso.choices,
+        blank=True,
+        null=True,
     )
     ativo = models.BooleanField(default=True)
 
