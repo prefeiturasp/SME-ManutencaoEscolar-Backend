@@ -1,9 +1,22 @@
 """Fixtures dos testes do domínio Profissional."""
 
+from collections.abc import Iterator
+from unittest.mock import patch
+
 import pytest
+from django.core.files.storage import InMemoryStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.cargo.models import Cargo
+from apps.profissional.models import DocumentoFuncaoProfissional
+
+
+@pytest.fixture(autouse=True)
+def storage_de_documentos_em_memoria() -> Iterator[None]:
+    """Evita acesso ao MinIO nos testes de documentos profissionais."""
+    campo_arquivo = DocumentoFuncaoProfissional._meta.get_field("arquivo")
+    with patch.object(campo_arquivo, "storage", InMemoryStorage()):
+        yield
 
 
 @pytest.fixture
