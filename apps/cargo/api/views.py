@@ -7,16 +7,19 @@ from rest_framework import viewsets
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.serializers import BaseSerializer
+from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.cargo.constants import CargoErrorMessages
 from apps.cargo.exceptions import (
     CargoInstabilidadeError,
     CargoOuDocumentoJaVinculadaError,
 )
+from apps.cargo.filters import CargoFilter
 from apps.cargo.models import Cargo
 from apps.cargo.schemas import CARGO_SCHEMA
-from apps.cargo.serializers import CargoCriarSerializer
+from apps.cargo.serializers import CargoCriarSerializer, CargoSerializer
 from apps.cargo.services.cargo_service import CargoService
+from apps.core.pagination import PaginacaoPadrao
 from apps.usuarios.models.usuario import Usuario
 
 
@@ -27,9 +30,15 @@ class CargoViewSet(viewsets.ModelViewSet):
     Delegando regras de negócio ao CargosService.
     """
 
-    http_method_names = ["post", "options"]
+    http_method_names = ["get", "post", "options"]
     queryset = Cargo.objects.all()
+    lookup_field = "uuid"
+
     serializer_class = CargoCriarSerializer
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CargoFilter
+    pagination_class = PaginacaoPadrao
 
     def __init__(self, **kwargs: Any) -> None:
         """Inicializa a view com o serviço de cargos.
@@ -40,6 +49,13 @@ class CargoViewSet(viewsets.ModelViewSet):
         """
         super().__init__(**kwargs)
         self.service = CargoService()
+
+    def get_serializer_class(self) -> type[BaseSerializer]:
+        """Retorna o serializer adequado para cada ação."""
+        if self.action in ("create", "partial_update"):
+            return CargoCriarSerializer
+
+        return CargoSerializer
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         """Cria um cargo delegando as regras ao service.
