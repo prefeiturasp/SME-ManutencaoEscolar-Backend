@@ -2,6 +2,9 @@ from unittest.mock import Mock
 
 import pytest
 
+from apps.usuarios.constants import PerfilAcesso
+from apps.usuarios.models.cargo_eol import CargoEOL
+
 
 @pytest.fixture
 def resposta_api_cargos():
@@ -19,3 +22,14 @@ def resposta_api_cargos():
         },
     ]
     return resposta
+
+
+@pytest.fixture
+def cargo_eol_coordenador() -> CargoEOL:
+    """Fixture de cargo de coordenador de UE."""
+    return CargoEOL.objects.create(
+        codigo="99999",
+        nome="CARGO COORDENADOR",
+        perfil=PerfilAcesso.UE,
+        ativo=True,
+    )
