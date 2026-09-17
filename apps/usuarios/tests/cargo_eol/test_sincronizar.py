@@ -33,13 +33,13 @@ class TestSincronizarCargosEol:
         cargo = CargoEOL.objects.get(codigo="1000")
 
         assert cargo.nome == "ASSISTENTE ADMINISTRATIVO"
-        assert cargo.perfil is None
+        assert cargo.perfil == ""
         assert cargo.ativo is True
 
         cargo = CargoEOL.objects.get(codigo="2000")
 
         assert cargo.nome == "SUPERVISOR ESCOLAR"
-        assert cargo.perfil is None
+        assert cargo.perfil == ""
         assert cargo.ativo is True
 
     @patch(
@@ -481,5 +481,5 @@ class TestSincronizarCargosEol:
         diretor = CargoEOL.objects.get(codigo="1000")
 
         assert diretor.nome == "ASSISTENTE ADMINISTRATIVO"
-        assert diretor.perfil is None
+        assert diretor.perfil == ""
         assert diretor.ativo is True

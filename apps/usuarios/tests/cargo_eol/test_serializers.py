@@ -32,7 +32,7 @@ class TestCargoEOLSerializer(TestCase):
         cargo = CargoEOL.objects.create(
             codigo="9998",
             nome="COORDENADOR II - ENS MED",
-            perfil=None,
+            perfil="",
             ativo=True,
         )
 
@@ -40,7 +40,7 @@ class TestCargoEOLSerializer(TestCase):
 
         assert serializer.data["codigo"] == "9998"
         assert serializer.data["nome"] == "COORDENADOR II - ENS MED"
-        assert serializer.data["perfil"] is None
+        assert serializer.data["perfil"] == ""
         assert serializer.data["ativo"] is True
 
     def test_deve_serializar_cargo_inativo(self):
@@ -85,7 +85,7 @@ class TestCargoEOLSerializer(TestCase):
             data={
                 "codigo": "9998",
                 "nome": "COORDENADOR II - ENS MED",
-                "perfil": None,
+                "perfil": "",
                 "ativo": True,
             }
         )
