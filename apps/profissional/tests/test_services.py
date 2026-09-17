@@ -34,6 +34,7 @@ def test_documento_service_valida_e_cria_documentos(usuario_ativo):
         "tipo_mime": "application/pdf",
         "tamanho_bytes": len(b"conteudo"),
         "arquivo": arquivo,
+        "usuario_id": usuario_ativo.id,
     }
     anexo_service.validar_e_preparar_anexo.return_value = dados_anexo
     service = DocumentoFuncaoProfissionalService(

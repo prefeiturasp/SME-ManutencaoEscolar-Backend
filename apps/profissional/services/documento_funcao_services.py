@@ -54,6 +54,7 @@ class DocumentoFuncaoProfissionalService:
                 arquivo=arquivo,
                 id_usuario=usuario.id if usuario is not None else None,
             )
+            dados.pop("usuario_id", None)
             documento = self.repository.criar(
                 {
                     **dados,
