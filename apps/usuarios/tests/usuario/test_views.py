@@ -2,7 +2,7 @@ import pytest
 from rest_framework import status
 from rest_framework.test import force_authenticate
 
-from apps.usuarios.api.views import UsuarioViewSet
+from apps.usuarios.api.views.usuario_views import UsuarioViewSet
 
 pytestmark = pytest.mark.django_db
 
