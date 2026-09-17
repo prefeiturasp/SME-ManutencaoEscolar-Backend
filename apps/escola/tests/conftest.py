@@ -68,30 +68,6 @@ def resposta_api_tipos_escolas():
     return resposta
 
 
-@pytest.fixture()
-def configurar_api_eol(monkeypatch):
-    """Configura as variáveis da API EOL para os testes."""
-    comandos = (
-        "sincronizar_tipos_escolas",
-        "sincronizar_subprefeituras",
-        "sincronizar_escolas",
-        "sincronizar_diretores",
-        "sincronizar_dados_escolas",
-    )
-
-    for comando in comandos:
-        modulo = f"apps.escola.management.commands.{comando}"
-
-        monkeypatch.setattr(
-            f"{modulo}.SME_API_EOL_URL",
-            "https://api-eol-teste",
-        )
-        monkeypatch.setattr(
-            f"{modulo}.SME_API_EOL_TOKEN",
-            "token-teste",
-        )
-
-
 @pytest.fixture
 def diretoria_regional_centro():
     """Cria uma Diretoria Regional para os testes."""
