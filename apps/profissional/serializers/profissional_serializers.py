@@ -1,0 +1,105 @@
+"""Serializers do domínio Profissional."""
+
+from typing import Any
+
+from rest_framework import serializers
+
+from apps.profissional.constants import ProfissionalErrorMessages
+from apps.profissional.models import Profissional
+from apps.profissional.serializers.funcao_serializers import (
+    FuncaoProfissionalSerializer,
+)
+from apps.usuarios.models.usuario import Usuario
+
+
+class ProfissionalSerializer(serializers.ModelSerializer):
+    """Serializa um profissional para listagem e detalhes."""
+
+    criado_por: serializers.SlugRelatedField[Usuario] = (
+        serializers.SlugRelatedField(slug_field="nome", read_only=True)
+    )
+    atualizado_por: serializers.SlugRelatedField[Usuario] = (
+        serializers.SlugRelatedField(slug_field="nome", read_only=True)
+    )
+    funcoes: FuncaoProfissionalSerializer = FuncaoProfissionalSerializer(
+        many=True, read_only=True
+    )
+
+    class Meta:
+        """Configuração do serializer de profissional."""
+
+        model = Profissional
+        fields = (
+            "id",
+            "uuid",
+            "nome",
+            "cpf",
+            "rg",
+            "status",
+            "criado_por",
+            "criado_em",
+            "atualizado_por",
+            "atualizado_em",
+            "funcoes",
+        )
+
+
+class ProfissionalCriarAtualizarSerializer(serializers.ModelSerializer):
+    """Serializa o cadastro e atualização de profissionais."""
+
+    funcoes: FuncaoProfissionalSerializer = FuncaoProfissionalSerializer(
+        many=True
+    )
+
+    class Meta:
+        """Configuração do serializer de profissional."""
+
+        model = Profissional
+        fields = (
+            "nome",
+            "cpf",
+            "rg",
+            "status",
+            "funcoes",
+        )
+        extra_kwargs: dict[str, dict[str, Any]] = {
+            "cpf": {"validators": []},
+            "rg": {"validators": []},
+        }
+
+    def validate_funcoes(
+        self, value: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """Valida se o profissional possui pelo menos uma função."""
+        if not value:
+            raise serializers.ValidationError(
+                ProfissionalErrorMessages.FUNCAO_PROFISSIONAL_OBRIGATORIA
+            )
+        cargos = [funcao["cargo"].pk for funcao in value]
+        if len(cargos) != len(set(cargos)):
+            raise serializers.ValidationError(
+                ProfissionalErrorMessages.FUNCAO_PROFISSIONAL_DUPLICADA
+            )
+        return value
+
+    def validate_cpf(self, value: str) -> str:
+        """Impede CPF duplicado entre profissionais não excluídos."""
+        profissionais = Profissional.objects.filter(cpf=value)
+        if self.instance is not None:
+            profissionais = profissionais.exclude(pk=self.instance.pk)
+        if profissionais.exists():
+            raise serializers.ValidationError(
+                ProfissionalErrorMessages.PROFISSIONAL_CPF_JA_CADASTRADO
+            )
+        return value
+
+    def validate_rg(self, value: str) -> str:
+        """Impede RG duplicado entre profissionais não excluídos."""
+        profissionais = Profissional.objects.filter(rg=value)
+        if self.instance is not None:
+            profissionais = profissionais.exclude(pk=self.instance.pk)
+        if profissionais.exists():
+            raise serializers.ValidationError(
+                ProfissionalErrorMessages.PROFISSIONAL_RG_JA_CADASTRADO
+            )
+        return value
