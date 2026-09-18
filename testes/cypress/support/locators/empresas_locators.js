@@ -31,6 +31,11 @@ class Empresas_Localizadores {
   btn_limpar_filtros = () => '.justify-end > :nth-child(1)'
   btn_buscar = () => '.justify-end > :nth-child(2)'
 
+  // excluir
+  btn_excluir_empresa = () => '.hover\\:bg-destructive\\/20'
+  btn_confirmar_exclusao = () => '[role="alertdialog"] button:contains("Excluir")'
+  btn_cancelar_exclusao = () => '[role="alertdialog"] button:contains("Cancelar")'
+
 }
 
 export default Empresas_Localizadores 
