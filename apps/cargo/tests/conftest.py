@@ -7,6 +7,8 @@ from django.utils import timezone
 from apps.cargo.models import Cargo, DocumentoCargo
 from apps.cargo.services.cargo_service import CargoService
 
+_DOCUMENTO = "Certificado NR-10"
+
 
 @pytest.fixture
 def cargo(db):
@@ -34,7 +36,7 @@ def cargo_deletado(db, usuario_ativo):
 def documento_cargo(db, cargo, usuario_ativo):
     """Documento vinculado a um cargo para os testes."""
     return DocumentoCargo.objects.create(
-        nome="Certificado NR-10",
+        nome=_DOCUMENTO,
         cargo=cargo,
         criado_por=usuario_ativo,
         atualizado_por=usuario_ativo,
@@ -45,7 +47,7 @@ def documento_cargo(db, cargo, usuario_ativo):
 def documento_cargo_payload_valido():
     """Payload válido de documento de cargo."""
     return {
-        "nome": "Certificado NR-10",
+        "nome": _DOCUMENTO,
     }
 
 
@@ -75,7 +77,7 @@ def documentos_cargo_payload_valido() -> list[dict[str, str]]:
     """Lista válida de documentos de cargo."""
     return [
         {
-            "nome": "Certificado NR-10",
+            "nome": _DOCUMENTO,
         },
         {
             "nome": "Certificado NR-35",
