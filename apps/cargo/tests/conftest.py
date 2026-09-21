@@ -5,6 +5,7 @@ import pytest
 from django.utils import timezone
 
 from apps.cargo.models import Cargo, DocumentoCargo
+from apps.cargo.services.cargo_service import CargoService
 
 
 @pytest.fixture
@@ -60,4 +61,47 @@ def cargo_payload_atualizacao_valido():
                 "nome": "Certificado NR-10 atualizado",
             },
         ],
+    }
+
+
+@pytest.fixture
+def service():
+    """Serviço de cargos configurado para os testes."""
+    return CargoService()
+
+
+@pytest.fixture
+def documentos_cargo_payload_valido() -> list[dict[str, str]]:
+    """Lista válida de documentos de cargo."""
+    return [
+        {
+            "nome": "Certificado NR-10",
+        },
+        {
+            "nome": "Certificado NR-35",
+        },
+    ]
+
+
+@pytest.fixture
+def cargo_payload_valido(
+    documentos_cargo_payload_valido: list[dict[str, str]],
+) -> dict[str, object]:
+    """Payload válido para criação de cargo com documentos."""
+    return {
+        "nome": "Engenheiro Eletricista",
+        "exige_documento": True,
+        "status": True,
+        "documentos": documentos_cargo_payload_valido,
+    }
+
+
+@pytest.fixture
+def cargo_payload_valido_sem_documentos() -> dict[str, object]:
+    """Payload válido para criação de cargo sem documentos."""
+    return {
+        "nome": "Auxiliar Administrativo",
+        "exige_documento": False,
+        "status": True,
+        "documentos": [],
     }

@@ -13,12 +13,6 @@ from apps.cargo.services.cargo_service import CargoService
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture
-def service():
-    """Serviço de cargos configurado para os testes."""
-    return CargoService()
-
-
 def test_inicializar_service_com_repository_padrao():
     """Deve utilizar o repositório padrão quando não for informado."""
     service = CargoService()
