@@ -17,7 +17,11 @@ from apps.cargo.exceptions import (
 from apps.cargo.filters import CargoFilter
 from apps.cargo.models import Cargo
 from apps.cargo.schemas import CARGO_SCHEMA
-from apps.cargo.serializers import CargoCriarSerializer, CargoSerializer
+from apps.cargo.serializers import (
+    CargoCriarSerializer,
+    CargoListagemSerializer,
+    CargoSerializer,
+)
 from apps.cargo.services.cargo_service import CargoService
 from apps.core.pagination import PaginacaoPadrao
 from apps.usuarios.models.usuario import Usuario
@@ -54,6 +58,9 @@ class CargoViewSet(viewsets.ModelViewSet):
         """Retorna o serializer adequado para cada ação."""
         if self.action in ("create", "partial_update"):
             return CargoCriarSerializer
+
+        if self.action == "list":
+            return CargoListagemSerializer
 
         return CargoSerializer
 

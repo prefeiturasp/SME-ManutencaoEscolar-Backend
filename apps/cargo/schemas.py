@@ -11,6 +11,7 @@ from drf_spectacular.utils import (
 
 from apps.cargo.serializers import (
     CargoCriarSerializer,
+    CargoListagemSerializer,
     CargoSerializer,
 )
 
@@ -83,6 +84,19 @@ _CARGOS_EXEMPLO_LISTAGEM: dict[str, object] = {
         },
     ],
 }
+
+
+LISTAR_TODOS_CARGOS_SCHEMA = extend_schema(
+    tags=[_TAG_CARGO],
+    summary="Lista todos os cargos",
+    description="Retorna todos os cargos cadastrados, sem paginação.",
+    operation_id="listarTodosCargos",
+    responses={
+        200: CargoListagemSerializer(many=True),
+        401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+        500: OpenApiResponse(description=_ERRO_NO_SERVIDOR),
+    },
+)
 
 
 CARGO_SCHEMA = extend_schema_view(
