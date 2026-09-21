@@ -17,6 +17,7 @@ from apps.cargo.exceptions import (
     CargoOuDocumentoJaVinculadaError,
 )
 from apps.cargo.filters import CargoFilter
+from apps.cargo.models import Cargo
 from apps.cargo.serializers import CargoCriarSerializer, CargoSerializer
 from apps.core.pagination import PaginacaoPadrao
 from apps.usuarios.models.usuario import Usuario
@@ -30,6 +31,20 @@ def usuario() -> Usuario:
         Usuário utilizado na requisição.
     """
     return Usuario()
+
+
+@pytest.fixture
+def cargo() -> Cargo:
+    """Retorna uma instância de cargo para os testes.
+
+    Returns:
+        Cargo utilizado nos testes de atualização.
+    """
+    return Cargo(
+        nome="Eletricista",
+        exige_documento=True,
+        status=True,
+    )
 
 
 @pytest.fixture
@@ -246,6 +261,7 @@ def test_configurar_metodos_http_permitidos() -> None:
     assert view.http_method_names == [
         "get",
         "post",
+        "patch",
         "options",
     ]
     assert view.lookup_field == "uuid"
@@ -278,3 +294,259 @@ def test_get_serializer_class_deve_usar_serializer_de_leitura(
     resultado = view.get_serializer_class()
 
     assert resultado is CargoSerializer
+
+
+def test_obter_cargo_deve_retornar_instancia_do_serializer(
+    cargo: Cargo,
+    serializer: MagicMock,
+) -> None:
+    """Deve retornar a instância de cargo presente no serializer."""
+    serializer.instance = cargo
+
+    resultado = CargoViewSet._obter_cargo(serializer)
+
+    assert resultado is cargo
+
+
+def test_obter_cargo_deve_rejeitar_instancia_invalida(
+    serializer: MagicMock,
+) -> None:
+    """Deve rejeitar um serializer sem uma instância de cargo válida."""
+    serializer.instance = None
+
+    with pytest.raises(DRFValidationError) as exc_info:
+        CargoViewSet._obter_cargo(serializer)
+
+    assert exc_info.value.detail == {
+        "title": "Erro",
+        "detail": "Cargo inválido ou não encontrado.",
+    }
+
+
+def test_obter_cargo_deve_rejeitar_instancia_de_outro_tipo(
+    serializer: MagicMock,
+) -> None:
+    """Deve rejeitar uma instância que não seja um cargo."""
+    serializer.instance = MagicMock()
+
+    with pytest.raises(DRFValidationError) as exc_info:
+        CargoViewSet._obter_cargo(serializer)
+
+    assert exc_info.value.detail == {
+        "title": "Erro",
+        "detail": "Cargo inválido ou não encontrado.",
+    }
+
+
+def test_perform_update_deve_atualizar_cargo(
+    view: CargoViewSet,
+    serializer: MagicMock,
+    cargo: Cargo,
+    usuario: Usuario,
+) -> None:
+    """Deve atualizar o cargo utilizando o serviço."""
+    serializer.instance = cargo
+    serializer.validated_data = {
+        "nome": "Engenheiro Eletricista",
+        "exige_documento": True,
+        "status": True,
+        "documentos": [
+            {
+                "nome": "Certificado NR-10",
+            },
+        ],
+    }
+
+    view.service.atualizar.return_value = {
+        "pk": 1,
+        "nome": "Engenheiro Eletricista",
+    }
+
+    view.perform_update(serializer)
+
+    view.service.atualizar.assert_called_once_with(
+        cargo=cargo,
+        dados=serializer.validated_data,
+        usuario=usuario,
+    )
+    assert serializer.instance is cargo
+
+
+def test_perform_update_deve_tratar_cargo_duplicado(
+    view: CargoViewSet,
+    serializer: MagicMock,
+    cargo: Cargo,
+) -> None:
+    """Deve converter duplicidade na atualização em erro DRF."""
+    serializer.instance = cargo
+
+    erro_original = CargoOuDocumentoJaVinculadaError(
+        title="Cargo já cadastrado",
+        detail={
+            "message": (
+                "Já existe um cargo com o nome Eletricista cadastrado."
+            ),
+        },
+    )
+    view.service.atualizar.side_effect = erro_original
+
+    with pytest.raises(DRFValidationError) as exc_info:
+        view.perform_update(serializer)
+
+    assert exc_info.value.detail == {
+        "title": "Cargo já cadastrado",
+        "detail": {
+            "message": (
+                "Já existe um cargo com o nome Eletricista cadastrado."
+            ),
+        },
+    }
+    assert exc_info.value.__cause__ is erro_original
+    assert serializer.instance is cargo
+
+
+def test_perform_update_deve_tratar_documento_duplicado(
+    view: CargoViewSet,
+    serializer: MagicMock,
+    cargo: Cargo,
+) -> None:
+    """Deve converter duplicidade de documento em erro DRF."""
+    serializer.instance = cargo
+
+    erro_original = CargoOuDocumentoJaVinculadaError(
+        title="Documento já vinculado",
+        detail={
+            "message": (
+                "Já existe um documento com este nome vinculado ao cargo."
+            ),
+        },
+    )
+    view.service.atualizar.side_effect = erro_original
+
+    with pytest.raises(DRFValidationError) as exc_info:
+        view.perform_update(serializer)
+
+    assert exc_info.value.detail == {
+        "title": "Documento já vinculado",
+        "detail": {
+            "message": (
+                "Já existe um documento com este nome vinculado ao cargo."
+            ),
+        },
+    }
+    assert exc_info.value.__cause__ is erro_original
+
+
+def test_perform_update_deve_tratar_validation_error_com_dicionario(
+    view: CargoViewSet,
+    serializer: MagicMock,
+    cargo: Cargo,
+) -> None:
+    """Deve converter ValidationError com dicionário em erro DRF."""
+    serializer.instance = cargo
+
+    erro_original = DjangoValidationError(
+        {
+            "nome": [
+                "Já existe um cargo com este nome.",
+            ],
+        },
+    )
+    view.service.atualizar.side_effect = erro_original
+
+    with pytest.raises(DRFValidationError) as exc_info:
+        view.perform_update(serializer)
+
+    assert exc_info.value.detail == {
+        "nome": [
+            "Já existe um cargo com este nome.",
+        ],
+    }
+    assert exc_info.value.__cause__ is erro_original
+    assert serializer.instance is cargo
+
+
+def test_perform_update_deve_tratar_validation_error_com_lista(
+    view: CargoViewSet,
+    serializer: MagicMock,
+    cargo: Cargo,
+) -> None:
+    """Deve converter ValidationError com lista em erro DRF."""
+    serializer.instance = cargo
+
+    erro_original = DjangoValidationError(
+        [
+            "Dados inválidos.",
+        ],
+    )
+    view.service.atualizar.side_effect = erro_original
+
+    with pytest.raises(DRFValidationError) as exc_info:
+        view.perform_update(serializer)
+
+    assert exc_info.value.detail == [
+        "Dados inválidos.",
+    ]
+    assert exc_info.value.__cause__ is erro_original
+    assert serializer.instance is cargo
+
+
+def test_perform_update_deve_tratar_erro_inesperado(
+    view: CargoViewSet,
+    serializer: MagicMock,
+    cargo: Cargo,
+) -> None:
+    """Deve converter erro inesperado em erro de instabilidade."""
+    serializer.instance = cargo
+
+    erro_original = RuntimeError("Falha inesperada durante a atualização.")
+    view.service.atualizar.side_effect = erro_original
+
+    with pytest.raises(CargoInstabilidadeError) as exc_info:
+        view.perform_update(serializer)
+
+    assert exc_info.value.detail == {
+        "title": "Erro",
+        "detail": CargoErrorMessages.INSTABILIDADE,
+    }
+    assert exc_info.value.__cause__ is erro_original
+    assert serializer.instance is cargo
+
+
+def test_perform_update_deve_validar_usuario_antes_do_service(
+    serializer: MagicMock,
+    cargo: Cargo,
+) -> None:
+    """Deve rejeitar a atualização quando o usuário não é válido."""
+    view = CargoViewSet()
+    view.service = MagicMock()
+    serializer.instance = cargo
+
+    cast(Any, view).request = SimpleNamespace(
+        user=MagicMock(),
+    )
+
+    with pytest.raises(
+        NotAuthenticated,
+        match="Usuário não identificado.",
+    ):
+        view.perform_update(serializer)
+
+    view.service.atualizar.assert_not_called()
+
+
+def test_perform_update_deve_validar_cargo_antes_do_service(
+    view: CargoViewSet,
+    serializer: MagicMock,
+) -> None:
+    """Deve rejeitar a atualização quando o cargo não é válido."""
+    serializer.instance = None
+
+    with pytest.raises(DRFValidationError) as exc_info:
+        view.perform_update(serializer)
+
+    assert exc_info.value.detail == {
+        "title": "Erro",
+        "detail": "Cargo inválido ou não encontrado.",
+    }
+    view.service.atualizar.assert_not_called()

@@ -15,19 +15,29 @@ class CargoRepository:
     model: type[Cargo] = Cargo
     documento_model: type[DocumentoCargo] = DocumentoCargo
 
-    def existe_por_nome(self, nome: str) -> bool:
-        """Verifica se existe um cargo com o nome informado.
+    def existe_por_nome(
+        self,
+        nome: str,
+        cargo_ignorado: Cargo | None = None,
+    ) -> bool:
+        """Verifica se outro cargo não deletado possui o nome informado.
 
         Args:
-            nome: Nome do cargo consultado.
+            nome: Nome consultado.
+            cargo_ignorado: Cargo desconsiderado na busca por duplicidade.
 
         Returns:
-            True quando existe um cargo não deletado com o mesmo nome.
+            True quando outro cargo possui o mesmo nome.
         """
-        return self.model.objects.filter(
+        queryset = self.model.objects.filter(
             nome__iexact=nome,
             deletado_em__isnull=True,
-        ).exists()
+        )
+
+        if cargo_ignorado is not None:
+            queryset = queryset.exclude(pk=cargo_ignorado.pk)
+
+        return queryset.exists()
 
     @transaction.atomic
     def criar(
@@ -93,3 +103,68 @@ class CargoRepository:
         dados_cargo["pk"] = cargo.pk
 
         return dados_cargo
+
+    @transaction.atomic
+    def atualizar(
+        self,
+        cargo: Cargo,
+        dados: dict[str, Any],
+        usuario: Usuario,
+    ) -> dict[str, Any]:
+        """Atualiza um cargo e sincroniza seus documentos quando informados.
+
+        Args:
+            cargo: Instância do cargo a ser atualizada.
+            dados: Campos validados, podendo incluir a lista completa
+                de documentos que deve permanecer vinculada.
+            usuario: Usuário responsável pela atualização.
+
+        Returns:
+            Dicionário com os dados do cargo e seus documentos atualizados.
+
+        Raises:
+            ValidationError: Quando cargo ou documentos são inválidos.
+            IntegrityError: Quando há violação de integridade.
+        """
+        dados_cargo = dados.copy()
+        atualizar_documentos = "documentos" in dados_cargo
+        documentos = cast(
+            list[dict[str, Any]],
+            dados_cargo.pop("documentos", []),
+        )
+
+        for campo, valor in dados_cargo.items():
+            setattr(cargo, campo, valor)
+
+        cargo.atualizado_por = usuario
+        cargo.full_clean()
+        cargo.save()
+
+        if atualizar_documentos:
+            self.documento_model.objects.filter(cargo=cargo).delete()
+
+            documentos_cargo = [
+                self.documento_model(
+                    **dados_documento,
+                    cargo=cargo,
+                    criado_por=usuario,
+                    atualizado_por=usuario,
+                )
+                for dados_documento in documentos
+            ]
+
+            for documento in documentos_cargo:
+                documento.full_clean()
+
+            self.documento_model.objects.bulk_create(documentos_cargo)
+        else:
+            documentos_cargo = list(
+                self.documento_model.objects.filter(cargo=cargo)
+            )
+
+        resultado = model_to_dict(cargo)
+        resultado["documentos"] = documentos_cargo
+        resultado["uuid"] = cargo.uuid
+        resultado["pk"] = cargo.pk
+
+        return resultado
