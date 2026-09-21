@@ -104,6 +104,7 @@ class CargoRepository:
 
         return dados_cargo
 
+    @transaction.atomic
     def atualizar(
         self,
         cargo: Cargo,

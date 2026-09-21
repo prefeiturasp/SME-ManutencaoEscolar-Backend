@@ -98,7 +98,7 @@ CARGO_SCHEMA = extend_schema_view(
     list=extend_schema(
         tags=[_TAG_CARGO],
         summary="Lista os cargos",
-        description="Retorna a lista paginada de cargos cadastrados no sistema.",
+        description="Retorna lista paginada de cargos cadastrados no sistema.",
         operation_id="listarCargos",
         parameters=[
             OpenApiParameter(
@@ -113,9 +113,7 @@ CARGO_SCHEMA = extend_schema_view(
                 name="exige_documento",
                 type=OpenApiTypes.BOOL,
                 location=OpenApiParameter.QUERY,
-                description=(
-                    "Filtra cargos pela exigência de documento."
-                ),
+                description=("Filtra cargos pela exigência de documento."),
             ),
         ],
         responses={
