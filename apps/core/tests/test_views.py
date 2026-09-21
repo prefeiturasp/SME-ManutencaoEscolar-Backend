@@ -386,12 +386,14 @@ def test_redefinir_senha_retorna_email_mascarado(
     }
 
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
+        "apps.usuarios.api.views.usuario_views.UsuarioService."
+        "obter_usuario_por_rf_cpf",
         classmethod(lambda cls, _: usuario),
     )
 
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.enviar_email_recuperacao_senha",
+        "apps.usuarios.api.views.usuario_views.UsuarioService."
+        "enviar_email_recuperacao_senha",
         staticmethod(lambda usuario: None),
     )
 
@@ -426,7 +428,8 @@ def test_redefinir_senha_usuario_nao_encontrado(
         )
 
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
+        "apps.usuarios.api.views.usuario_views.UsuarioService."
+        "obter_usuario_por_rf_cpf",
         classmethod(raise_usuario_nao_encontado_error),
     )
 
@@ -462,7 +465,8 @@ def test_redefinir_senha_email_nao_encontrado(
         )
 
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
+        "apps.usuarios.api.views.usuario_views.UsuarioService."
+        "obter_usuario_por_rf_cpf",
         classmethod(raise_email_usuario_error),
     )
 
@@ -503,12 +507,14 @@ def test_redefinir_senha_erro_envio_email(
         )
 
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.obter_usuario_por_rf_cpf",
+        "apps.usuarios.api.views.usuario_views.UsuarioService."
+        "obter_usuario_por_rf_cpf",
         classmethod(lambda cls, _: usuario),
     )
 
     monkeypatch.setattr(
-        "apps.usuarios.api.views.UsuarioService.enviar_email_recuperacao_senha",
+        "apps.usuarios.api.views.usuario_views.UsuarioService."
+        "enviar_email_recuperacao_senha",
         staticmethod(raise_enio_email_error),
     )
 

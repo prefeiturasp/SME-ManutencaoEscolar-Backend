@@ -44,6 +44,6 @@ class Usuario(AbstractUser):
         return self.nome
 
     @property
-    def perfil(self) -> str:
+    def perfil(self) -> str | None:
         """Retorna o perfil de acesso através do cargo."""
         return self.cargo.perfil

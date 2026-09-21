@@ -2,23 +2,8 @@
 
 import pytest
 
-from apps.cargo.filters import CargoFilter, _converter_exige_documento
+from apps.cargo.filters import CargoFilter
 from apps.cargo.models import Cargo
-
-
-@pytest.mark.parametrize(
-    ("valor", "esperado"),
-    [
-        ("true", True),
-        ("false", False),
-    ],
-)
-def test_converter_exige_documento(
-    valor: str,
-    esperado: bool,
-) -> None:
-    """Converte os valores aceitos pelo filtro para booleano."""
-    assert _converter_exige_documento(valor) is esperado
 
 
 @pytest.mark.django_db
@@ -54,7 +39,7 @@ def test_filtrar_cargos_por_exigencia_de_documento(
     valor: str,
     esperado: bool,
 ) -> None:
-    """Converte o valor recebido e adiciona o filtro à consulta."""
+    """Converte o valor da URL e aplica o filtro booleano."""
     consulta_original = Cargo.objects.all()
     filtro = CargoFilter(
         data={"exige_documento": valor},
@@ -69,20 +54,8 @@ def test_filtrar_cargos_por_exigencia_de_documento(
 
 
 @pytest.mark.django_db
-def test_rejeitar_valor_invalido_para_exige_documento() -> None:
-    """Rejeita valores que não pertencem às opções do filtro."""
-    filtro = CargoFilter(
-        data={"exige_documento": "talvez"},
-        queryset=Cargo.objects.all(),
-    )
-
-    assert not filtro.is_valid()
-    assert "exige_documento" in filtro.errors
-
-
-@pytest.mark.django_db
 def test_permitir_consulta_sem_filtros() -> None:
-    """Mantém a consulta original quando nenhum filtro é informado."""
+    """Mantém a consulta original quando não há filtros."""
     consulta_original = Cargo.objects.all()
     filtro = CargoFilter(
         data={},

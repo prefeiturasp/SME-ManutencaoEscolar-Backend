@@ -10,6 +10,7 @@ from apps.escola.management.commands.sincronizar_diretores import Command
 from apps.escola.models import HistoricoResponsavel, ResponsavelUnidade
 from apps.escola.models.unidade_educacional import Unidadeeducacional
 from apps.usuarios.models.cargo_eol import CargoEOL
+from apps.usuarios.models.usuario import Usuario
 
 pytestmark = pytest.mark.django_db
 
@@ -889,15 +890,16 @@ class TestSincronizarDiretores:
             "esta_afastado": True,
         }
 
-        resultado, foi_criado = Command()._salvar_responsavel(
+        resultado = Command()._salvar_responsavel(
             registro=registro,
             usuario=usuario_ativo,
         )
 
         responsavel.refresh_from_db()
 
-        assert resultado.pk == responsavel.pk
-        assert foi_criado is False
+        assert resultado["responsavel"].pk == responsavel.pk
+        assert resultado["foi_criado"] is False
+        assert resultado["foi_atualizado"] is True
         assert responsavel.nome == "NOME NOVO"
         assert responsavel.email == "novo@email.com"
         assert responsavel.telefone == "22222222"
@@ -935,7 +937,7 @@ class TestSincronizarDiretores:
             "cargo_diretor": cargo_perfil_diretor,
         }
 
-        resultado, foi_criado = Command()._salvar_historico(
+        resultado = Command()._salvar_historico(
             responsavel=responsavel,
             registro=registro,
             usuario=usuario_ativo,
@@ -943,8 +945,9 @@ class TestSincronizarDiretores:
 
         historico.refresh_from_db()
 
-        assert resultado.pk == historico.pk
-        assert foi_criado is False
+        assert resultado["historico"].pk == historico.pk
+        assert resultado["foi_criado"] is False
+        assert resultado["foi_atualizado"] is True
         assert historico.ativo is True
         assert historico.atualizado_por == usuario_ativo
 
@@ -981,12 +984,20 @@ class TestSincronizarDiretores:
             patch.object(
                 Command,
                 "_salvar_responsavel",
-                return_value=(responsavel, True),
+                return_value={
+                    "responsavel": responsavel,
+                    "foi_criado": True,
+                    "foi_atualizado": False,
+                },
             ),
             patch.object(
                 Command,
                 "_salvar_historico",
-                return_value=(historico, True),
+                return_value={
+                    "historico": historico,
+                    "foi_criado": True,
+                    "foi_atualizado": False,
+                },
             ),
         ):
             call_command("sincronizar_diretores")
@@ -1043,3 +1054,445 @@ class TestSincronizarDiretores:
             )
 
         assert len(resultado) == 501
+
+    def test_deve_atualizar_responsavel_com_atualizado_por_none(
+        self,
+        usuario_sincronizacao,
+    ):
+        """Deve atualizar responsável quando atualizado_por for None."""
+        responsavel = ResponsavelUnidade.objects.create(
+            registro_funcional="0000014",
+            nome="NOME ANTIGO",
+            email="antigo@email.com",
+            telefone="11111111",
+            esta_afastado=False,
+            atualizado_por=None,
+        )
+
+        registro = {
+            "registro_funcional": "0000014",
+            "nome": "NOME NOVO",
+            "email": "novo@email.com",
+            "telefone": "22222222",
+            "esta_afastado": True,
+        }
+
+        resultado = Command()._salvar_responsavel(
+            registro=registro,
+            usuario=usuario_sincronizacao,
+        )
+
+        responsavel.refresh_from_db()
+
+        assert resultado["foi_criado"] is False
+        assert resultado["foi_atualizado"] is True
+        assert responsavel.nome == "NOME NOVO"
+        assert responsavel.email == "novo@email.com"
+        assert responsavel.telefone == "22222222"
+        assert responsavel.esta_afastado is True
+        assert responsavel.atualizado_por == usuario_sincronizacao
+
+    def test_deve_atualizar_responsavel_atualizado_pela_sincronizacao(
+        self,
+        usuario_sincronizacao,
+    ):
+        """Deve atualizar responsável quando for a sincronização."""
+        responsavel = ResponsavelUnidade.objects.create(
+            registro_funcional="0000014",
+            nome="NOME ANTIGO",
+            email="antigo@email.com",
+            telefone="11111111",
+            esta_afastado=False,
+            atualizado_por=usuario_sincronizacao,
+        )
+
+        registro = {
+            "registro_funcional": "0000014",
+            "nome": "NOME NOVO",
+            "email": "novo@email.com",
+            "telefone": "22222222",
+            "esta_afastado": True,
+        }
+
+        resultado = Command()._salvar_responsavel(
+            registro=registro,
+            usuario=usuario_sincronizacao,
+        )
+
+        responsavel.refresh_from_db()
+
+        assert resultado["foi_criado"] is False
+        assert resultado["foi_atualizado"] is True
+        assert responsavel.nome == "NOME NOVO"
+        assert responsavel.atualizado_por == usuario_sincronizacao
+
+    def test_nao_deve_atualizar_responsavel_alterado_por_outro_usuario(
+        self,
+        usuario_sincronizacao,
+        usuario_ativo,
+    ):
+        """Não deve sobrescrever alteração feita por outro usuário."""
+        responsavel = ResponsavelUnidade.objects.create(
+            registro_funcional="0000014",
+            nome="NOME MANUAL",
+            email="manual@email.com",
+            telefone="33333333",
+            esta_afastado=True,
+            atualizado_por=usuario_ativo,
+        )
+
+        registro = {
+            "registro_funcional": "0000014",
+            "nome": "NOME EOL",
+            "email": "eol@email.com",
+            "telefone": "44444444",
+            "esta_afastado": False,
+        }
+
+        resultado = Command()._salvar_responsavel(
+            registro=registro,
+            usuario=usuario_sincronizacao,
+        )
+
+        responsavel.refresh_from_db()
+
+        assert resultado["foi_criado"] is False
+        assert resultado["foi_atualizado"] is False
+        assert responsavel.nome == "NOME MANUAL"
+        assert responsavel.email == "manual@email.com"
+        assert responsavel.telefone == "33333333"
+        assert responsavel.esta_afastado is True
+        assert responsavel.atualizado_por == usuario_ativo
+
+    def test_deve_atualizar_historico_com_atualizado_por_none(
+        self,
+        usuario_sincronizacao,
+        unidade_educacional_emef,
+        cargo_perfil_diretor,
+    ):
+        """Deve atualizar histórico quando atualizado_por for None."""
+        responsavel = ResponsavelUnidade.objects.create(
+            registro_funcional="0000014",
+            nome="DIRETOR TESTE",
+            atualizado_por=usuario_sincronizacao,
+        )
+
+        historico = HistoricoResponsavel.objects.create(
+            responsavel=responsavel,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=cargo_perfil_diretor,
+            ativo=False,
+            atualizado_por=None,
+        )
+
+        registro = {
+            "unidade_educacional": unidade_educacional_emef,
+            "cargo_diretor": cargo_perfil_diretor,
+        }
+
+        resultado = Command()._salvar_historico(
+            responsavel=responsavel,
+            registro=registro,
+            usuario=usuario_sincronizacao,
+        )
+
+        historico.refresh_from_db()
+
+        assert resultado["foi_criado"] is False
+        assert resultado["foi_atualizado"] is True
+        assert historico.ativo is True
+        assert historico.atualizado_por == usuario_sincronizacao
+
+    def test_deve_atualizar_historico_atualizado_pela_sincronizacao(
+        self,
+        usuario_sincronizacao,
+        unidade_educacional_emef,
+        cargo_perfil_diretor,
+    ):
+        """Deve atualizar histórico quando for a sincronização."""
+        responsavel = ResponsavelUnidade.objects.create(
+            registro_funcional="0000014",
+            nome="DIRETOR TESTE",
+            atualizado_por=usuario_sincronizacao,
+        )
+
+        historico = HistoricoResponsavel.objects.create(
+            responsavel=responsavel,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=cargo_perfil_diretor,
+            ativo=False,
+            atualizado_por=usuario_sincronizacao,
+        )
+
+        registro = {
+            "unidade_educacional": unidade_educacional_emef,
+            "cargo_diretor": cargo_perfil_diretor,
+        }
+
+        resultado = Command()._salvar_historico(
+            responsavel=responsavel,
+            registro=registro,
+            usuario=usuario_sincronizacao,
+        )
+
+        historico.refresh_from_db()
+
+        assert resultado["foi_criado"] is False
+        assert resultado["foi_atualizado"] is True
+        assert historico.ativo is True
+        assert historico.atualizado_por == usuario_sincronizacao
+
+    def test_nao_deve_atualizar_historico_alterado_por_outro_usuario(
+        self,
+        usuario_sincronizacao,
+        usuario_ativo,
+        unidade_educacional_emef,
+        cargo_perfil_diretor,
+    ):
+        """Não deve sobrescrever histórico alterado por outro usuário."""
+        responsavel = ResponsavelUnidade.objects.create(
+            registro_funcional="0000014",
+            nome="DIRETOR TESTE",
+            atualizado_por=usuario_ativo,
+        )
+
+        historico = HistoricoResponsavel.objects.create(
+            responsavel=responsavel,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=cargo_perfil_diretor,
+            ativo=False,
+            atualizado_por=usuario_ativo,
+        )
+
+        registro = {
+            "unidade_educacional": unidade_educacional_emef,
+            "cargo_diretor": cargo_perfil_diretor,
+        }
+
+        resultado = Command()._salvar_historico(
+            responsavel=responsavel,
+            registro=registro,
+            usuario=usuario_sincronizacao,
+        )
+
+        historico.refresh_from_db()
+
+        assert resultado["foi_criado"] is False
+        assert resultado["foi_atualizado"] is False
+        assert historico.ativo is False
+        assert historico.atualizado_por == usuario_ativo
+
+    def test_deve_falhar_quando_usuario_de_sincronizacao_nao_existir(
+        self,
+        configurar_api_eol,
+        unidade_educacional_emef,
+    ):
+        """Deve falhar quando o usuário da sincronização não existir."""
+        with patch.object(
+            Command,
+            "_coletar_registros",
+            return_value=[],
+        ):
+            Usuario.objects.filter(
+                username="sincronizacao_eol",
+            ).delete()
+
+            with pytest.raises(
+                CommandError,
+                match="Usuário de sincronização de dados não encontrado",
+            ):
+                call_command("sincronizar_diretores")
+
+    def test_deve_contabilizar_responsavel_e_historico(
+        self,
+        usuario_ativo,
+        usuario_sincronizacao,
+        configurar_api_eol,
+        unidade_educacional_emef,
+        cargo_perfil_diretor,
+    ):
+        """Deve contabilizar criados, atualizados e ignorados."""
+        responsavel_atualizado = ResponsavelUnidade.objects.create(
+            registro_funcional="0000020",
+            nome="NOME ANTIGO",
+            email="antigo@email.com",
+            telefone="11111111",
+            esta_afastado=False,
+            atualizado_por=usuario_sincronizacao,
+        )
+
+        responsavel_ignorado = ResponsavelUnidade.objects.create(
+            registro_funcional="0000021",
+            nome="NOME MANUAL",
+            email="manual@email.com",
+            telefone="22222222",
+            esta_afastado=True,
+            atualizado_por=usuario_ativo,
+        )
+
+        historico_atualizado = HistoricoResponsavel.objects.create(
+            responsavel=responsavel_atualizado,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=cargo_perfil_diretor,
+            ativo=False,
+            atualizado_por=usuario_sincronizacao,
+        )
+
+        historico_ignorado = HistoricoResponsavel.objects.create(
+            responsavel=responsavel_ignorado,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=cargo_perfil_diretor,
+            ativo=False,
+            atualizado_por=usuario_ativo,
+        )
+
+        registros = [
+            {
+                "registro_funcional": "0000019",
+                "nome": "DIRETOR NOVO",
+                "email": "novo@email.com",
+                "telefone": "99999999",
+                "esta_afastado": False,
+                "unidade_educacional": unidade_educacional_emef,
+                "cargo_diretor": cargo_perfil_diretor,
+            },
+            {
+                "registro_funcional": "0000020",
+                "nome": "DIRETOR ATUALIZADO",
+                "email": "atualizado@email.com",
+                "telefone": "88888888",
+                "esta_afastado": True,
+                "unidade_educacional": unidade_educacional_emef,
+                "cargo_diretor": cargo_perfil_diretor,
+            },
+            {
+                "registro_funcional": "0000021",
+                "nome": "DIRETOR EOL",
+                "email": "eol@email.com",
+                "telefone": "77777777",
+                "esta_afastado": False,
+                "unidade_educacional": unidade_educacional_emef,
+                "cargo_diretor": cargo_perfil_diretor,
+            },
+        ]
+
+        with patch.object(
+            Command,
+            "_coletar_registros",
+            return_value=registros,
+        ):
+            call_command("sincronizar_diretores")
+
+        responsavel_atualizado.refresh_from_db()
+        responsavel_ignorado.refresh_from_db()
+        historico_atualizado.refresh_from_db()
+        historico_ignorado.refresh_from_db()
+
+        responsavel_novo = ResponsavelUnidade.objects.get(
+            registro_funcional="0000019",
+        )
+        historico_novo = HistoricoResponsavel.objects.get(
+            responsavel=responsavel_novo,
+        )
+
+        assert responsavel_novo.nome == "DIRETOR NOVO"
+        assert responsavel_novo.atualizado_por == usuario_sincronizacao
+        assert historico_novo.ativo is True
+        assert historico_novo.atualizado_por == usuario_sincronizacao
+
+        assert responsavel_atualizado.nome == "DIRETOR ATUALIZADO"
+        assert responsavel_atualizado.email == "atualizado@email.com"
+        assert responsavel_atualizado.telefone == "88888888"
+        assert responsavel_atualizado.esta_afastado is True
+        assert responsavel_atualizado.atualizado_por == usuario_sincronizacao
+        assert historico_atualizado.ativo is True
+        assert historico_atualizado.atualizado_por == usuario_sincronizacao
+
+        assert responsavel_ignorado.nome == "NOME MANUAL"
+        assert responsavel_ignorado.email == "manual@email.com"
+        assert responsavel_ignorado.telefone == "22222222"
+        assert responsavel_ignorado.esta_afastado is True
+        assert responsavel_ignorado.atualizado_por == usuario_ativo
+        assert historico_ignorado.ativo is False
+        assert historico_ignorado.atualizado_por == usuario_ativo
+
+    def test_deve_contabilizar_criacao(self):
+        quantidades = {
+            "criados": 0,
+            "atualizados": 0,
+            "ignorados": 0,
+        }
+        resultado = {
+            "foi_criado": True,
+            "foi_atualizado": False,
+        }
+
+        Command._contabilizar_resultado(
+            quantidades=quantidades,
+            resultado=resultado,
+        )
+
+        assert quantidades["criados"] == 1
+        assert quantidades["atualizados"] == 0
+        assert quantidades["ignorados"] == 0
+
+    def test_deve_contabilizar_atualizacao(self):
+        quantidades = {
+            "criados": 0,
+            "atualizados": 0,
+            "ignorados": 0,
+        }
+        resultado = {
+            "foi_criado": False,
+            "foi_atualizado": True,
+        }
+
+        Command._contabilizar_resultado(
+            quantidades=quantidades,
+            resultado=resultado,
+        )
+
+        assert quantidades["criados"] == 0
+        assert quantidades["atualizados"] == 1
+        assert quantidades["ignorados"] == 0
+
+    def test_deve_contabilizar_ignorados(self):
+        quantidades = {
+            "criados": 0,
+            "atualizados": 0,
+            "ignorados": 0,
+        }
+        resultado = {
+            "foi_criado": False,
+            "foi_atualizado": False,
+        }
+
+        Command._contabilizar_resultado(
+            quantidades=quantidades,
+            resultado=resultado,
+        )
+
+        assert quantidades["criados"] == 0
+        assert quantidades["atualizados"] == 0
+        assert quantidades["ignorados"] == 1
+
+    def test_deve_contabilizar_historico_com_prefixo(self):
+        quantidades = {
+            "historicos_criados": 0,
+            "historicos_atualizados": 0,
+            "historicos_ignorados": 0,
+        }
+        resultado = {
+            "foi_criado": True,
+            "foi_atualizado": False,
+        }
+
+        Command._contabilizar_resultado(
+            quantidades=quantidades,
+            resultado=resultado,
+            prefixo="historicos_",
+        )
+
+        assert quantidades["historicos_criados"] == 1
+        assert quantidades["historicos_atualizados"] == 0
+        assert quantidades["historicos_ignorados"] == 0
