@@ -17,6 +17,8 @@ _CREDENCIAIS_INVALIDAS = "Credenciais inválidas"
 _DADOS_INVALIDOS = "Dados inválidos ou cargo já cadastrado."
 _ERRO_NO_SERVIDOR = "Erro no servidor"
 _CARGO_NAO_ENCONTRADO = "Cargo não encontrado."
+_DOCUMENTO = "Certificado NR-10"
+_COMPROVANTE  ="Comprovante de formação"
 
 _ESCOLA_CONST = "ESCOLA EMEF ADMIN"
 
@@ -25,8 +27,8 @@ _CARGO_EXEMPLO_ENTRADA: dict[str, object] = {
     "exige_documento": True,
     "status": True,
     "documentos": [
-        {"nome": "Certificado NR-10"},
-        {"nome": "Comprovante de formação"},
+        {"nome": _DOCUMENTO},
+        {"nome": _COMPROVANTE},
     ],
 }
 
@@ -35,8 +37,8 @@ _CARGO_EXEMPLO_SAIDA: dict[str, object] = {
     "exige_documento": True,
     "status": True,
     "documentos": [
-        {"nome": "Certificado NR-10"},
-        {"nome": "Comprovante de formação"},
+        {"nome": _DOCUMENTO},
+        {"nome": _COMPROVANTE},
     ],
 }
 
@@ -78,8 +80,8 @@ _CARGO_EXEMPLO_ATUALIZACAO: dict[str, object] = {
     "exige_documento": True,
     "status": True,
     "documentos": [
-        {"nome": "Certificado NR-10"},
-        {"nome": "Comprovante de formação"},
+        {"nome": _DOCUMENTO},
+        {"nome": _COMPROVANTE},
     ],
 }
 
@@ -88,8 +90,8 @@ _CARGO_EXEMPLO_ATUALIZADO: dict[str, object] = {
     "exige_documento": True,
     "status": True,
     "documentos": [
-        {"nome": "Certificado NR-10"},
-        {"nome": "Comprovante de formação"},
+        {"nome": _DOCUMENTO},
+        {"nome": _COMPROVANTE},
     ],
 }
 
