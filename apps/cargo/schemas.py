@@ -18,7 +18,7 @@ _DADOS_INVALIDOS = "Dados inválidos ou cargo já cadastrado."
 _ERRO_NO_SERVIDOR = "Erro no servidor"
 _CARGO_NAO_ENCONTRADO = "Cargo não encontrado."
 _DOCUMENTO = "Certificado NR-10"
-_COMPROVANTE  ="Comprovante de formação"
+_COMPROVANTE = "Comprovante de formação"
 
 _ESCOLA_CONST = "ESCOLA EMEF ADMIN"
 

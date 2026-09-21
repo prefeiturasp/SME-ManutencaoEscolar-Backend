@@ -1,580 +1,321 @@
 """Testes do repositório de cargos."""
 
-from typing import cast
-from unittest.mock import MagicMock, call, patch
-from uuid import uuid4
+from copy import deepcopy
 
 import pytest
 from django.core.exceptions import ValidationError
 
 from apps.cargo.models import Cargo, DocumentoCargo
 from apps.cargo.repository.cargo_repository import CargoRepository
-from apps.usuarios.models.usuario import Usuario
-
-MocksRepository = tuple[
-    CargoRepository,
-    MagicMock,
-    MagicMock,
-]
 
 pytestmark = pytest.mark.django_db
 
 
-def criar_mocks() -> MocksRepository:
-    """Cria o repositório com os models simulados.
-
-    Returns:
-        Tupla contendo o repositório e os mocks dos models.
-    """
+def test_existe_por_nome_deve_retornar_true(
+    cargo,
+):
+    """Deve encontrar um cargo ativo pelo nome."""
     repository = CargoRepository()
-    cargo_model = MagicMock()
-    documento_model = MagicMock()
-
-    repository.model = cast(type[Cargo], cargo_model)
-    repository.documento_model = cast(
-        type[DocumentoCargo],
-        documento_model,
-    )
-
-    return repository, cargo_model, documento_model
-
-
-@pytest.mark.parametrize(
-    ("resultado_exists", "resultado_esperado"),
-    [
-        (True, True),
-        (False, False),
-    ],
-)
-def test_existe_por_nome(
-    resultado_exists: bool,
-    resultado_esperado: bool,
-) -> None:
-    """Deve informar se existe um cargo ativo com o nome recebido."""
-    repository, cargo_model, _ = criar_mocks()
-    queryset = MagicMock()
-
-    cargo_model.objects.filter.return_value = queryset
-    queryset.exists.return_value = resultado_exists
 
     resultado = repository.existe_por_nome("Eletricista")
 
-    cargo_model.objects.filter.assert_called_once_with(
-        nome__iexact="Eletricista",
-        deletado_em__isnull=True,
-    )
-    queryset.exclude.assert_not_called()
-    queryset.exists.assert_called_once_with()
-
-    assert resultado is resultado_esperado
+    assert resultado is True
 
 
-def test_existe_por_nome_deve_ignorar_cargo_informado() -> None:
-    """Deve desconsiderar o cargo informado na busca por duplicidade."""
-    repository, cargo_model, _ = criar_mocks()
-    cargo_ignorado = MagicMock(spec=Cargo)
-    cargo_ignorado.pk = 10
+def test_existe_por_nome_deve_ignorar_diferenca_de_caixa(
+    cargo,
+):
+    """Deve consultar o nome sem diferenciar maiúsculas e minúsculas."""
+    repository = CargoRepository()
 
-    queryset_filtrado = MagicMock()
-    queryset_excluido = MagicMock()
+    resultado = repository.existe_por_nome("eLeTrIcIsTa")
 
-    cargo_model.objects.filter.return_value = queryset_filtrado
-    queryset_filtrado.exclude.return_value = queryset_excluido
-    queryset_excluido.exists.return_value = False
+    assert resultado is True
 
-    resultado = repository.existe_por_nome(
-        "Eletricista",
-        cargo_ignorado=cargo_ignorado,
-    )
 
-    cargo_model.objects.filter.assert_called_once_with(
-        nome__iexact="Eletricista",
-        deletado_em__isnull=True,
-    )
-    queryset_filtrado.exclude.assert_called_once_with(
-        pk=cargo_ignorado.pk,
-    )
-    queryset_excluido.exists.assert_called_once_with()
+def test_existe_por_nome_deve_retornar_false(
+    cargo,
+):
+    """Deve retornar False quando o cargo não existe."""
+    repository = CargoRepository()
+
+    resultado = repository.existe_por_nome("Encanador")
 
     assert resultado is False
 
 
-@patch("apps.cargo.repository.cargo_repository.model_to_dict")
-def test_criar_cargo_com_documentos(
-    model_to_dict_mock: MagicMock,
-) -> None:
-    """Deve criar um cargo e seus documentos."""
-    repository, cargo_model, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
+def test_existe_por_nome_deve_ignorar_cargo_informado(
+    cargo,
+):
+    """Deve desconsiderar o próprio cargo na busca por duplicidade."""
+    repository = CargoRepository()
 
-    cargo = MagicMock(spec=Cargo)
-    cargo.pk = 1
-    cargo.uuid = uuid4()
-    cargo_model.return_value = cargo
-
-    primeiro_documento = MagicMock(spec=DocumentoCargo)
-    segundo_documento = MagicMock(spec=DocumentoCargo)
-
-    documento_model.side_effect = [
-        primeiro_documento,
-        segundo_documento,
-    ]
-
-    model_to_dict_mock.return_value = {
-        "nome": "Eletricista",
-        "exige_documento": True,
-        "status": True,
-    }
-
-    dados = {
-        "nome": "Eletricista",
-        "exige_documento": True,
-        "status": True,
-        "documentos": [
-            {
-                "nome": "Certificado NR-10",
-            },
-            {
-                "nome": "Documento pessoal",
-            },
-        ],
-    }
-
-    resultado = repository.criar(
-        dados=dados,
-        usuario=usuario,
+    resultado = repository.existe_por_nome(
+        "Eletricista",
+        cargo_ignorado=cargo,
     )
 
-    cargo_model.assert_called_once_with(
-        nome="Eletricista",
-        exige_documento=True,
-        status=True,
-        criado_por=usuario,
-        atualizado_por=usuario,
-    )
-
-    cargo.full_clean.assert_called_once_with()
-    cargo.save.assert_called_once_with()
-
-    assert documento_model.call_args_list == [
-        call(
-            nome="Certificado NR-10",
-            cargo=cargo,
-            criado_por=usuario,
-            atualizado_por=usuario,
-        ),
-        call(
-            nome="Documento pessoal",
-            cargo=cargo,
-            criado_por=usuario,
-            atualizado_por=usuario,
-        ),
-    ]
-
-    primeiro_documento.full_clean.assert_called_once_with()
-    segundo_documento.full_clean.assert_called_once_with()
-
-    documento_model.objects.bulk_create.assert_called_once_with(
-        [
-            primeiro_documento,
-            segundo_documento,
-        ],
-    )
-
-    model_to_dict_mock.assert_called_once_with(cargo)
-
-    assert resultado == {
-        "nome": "Eletricista",
-        "exige_documento": True,
-        "status": True,
-        "documentos": [
-            primeiro_documento,
-            segundo_documento,
-        ],
-        "uuid": cargo.uuid,
-        "pk": cargo.pk,
-    }
+    assert resultado is False
 
 
-@patch("apps.cargo.repository.cargo_repository.model_to_dict")
-def test_criar_cargo_sem_documentos(
-    model_to_dict_mock: MagicMock,
-) -> None:
-    """Deve criar um cargo sem documentos."""
-    repository, cargo_model, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
-
-    cargo = MagicMock(spec=Cargo)
-    cargo.pk = 2
-    cargo.uuid = uuid4()
-    cargo_model.return_value = cargo
-
-    model_to_dict_mock.return_value = {
-        "nome": "Auxiliar",
-        "exige_documento": False,
-        "status": True,
-    }
-
-    dados = {
-        "nome": "Auxiliar",
-        "exige_documento": False,
-        "status": True,
-    }
-
-    resultado = repository.criar(
-        dados=dados,
-        usuario=usuario,
-    )
-
-    cargo_model.assert_called_once_with(
-        nome="Auxiliar",
+def test_existe_por_nome_deve_encontrar_outro_cargo(
+    cargo,
+):
+    """Deve encontrar um cargo diferente daquele ignorado."""
+    Cargo.objects.create(
+        nome="Encanador",
         exige_documento=False,
         status=True,
-        criado_por=usuario,
-        atualizado_por=usuario,
+    )
+    repository = CargoRepository()
+
+    resultado = repository.existe_por_nome(
+        "Encanador",
+        cargo_ignorado=cargo,
     )
 
-    cargo.full_clean.assert_called_once_with()
-    cargo.save.assert_called_once_with()
-
-    documento_model.assert_not_called()
-    documento_model.objects.bulk_create.assert_called_once_with([])
-
-    model_to_dict_mock.assert_called_once_with(cargo)
-
-    assert resultado == {
-        "nome": "Auxiliar",
-        "exige_documento": False,
-        "status": True,
-        "documentos": [],
-        "uuid": cargo.uuid,
-        "pk": cargo.pk,
-    }
+    assert resultado is True
 
 
-@patch("apps.cargo.repository.cargo_repository.model_to_dict")
+def test_existe_por_nome_deve_ignorar_cargo_deletado(
+    cargo_deletado,
+):
+    """Deve ignorar cargos deletados logicamente."""
+    repository = CargoRepository()
+
+    resultado = repository.existe_por_nome(
+        cargo_deletado.nome,
+    )
+
+    assert resultado is False
+
+
+def test_criar_cargo_com_documentos(
+    cargo_payload_valido,
+    usuario_ativo,
+):
+    """Deve criar um cargo e seus documentos."""
+    repository = CargoRepository()
+
+    resultado = repository.criar(
+        dados=cargo_payload_valido,
+        usuario=usuario_ativo,
+    )
+
+    cargo_criado = Cargo.objects.get(
+        pk=resultado["pk"],
+    )
+    documentos = list(
+        DocumentoCargo.objects.filter(
+            cargo=cargo_criado,
+        ).order_by("nome")
+    )
+
+    assert cargo_criado.nome == "Engenheiro Eletricista"
+    assert cargo_criado.exige_documento is True
+    assert cargo_criado.status is True
+    assert cargo_criado.criado_por == usuario_ativo
+    assert cargo_criado.atualizado_por == usuario_ativo
+
+    assert len(documentos) == 2
+    assert documentos[0].nome == "Certificado NR-10"
+    assert documentos[1].nome == "Certificado NR-35"
+
+    assert documentos[0].criado_por == usuario_ativo
+    assert documentos[0].atualizado_por == usuario_ativo
+    assert documentos[1].criado_por == usuario_ativo
+    assert documentos[1].atualizado_por == usuario_ativo
+
+    assert resultado["pk"] == cargo_criado.pk
+    assert resultado["uuid"] == cargo_criado.uuid
+    assert resultado["documentos"] == documentos
+
+
+def test_criar_cargo_sem_documentos(
+    cargo_payload_valido_sem_documentos,
+    usuario_ativo,
+):
+    """Deve criar um cargo sem documentos."""
+    repository = CargoRepository()
+
+    resultado = repository.criar(
+        dados=cargo_payload_valido_sem_documentos,
+        usuario=usuario_ativo,
+    )
+
+    cargo_criado = Cargo.objects.get(
+        pk=resultado["pk"],
+    )
+
+    assert cargo_criado.nome == "Auxiliar Administrativo"
+    assert cargo_criado.exige_documento is False
+    assert cargo_criado.status is True
+    assert cargo_criado.criado_por == usuario_ativo
+    assert cargo_criado.atualizado_por == usuario_ativo
+
+    assert not DocumentoCargo.objects.filter(
+        cargo=cargo_criado,
+    ).exists()
+
+    assert resultado["documentos"] == []
+    assert resultado["uuid"] == cargo_criado.uuid
+    assert resultado["pk"] == cargo_criado.pk
+
+
 def test_criar_nao_deve_alterar_dados_originais(
-    model_to_dict_mock: MagicMock,
-) -> None:
-    """Não deve alterar o dicionário original recebido na criação."""
-    repository, cargo_model, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
+    cargo_payload_valido,
+    usuario_ativo,
+):
+    """Não deve modificar os dados recebidos na criação."""
+    repository = CargoRepository()
 
-    cargo = MagicMock(spec=Cargo)
-    cargo.pk = 3
-    cargo.uuid = uuid4()
-    cargo_model.return_value = cargo
-
-    documento = MagicMock(spec=DocumentoCargo)
-    documento_model.return_value = documento
-
-    model_to_dict_mock.return_value = {
-        "nome": "Eletricista",
-        "exige_documento": True,
-        "status": True,
-    }
-
-    dados = {
-        "nome": "Eletricista",
-        "exige_documento": True,
-        "status": True,
-        "documentos": [
-            {
-                "nome": "Certificado NR-10",
-            },
-        ],
-    }
-
-    dados_esperados = {
-        "nome": "Eletricista",
-        "exige_documento": True,
-        "status": True,
-        "documentos": [
-            {
-                "nome": "Certificado NR-10",
-            },
-        ],
-    }
+    dados = cargo_payload_valido
+    dados_esperados = deepcopy(cargo_payload_valido)
 
     repository.criar(
         dados=dados,
-        usuario=usuario,
+        usuario=usuario_ativo,
     )
 
     assert dados == dados_esperados
 
 
-def test_criar_nao_deve_salvar_cargo_invalido() -> None:
-    """Não deve salvar o cargo quando sua validação falhar."""
-    repository, cargo_model, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
+def test_criar_nao_deve_persistir_cargo_invalido(
+    cargo_payload_valido_sem_documentos,
+    usuario_ativo,
+):
+    """Não deve persistir o cargo quando sua validação falhar."""
+    repository = CargoRepository()
 
-    cargo = MagicMock(spec=Cargo)
-    cargo.full_clean.side_effect = ValidationError(
-        {
-            "nome": [
-                "Nome inválido.",
-            ],
-        },
-    )
-    cargo_model.return_value = cargo
-
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(ValidationError):
         repository.criar(
             dados={
+                **cargo_payload_valido_sem_documentos,
                 "nome": "",
-                "exige_documento": False,
-                "status": True,
             },
-            usuario=usuario,
+            usuario=usuario_ativo,
         )
 
-    assert exc_info.value.message_dict == {
-        "nome": [
-            "Nome inválido.",
-        ],
-    }
-
-    cargo.full_clean.assert_called_once_with()
-    cargo.save.assert_not_called()
-
-    documento_model.assert_not_called()
-    documento_model.objects.bulk_create.assert_not_called()
+    assert not Cargo.objects.filter(
+        nome="",
+    ).exists()
 
 
-def test_criar_nao_deve_persistir_documento_invalido() -> None:
-    """Não deve persistir documentos quando sua validação falhar."""
-    repository, cargo_model, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
+def test_criar_deve_desfazer_transacao_com_documento_invalido(
+    cargo_payload_valido,
+    usuario_ativo,
+):
+    """Deve desfazer a criação quando um documento for inválido."""
+    repository = CargoRepository()
+    nome_cargo = "Cargo com documento inválido"
 
-    cargo = MagicMock(spec=Cargo)
-    cargo_model.return_value = cargo
-
-    documento = MagicMock(spec=DocumentoCargo)
-    documento.full_clean.side_effect = ValidationError(
-        {
-            "nome": [
-                "Nome inválido.",
-            ],
-        },
-    )
-    documento_model.return_value = documento
-
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(ValidationError):
         repository.criar(
             dados={
-                "nome": "Eletricista",
-                "exige_documento": True,
-                "status": True,
+                **cargo_payload_valido,
+                "nome": nome_cargo,
                 "documentos": [
                     {
                         "nome": "",
                     },
                 ],
             },
-            usuario=usuario,
+            usuario=usuario_ativo,
         )
 
-    assert exc_info.value.message_dict == {
-        "nome": [
-            "Nome inválido.",
-        ],
-    }
+    assert not Cargo.objects.filter(
+        nome=nome_cargo,
+    ).exists()
 
-    cargo.full_clean.assert_called_once_with()
-    cargo.save.assert_called_once_with()
-
-    documento.full_clean.assert_called_once_with()
-    documento_model.objects.bulk_create.assert_not_called()
+    assert not DocumentoCargo.objects.filter(
+        nome="",
+    ).exists()
 
 
-@patch("apps.cargo.repository.cargo_repository.model_to_dict")
 def test_atualizar_cargo_e_substituir_documentos(
-    model_to_dict_mock: MagicMock,
-) -> None:
+    cargo,
+    cargo_payload_atualizacao_valido,
+    documento_cargo,
+    usuario_ativo,
+):
     """Deve atualizar o cargo e substituir seus documentos."""
-    repository, _, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
-
-    cargo = MagicMock(spec=Cargo)
-    cargo.pk = 4
-    cargo.uuid = uuid4()
-    cargo.nome = "Eletricista"
-    cargo.exige_documento = True
-    cargo.status = True
-
-    queryset_documentos = MagicMock()
-    documento_model.objects.filter.return_value = queryset_documentos
-
-    primeiro_documento = MagicMock(spec=DocumentoCargo)
-    segundo_documento = MagicMock(spec=DocumentoCargo)
-
-    documento_model.side_effect = [
-        primeiro_documento,
-        segundo_documento,
-    ]
-
-    model_to_dict_mock.return_value = {
-        "nome": "Engenheiro Eletricista",
-        "exige_documento": True,
-        "status": False,
-    }
-
-    dados = {
-        "nome": "Engenheiro Eletricista",
-        "exige_documento": True,
-        "status": False,
-        "documentos": [
-            {
-                "nome": "Certificado NR-10",
-            },
-            {
-                "nome": "Certificado NR-35",
-            },
-        ],
-    }
+    repository = CargoRepository()
 
     resultado = repository.atualizar(
         cargo=cargo,
-        dados=dados,
-        usuario=usuario,
+        dados=cargo_payload_atualizacao_valido,
+        usuario=usuario_ativo,
     )
 
-    assert cargo.nome == "Engenheiro Eletricista"
+    cargo.refresh_from_db()
+
+    documentos = list(
+        DocumentoCargo.objects.filter(
+            cargo=cargo,
+        ).order_by("nome")
+    )
+
+    assert cargo.nome == "Eletricista atualizado"
     assert cargo.exige_documento is True
     assert cargo.status is False
-    assert cargo.atualizado_por is usuario
+    assert cargo.atualizado_por == usuario_ativo
 
-    cargo.full_clean.assert_called_once_with()
-    cargo.save.assert_called_once_with()
+    assert not DocumentoCargo.objects.filter(
+        pk=documento_cargo.pk,
+    ).exists()
 
-    documento_model.objects.filter.assert_called_once_with(
-        cargo=cargo,
-    )
-    queryset_documentos.delete.assert_called_once_with()
+    assert len(documentos) == 1
+    assert documentos[0].nome == "Certificado NR-10 atualizado"
 
-    assert documento_model.call_args_list == [
-        call(
-            nome="Certificado NR-10",
-            cargo=cargo,
-            criado_por=usuario,
-            atualizado_por=usuario,
-        ),
-        call(
-            nome="Certificado NR-35",
-            cargo=cargo,
-            criado_por=usuario,
-            atualizado_por=usuario,
-        ),
-    ]
+    assert documentos[0].criado_por == usuario_ativo
+    assert documentos[0].atualizado_por == usuario_ativo
 
-    primeiro_documento.full_clean.assert_called_once_with()
-    segundo_documento.full_clean.assert_called_once_with()
-
-    documento_model.objects.bulk_create.assert_called_once_with(
-        [
-            primeiro_documento,
-            segundo_documento,
-        ],
-    )
-
-    model_to_dict_mock.assert_called_once_with(cargo)
-
-    assert resultado == {
-        "nome": "Engenheiro Eletricista",
-        "exige_documento": True,
-        "status": False,
-        "documentos": [
-            primeiro_documento,
-            segundo_documento,
-        ],
-        "uuid": cargo.uuid,
-        "pk": cargo.pk,
-    }
+    assert resultado["documentos"] == documentos
+    assert resultado["uuid"] == cargo.uuid
+    assert resultado["pk"] == cargo.pk
 
 
-@patch("apps.cargo.repository.cargo_repository.model_to_dict")
 def test_atualizar_cargo_sem_alterar_documentos(
-    model_to_dict_mock: MagicMock,
-) -> None:
-    """Deve manter os documentos quando o campo não for informado."""
-    repository, _, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
-
-    cargo = MagicMock(spec=Cargo)
-    cargo.pk = 5
-    cargo.uuid = uuid4()
-    cargo.nome = "Eletricista"
-    cargo.status = True
-
-    documento_existente = MagicMock(spec=DocumentoCargo)
-    queryset_documentos = MagicMock()
-    queryset_documentos.__iter__.return_value = iter(
-        [documento_existente],
-    )
-    documento_model.objects.filter.return_value = queryset_documentos
-
-    model_to_dict_mock.return_value = {
-        "nome": "Eletricista atualizado",
-        "status": True,
-    }
+    cargo,
+    documento_cargo,
+    usuario_ativo,
+):
+    """Deve manter os documentos quando não forem informados."""
+    repository = CargoRepository()
 
     resultado = repository.atualizar(
         cargo=cargo,
         dados={
             "nome": "Eletricista atualizado",
+            "status": False,
         },
-        usuario=usuario,
+        usuario=usuario_ativo,
     )
+
+    cargo.refresh_from_db()
+    documento_cargo.refresh_from_db()
 
     assert cargo.nome == "Eletricista atualizado"
-    assert cargo.atualizado_por is usuario
+    assert cargo.status is False
+    assert cargo.atualizado_por == usuario_ativo
 
-    cargo.full_clean.assert_called_once_with()
-    cargo.save.assert_called_once_with()
-
-    documento_model.objects.filter.assert_called_once_with(
+    assert DocumentoCargo.objects.filter(
+        pk=documento_cargo.pk,
         cargo=cargo,
-    )
-    queryset_documentos.delete.assert_not_called()
+    ).exists()
 
-    documento_model.assert_not_called()
-    documento_model.objects.bulk_create.assert_not_called()
-
-    model_to_dict_mock.assert_called_once_with(cargo)
-
-    assert resultado == {
-        "nome": "Eletricista atualizado",
-        "status": True,
-        "documentos": [
-            documento_existente,
-        ],
-        "uuid": cargo.uuid,
-        "pk": cargo.pk,
-    }
+    assert resultado["documentos"] == [documento_cargo]
+    assert resultado["uuid"] == cargo.uuid
+    assert resultado["pk"] == cargo.pk
 
 
-@patch("apps.cargo.repository.cargo_repository.model_to_dict")
 def test_atualizar_com_lista_vazia_deve_remover_documentos(
-    model_to_dict_mock: MagicMock,
-) -> None:
+    cargo,
+    documento_cargo,
+    usuario_ativo,
+):
     """Deve remover documentos quando uma lista vazia for informada."""
-    repository, _, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
-
-    cargo = MagicMock(spec=Cargo)
-    cargo.pk = 6
-    cargo.uuid = uuid4()
-    cargo.exige_documento = True
-
-    queryset_documentos = MagicMock()
-    documento_model.objects.filter.return_value = queryset_documentos
-
-    model_to_dict_mock.return_value = {
-        "nome": "Auxiliar",
-        "exige_documento": False,
-        "status": True,
-    }
+    repository = CargoRepository()
 
     resultado = repository.atualizar(
         cargo=cargo,
@@ -582,175 +323,99 @@ def test_atualizar_com_lista_vazia_deve_remover_documentos(
             "exige_documento": False,
             "documentos": [],
         },
-        usuario=usuario,
+        usuario=usuario_ativo,
     )
+
+    cargo.refresh_from_db()
 
     assert cargo.exige_documento is False
-    assert cargo.atualizado_por is usuario
+    assert cargo.atualizado_por == usuario_ativo
 
-    cargo.full_clean.assert_called_once_with()
-    cargo.save.assert_called_once_with()
-
-    documento_model.objects.filter.assert_called_once_with(
+    assert not DocumentoCargo.objects.filter(
         cargo=cargo,
-    )
-    queryset_documentos.delete.assert_called_once_with()
+    ).exists()
 
-    documento_model.assert_not_called()
-    documento_model.objects.bulk_create.assert_called_once_with([])
-
-    assert resultado == {
-        "nome": "Auxiliar",
-        "exige_documento": False,
-        "status": True,
-        "documentos": [],
-        "uuid": cargo.uuid,
-        "pk": cargo.pk,
-    }
+    assert resultado["documentos"] == []
+    assert resultado["uuid"] == cargo.uuid
+    assert resultado["pk"] == cargo.pk
 
 
-@patch("apps.cargo.repository.cargo_repository.model_to_dict")
 def test_atualizar_nao_deve_alterar_dados_originais(
-    model_to_dict_mock: MagicMock,
-) -> None:
-    """Não deve modificar o dicionário recebido na atualização."""
-    repository, _, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
+    cargo,
+    cargo_payload_atualizacao_valido,
+    usuario_ativo,
+):
+    """Não deve modificar os dados recebidos na atualização."""
+    repository = CargoRepository()
 
-    cargo = MagicMock(spec=Cargo)
-    cargo.pk = 7
-    cargo.uuid = uuid4()
-
-    queryset_documentos = MagicMock()
-    documento_model.objects.filter.return_value = queryset_documentos
-
-    documento = MagicMock(spec=DocumentoCargo)
-    documento_model.return_value = documento
-
-    model_to_dict_mock.return_value = {
-        "nome": "Eletricista atualizado",
-        "exige_documento": True,
-    }
-
-    dados = {
-        "nome": "Eletricista atualizado",
-        "exige_documento": True,
-        "documentos": [
-            {
-                "nome": "Certificado NR-10",
-            },
-        ],
-    }
-
-    dados_esperados = {
-        "nome": "Eletricista atualizado",
-        "exige_documento": True,
-        "documentos": [
-            {
-                "nome": "Certificado NR-10",
-            },
-        ],
-    }
+    dados = cargo_payload_atualizacao_valido
+    dados_esperados = deepcopy(cargo_payload_atualizacao_valido)
 
     repository.atualizar(
         cargo=cargo,
         dados=dados,
-        usuario=usuario,
+        usuario=usuario_ativo,
     )
 
     assert dados == dados_esperados
 
 
-def test_atualizar_nao_deve_salvar_cargo_invalido() -> None:
-    """Não deve salvar o cargo quando sua validação falhar."""
-    repository, _, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
+def test_atualizar_nao_deve_persistir_cargo_invalido(
+    cargo,
+    usuario_ativo,
+):
+    """Não deve persistir a atualização de um cargo inválido."""
+    repository = CargoRepository()
 
-    cargo = MagicMock(spec=Cargo)
-    cargo.nome = "Eletricista"
-    cargo.full_clean.side_effect = ValidationError(
-        {
-            "nome": [
-                "Nome inválido.",
-            ],
-        },
-    )
-
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(ValidationError):
         repository.atualizar(
             cargo=cargo,
             dados={
                 "nome": "",
-                "documentos": [],
             },
-            usuario=usuario,
+            usuario=usuario_ativo,
         )
 
-    assert exc_info.value.message_dict == {
-        "nome": [
-            "Nome inválido.",
-        ],
-    }
+    cargo.refresh_from_db()
 
-    assert cargo.nome == ""
-    assert cargo.atualizado_por is usuario
-
-    cargo.full_clean.assert_called_once_with()
-    cargo.save.assert_not_called()
-
-    documento_model.objects.filter.assert_not_called()
-    documento_model.objects.bulk_create.assert_not_called()
+    assert cargo.nome == "Eletricista"
 
 
-def test_atualizar_nao_deve_persistir_documento_invalido() -> None:
-    """Não deve persistir documentos novos quando a validação falhar."""
-    repository, _, documento_model = criar_mocks()
-    usuario = MagicMock(spec=Usuario)
+def test_atualizar_deve_desfazer_transacao_com_documento_invalido(
+    cargo,
+    cargo_payload_atualizacao_valido,
+    documento_cargo,
+    usuario_ativo,
+):
+    """Deve restaurar cargo e documentos após falha de validação."""
+    repository = CargoRepository()
 
-    cargo = MagicMock(spec=Cargo)
-    cargo.pk = 8
-    cargo.uuid = uuid4()
-
-    queryset_documentos = MagicMock()
-    documento_model.objects.filter.return_value = queryset_documentos
-
-    documento = MagicMock(spec=DocumentoCargo)
-    documento.full_clean.side_effect = ValidationError(
-        {
-            "nome": [
-                "Nome inválido.",
-            ],
-        },
-    )
-    documento_model.return_value = documento
-
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(ValidationError):
         repository.atualizar(
             cargo=cargo,
             dados={
-                "nome": "Eletricista",
+                **cargo_payload_atualizacao_valido,
                 "documentos": [
                     {
                         "nome": "",
                     },
                 ],
             },
-            usuario=usuario,
+            usuario=usuario_ativo,
         )
 
-    assert exc_info.value.message_dict == {
-        "nome": [
-            "Nome inválido.",
-        ],
-    }
+    cargo.refresh_from_db()
+    documento_cargo.refresh_from_db()
 
-    cargo.full_clean.assert_called_once_with()
-    cargo.save.assert_called_once_with()
+    assert cargo.nome == "Eletricista"
 
-    documento_model.objects.filter.assert_called_once_with(
+    assert DocumentoCargo.objects.filter(
+        pk=documento_cargo.pk,
         cargo=cargo,
-    )
-    queryset_documentos.delete.assert_called_once_with()
+        nome="Certificado NR-10",
+    ).exists()
 
-    documento.full_clean.assert_called_once_with()
-    documento_model.objects.bulk_create.assert_not_called()
+    assert not DocumentoCargo.objects.filter(
+        cargo=cargo,
+        nome="",
+    ).exists()

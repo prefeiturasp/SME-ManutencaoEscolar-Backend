@@ -4,6 +4,7 @@ from django_filters import rest_framework as filters
 
 from apps.cargo.models import Cargo
 
+
 class CargoFilter(filters.FilterSet):
     """Filtros disponíveis para cargos."""
 
