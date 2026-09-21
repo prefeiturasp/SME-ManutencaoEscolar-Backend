@@ -1,7 +1,10 @@
 """Classes de paginação compartilhadas pelos endpoints da API."""
 
+from typing import Any
+
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
+from rest_framework.response import Response
 
 
 class PaginacaoPadrao(PageNumberPagination):
@@ -18,26 +21,46 @@ class PaginacaoPadrao(PageNumberPagination):
     page_size_query_param = "page_size"
     max_page_size = 100
 
-    def get_page_size(self, request: Request) -> int | None:
-        """Obtém a quantidade de registros que deverá compor a página.
-
-        Quando o parâmetro ``page_size`` possui o valor ``all``, a paginação
-        é desabilitada para a requisição. Para os demais valores, o método
-        utiliza a implementação padrão do Django REST Framework, incluindo
-        as regras de limite configuradas na classe.
+    def paginate_queryset(
+        self,
+        queryset: Any,
+        request: Request,
+        view: Any = None,
+    ) -> Any:
+        """Retorna todos os registros quando ``page_size=all``.
 
         Args:
-            request (Request): Requisição HTTP recebida pela API.
+            queryset: Conjunto de registros a ser paginado.
+            request: Requisição HTTP recebida pela API.
+            view: View que solicitou a paginação.
 
         Returns:
-            int | None: Quantidade de registros por página ou ``None`` para
-            desabilitar a paginação.
+            Any: Registros paginados ou todos os registros.
         """
-        page_size = request.query_params.get(
-            self.page_size_query_param,
-        )
+        if request.query_params.get(self.page_size_query_param) == "all":
+            self._all_requested = True
+            return queryset
 
-        if page_size == "all":
-            return None
+        self._all_requested = False
+        return super().paginate_queryset(queryset, request, view)
 
-        return super().get_page_size(request)
+    def get_paginated_response(self, data: Any) -> Response:
+        """Monta a resposta paginada.
+
+        Args:
+            data: Dados serializados da página atual.
+
+        Returns:
+            Response: Resposta com os metadados e os registros.
+        """
+        if getattr(self, "_all_requested", False):
+            return Response(
+                {
+                    "count": len(data),
+                    "next": None,
+                    "previous": None,
+                    "results": data,
+                },
+            )
+
+        return super().get_paginated_response(data)
