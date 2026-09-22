@@ -273,4 +273,5 @@ class UnidadeEducacionalAtualizarSerializer(serializers.Serializer):
 
     responsaveis = ResponsavelUnidadeAtualizacaoSerializer(
         many=True,
+        allow_empty=False,
     )
