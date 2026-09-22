@@ -1,7 +1,6 @@
 """Fixtures compartilhadas para os testes do app Cargo."""
 
 import pytest
-
 from django.utils import timezone
 
 from apps.cargo.models import Cargo, DocumentoCargo

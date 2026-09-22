@@ -199,3 +199,22 @@ class CargoService:
                 )
 
             nomes_encontrados.add(nome_normalizado)
+
+    def deletar(
+        self,
+        model_cargo: Cargo,
+        usuario: Usuario,
+    ) -> tuple[int, dict[str, int]]:
+        """Realiza a exclusão lógica de um cargo.
+
+        Registra o usuário logado como responsável pela exclusão.
+
+        Args:
+            model_cargo: Instância do cargo a ser deletada.
+            usuario: Usuário logado responsável pela exclusão.
+
+        Returns:
+            Tupla contendo a quantidade de registros deletados e um dicionário
+            com a quantidade de exclusões por tipo de objeto.
+        """
+        return self.repository.deletar(usuario, model_cargo)
