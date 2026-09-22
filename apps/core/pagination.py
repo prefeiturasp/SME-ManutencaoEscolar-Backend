@@ -27,15 +27,19 @@ class PaginacaoPadrao(PageNumberPagination):
         request: Request,
         view: Any = None,
     ) -> Any:
-        """Retorna todos os registros quando ``page_size=all``.
+        """Pagina o conjunto ou o retorna integralmente com ``page_size=all``.
+
+        Nesse caso, preserva o queryset recebido e sinaliza que a resposta
+        deve incluir os metadados de paginação sem links de navegação.
 
         Args:
             queryset: Conjunto de registros a ser paginado.
             request: Requisição HTTP recebida pela API.
-            view: View que solicitou a paginação.
+            view: View que solicitou a paginação, quando disponível.
 
         Returns:
-            Any: Registros paginados ou todos os registros.
+            Any: Página de registros, queryset integral ou ``None`` quando a
+                paginação estiver desabilitada pela configuração da view.
         """
         if request.query_params.get(self.page_size_query_param) == "all":
             self._all_requested = True
@@ -45,13 +49,18 @@ class PaginacaoPadrao(PageNumberPagination):
         return super().paginate_queryset(queryset, request, view)
 
     def get_paginated_response(self, data: Any) -> Response:
-        """Monta a resposta paginada.
+        """Monta a resposta com registros e metadados de paginação.
+
+        Com ``page_size=all``, informa o total de registros serializados e
+        define ``next`` e ``previous`` como ``None``. Nos demais casos,
+        utiliza a resposta padrão do DRF.
 
         Args:
-            data: Dados serializados da página atual.
+            data: Dados serializados da página ou do queryset integral.
 
         Returns:
-            Response: Resposta com os metadados e os registros.
+            Response: Resposta com ``count``, ``next``, ``previous`` e
+                ``results``.
         """
         if getattr(self, "_all_requested", False):
             return Response(
