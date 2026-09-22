@@ -34,7 +34,7 @@ class CargoViewSet(viewsets.ModelViewSet):
     Delegando regras de negócio ao CargosService.
     """
 
-    http_method_names = ["get", "post", "options"]
+    http_method_names = ["get", "post", "patch", "options"]
     queryset = Cargo.objects.all()
     lookup_field = "uuid"
 
@@ -43,6 +43,21 @@ class CargoViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = CargoFilter
     pagination_class = PaginacaoPadrao
+
+    @staticmethod
+    def _obter_cargo(serializer: BaseSerializer) -> Cargo:
+        """Retorna a instância de cargo do serializer."""
+        cargo = serializer.instance
+
+        if not isinstance(cargo, Cargo):
+            raise DRFValidationError(
+                {
+                    "title": "Erro",
+                    "detail": "Cargo inválido ou não encontrado.",
+                }
+            )
+
+        return cargo
 
     def __init__(self, **kwargs: Any) -> None:
         """Inicializa a view com o serviço de cargos.
@@ -79,6 +94,48 @@ class CargoViewSet(viewsets.ModelViewSet):
 
         try:
             cargo = self.service.criar(
+                dados=serializer.validated_data,
+                usuario=usuario,
+            )
+        except CargoOuDocumentoJaVinculadaError as exc:
+            raise DRFValidationError(
+                {
+                    "title": exc.title,
+                    "detail": exc.detail,
+                }
+            ) from exc
+        except DjangoValidationError as exc:
+            if hasattr(exc, "message_dict"):
+                raise DRFValidationError(exc.message_dict) from exc
+
+            raise DRFValidationError(exc.messages) from exc
+        except Exception as exc:
+            raise CargoInstabilidadeError(
+                {
+                    "title": "Erro",
+                    "detail": CargoErrorMessages.INSTABILIDADE,
+                }
+            ) from exc
+
+        serializer.instance = cargo
+
+    def perform_update(self, serializer: BaseSerializer) -> None:
+        """
+        Atualiza um cargo existente usando o serviço.
+
+        Args:
+            serializer (BaseSerializer): Serializer contendo os dados do
+                cargo.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
+        usuario = self._obter_usuario()
+        cargo = self._obter_cargo(serializer)
+
+        try:
+            self.service.atualizar(
+                cargo=cargo,
                 dados=serializer.validated_data,
                 usuario=usuario,
             )
