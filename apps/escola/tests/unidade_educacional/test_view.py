@@ -250,23 +250,6 @@ class TestUnidadeEducacionalViewSet:
 
         assert resposta.status_code == (status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_nao_deve_permitir_atualizacao(
-        self,
-        api_cliente,
-        unidade_educacional_emef,
-    ):
-        """Não deve permitir atualização de unidades educacionais."""
-        resposta = api_cliente.put(
-            f"{self.url}{unidade_educacional_emef.uuid}/",
-            data={
-                "codigo_eol": "999999",
-                "nome": "Unidade Alterada",
-            },
-            format="json",
-        )
-
-        assert resposta.status_code == (status.HTTP_405_METHOD_NOT_ALLOWED)
-
     def test_nao_deve_permitir_atualizacao_parcial(
         self,
         api_cliente,
@@ -296,3 +279,56 @@ class TestUnidadeEducacionalViewSet:
         assert Unidadeeducacional.objects.filter(
             uuid=unidade_educacional_emef.uuid,
         ).exists()
+
+    def test_deve_atualizar_unidade_educacional(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        dados_unidade_emef,
+        historico_responsavel,
+        usuario_sincronizacao,
+    ):
+        """Deve atualizar os dados da unidade educacional."""
+        dados = {
+            "email": "atualizado@email.com",
+            "telefone": "1133334444",
+            "ativo": False,
+            "responsaveis": [
+                {
+                    "uuid": str(historico_responsavel.responsavel.uuid),
+                    "registro_funcional": (
+                        historico_responsavel.responsavel.registro_funcional
+                    ),
+                    "nome": "Diretor Atualizado",
+                    "cargo": historico_responsavel.cargo.codigo,
+                    "email": "diretor@atualizado.com",
+                    "telefone": "",
+                    "celular": "",
+                },
+            ],
+        }
+
+        api_cliente.force_authenticate(
+            user=usuario_sincronizacao,
+        )
+
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_200_OK, resposta.data
+
+        unidade_educacional_emef.refresh_from_db()
+        dados_unidade_emef.refresh_from_db()
+        historico_responsavel.responsavel.refresh_from_db()
+
+        assert unidade_educacional_emef.status is False
+        assert dados_unidade_emef.email == "atualizado@email.com"
+        assert dados_unidade_emef.telefone == "1133334444"
+
+        assert historico_responsavel.responsavel.nome == "Diretor Atualizado"
+        assert (
+            historico_responsavel.responsavel.email == "diretor@atualizado.com"
+        )

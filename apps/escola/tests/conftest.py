@@ -270,7 +270,7 @@ def usuario_sincronizacao(cargo_perfil_diretor):
 def responsavel_unidade() -> ResponsavelUnidade:
     """Cria um responsável de unidade para os testes."""
     return ResponsavelUnidade.objects.create(
-        registro_funcional="000000011",
+        registro_funcional="0000011",
         nome="DIRETOR TESTE",
         email="responsavel.emef@teste.com",
         telefone="11999999999",

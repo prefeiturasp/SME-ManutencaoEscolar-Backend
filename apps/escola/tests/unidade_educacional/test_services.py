@@ -46,7 +46,7 @@ class TestUnidadeEducacionalService:
             dados=dados,
             usuario=usuario_sincronizacao,
         )
-        assert dados_atualizados["dados"]["email"] == dados["email"]
+        assert dados_atualizados["email"] == dados["email"]
 
     def test_deve_rejeitar_rf_duplicado_na_mesma_requisicao(
         self,

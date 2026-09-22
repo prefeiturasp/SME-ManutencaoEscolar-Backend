@@ -192,4 +192,29 @@ class UnidadeEducacionalRepository:
             model_to_dict(dados_unidade) if dados_unidade else None
         )
 
-        return dados
+        responsaveis = self.historico_model.objects.filter(
+            unidade_educacional=unidade,
+            ativo=True,
+        ).select_related(
+            "responsavel",
+            "cargo",
+        )
+        return {
+            "email": dados_unidade.email if dados_unidade else "",
+            "telefone": dados_unidade.telefone if dados_unidade else "",
+            "ativo": unidade.status,
+            "responsaveis": [
+                {
+                    "uuid": str(historico.responsavel.uuid),
+                    "registro_funcional": (
+                        historico.responsavel.registro_funcional
+                    ),
+                    "nome": historico.responsavel.nome,
+                    "cargo": historico.cargo.codigo,
+                    "email": historico.responsavel.email,
+                    "telefone": historico.responsavel.telefone,
+                    "celular": historico.responsavel.celular,
+                }
+                for historico in responsaveis
+            ],
+        }

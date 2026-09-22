@@ -75,7 +75,7 @@ class TestUnidadeEducacionalRepository:
             "ativo": False,
         }
 
-        resultado = UnidadeEducacionalRepository().atualizar(
+        UnidadeEducacionalRepository().atualizar(
             unidade=unidade_educacional_emef,
             dados=dados,
             responsaveis=[],
@@ -88,7 +88,6 @@ class TestUnidadeEducacionalRepository:
         assert unidade_educacional_emef.status is False
         assert dados_unidade_emef.email == "atualizado@email.com"
         assert dados_unidade_emef.telefone == "1133334444"
-        assert resultado["id"] == unidade_educacional_emef.id
 
     def test_deve_atualizar_responsavel_existente(
         self,
