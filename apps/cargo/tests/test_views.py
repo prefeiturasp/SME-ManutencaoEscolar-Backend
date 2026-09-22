@@ -17,8 +17,12 @@ from apps.cargo.exceptions import (
     CargoOuDocumentoJaVinculadaError,
 )
 from apps.cargo.filters import CargoFilter
-from apps.cargo.models import Cargo
-from apps.cargo.serializers import CargoCriarSerializer, CargoSerializer
+from apps.cargo.models import Cargo, DocumentoCargo
+from apps.cargo.serializers import (
+    CargoCriarSerializer,
+    CargoListagemSerializer,
+    CargoSerializer,
+)
 from apps.core.pagination import PaginacaoPadrao
 from apps.usuarios.models.usuario import Usuario
 
@@ -283,17 +287,61 @@ def test_get_serializer_class_deve_usar_serializer_de_criacao(
     assert resultado is CargoCriarSerializer
 
 
-@pytest.mark.parametrize("acao", ["list", "retrieve"])
 def test_get_serializer_class_deve_usar_serializer_de_leitura(
     view: CargoViewSet,
-    acao: str,
 ) -> None:
-    """Usa o serializer de leitura nas ações de consulta."""
-    view.action = acao
+    """Usa o serializer de leitura na consulta de um cargo."""
+    view.action = "retrieve"
 
     resultado = view.get_serializer_class()
 
     assert resultado is CargoSerializer
+
+
+def test_get_serializer_class_deve_usar_serializer_de_listagem(
+    view: CargoViewSet,
+) -> None:
+    """Usa o serializer resumido na listagem de cargos."""
+    view.action = "list"
+
+    assert view.get_serializer_class() is CargoListagemSerializer
+
+
+@pytest.mark.django_db
+def test_listar_todos_os_cargos_com_page_size_all(api_cliente: Any) -> None:
+    """Deve listar todos os cargos com os campos resumidos e metadados."""
+    cargo = Cargo.objects.create(nome="Eletricista", exige_documento=True)
+    DocumentoCargo.objects.create(
+        cargo=cargo,
+        nome="Certificado NR-10",
+    )
+    cargo_sem_documento = Cargo.objects.create(
+        nome="Auxiliar",
+        exige_documento=False,
+    )
+
+    resposta = api_cliente.get("/api/v1/cargos/?page_size=all")
+
+    assert resposta.status_code == 200
+    assert resposta.json() == {
+        "count": 2,
+        "next": None,
+        "previous": None,
+        "results": [
+            {
+                "uuid": str(cargo_sem_documento.uuid),
+                "nome": "Auxiliar",
+                "exige_documento": False,
+                "documentos": [],
+            },
+            {
+                "uuid": str(cargo.uuid),
+                "nome": "Eletricista",
+                "exige_documento": True,
+                "documentos": [{"nome": "Certificado NR-10"}],
+            },
+        ],
+    }
 
 
 def test_obter_cargo_deve_retornar_instancia_do_serializer(

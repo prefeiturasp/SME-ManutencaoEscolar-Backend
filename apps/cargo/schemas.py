@@ -9,7 +9,10 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 
-from apps.cargo.serializers import CargoCriarSerializer, CargoSerializer
+from apps.cargo.serializers import (
+    CargoCriarSerializer,
+    CargoSerializer,
+)
 
 _TAG_CARGO = "Cargo"
 
@@ -94,7 +97,6 @@ _CARGO_EXEMPLO_ATUALIZADO: dict[str, object] = {
         {"nome": _COMPROVANTE},
     ],
 }
-
 
 CARGO_SCHEMA = extend_schema_view(
     list=extend_schema(

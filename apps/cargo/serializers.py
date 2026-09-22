@@ -62,6 +62,23 @@ class CargoSerializer(serializers.ModelSerializer):
         )
 
 
+class CargoListagemSerializer(serializers.ModelSerializer):
+    """Serializa os dados resumidos de um cargo para listagem completa."""
+
+    documentos = DocumentoCargoCriarSerializer(many=True, read_only=True)
+
+    class Meta:
+        """Configura o serializer da listagem completa de cargos."""
+
+        model = Cargo
+        fields = (
+            "uuid",
+            "nome",
+            "exige_documento",
+            "documentos",
+        )
+
+
 class CargoCriarSerializer(serializers.ModelSerializer):
     """Valida os dados necessários para cadastrar um cargo."""
 
