@@ -23,7 +23,7 @@ class UnidadeEducacionalService:
         self,
         unidade: Unidadeeducacional,
         dados: dict[str, Any],
-        usuario: Usuario,
+        usuario: Usuario | None,
     ) -> dict[str, Any]:
         """Atualiza uma unidade educacional.
 

@@ -52,7 +52,7 @@ class UnidadeEducacionalRepository:
         unidade: Unidadeeducacional,
         dados: dict[str, Any],
         responsaveis: list[dict[str, Any]],
-        usuario: Usuario,
+        usuario: Usuario | None,
     ) -> dict[str, Any]:
         """Atualiza a unidade e seus responsáveis."""
         self._atualizar_dados_unidade(
@@ -98,7 +98,7 @@ class UnidadeEducacionalRepository:
         self,
         unidade: Unidadeeducacional,
         dados: dict[str, Any],
-        usuario: Usuario,
+        usuario: Usuario | None,
     ) -> None:
         """Atualiza um responsável já vinculado à unidade."""
         historico = self.historico_model.objects.select_related(
@@ -133,7 +133,7 @@ class UnidadeEducacionalRepository:
         self,
         unidade: Unidadeeducacional,
         dados: dict[str, Any],
-        usuario: Usuario,
+        usuario: Usuario | None,
     ) -> None:
         """Cria um responsável e seu vínculo com a unidade."""
         responsavel = self.responsavel_model(

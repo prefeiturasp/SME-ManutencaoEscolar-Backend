@@ -274,33 +274,3 @@ class UnidadeEducacionalAtualizarSerializer(serializers.Serializer):
     responsaveis = ResponsavelUnidadeAtualizacaoSerializer(
         many=True,
     )
-
-    def validate_responsaveis(self, responsaveis: list) -> list:
-        """Valida a unicidade dos RFs/CPFs dos responsáveis."""
-        rfs = [
-            responsavel["registro_funcional"] for responsavel in responsaveis
-        ]
-
-        if len(rfs) != len(set(rfs)):
-            raise serializers.ValidationError(
-                "Não é permitido cadastrar responsáveis com o mesmo RF ou CPF."
-            )
-
-        for responsavel in responsaveis:
-            registro_funcional = responsavel["registro_funcional"]
-            uuid = responsavel.get("uuid")
-
-            consulta = ResponsavelUnidade.objects.filter(
-                registro_funcional=registro_funcional,
-            )
-
-            if uuid:
-                consulta = consulta.exclude(uuid=uuid)
-
-            if consulta.exists():
-                raise serializers.ValidationError(
-                    f"O RF ou CPF {registro_funcional} já está "
-                    "associado a outro responsável."
-                )
-
-        return responsaveis
