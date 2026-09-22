@@ -221,3 +221,86 @@ class UnidadeEducacionalListSerializer(
             "lote",
             "status",
         )
+
+
+class ResponsavelUnidadeAtualizacaoSerializer(serializers.Serializer):
+    """Valida os dados de um responsável na atualização da unidade."""
+
+    uuid = serializers.UUIDField(
+        required=False,
+    )
+    registro_funcional = serializers.CharField(
+        max_length=11,
+    )
+    nome = serializers.CharField(
+        max_length=255,
+    )
+    cargo = serializers.CharField()
+    email = serializers.EmailField()
+    telefone = serializers.CharField(
+        allow_blank=True,
+        required=False,
+    )
+    celular = serializers.CharField(
+        allow_blank=True,
+        required=False,
+    )
+
+    def validate_registro_funcional(
+        self,
+        value: str,
+    ) -> str:
+        """Valida o formato do registro funcional ou CPF."""
+        if not value.isdigit():
+            raise serializers.ValidationError(
+                "RF ou CPF deve conter apenas números.",
+            )
+
+        if len(value) not in (7, 11):
+            raise serializers.ValidationError(
+                "RF deve conter 7 dígitos ou CPF deve conter 11 dígitos.",
+            )
+
+        return value
+
+
+class UnidadeEducacionalAtualizarSerializer(serializers.Serializer):
+    """Valida os dados para atualização da unidade educacional."""
+
+    email = serializers.EmailField()
+    telefone = serializers.CharField()
+    ativo = serializers.BooleanField()
+
+    responsaveis = ResponsavelUnidadeAtualizacaoSerializer(
+        many=True,
+    )
+
+    def validate_responsaveis(self, responsaveis: list) -> list:
+        """Valida a unicidade dos RFs/CPFs dos responsáveis."""
+        rfs = [
+            responsavel["registro_funcional"] for responsavel in responsaveis
+        ]
+
+        if len(rfs) != len(set(rfs)):
+            raise serializers.ValidationError(
+                "Não é permitido cadastrar responsáveis com o mesmo RF ou CPF."
+            )
+
+        for responsavel in responsaveis:
+            registro_funcional = responsavel["registro_funcional"]
+            uuid = responsavel.get("uuid")
+
+            consulta = ResponsavelUnidade.objects.filter(
+                registro_funcional=registro_funcional,
+            )
+
+            if uuid:
+                consulta = consulta.exclude(uuid=uuid)
+
+            if consulta.exists():
+                raise serializers.ValidationError(
+                    f"O RF ou CPF {registro_funcional} já está "
+                    "associado a outro responsável."
+                )
+
+        return responsaveis
