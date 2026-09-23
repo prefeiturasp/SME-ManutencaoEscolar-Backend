@@ -251,4 +251,27 @@ CARGO_SCHEMA = extend_schema_view(
             ),
         ],
     ),
+    destroy=extend_schema(
+        tags=[_TAG_CARGO],
+        summary="Exclui um cargo",
+        description=(
+            "Realiza a exclusão lógica de um cargo identificado pelo UUID."
+        ),
+        operation_id="excluirCargo",
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Cargo excluído com sucesso",
+            ),
+            401: OpenApiResponse(
+                description=_CREDENCIAIS_INVALIDAS,
+            ),
+            404: OpenApiResponse(
+                description=_CARGO_NAO_ENCONTRADO,
+            ),
+            500: OpenApiResponse(
+                description=_ERRO_NO_SERVIDOR,
+            ),
+        },
+    ),
 )

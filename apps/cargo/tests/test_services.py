@@ -584,3 +584,24 @@ def test_atualizar_documentos_deve_usar_novo_nome_na_mensagem(
     cargo.refresh_from_db()
 
     assert cargo.nome == "Eletricista"
+
+
+def test_deletar_cargo(
+    cargo,
+    service,
+    usuario_ativo,
+):
+    """Deve realizar a exclusão lógica do cargo."""
+    quantidade, detalhes = service.deletar(
+        model_cargo=cargo,
+        usuario=usuario_ativo,
+    )
+
+    cargo.refresh_from_db()
+
+    assert quantidade == 1
+    assert detalhes == {
+        "cargo.Cargo": 1,
+    }
+    assert cargo.deletado_em is not None
+    assert cargo.deletado_por == usuario_ativo
