@@ -243,7 +243,7 @@ def resposta_dados_complementares():
         "codigoUe": "100001",
         "nomeUe": "EMEF Escola Teste",
         "enderecoUe": "Rua Teste, 100",
-        "telefoneUe": "1122223333",
+        "telefoneUe": "22223333",
         "email": "diretor.um@email.com",
         "nome": "Diretor Escola",
         "cpf": "12345678900",

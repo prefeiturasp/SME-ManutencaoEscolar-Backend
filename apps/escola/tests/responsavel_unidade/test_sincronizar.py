@@ -1496,3 +1496,28 @@ class TestSincronizarDiretores:
         assert quantidades["historicos_criados"] == 1
         assert quantidades["historicos_atualizados"] == 0
         assert quantidades["historicos_ignorados"] == 0
+
+    @pytest.mark.parametrize(
+        ("telefone", "resultado_esperado"),
+        [
+            ("12345678", "1112345678"),
+            ("912345678", "11912345678"),
+            ("  12345678  ", "1112345678"),
+            ("  912345678  ", "11912345678"),
+            ("1199999999", ""),
+            ("1234567", ""),
+            ("123456789012", ""),
+            ("telefone", ""),
+            ("", ""),
+            ("   ", ""),
+            (None, ""),
+        ],
+    )
+    def test_deve_normalizar_telefone(
+        self,
+        telefone,
+        resultado_esperado,
+    ):
+        """Deve validar e normalizar telefones com oito ou nove dígitos."""
+        resultado = Command()._normalizar_telefone(telefone)
+        assert resultado == resultado_esperado
