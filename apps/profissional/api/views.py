@@ -13,6 +13,7 @@ from apps.profissional.models import Profissional
 from apps.profissional.schemas import PROFISSIONAL_SCHEMA
 from apps.profissional.serializers.profissional_serializers import (
     ProfissionalCriarAtualizarSerializer,
+    ProfissionalListSerializer,
     ProfissionalSerializer,
 )
 from apps.profissional.services.profissional_services import (
@@ -23,13 +24,13 @@ from apps.usuarios.models import Usuario
 
 @PROFISSIONAL_SCHEMA
 class ProfissionalViewSet(ModelViewSet):
-    """Disponibiliza o cadastro de profissionais."""
+    """Disponibiliza o cadastro e listagem de profissionais."""
 
     queryset = Profissional.objects.prefetch_related(
         "funcoes__cargo", "funcoes__documentos"
     )
     lookup_field = "uuid"
-    http_method_names = ["post", "options"]
+    http_method_names = ["get", "post", "options"]
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProfissionalFilter
 
@@ -41,6 +42,8 @@ class ProfissionalViewSet(ModelViewSet):
         """Retorna o serializer apropriado para a ação atual."""
         if self.action == "create":
             return ProfissionalCriarAtualizarSerializer
+        if self.action == "list":
+            return ProfissionalListSerializer
         return ProfissionalSerializer
 
     def _usuario_logado(self) -> Usuario | None:
