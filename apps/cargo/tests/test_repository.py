@@ -128,7 +128,9 @@ def test_criar_cargo_com_documentos(
 
     assert resultado["pk"] == cargo_criado.pk
     assert resultado["uuid"] == cargo_criado.uuid
-    assert resultado["documentos"] == documentos
+    assert [documento.uuid for documento in resultado["documentos"]] == [
+        documento.uuid for documento in documentos
+    ]
 
 
 def test_criar_cargo_sem_documentos(
@@ -270,7 +272,9 @@ def test_atualizar_cargo_e_substituir_documentos(
     assert documentos[0].criado_por == usuario_ativo
     assert documentos[0].atualizado_por == usuario_ativo
 
-    assert resultado["documentos"] == documentos
+    assert [documento.uuid for documento in resultado["documentos"]] == [
+        documento.uuid for documento in documentos
+    ]
     assert resultado["uuid"] == cargo.uuid
     assert resultado["pk"] == cargo.pk
 

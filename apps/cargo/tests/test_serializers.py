@@ -2,12 +2,32 @@
 
 import pytest
 
+from apps.cargo.models import Cargo, DocumentoCargo
 from apps.cargo.serializers import (
     CargoCriarSerializer,
+    CargoListagemSerializer,
     DocumentoCargoCriarSerializer,
 )
 
 pytestmark = pytest.mark.django_db
+
+
+def test_serializar_cargo_para_listagem_completa() -> None:
+    """Deve retornar somente os campos resumidos e seus documentos."""
+    cargo = Cargo.objects.create(nome="Eletricista", exige_documento=True)
+    DocumentoCargo.objects.create(
+        cargo=cargo,
+        nome="Certificado NR-10",
+    )
+
+    dados = CargoListagemSerializer(cargo).data
+
+    assert dados == {
+        "uuid": str(cargo.uuid),
+        "nome": "Eletricista",
+        "exige_documento": True,
+        "documentos": [{"nome": "Certificado NR-10"}],
+    }
 
 
 def test_validar_documento_do_cargo() -> None:

@@ -18,7 +18,11 @@ from apps.cargo.constants import CargoErrorMessages
 from apps.cargo.exceptions import CargoInstabilidadeError
 from apps.cargo.filters import CargoFilter
 from apps.cargo.models import Cargo, DocumentoCargo
-from apps.cargo.serializers import CargoCriarSerializer, CargoSerializer
+from apps.cargo.serializers import (
+    CargoCriarSerializer,
+    CargoListagemSerializer,
+    CargoSerializer,
+)
 from apps.cargo.services.cargo_service import CargoService
 from apps.core.pagination import PaginacaoPadrao
 from apps.usuarios.models.usuario import Usuario
@@ -72,10 +76,19 @@ def test_get_serializer_class_deve_usar_serializer_de_escrita(
     assert resultado is CargoCriarSerializer
 
 
+def test_get_serializer_class_deve_usar_serializer_de_listagem() -> None:
+    """Deve utilizar o serializer resumido na listagem."""
+    view = CargoViewSet()
+    view.action = "list"
+
+    resultado = view.get_serializer_class()
+
+    assert resultado is CargoListagemSerializer
+
+
 @pytest.mark.parametrize(
     "acao",
     [
-        "list",
         "retrieve",
         "destroy",
     ],
@@ -159,6 +172,54 @@ def test_obter_cargo_deve_rejeitar_instancia_de_outro_tipo() -> None:
     assert exc_info.value.detail == {
         "title": "Erro",
         "detail": "Cargo inválido ou não encontrado.",
+    }
+
+
+def test_listar_todos_os_cargos_com_page_size_all(
+    api_cliente: Any,
+) -> None:
+    """Deve listar todos os cargos com os campos resumidos e metadados."""
+    cargo = Cargo.objects.create(
+        nome="Eletricista",
+        exige_documento=True,
+    )
+    DocumentoCargo.objects.create(
+        cargo=cargo,
+        nome="Certificado NR-10",
+    )
+
+    cargo_sem_documento = Cargo.objects.create(
+        nome="Auxiliar",
+        exige_documento=False,
+    )
+
+    resposta = api_cliente.get(
+        f"{CARGOS_URL}?page_size=all",
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json() == {
+        "count": 2,
+        "next": None,
+        "previous": None,
+        "results": [
+            {
+                "uuid": str(cargo_sem_documento.uuid),
+                "nome": "Auxiliar",
+                "exige_documento": False,
+                "documentos": [],
+            },
+            {
+                "uuid": str(cargo.uuid),
+                "nome": "Eletricista",
+                "exige_documento": True,
+                "documentos": [
+                    {
+                        "nome": "Certificado NR-10",
+                    },
+                ],
+            },
+        ],
     }
 
 
