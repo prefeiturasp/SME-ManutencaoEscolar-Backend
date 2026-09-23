@@ -419,3 +419,22 @@ def test_atualizar_deve_desfazer_transacao_com_documento_invalido(
         cargo=cargo,
         nome="",
     ).exists()
+
+
+def test_deletar_cargo(
+    cargo,
+    usuario_ativo,
+):
+    """Deve realizar a exclusao logica do cargo."""
+    repository = CargoRepository()
+
+    quantidade, _ = repository.deletar(
+        usuario=usuario_ativo,
+        model_cargo=cargo,
+    )
+
+    cargo.refresh_from_db()
+
+    assert quantidade == 1
+    assert cargo.deletado_em is not None
+    assert cargo.deletado_por == usuario_ativo
