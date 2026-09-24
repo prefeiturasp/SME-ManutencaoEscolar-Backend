@@ -800,3 +800,81 @@ Cypress.Commands.add('cancelar_excluir_empresa', () => {
     .should('be.visible')
     .click()
 })
+
+Cypress.Commands.add('clicar_editar_empresa', () => {
+  cy.get(empresas_localizadores.campo_nome())
+    .should('be.visible')
+    .click()
+    .type('Teste automação')
+
+  cy.intercept('POST', `${Cypress.config('baseUrl')}/empresas`)
+    .as('buscar_empresas')
+
+  cy.get(empresas_localizadores.btn_buscar())
+    .should('be.visible')
+    .click()
+
+  cy.wait('@buscar_empresas')
+
+  cy.get(empresas_localizadores.btn_abrir_empresa())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('editar_dados_empresa', () => {
+  const nomeEmpresa = faker.company.name() 
+  const nomeResponsavel = faker.person.fullName()
+  
+  cy.get(empresas_localizadores.campo_razao_social())
+    .should('be.visible')
+    .clear()
+    .type(nomeEmpresa)
+
+  cy.get(empresas_localizadores.btn_salvar_cadastro())
+    .should('be.visible')
+    .click()
+	
+  cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
+    .should('be.visible')
+    .first()   
+    .clear()
+    .type(nomeResponsavel)
+
+  cy.get(empresas_localizadores.btn_salvar_cadastro())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_edicao_empresa', () => {
+  cy.contains('Alteração')  
+})
+
+Cypress.Commands.add('dados_obrigatorios_editar_dados_empresa', () => {
+  const nomeEmpresa = faker.company.name() 
+  
+  cy.get(empresas_localizadores.campo_razao_social())
+    .should('be.visible')
+    .type(nomeEmpresa)
+
+  cy.get(empresas_localizadores.btn_salvar_cadastro())
+    .should('be.visible')
+    .click()
+	
+  cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
+    .should('be.visible')
+    .clear()	
+
+  cy.get(empresas_localizadores.campo_telefone_responsavel_tecnico())
+    .should('be.visible')   
+    .clear()
+  
+  cy.get(empresas_localizadores.campo_email_responsavel_tecnico())
+    .should('be.visible')  
+    .clear()
+})
+
+Cypress.Commands.add('cancelar_editar_dados_empresa', () => {  
+  cy.get(empresas_localizadores.btn_cancelar())
+    .should('be.visible')
+    .click()
+})

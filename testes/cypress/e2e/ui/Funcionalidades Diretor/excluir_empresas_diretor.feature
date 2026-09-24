@@ -1,6 +1,6 @@
 # language: pt
 
-Funcionalidade: Exclusão de Empresa
+Funcionalidade: Exclusão de empresa
 
   Contexto:
     Dado eu acesso o sistema com a visualização "web"
@@ -13,8 +13,8 @@ Funcionalidade: Exclusão de Empresa
 	  Então o sistema cancela exclusão da empresa
 
     Exemplos:
-      | status | caso                         |
-      | ativo  | Cancelar exclusão de empresa |
+      | status | caso                          |
+      | ativo  | Cancelar exclusão do cadastro |
 
   Esquema do Cenário: Validar: <caso>
     E acesso a tela Empresas
@@ -23,7 +23,7 @@ Funcionalidade: Exclusão de Empresa
 
     Exemplos:
       | status | caso                         |
-      | ativo  | Empresa excluída com sucesso |
+      | ativo  | Cadastro excluído com sucesso |
 
   
 

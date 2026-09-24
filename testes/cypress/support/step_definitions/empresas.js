@@ -129,3 +129,31 @@ Quando('seleciono na empresa {string} para excluir', () => {
 Então('o sistema exclui a empresa', () => { 
   cy.validar_exclusao_empresa() 
 })
+
+Quando('seleciono a empresa {string} para editar', () => { 
+  cy.clicar_editar_empresa()
+})
+
+Quando('edito o cadastro da empresa', () => { 
+  cy.editar_dados_empresa()
+})
+
+Então('o sistema salva a edição da empresa', () => {
+  cy.validar_edicao_empresa()
+})
+
+Quando('deixo o campo vazio no cadastro da empresa', () => {
+  cy.dados_obrigatorios_editar_dados_empresa()  
+})
+
+Então('o sistema exibe campo obrigadotório na edição da empresa', () => {
+  cy.validar_campo_obrigatorio_empresa()  
+})
+
+Quando('cancelo a edição do cadastro da empresa', () => {
+  cy.cancelar_editar_dados_empresa()   
+})
+
+Então('o sistema retorna sem edição da empresa', () => {
+  cy.validar_consulta_empresa()  
+})

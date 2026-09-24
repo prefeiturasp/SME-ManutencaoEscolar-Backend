@@ -1,6 +1,6 @@
 # language: pt
 
-Funcionalidade: Cadastro de Empresa
+Funcionalidade: Cadastro de empresa
 
   Contexto:
     Dado eu acesso o sistema com a visualização "web"
