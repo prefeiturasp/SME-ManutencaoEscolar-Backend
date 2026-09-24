@@ -41,7 +41,9 @@ from apps.escola.serializers.unidade_educacional_serializers import (
     UnidadeEducacionalListSerializer,
     UnidadeEducacionalSerializer,
 )
-from apps.escola.services import UnidadeEducacionalService
+from apps.escola.services.unidade_educacional_service import (
+    UnidadeEducacionalService,
+)
 from apps.usuarios.models.usuario import Usuario
 
 

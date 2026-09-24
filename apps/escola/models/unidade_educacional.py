@@ -65,9 +65,13 @@ class Unidadeeducacional(UUIDMixin):
             QuerySet: Históricos dos responsáveis atualmente vinculados,
                 com o responsável e o cargo carregados.
         """
-        return self.historico_responsaveis.filter(
-            ativo=True,
-        ).select_related("responsavel", "cargo")
+        return (
+            self.historico_responsaveis.filter(
+                ativo=True,
+            )
+            .select_related("responsavel", "cargo")
+            .order_by("criado_em")
+        )
 
     @property
     def diretor_atual(self) -> ResponsavelUnidade | None:

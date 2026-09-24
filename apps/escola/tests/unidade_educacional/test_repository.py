@@ -2,7 +2,9 @@
 
 import pytest
 
-from apps.escola.repository import UnidadeEducacionalRepository
+from apps.escola.repository.unidade_educacional_repository import (
+    UnidadeEducacionalRepository,
+)
 
 pytestmark = pytest.mark.django_db
 

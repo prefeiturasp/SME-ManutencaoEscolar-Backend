@@ -3,8 +3,12 @@
 import pytest
 from rest_framework.exceptions import ValidationError
 
-from apps.escola.repository import UnidadeEducacionalRepository
-from apps.escola.services import UnidadeEducacionalService
+from apps.escola.repository.unidade_educacional_repository import (
+    UnidadeEducacionalRepository,
+)
+from apps.escola.services.unidade_educacional_service import (
+    UnidadeEducacionalService,
+)
 
 pytestmark = pytest.mark.django_db
 
