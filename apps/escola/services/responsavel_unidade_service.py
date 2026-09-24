@@ -97,6 +97,7 @@ class ResponsavelUnidadeService:
         """
         for responsavel in responsaveis:
             uuid = responsavel.get("uuid")
+            registro_funcional = responsavel["registro_funcional"]
 
             if not uuid:
                 continue
@@ -107,9 +108,9 @@ class ResponsavelUnidadeService:
             ):
                 raise ValidationError(
                     {
-                        "responsaveis": (
-                            "O responsável informado não está "
-                            "vinculado à unidade educacional."
-                        )
+                        "title": "Não é possível adicionar o contato",
+                        "message": "O contato com o CPF/RF "
+                        f"{registro_funcional} não está vinculado à unidade "
+                        "educacional.",
                     }
                 )

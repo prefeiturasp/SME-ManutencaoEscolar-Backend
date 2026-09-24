@@ -12,8 +12,8 @@ from apps.escola.models.unidade_educacional import (
 from apps.escola.repository.responsavel_unidade_repository import (
     ResponsavelUnidadeRepository,
 )
-from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
+from apps.usuarios.repository.cargo_repository import CargoEOLRepository
 
 
 class UnidadeEducacionalRepository:
@@ -150,6 +150,8 @@ class UnidadeEducacionalRepository:
             dados: Dados do responsável.
             usuario: Usuário responsável pela operação.
         """
+        cargo = self._obter_cargo(dados["cargo"])
+
         historico = self.responsavel_repository.buscar_vinculo_ativo(
             unidade=unidade,
             responsavel_uuid=dados["uuid"],
@@ -167,9 +169,7 @@ class UnidadeEducacionalRepository:
         responsavel.full_clean()
         responsavel.save()
 
-        historico.cargo = self._obter_cargo(
-            codigo=dados["cargo"],
-        )
+        historico.cargo_id = cargo["id"]
         historico.atualizado_por = usuario
         historico.full_clean()
         historico.save()
@@ -187,6 +187,7 @@ class UnidadeEducacionalRepository:
             dados: Dados do responsável.
             usuario: Usuário responsável pela operação.
         """
+        cargo = self._obter_cargo(codigo=dados["cargo"])
         responsavel = self.responsavel_model(
             registro_funcional=dados["registro_funcional"],
             nome=dados["nome"],
@@ -203,16 +204,14 @@ class UnidadeEducacionalRepository:
         self.responsavel_repository.criar_vinculo(
             responsavel=responsavel,
             unidade=unidade,
-            cargo=self._obter_cargo(
-                codigo=dados["cargo"],
-            ),
+            id_cargo=cargo["id"],
             usuario=usuario,
         )
 
     @staticmethod
     def _obter_cargo(
         codigo: str,
-    ) -> CargoEOL:
+    ) -> dict:
         """Obtém o cargo pelo código EOL.
 
         Args:
@@ -221,9 +220,12 @@ class UnidadeEducacionalRepository:
         Returns:
             Cargo EOL correspondente ao código informado.
         """
-        return CargoEOL.objects.get(
-            codigo=codigo,
-        )
+        cargo = CargoEOLRepository.buscar_por_codigo(int(codigo))
+
+        if cargo is None:
+            raise ValueError(f"Cargo EOL com código {codigo} não encontrado.")
+
+        return cargo
 
     def _serializar(
         self,

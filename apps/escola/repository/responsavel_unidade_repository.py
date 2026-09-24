@@ -7,7 +7,6 @@ from apps.escola.models.responsavel_unidade import (
     ResponsavelUnidade,
 )
 from apps.escola.models.unidade_educacional import Unidadeeducacional
-from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 
 
@@ -107,7 +106,7 @@ class ResponsavelUnidadeRepository:
         self,
         responsavel: ResponsavelUnidade,
         unidade: Unidadeeducacional,
-        cargo: CargoEOL,
+        id_cargo: int,
         usuario: Usuario | None,
     ) -> HistoricoResponsavel:
         """Cria o vínculo do responsável com uma unidade.
@@ -115,7 +114,7 @@ class ResponsavelUnidadeRepository:
         Args:
             responsavel: Responsável que será vinculado.
             unidade: Unidade educacional.
-            cargo: Cargo do responsável na unidade.
+            id_cargo: ID do cargo do responsável na unidade.
             usuario: Usuário responsável pela operação.
 
         Returns:
@@ -124,7 +123,7 @@ class ResponsavelUnidadeRepository:
         historico = self.historico_model(
             responsavel=responsavel,
             unidade_educacional=unidade,
-            cargo=cargo,
+            cargo_id=id_cargo,
             ativo=True,
             criado_por=usuario,
             atualizado_por=usuario,
