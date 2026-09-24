@@ -14,16 +14,33 @@ class TestUnidadeEducacionalRepository:
 
     def test_deve_buscar_responsavel_por_registro_funcional(
         self,
-        responsavel_unidade,
+        historico_responsavel,
     ):
         """Deve localizar responsável pelo registro funcional."""
+        responsavel_unidade = historico_responsavel.responsavel
+        unidade = historico_responsavel.unidade_educacional
+
         resultado = (
             UnidadeEducacionalRepository().buscar_por_registro_funcional(
                 responsavel_unidade.registro_funcional,
             )
         )
 
-        assert resultado == responsavel_unidade
+        assert resultado is not None
+        assert resultado["uuid"] == str(responsavel_unidade.uuid)
+        assert (
+            resultado["registro_funcional"]
+            == responsavel_unidade.registro_funcional
+        )
+        assert resultado["nome"] == responsavel_unidade.nome
+        assert resultado["unidades"] == [
+            {
+                "id": unidade.id,
+                "uuid": str(unidade.uuid),
+                "codigo_eol": unidade.codigo_eol,
+                "nome": unidade.nome,
+            }
+        ]
 
     def test_deve_retornar_none_quando_registro_funcional_nao_existir(
         self,

@@ -52,11 +52,12 @@ class TestUnidadeEducacionalService:
         )
         assert dados_atualizados["email"] == dados["email"]
 
-    def test_deve_rejeitar_rf_duplicado_na_mesma_requisicao(
+    def test_deve_rejeitar_rf_ja_existente_no_banco(
         self,
         unidade_educacional_emef,
-        usuario_sincronizacao,
+        responsavel_unidade,
         cargo_perfil_diretor,
+        usuario_ativo,
     ):
         """Deve rejeitar RF duplicado no mesmo payload."""
         repository = UnidadeEducacionalRepository()
@@ -67,15 +68,20 @@ class TestUnidadeEducacionalService:
             "ativo": True,
             "responsaveis": [
                 {
-                    "registro_funcional": "1234567",
-                    "nome": "João",
+                    "uuid": responsavel_unidade.uuid,
+                    "registro_funcional": (
+                        responsavel_unidade.registro_funcional
+                    ),
+                    "nome": responsavel_unidade.nome,
                     "cargo": cargo_perfil_diretor.codigo,
-                    "email": "joao@email.com",
-                    "telefone": "",
-                    "celular": "",
+                    "email": responsavel_unidade.email,
+                    "telefone": responsavel_unidade.telefone,
+                    "celular": responsavel_unidade.email,
                 },
                 {
-                    "registro_funcional": "1234567",
+                    "registro_funcional": (
+                        responsavel_unidade.registro_funcional
+                    ),
                     "nome": "Maria",
                     "cargo": cargo_perfil_diretor.codigo,
                     "email": "maria@email.com",
@@ -90,11 +96,7 @@ class TestUnidadeEducacionalService:
         )
 
         with pytest.raises(ValidationError):
-            service.atualizar(
-                unidade=unidade_educacional_emef,
-                dados=dados,
-                usuario=usuario_sincronizacao,
-            )
+            service.atualizar(unidade_educacional_emef, dados, usuario_ativo)
 
     def test_deve_permitir_rf_do_proprio_responsavel(
         self,
