@@ -13,7 +13,7 @@ from rest_framework.serializers import (
 from rest_framework.serializers import ValidationError as DRFValidationError
 from rest_framework.viewsets import ModelViewSet
 
-from apps.empresa.exceptions import EmpresaCnpjDuplicadoError
+from apps.empresa.exceptions import EmpresaCnpjDuplicadoError, EmpresaPossuiLotesVinculadosError
 from apps.empresa.filters import EmpresaFilter
 from apps.empresa.models import Empresa
 from apps.empresa.schemas.empresa_schemas import EMPRESA_SCHEMA
@@ -101,12 +101,23 @@ class EmpresaViewSet(ModelViewSet):
         serializer.instance = empresa
 
     def perform_destroy(self, instance: Empresa) -> None:
-        """
-        Deleta uma empresa existente usando o serviço.
+        """Exclui uma empresa quando não possui lotes vinculados.
 
         Args:
             instance (Empresa): Instância da empresa a ser deletada.
+
         Raises:
-            DRFValidationError: Se ocorrer algum erro de validação.
+            DRFValidationError: Se a empresa possuir lotes vinculados.
         """
-        self.service.deletar(instance, self._usuario_logado())
+        try:
+            self.service.deletar(
+                empresa=instance,
+                usuario=self._usuario_logado(),
+            )
+        except EmpresaPossuiLotesVinculadosError as exc:
+            raise DRFValidationError(
+                {
+                    "title": exc.title,
+                    "detail": exc.detail,
+                }
+            ) from exc

@@ -6,6 +6,7 @@ from typing import Any, cast
 from django.db import transaction
 from django.forms.models import model_to_dict
 
+from apps.empresa.models import Empresa
 from apps.escola.models import DiretoriaRegional
 from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.usuario import Usuario
@@ -61,6 +62,17 @@ class LoteRepository:
         ]
 
         LoteDiretoriaRegional.objects.bulk_create(novos_vinculos)
+
+    def codigos_lotes_vinculados_a_empresa(self, empresa: Empresa) -> list[str]:
+        """Retorna os códigos dos lotes não excluídos da empresa."""
+        return list(
+            Lote.objects.filter(
+                empresa=empresa,
+                deletado_em__isnull=True,
+            )
+            .order_by("pk")
+            .values_list("codigo_cadastro", flat=True)
+        )
 
     def _obter_diretorias_regionais_vinculadas(
         self,
