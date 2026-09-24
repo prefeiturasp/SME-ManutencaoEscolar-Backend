@@ -545,9 +545,13 @@ class TestUnidadeEducacionalViewSet:
         )
 
         assert resposta.status_code == status.HTTP_400_BAD_REQUEST
-        assert resposta.data["responsaveis"] == (
-            "O responsável informado não está "
-            "vinculado à unidade educacional."
+        assert resposta.data["title"] == "Não é possível adicionar o contato"
+        assert (
+            responsavel_unidade.registro_funcional in resposta.data["message"]
+        )
+        assert (
+            "não está vinculado à unidade educacional."
+            in resposta.data["message"]
         )
 
     def test_nao_deve_atualizar_com_telefone_do_responsavel_invalido(

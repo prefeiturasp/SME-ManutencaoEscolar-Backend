@@ -199,3 +199,13 @@ class TestUnidadeEducacionalRepository:
             cargo=cargo_perfil_diretor,
             ativo=True,
         ).exists()
+
+    def test_deve_rejeitar_cargo_eol_inexistente(self):
+        """Deve lançar erro quando o cargo EOL não existir."""
+        codigo = "999999"
+
+        with pytest.raises(
+            ValueError,
+            match=f"Cargo EOL com código {codigo} não encontrado.",
+        ):
+            UnidadeEducacionalRepository._obter_cargo(codigo)

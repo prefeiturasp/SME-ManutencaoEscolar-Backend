@@ -132,7 +132,7 @@ class TestResponsavelUnidadeRepository:
         resultado = ResponsavelUnidadeRepository().criar_vinculo(
             responsavel=responsavel_unidade,
             unidade=unidade_educacional_emef,
-            cargo=cargo_perfil_diretor,
+            id_cargo=cargo_perfil_diretor.id,
             usuario=usuario_sincronizacao,
         )
 

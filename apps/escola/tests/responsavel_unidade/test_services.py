@@ -141,6 +141,9 @@ class TestResponsavelUnidadeService:
             responsaveis=[
                 {
                     "uuid": str(historico_responsavel.responsavel.uuid),
+                    "registro_funcional": (
+                        historico_responsavel.responsavel.registro_funcional
+                    ),
                 },
             ],
         )
@@ -163,13 +166,18 @@ class TestResponsavelUnidadeService:
                 responsaveis=[
                     {
                         "uuid": str(responsavel_unidade.uuid),
+                        "registro_funcional": (
+                            responsavel_unidade.registro_funcional
+                        ),
                     },
                 ],
             )
-
-        assert exc_info.value.detail == {
-            "responsaveis": (
-                "O responsável informado não está "
-                "vinculado à unidade educacional."
-            )
-        }
+        assert (
+            exc_info.value.detail["title"]
+            == "Não é possível adicionar o contato"
+        )
+        assert exc_info.value.detail["message"] == (
+            "O contato com o CPF/RF "
+            f"{responsavel_unidade.registro_funcional} não está "
+            "vinculado à unidade educacional."
+        )
