@@ -66,7 +66,16 @@ class LoteRepository:
     def codigos_lotes_vinculados_a_empresa(
         self, empresa: Empresa
     ) -> list[str]:
-        """Retorna os códigos dos lotes não excluídos da empresa."""
+        """Retorna os códigos dos lotes não excluídos da empresa.
+
+        Args:
+            empresa: Empresa cujos lotes vinculados serão consultados.
+
+        Returns:
+            Lista dos códigos de cadastro dos lotes não excluídos,
+            ordenada pela chave primária. Retorna uma lista vazia quando
+            não houver lotes vinculados.
+        """
         return list(
             Lote.objects.filter(
                 empresa=empresa,
