@@ -1,6 +1,6 @@
 # language: pt
 
-Funcionalidade: Consulta de Empresa
+Funcionalidade: Consulta de empresa
 
   Contexto:
     Dado eu acesso o sistema com a visualização "web"
