@@ -126,13 +126,14 @@ class UnidadeEducacionalRepository:
         unidade.full_clean()
         unidade.save()
 
-        self.dados_model.objects.update_or_create(
-            unidade_educacional=unidade,
-            defaults={
-                "email": dados["email"],
-                "telefone": dados["telefone"],
-            },
-        )
+        with transaction.atomic():
+            self.dados_model.objects.update_or_create(
+                unidade_educacional=unidade,
+                defaults={
+                    "email": dados["email"],
+                    "telefone": dados["telefone"],
+                },
+            )
 
     def _atualizar_responsavel(
         self,
@@ -158,21 +159,21 @@ class UnidadeEducacionalRepository:
         )
 
         responsavel = historico.responsavel
+        with transaction.atomic():
+            responsavel.registro_funcional = dados["registro_funcional"]
+            responsavel.nome = dados["nome"]
+            responsavel.email = dados["email"]
+            responsavel.telefone = dados["telefone"]
+            responsavel.celular = dados["celular"]
+            responsavel.atualizado_por = usuario
 
-        responsavel.registro_funcional = dados["registro_funcional"]
-        responsavel.nome = dados["nome"]
-        responsavel.email = dados["email"]
-        responsavel.telefone = dados["telefone"]
-        responsavel.celular = dados["celular"]
-        responsavel.atualizado_por = usuario
+            responsavel.full_clean()
+            responsavel.save()
 
-        responsavel.full_clean()
-        responsavel.save()
-
-        historico.cargo_id = cargo["id"]
-        historico.atualizado_por = usuario
-        historico.full_clean()
-        historico.save()
+            historico.cargo_id = cargo["id"]
+            historico.atualizado_por = usuario
+            historico.full_clean()
+            historico.save()
 
     def _criar_responsavel(
         self,
