@@ -13,7 +13,10 @@ from rest_framework.serializers import (
 from rest_framework.serializers import ValidationError as DRFValidationError
 from rest_framework.viewsets import ModelViewSet
 
-from apps.empresa.exceptions import EmpresaCnpjDuplicadoError, EmpresaPossuiLotesVinculadosError
+from apps.empresa.exceptions import (
+    EmpresaCnpjDuplicadoError,
+    EmpresaPossuiLotesVinculadosError,
+)
 from apps.empresa.filters import EmpresaFilter
 from apps.empresa.models import Empresa
 from apps.empresa.schemas.empresa_schemas import EMPRESA_SCHEMA

@@ -63,7 +63,9 @@ class LoteRepository:
 
         LoteDiretoriaRegional.objects.bulk_create(novos_vinculos)
 
-    def codigos_lotes_vinculados_a_empresa(self, empresa: Empresa) -> list[str]:
+    def codigos_lotes_vinculados_a_empresa(
+        self, empresa: Empresa
+    ) -> list[str]:
         """Retorna os códigos dos lotes não excluídos da empresa."""
         return list(
             Lote.objects.filter(

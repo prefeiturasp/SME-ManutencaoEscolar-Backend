@@ -8,6 +8,7 @@ class EmpresaNaoEncontradoError(Exception):
 class EmpresaCnpjDuplicadoError(Exception):
     """Levantada quando já existe uma empresa com o mesmo CNPJ."""
 
+
 class EmpresaPossuiLotesVinculadosError(Exception):
     """Indica que a empresa possui lotes que impedem sua exclusão."""
 

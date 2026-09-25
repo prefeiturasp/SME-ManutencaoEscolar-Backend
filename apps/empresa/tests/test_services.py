@@ -12,6 +12,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.core.constants import TipoArquivo
 from apps.core.services.anexo_service import AnexoService
 from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.exceptions import EmpresaPossuiLotesVinculadosError
 from apps.empresa.models import (
     AnexoResponsavelTecnico,
     Empresa,
@@ -381,6 +382,80 @@ class TestEmpresaService:
         empresa.refresh_from_db()
         assert responsavel.deletado_em is None
         assert empresa.deletado_em is None
+
+    @pytest.mark.django_db
+    def test_deletar_com_um_lote_lanca_erro_sem_lista_de_vinculados(
+        self, empresa: Empresa
+    ) -> None:
+        """Deve informar o lote e impedir a exclusão da empresa."""
+        empresa_repository = Mock(spec=EmpresaRepository)
+        responsavel_service = Mock(spec=ResponsavelTecnicoService)
+        service = EmpresaService(
+            empresa_repository=empresa_repository,
+            responsavel_tecnico_service=responsavel_service,
+        )
+        codigo = "Lote 001"
+
+        with (
+            patch(
+                "apps.empresa.services.empresa_service."
+                "LoteRepository.codigos_lotes_vinculados_a_empresa",
+                return_value=[codigo],
+            ) as buscar_lotes,
+            pytest.raises(EmpresaPossuiLotesVinculadosError) as erro,
+        ):
+            service.deletar(empresa)
+
+        buscar_lotes.assert_called_once_with(empresa)
+        assert erro.value.title == (
+            EmpresaErrorMessages.EMPRESA_VINCULADA_A_LOTE_TITULO
+        )
+        assert erro.value.detail == {
+            "message": EmpresaErrorMessages.EMPRESA_VINCULADA_A_LOTE.format(
+                cnpj=empresa.cnpj,
+                codigo=codigo,
+            )
+        }
+        responsavel_service.remover.assert_not_called()
+        empresa_repository.deletar.assert_not_called()
+
+    @pytest.mark.django_db
+    def test_deletar_com_varios_lotes_lanca_erro_com_vinculados(
+        self, empresa: Empresa
+    ) -> None:
+        """Deve listar os lotes e impedir a exclusão da empresa."""
+        empresa_repository = Mock(spec=EmpresaRepository)
+        responsavel_service = Mock(spec=ResponsavelTecnicoService)
+        service = EmpresaService(
+            empresa_repository=empresa_repository,
+            responsavel_tecnico_service=responsavel_service,
+        )
+        codigos = ["Lote 001", "Lote 002"]
+
+        with (
+            patch(
+                "apps.empresa.services.empresa_service."
+                "LoteRepository.codigos_lotes_vinculados_a_empresa",
+                return_value=codigos,
+            ) as buscar_lotes,
+            pytest.raises(EmpresaPossuiLotesVinculadosError) as erro,
+        ):
+            service.deletar(empresa)
+
+        buscar_lotes.assert_called_once_with(empresa)
+        assert erro.value.title == (
+            EmpresaErrorMessages.EMPRESA_VINCULADA_A_LOTE_TITULO
+        )
+        assert erro.value.detail == {
+            "message": (
+                EmpresaErrorMessages.EMPRESA_VINCULADA_A_VARIOS_LOTES.format(
+                    cnpj=empresa.cnpj,
+                )
+            ),
+            "vinculados": codigos,
+        }
+        responsavel_service.remover.assert_not_called()
+        empresa_repository.deletar.assert_not_called()
 
 
 class TestResponsavelTecnicoService:

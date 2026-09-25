@@ -142,9 +142,7 @@ class EmpresaService:
             EmpresaPossuiLotesVinculadosError: Se a empresa possuir lotes
                 não excluídos vinculados.
         """
-        codigos = LoteRepository().codigos_lotes_vinculados_a_empresa(
-            empresa
-        )
+        codigos = LoteRepository().codigos_lotes_vinculados_a_empresa(empresa)
         if codigos:
             if len(codigos) == 1:
                 detail: dict[str, str | list[str]] = {

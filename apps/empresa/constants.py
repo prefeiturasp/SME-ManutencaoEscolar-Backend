@@ -34,9 +34,7 @@ class EmpresaErrorMessages:
         "Responsável técnico não encontrado para esta empresa."
     )
 
-    EMPRESA_VINCULADA_A_LOTE_TITULO = (
-        "Não é possível excluir a empresa"
-    )
+    EMPRESA_VINCULADA_A_LOTE_TITULO = "Não é possível excluir a empresa"
 
     EMPRESA_VINCULADA_A_LOTE = (
         "A empresa com CNPJ {cnpj} possui vínculo com o lote {codigo}. "

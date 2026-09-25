@@ -9,6 +9,7 @@ from rest_framework.test import APIClient
 
 from apps.empresa.exceptions import (
     EmpresaCnpjDuplicadoError,
+    EmpresaPossuiLotesVinculadosError,
 )
 from apps.empresa.models import Empresa, ResponsavelTecnico
 
@@ -339,6 +340,49 @@ def test_remocao_de_empresa_inexistente_retorna_404(api_cliente):
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_remocao_passa_empresa_e_usuario_para_o_servico(
+    api_cliente, empresa_payload_valido, usuario_ativo
+):
+    """DELETE delega a empresa e o usuário autenticado ao serviço."""
+    empresa = Empresa.objects.create(**empresa_payload_valido)
+
+    with patch(
+        "apps.empresa.api.views.empresa_views.EmpresaService.deletar"
+    ) as deletar:
+        response = api_cliente.delete(f"/api/v1/empresas/{empresa.uuid}/")
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    deletar.assert_called_once_with(
+        empresa=empresa,
+        usuario=usuario_ativo,
+    )
+
+
+def test_remocao_mapeia_lotes_vinculados_para_erro_de_validacao(
+    api_cliente, empresa_payload_valido
+):
+    """DELETE retorna 400 com os dados dos lotes vinculados."""
+    empresa = Empresa.objects.create(**empresa_payload_valido)
+    titulo = "Não é possível excluir a empresa"
+    detalhe = {
+        "message": "A empresa possui lotes vinculados.",
+        "vinculados": ["Lote 1", "Lote 2"],
+    }
+
+    with patch(
+        "apps.empresa.api.views.empresa_views.EmpresaService.deletar",
+        side_effect=EmpresaPossuiLotesVinculadosError(
+            title=titulo,
+            detail=detalhe,
+        ),
+    ):
+        response = api_cliente.delete(f"/api/v1/empresas/{empresa.uuid}/")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["title"] == titulo
+    assert response.json()["detail"] == detalhe
 
 
 def test_listagem_filtra_por_nome(api_cliente, empresa_payload_valido):
