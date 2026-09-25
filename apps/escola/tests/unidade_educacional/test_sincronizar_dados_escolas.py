@@ -111,6 +111,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve criar os dados da unidade retornados pela API."""
         mock_get.return_value = resposta_dados_unidade
@@ -144,6 +145,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve atualizar os dados existentes da unidade."""
         dados_existentes = DadosUnidadeEducacional.objects.create(
@@ -187,6 +189,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar o endpoint utilizando o código EOL."""
         mock_get.return_value = resposta_dados_unidade
@@ -211,6 +214,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar a API EOL com o token configurado."""
         mock_get.return_value = resposta_dados_unidade
@@ -612,6 +616,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         mock_get,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve continuar a importação quando uma unidade falhar."""
         mock_get.side_effect = requests.RequestException(
@@ -636,6 +641,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar todas as unidades educacionais cadastradas."""
         segunda_unidade = Unidadeeducacional.objects.create(
@@ -690,6 +696,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve manter somente um registro para cada unidade."""
         mock_get.return_value = resposta_dados_unidade
