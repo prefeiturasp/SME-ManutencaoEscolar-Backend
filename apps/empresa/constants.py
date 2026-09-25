@@ -33,3 +33,15 @@ class EmpresaErrorMessages:
     RESPONSAVEL_TECNICO_NAO_ENCONTRADO = (
         "Responsável técnico não encontrado para esta empresa."
     )
+
+    EMPRESA_VINCULADA_A_LOTE_TITULO = "Não é possível excluir a empresa"
+
+    EMPRESA_VINCULADA_A_LOTE = (
+        "A empresa com CNPJ {cnpj} possui vínculo com o lote {codigo}. "
+        "Para excluir a empresa, primeiro remova esse vínculo com o lote."
+    )
+
+    EMPRESA_VINCULADA_A_VARIOS_LOTES = (
+        "A empresa com CNPJ {cnpj} possui vínculo com mais de um lote."
+        "Para excluir a empresa, primeiro remova os vínculos."
+    )

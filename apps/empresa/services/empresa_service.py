@@ -4,11 +4,14 @@ from typing import Any
 
 from django.db import transaction
 
+from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.exceptions import EmpresaPossuiLotesVinculadosError
 from apps.empresa.models import Empresa
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
 from apps.empresa.services.responsavel_service import ResponsavelTecnicoService
+from apps.lote.repository.lote_repository import LoteRepository
 from apps.usuarios.models import Usuario
 
 
@@ -125,16 +128,46 @@ class EmpresaService:
 
     @transaction.atomic
     def deletar(
-        self, empresa: Empresa, usuario: Usuario | None = None
+        self,
+        empresa: Empresa,
+        usuario: Usuario | None = None,
     ) -> None:
-        """Realiza a exclusão lógica da empresa e de seus responsáveis.
-
-        Registra o usuário logado como responsável pela exclusão.
+        """Exclui logicamente uma empresa sem lotes vinculados.
 
         Args:
-            empresa: Instância da empresa a ser deletada.
-            usuario: Usuário logado responsável pela exclusão.
+            empresa: Empresa a ser excluída.
+            usuario: Usuário responsável pela exclusão.
+
+        Raises:
+            EmpresaPossuiLotesVinculadosError: Se a empresa possuir lotes
+                não excluídos vinculados.
         """
+        codigos = LoteRepository().codigos_lotes_vinculados_a_empresa(empresa)
+        if codigos:
+            if len(codigos) == 1:
+                detail: dict[str, str | list[str]] = {
+                    "message": (
+                        EmpresaErrorMessages.EMPRESA_VINCULADA_A_LOTE.format(
+                            cnpj=empresa.cnpj,
+                            codigo=codigos[0],
+                        )
+                    ),
+                }
+            else:
+                detail = {
+                    "message": (
+                        EmpresaErrorMessages.EMPRESA_VINCULADA_A_VARIOS_LOTES.format(
+                            cnpj=empresa.cnpj,
+                        )
+                    ),
+                    "vinculados": codigos,
+                }
+
+            raise EmpresaPossuiLotesVinculadosError(
+                title=EmpresaErrorMessages.EMPRESA_VINCULADA_A_LOTE_TITULO,
+                detail=detail,
+            )
+
         responsaveis = list(empresa.responsaveis_tecnicos.all())
         self.responsavel_tecnico_service.remover(responsaveis, usuario)
         self.empresa_repository.deletar(empresa, usuario)
