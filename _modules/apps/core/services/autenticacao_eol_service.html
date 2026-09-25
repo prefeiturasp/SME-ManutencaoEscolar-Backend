@@ -1,0 +1,639 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.core.services.autenticacao_eol_service &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dominios/index.html">Documentação</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Código do módulo</a></li>
+      <li class="breadcrumb-item active">apps.core.services.autenticacao_eol_service</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código-fonte para apps.core.services.autenticacao_eol_service</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Serviços responsáveis pela autenticaçãoe integração com o EOL/CoreSSO.</span>
+
+<span class="sd">Este módulo centraliza as operações necessárias para autenticar usuários no</span>
+<span class="sd">serviço EOL, consultar dados funcionais, sincronizar informações do usuário</span>
+<span class="sd">local e realizar operações relacionadas à senha no CoreSSO.</span>
+
+<span class="sd">O fluxo de autenticação também é responsável pela geração dos tokens JWT</span>
+<span class="sd">utilizados pela aplicação após a autenticação bem-sucedida.</span>
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.constants</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ENDPOINT_ALTERAR_SENHA_CORESSO</span><span class="p">,</span>
+    <span class="n">ENDPOINT_AUTENTICACAO</span><span class="p">,</span>
+    <span class="n">ENDPOINT_USUARIO_EXISTE_CORESSO</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FalhaAutenticacaoError</span><span class="p">,</span>
+    <span class="n">InternalError</span><span class="p">,</span>
+    <span class="n">SmeIntegracaoError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.repository.autenticacao_eol_repository</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiEOLRepository</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.services.token_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">TokenService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.usuarios.repository.usuario_repository</span><span class="w"> </span><span class="kn">import</span> <span class="n">UsuarioRepository</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.usuarios.services.usuario_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">UsuarioService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">SME_API_EOL_TOKEN</span><span class="p">,</span> <span class="n">SME_API_EOL_URL</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">DADO_NAO_INFORMADO</span> <span class="o">=</span> <span class="s2">"Não informado"</span>
+
+
+<div class="viewcode-block" id="AutenticacaoEOLService">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_autenticacao_eol_service.html#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AutenticacaoEOLService</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Serviço para autenticação de usuários no EOL.</span>
+
+<span class="sd">    O serviço é responsável por coordenar a comunicação com o EOL/CoreSSO e</span>
+<span class="sd">    integrar os dados retornados pelo serviço externo com os usuários da</span>
+<span class="sd">    aplicação.</span>
+
+<span class="sd">    Entre as operações disponibilizadas estão:</span>
+
+<span class="sd">        - autenticação de credenciais no EOL;</span>
+<span class="sd">        - verificação da existência de usuários no CoreSSO;</span>
+<span class="sd">        - consulta de cargos funcionais;</span>
+<span class="sd">        - consulta de dados funcionais do usuário;</span>
+<span class="sd">        - sincronização do usuário local;</span>
+<span class="sd">        - geração de tokens JWT;</span>
+<span class="sd">        - alteração de senha no CoreSSO;</span>
+<span class="sd">        - atualização da senha do usuário na aplicação.</span>
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="AutenticacaoEOLService.autentica">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_autenticacao_eol_service.html#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.autentica">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">autentica</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">login</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">senha</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Realiza a autenticação de um usuário no serviço EOL da SME.</span>
+
+<span class="sd">        O método valida as credenciais informadas, monta a requisição para o</span>
+<span class="sd">        endpoint de autenticação, envia a solicitação ao serviço externo e</span>
+<span class="sd">        processa a resposta retornada.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            login (object): Identificador do usuário (RF ou CPF).</span>
+<span class="sd">            senha (object): Senha utilizada para autenticação.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict[str, Any]: Dados retornados pelo EOL após a autenticação</span>
+<span class="sd">                bem-sucedida.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FalhaAutenticacaoError:</span>
+<span class="sd">                Caso o login ou a senha sejam inválidos ou as credenciais</span>
+<span class="sd">                não atendam às validações de entrada.</span>
+<span class="sd">            SmeIntegracaoError:</span>
+<span class="sd">                Caso ocorra erro de comunicação, timeout, indisponibilidade</span>
+<span class="sd">                do serviço ou qualquer falha retornada pela API do EOL.</span>
+<span class="sd">            InternalError:</span>
+<span class="sd">                Caso ocorra um erro interno ou de configuração da aplicação.</span>
+<span class="sd">        """</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_valida_credenciais</span><span class="p">(</span><span class="n">login</span><span class="p">,</span> <span class="n">senha</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_valida_url</span><span class="p">()</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">SME_API_EOL_URL</span><span class="si">}{</span><span class="n">ENDPOINT_AUTENTICACAO</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_obter_headers</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">"login"</span><span class="p">:</span> <span class="n">login</span><span class="p">,</span> <span class="s2">"senha"</span><span class="p">:</span> <span class="n">senha</span><span class="p">})</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Iniciando autenticação no EOL. Login: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">login</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">ApiEOLRepository</span><span class="o">.</span><span class="n">autentica_usuario</span><span class="p">(</span>
+                <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Usuário autenticado com sucesso: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">login</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span>
+
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">Timeout</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Timeout na autenticação para login: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">login</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SmeIntegracaoError</span><span class="p">(</span>
+                <span class="s2">"O serviço de autenticação demorou mais do que o esperado "</span>
+                <span class="s2">"para responder. Tente novamente em alguns instantes."</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ConnectionError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Erro de conexão com EOL para login: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">login</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SmeIntegracaoError</span><span class="p">(</span>
+                <span class="s2">"Não foi possível acessar o serviço de autenticação no "</span>
+                <span class="s2">"momento. Tente novamente mais tarde."</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                <span class="s2">"Erro de comunicação com EOL para login </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">login</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SmeIntegracaoError</span><span class="p">(</span>
+                <span class="s2">"Ocorreu uma falha na comunicação com o serviço de "</span>
+                <span class="s2">"autenticação"</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="n">FalhaAutenticacaoError</span><span class="p">,</span> <span class="n">SmeIntegracaoError</span><span class="p">):</span>
+            <span class="k">raise</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
+                <span class="s2">"Erro inesperado na autenticação para login </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">login</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">),</span>
+                <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InternalError</span><span class="p">(</span>
+                <span class="s2">"Ocorreu um erro interno durante a autenticação. Tente "</span>
+                <span class="s2">"novamente em alguns instantes."</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span></div>
+
+
+<div class="viewcode-block" id="AutenticacaoEOLService.usuario_existe_no_coresso">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_autenticacao_eol_service.html#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.usuario_existe_no_coresso">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">usuario_existe_no_coresso</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">login</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Verifica se um usuário está cadastrado no CoreSSO.</span>
+
+<span class="sd">        Realiza uma requisição à API de integração do CoreSSO para verificar</span>
+<span class="sd">        se o usuário identificado pelo RF ou CPF informado já possui cadastro</span>
+<span class="sd">        no sistema.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            login (str):  login: RF (7 dígitos) ou CPF (11 dígitos) do usuário.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: ``True`` se o usuário existir no CoreSSO (HTTP 200);</span>
+<span class="sd">                caso contrário, retorna ``False``.</span>
+<span class="sd">        """</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"accept"</span><span class="p">:</span> <span class="s2">"text/plain"</span><span class="p">,</span>
+            <span class="s2">"x-api-eol-key"</span><span class="p">:</span> <span class="n">SME_API_EOL_TOKEN</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"usuario"</span><span class="p">:</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">login</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">SME_API_EOL_URL</span><span class="si">}{</span><span class="n">ENDPOINT_USUARIO_EXISTE_CORESSO</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">ApiEOLRepository</span><span class="o">.</span><span class="n">usuario_existe</span><span class="p">(</span>
+            <span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_valida_credenciais</span><span class="p">(</span><span class="n">login</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">senha</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Valida os dados de autenticação informados pelo usuário.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            login (object): Login do usuário (RF ou CPF).</span>
+<span class="sd">            senha (object): Senha do usuário.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FalhaAutenticacaoError: Caso o login ou a senha não sejam</span>
+<span class="sd">            informados ou possuam tipo diferente de ``str``.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">login</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">senha</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FalhaAutenticacaoError</span><span class="p">(</span>
+                <span class="s2">"Os campos login e senha são obrigatórios."</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">login</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">senha</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">FalhaAutenticacaoError</span><span class="p">(</span>
+                <span class="s2">"As credenciais informadas são inválidas."</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_valida_url</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Valida a configuração da URL base da integração com o EOL.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            InternalError:  Caso a URL base da integração não esteja</span>
+<span class="sd">            configurada.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">SME_API_EOL_URL</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InternalError</span><span class="p">(</span>
+                <span class="s2">"Serviço de autenticação não configurado. Entre em contato "</span>
+                <span class="s2">"com o suporte."</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_obter_headers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Obtém os cabeçalhos HTTP necessários para autenticação no EOL.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            InternalError: Caso o token de integração não esteja configurado.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict[str, str]: Cabeçalhos HTTP utilizados na requisição.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">SME_API_EOL_TOKEN</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InternalError</span><span class="p">(</span>
+                <span class="s2">"Serviço de autenticação não configurado. Entre em contato "</span>
+                <span class="s2">"com o suporte."</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"accept"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+            <span class="s2">"x-api-eol-key"</span><span class="p">:</span> <span class="n">SME_API_EOL_TOKEN</span><span class="p">,</span>
+            <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json-patch+json"</span><span class="p">,</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="AutenticacaoEOLService.buscar_cargos">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_autenticacao_eol_service.html#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.buscar_cargos">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">buscar_cargos</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">registro_funcional</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Consulta cargos de um servidor na SME pelo RF.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            registro_funcional (str): Registro funcional do servidor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Nome  e código do cargo base do servidor.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            SmeIntegracaoError: Quando a consulta falha.</span>
+<span class="sd">        """</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">SME_API_EOL_URL</span><span class="si">}</span><span class="s2">/funcionarios/cargo/</span><span class="si">{</span><span class="n">registro_funcional</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_obter_headers</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">ApiEOLRepository</span><span class="o">.</span><span class="n">buscar_cargos</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">SmeIntegracaoError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                <span class="s2">"Erro ao consultar cargos"</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="c1"># No futuro, se retornar lista vazia, retorna FalhaAutenticacaoError</span>
+        <span class="n">cargo</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+            <span class="k">else</span> <span class="p">{}</span>
+        <span class="p">)</span>
+        <span class="n">informacoes_cargo</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"nome_cargo"</span><span class="p">:</span> <span class="n">cargo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cargoBase"</span><span class="p">,</span> <span class="n">DADO_NAO_INFORMADO</span><span class="p">),</span>
+            <span class="s2">"codigo_cargo"</span><span class="p">:</span> <span class="n">cargo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cdCargoBase"</span><span class="p">,</span> <span class="n">DADO_NAO_INFORMADO</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">informacoes_cargo</span></div>
+
+
+<div class="viewcode-block" id="AutenticacaoEOLService.dados_usuario">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_autenticacao_eol_service.html#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.dados_usuario">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dados_usuario</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">registro_funcional</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Consulta dados de um servidor na SME pelo RF.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            registro_funcional (str): Registro funcional do servidor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dados do usuário retornados pela API.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            SmeIntegracaoError: Se ocorrer uma falha durante a consulta à</span>
+<span class="sd">                API do EOL.</span>
+<span class="sd">        """</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">SME_API_EOL_URL</span><span class="si">}</span><span class="s2">/AutenticacaoCOMAPRE/</span><span class="si">{</span><span class="n">registro_funcional</span><span class="si">}</span><span class="s2">/dados"</span>
+        <span class="p">)</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_obter_headers</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">ApiEOLRepository</span><span class="o">.</span><span class="n">obter_dados_usuarios</span><span class="p">(</span>
+                <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">SmeIntegracaoError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                <span class="s2">"Erro ao consultar dados do servidor"</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="AutenticacaoEOLService.login">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_autenticacao_eol_service.html#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.login">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">login</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">login</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">senha</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Realiza o fluxo completo de login da aplicação.</span>
+
+<span class="sd">        Autentica as credenciais no EOL e, após a autenticação bem-sucedida:</span>
+
+<span class="sd">            #. obtém o registro funcional retornado pelo EOL;</span>
+<span class="sd">            #. consulta o cargo do servidor;</span>
+<span class="sd">            #. consulta os dados funcionais do usuário;</span>
+<span class="sd">            #. sincroniza o usuário com a base local;</span>
+<span class="sd">            #. gera os tokens JWT da aplicação;</span>
+<span class="sd">            #. combina os dados locais e funcionais na resposta final.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            login (object): Identificador(RF ou CPF) utilizado para</span>
+<span class="sd">                autenticação no EOL.</span>
+<span class="sd">            senha (object): Senha utilizada para autenticação.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict[str, Any]: Dados da sessão autenticada, contendo:</span>
+<span class="sd">                - ``refresh``: Token JWT de renovação.</span>
+<span class="sd">                - ``access``: Token JWT de acesso.</span>
+<span class="sd">                - ``access_expires_in``: Tempo de validade do access token,</span>
+<span class="sd">                    em segundos.</span>
+<span class="sd">                - ``refresh_expires_in``: Tempo de validade do refresh token,</span>
+<span class="sd">                    em segundos.</span>
+<span class="sd">                - ``usuario``: Dados do usuário sincronizado, acrescidos das</span>
+<span class="sd">                    informações de diretoria regional e unidade educacional.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            FalhaAutenticacaoError: Se as credenciais forem inválidas.</span>
+<span class="sd">            SmeIntegracaoError: Se ocorrer falha na comunicação ou na</span>
+<span class="sd">                integração com o EOL/CoreSSO.</span>
+<span class="sd">            InternalError: Se ocorrer erro interno ou problema de configuração</span>
+<span class="sd">                durante o processo.</span>
+<span class="sd">        """</span>
+        <span class="n">dados_autenticacao</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">autentica</span><span class="p">(</span>
+            <span class="n">login</span><span class="o">=</span><span class="n">login</span><span class="p">,</span>
+            <span class="n">senha</span><span class="o">=</span><span class="n">senha</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">codigo_rf</span> <span class="o">=</span> <span class="n">dados_autenticacao</span><span class="p">[</span><span class="s2">"codigoRf"</span><span class="p">]</span>
+        <span class="n">informaoes_cargo</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">buscar_cargos</span><span class="p">(</span><span class="n">registro_funcional</span><span class="o">=</span><span class="n">codigo_rf</span><span class="p">)</span>
+        <span class="n">dados_usuario</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">dados_usuario</span><span class="p">(</span><span class="n">codigo_rf</span><span class="p">)</span>
+        <span class="n">dados_usuario</span><span class="p">[</span><span class="s2">"codigo_rf"</span><span class="p">]</span> <span class="o">=</span> <span class="n">codigo_rf</span>
+        <span class="n">usuario</span> <span class="o">=</span> <span class="n">UsuarioService</span><span class="o">.</span><span class="n">sincronizar_usuario</span><span class="p">(</span>
+            <span class="n">dados_usuario</span><span class="o">=</span><span class="n">dados_usuario</span><span class="p">,</span>
+            <span class="n">dados_cargo</span><span class="o">=</span><span class="n">informaoes_cargo</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">TokenService</span><span class="o">.</span><span class="n">gerar_tokens</span><span class="p">(</span><span class="n">usuario</span><span class="p">[</span><span class="s2">"id"</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"refresh"</span><span class="p">:</span> <span class="n">token</span><span class="p">[</span><span class="s2">"refresh"</span><span class="p">],</span>
+            <span class="s2">"access"</span><span class="p">:</span> <span class="n">token</span><span class="p">[</span><span class="s2">"access"</span><span class="p">],</span>
+            <span class="s2">"access_expires_in"</span><span class="p">:</span> <span class="n">token</span><span class="p">[</span><span class="s2">"access_expires_in"</span><span class="p">],</span>
+            <span class="s2">"refresh_expires_in"</span><span class="p">:</span> <span class="n">token</span><span class="p">[</span><span class="s2">"refresh_expires_in"</span><span class="p">],</span>
+            <span class="s2">"usuario"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="o">**</span><span class="n">usuario</span><span class="p">,</span>
+                <span class="s2">"diretoria_regional"</span><span class="p">:</span> <span class="n">dados_usuario</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">"dre"</span><span class="p">,</span> <span class="n">DADO_NAO_INFORMADO</span>
+                <span class="p">),</span>
+                <span class="s2">"unidade_educacional"</span><span class="p">:</span> <span class="n">dados_usuario</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">"nomeUe"</span><span class="p">,</span> <span class="n">DADO_NAO_INFORMADO</span>
+                <span class="p">),</span>
+            <span class="p">},</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="AutenticacaoEOLService.alterar_senha_no_coresso">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_autenticacao_eol_service.html#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.alterar_senha_no_coresso">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alterar_senha_no_coresso</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">login</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nova_senha</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Altera a senha do usuário e invalida o token de recuperação.</span>
+
+<span class="sd">        Monta os dados necessários para a requisição à API do CoreSSO e</span>
+<span class="sd">        delega a alteração da senha ao repositório de integração. Após uma</span>
+<span class="sd">        alteração bem-sucedida, invalida o token de recuperação de senha</span>
+<span class="sd">        associado ao usuário.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            login (str): Login do usuário cuja senha será alterada</span>
+<span class="sd">            nova_senha (str): Nova senha que será definida para o usuário.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FalhaAutenticacaoError: Levantada quando ocorre uma falha de</span>
+<span class="sd">                autenticação durante a alteração da senha no CoreSSO.</span>
+<span class="sd">            SmeIntegracaoError: Levantada quando ocorre uma falha na</span>
+<span class="sd">                comunicação ou no processamento da requisição pela API de</span>
+<span class="sd">                integração do SME.</span>
+<span class="sd">        """</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"accept"</span><span class="p">:</span> <span class="s2">"text/plain"</span><span class="p">,</span>
+            <span class="s2">"x-api-eol-key"</span><span class="p">:</span> <span class="n">SME_API_EOL_TOKEN</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"Usuario"</span><span class="p">:</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">login</span><span class="p">),</span>
+            <span class="s2">"Senha"</span><span class="p">:</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">nova_senha</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">SME_API_EOL_URL</span><span class="si">}{</span><span class="n">ENDPOINT_ALTERAR_SENHA_CORESSO</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ApiEOLRepository</span><span class="o">.</span><span class="n">alterar_senha</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">)</span>
+            <span class="n">UsuarioRepository</span><span class="o">.</span><span class="n">atualizar_senha_usuario</span><span class="p">(</span><span class="n">login</span><span class="p">,</span> <span class="n">nova_senha</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">FalhaAutenticacaoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FalhaAutenticacaoError</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">except</span> <span class="n">SmeIntegracaoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SmeIntegracaoError</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

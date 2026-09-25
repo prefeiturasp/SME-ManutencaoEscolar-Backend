@@ -1,0 +1,1089 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.core.management.commands.gerar_docs &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../dominios/index.html">Documentação</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../dominios/core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../dominios/empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../dominios/lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dominios/lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../dominios/glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../dominios/glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Código do módulo</a></li>
+      <li class="breadcrumb-item active">apps.core.management.commands.gerar_docs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código-fonte para apps.core.management.commands.gerar_docs</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Gera a estrutura inicial do Sphinx para cada app."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">textwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">dedent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.apps</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppConfig</span><span class="p">,</span> <span class="n">apps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.core.management.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseCommand</span><span class="p">,</span> <span class="n">CommandError</span>
+
+<span class="n">INDEX</span> <span class="o">=</span> <span class="s2">"index.rst"</span>
+
+
+<div class="viewcode-block" id="Command">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Command</span><span class="p">(</span><span class="n">BaseCommand</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Gera a estrutura de documentação Sphinx para um domínio Django."""</span>
+
+    <span class="n">help</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">"Cria a estrutura de documentação Sphinx para um app Django "</span>
+        <span class="s2">"e o registra automaticamente no índice de domínios."</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="Command.add_arguments">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.add_arguments">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Adiciona os argumentos aceitos pelo comando."""</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s2">"nome_app"</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s2">"Nome do app Django. Exemplos: core, empresa ou escola."</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.handle">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.handle">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Executa a geração da documentação do domínio informado."""</span>
+        <span class="n">nome_app</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s2">"nome_app"</span><span class="p">]</span>
+
+        <span class="n">configuracao_app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obter_configuracao_app</span><span class="p">(</span><span class="n">nome_app</span><span class="p">)</span>
+
+        <span class="n">diretorio_projeto</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">BASE_DIR</span><span class="p">)</span>
+        <span class="n">diretorio_dominios</span> <span class="o">=</span> <span class="n">diretorio_projeto</span> <span class="o">/</span> <span class="s2">"docs"</span> <span class="o">/</span> <span class="s2">"dominios"</span>
+        <span class="n">diretorio_dominio</span> <span class="o">=</span> <span class="n">diretorio_dominios</span> <span class="o">/</span> <span class="n">configuracao_app</span><span class="o">.</span><span class="n">label</span>
+        <span class="n">diretorio_codigo</span> <span class="o">=</span> <span class="n">diretorio_dominio</span> <span class="o">/</span> <span class="s2">"codigo"</span>
+        <span class="n">caminho_glossario</span> <span class="o">=</span> <span class="n">diretorio_dominios</span> <span class="o">/</span> <span class="s2">"glossario.rst"</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Criando documentação para: </span><span class="si">{</span><span class="n">configuracao_app</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">criar_estrutura_dominio</span><span class="p">(</span>
+            <span class="n">diretorio_dominio</span><span class="o">=</span><span class="n">diretorio_dominio</span><span class="p">,</span>
+            <span class="n">configuracao_app</span><span class="o">=</span><span class="n">configuracao_app</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gerar_documentacao_modulos</span><span class="p">(</span>
+            <span class="n">configuracao_app</span><span class="o">=</span><span class="n">configuracao_app</span><span class="p">,</span>
+            <span class="n">diretorio_codigo</span><span class="o">=</span><span class="n">diretorio_codigo</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">atualizar_indice_dominios</span><span class="p">(</span>
+            <span class="n">diretorio_dominios</span><span class="o">=</span><span class="n">diretorio_dominios</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">criar_glossario_geral</span><span class="p">(</span>
+            <span class="n">caminho_glossario</span><span class="o">=</span><span class="n">caminho_glossario</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">(</span>
+                <span class="s2">"</span><span class="se">\n</span><span class="s2">Documentação do domínio "</span>
+                <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">configuracao_app</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2">' criada com sucesso."</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Diretório: </span><span class="si">{</span><span class="n">diretorio_dominio</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.obter_configuracao_app">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.obter_configuracao_app">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obter_configuracao_app</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">nome_app</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AppConfig</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Localiza a configuração de um app registrado no Django.</span>
+
+<span class="sd">        O app pode ser informado pelo label ou pelo caminho completo</span>
+<span class="sd">        definido no INSTALLED_APPS.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nome_app: Nome ou caminho do app Django.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A configuração do app encontrada.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            CommandError: Caso o app não esteja registrado no Django.</span>
+<span class="sd">        """</span>
+        <span class="n">nome_normalizado</span> <span class="o">=</span> <span class="n">nome_app</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">configuracao_app</span> <span class="ow">in</span> <span class="n">apps</span><span class="o">.</span><span class="n">get_app_configs</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">nome_normalizado</span> <span class="ow">in</span> <span class="p">{</span>
+                <span class="n">configuracao_app</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">configuracao_app</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="p">}:</span>
+                <span class="k">return</span> <span class="n">configuracao_app</span>
+
+        <span class="n">apps_disponiveis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obter_apps_disponiveis</span><span class="p">()</span>
+
+        <span class="n">lista_apps</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  - </span><span class="si">{</span><span class="n">nome</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">nome</span> <span class="ow">in</span> <span class="n">apps_disponiveis</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="n">CommandError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"App '</span><span class="si">{</span><span class="n">nome_app</span><span class="si">}</span><span class="s2">' não encontrado.</span><span class="se">\n\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"Apps disponíveis:</span><span class="se">\n</span><span class="si">{</span><span class="n">lista_apps</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.obter_apps_disponiveis">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.obter_apps_disponiveis">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obter_apps_disponiveis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Retorna os labels dos apps registrados no Django.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Lista ordenada com os nomes dos apps disponíveis.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">configuracao_app</span><span class="o">.</span><span class="n">label</span>
+            <span class="k">for</span> <span class="n">configuracao_app</span> <span class="ow">in</span> <span class="n">apps</span><span class="o">.</span><span class="n">get_app_configs</span><span class="p">()</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.criar_estrutura_dominio">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.criar_estrutura_dominio">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar_estrutura_dominio</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">diretorio_dominio</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">configuracao_app</span><span class="p">:</span> <span class="n">AppConfig</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Cria os diretórios e arquivos iniciais da documentação do domínio.</span>
+
+<span class="sd">        Arquivos existentes são preservados para evitar a perda de</span>
+<span class="sd">        documentação escrita manualmente.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            diretorio_dominio: Diretório onde ficará a documentação.</span>
+<span class="sd">            configuracao_app: Configuração do app Django.</span>
+<span class="sd">        """</span>
+        <span class="n">diretorio_codigo</span> <span class="o">=</span> <span class="n">diretorio_dominio</span> <span class="o">/</span> <span class="s2">"codigo"</span>
+
+        <span class="n">diretorio_dominio</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">diretorio_codigo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">caminho_indice_dominio</span> <span class="o">=</span> <span class="n">diretorio_dominio</span> <span class="o">/</span> <span class="n">INDEX</span>
+        <span class="n">caminho_regras_negocio</span> <span class="o">=</span> <span class="n">diretorio_dominio</span> <span class="o">/</span> <span class="s2">"regras_negocio.rst"</span>
+        <span class="n">caminho_indice_codigo</span> <span class="o">=</span> <span class="n">diretorio_codigo</span> <span class="o">/</span> <span class="n">INDEX</span>
+
+        <span class="n">arquivos</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">caminho_indice_dominio</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">criar_conteudo_indice_dominio</span><span class="p">(</span>
+                <span class="n">configuracao_app</span><span class="o">=</span><span class="n">configuracao_app</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">caminho_regras_negocio</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">criar_conteudo_regras_negocio</span><span class="p">(</span>
+                <span class="n">configuracao_app</span><span class="o">=</span><span class="n">configuracao_app</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">caminho_indice_codigo</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">criar_conteudo_indice_codigo</span><span class="p">(</span>
+                <span class="n">configuracao_app</span><span class="o">=</span><span class="n">configuracao_app</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">caminho_arquivo</span><span class="p">,</span> <span class="n">conteudo</span> <span class="ow">in</span> <span class="n">arquivos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">criar_arquivo_se_nao_existir</span><span class="p">(</span>
+                <span class="n">caminho_arquivo</span><span class="o">=</span><span class="n">caminho_arquivo</span><span class="p">,</span>
+                <span class="n">conteudo</span><span class="o">=</span><span class="n">conteudo</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.criar_arquivo_se_nao_existir">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.criar_arquivo_se_nao_existir">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar_arquivo_se_nao_existir</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">caminho_arquivo</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">conteudo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Cria um arquivo apenas quando ele ainda não existe.</span>
+
+<span class="sd">        Isso garante que conteúdos escritos manualmente não sejam</span>
+<span class="sd">        sobrescritos em execuções posteriores do comando.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            caminho_arquivo: Caminho do arquivo a ser criado.</span>
+<span class="sd">            conteudo: Conteúdo inicial do arquivo.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">caminho_arquivo</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Preservado: </span><span class="si">{</span><span class="n">caminho_arquivo</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">caminho_arquivo</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="n">conteudo</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Criado: </span><span class="si">{</span><span class="n">caminho_arquivo</span><span class="si">}</span><span class="s2">"</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Command.atualizar_indice_dominios">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.atualizar_indice_dominios">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">atualizar_indice_dominios</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">diretorio_dominios</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Atualiza o índice central com todos os domínios documentados.</span>
+
+<span class="sd">        O índice é reconstruído com base nos diretórios que possuem</span>
+<span class="sd">        um arquivo index.rst.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            diretorio_dominios: Diretório raiz dos domínios.</span>
+<span class="sd">        """</span>
+        <span class="n">diretorio_dominios</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">dominios</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obter_dominios_documentados</span><span class="p">(</span>
+            <span class="n">diretorio_dominios</span><span class="o">=</span><span class="n">diretorio_dominios</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">caminho_indice</span> <span class="o">=</span> <span class="n">diretorio_dominios</span> <span class="o">/</span> <span class="n">INDEX</span>
+
+        <span class="n">conteudo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">criar_conteudo_indice_dominios</span><span class="p">(</span>
+            <span class="n">dominios</span><span class="o">=</span><span class="n">dominios</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">caminho_indice</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="n">conteudo</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Índice atualizado: </span><span class="si">{</span><span class="n">caminho_indice</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.obter_dominios_documentados">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.obter_dominios_documentados">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obter_dominios_documentados</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">diretorio_dominios</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Retorna os domínios que possuem documentação criada.</span>
+
+<span class="sd">        Um diretório é considerado um domínio quando contém</span>
+<span class="sd">        um arquivo index.rst.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            diretorio_dominios: Diretório raiz dos domínios.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Lista ordenada dos nomes dos domínios.</span>
+<span class="sd">        """</span>
+        <span class="n">dominios</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">caminho</span> <span class="ow">in</span> <span class="n">diretorio_dominios</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">caminho</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="k">continue</span>
+
+            <span class="n">caminho_indice</span> <span class="o">=</span> <span class="n">caminho</span> <span class="o">/</span> <span class="n">INDEX</span>
+
+            <span class="k">if</span> <span class="n">caminho_indice</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">dominios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">caminho</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dominios</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.criar_conteudo_indice_dominio">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.criar_conteudo_indice_dominio">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar_conteudo_indice_dominio</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuracao_app</span><span class="p">:</span> <span class="n">AppConfig</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Cria o conteúdo inicial do índice de um domínio.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            configuracao_app: Configuração do app Django.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Conteúdo do arquivo index.rst do domínio.</span>
+<span class="sd">        """</span>
+        <span class="n">nome_dominio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatar_nome_dominio</span><span class="p">(</span><span class="n">configuracao_app</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">separador</span> <span class="o">=</span> <span class="s2">"="</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">nome_dominio</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dedent</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"""</span><span class="se">\</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">separador</span><span class="si">}</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">nome_dominio</span><span class="si">}</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">separador</span><span class="si">}</span>
+
+<span class="s2">            Visão Geral</span>
+<span class="s2">            ===========</span>
+
+<span class="s2">            O domínio **</span><span class="si">{</span><span class="n">nome_dominio</span><span class="si">}</span><span class="s2">** é responsável por concentrar as</span>
+<span class="s2">            funcionalidades relacionadas ao seu contexto de negócio.</span>
+
+<span class="s2">            O app disponibiliza operações para gerenciamento das informações</span>
+<span class="s2">            do domínio, incluindo, quando aplicável, funcionalidades de</span>
+<span class="s2">            cadastro, consulta, alteração e exclusão (CRUD).</span>
+
+<span class="s2">            Também podem existir comandos administrativos específicos para</span>
+<span class="s2">            criação, atualização ou manutenção de informações relacionadas</span>
+<span class="s2">            ao domínio.</span>
+
+<span class="s2">            Regras de Negócio</span>
+<span class="s2">            =================</span>
+
+<span class="s2">            Esta seção apresenta as regras de negócio que orientam o</span>
+<span class="s2">            funcionamento do domínio **</span><span class="si">{</span><span class="n">nome_dominio</span><span class="si">}</span><span class="s2">**.</span>
+
+<span class="s2">            As regras descrevem comportamentos, restrições, validações</span>
+<span class="s2">            e condições que precisam ser respeitados pelas funcionalidades</span>
+<span class="s2">            do domínio.</span>
+
+<span class="s2">            .. toctree::</span>
+<span class="s2">               :maxdepth: 1</span>
+
+<span class="s2">               regras_negocio</span>
+
+<span class="s2">            Documentação do código</span>
+<span class="s2">            ======================</span>
+
+<span class="s2">            Esta seção apresenta a documentação técnica dos componentes que</span>
+<span class="s2">            implementam o domínio **</span><span class="si">{</span><span class="n">nome_dominio</span><span class="si">}</span><span class="s2">**.</span>
+
+<span class="s2">            A documentação é gerada automaticamente a partir dos módulos</span>
+<span class="s2">            Python do app e tem como objetivo facilitar a compreensão da</span>
+<span class="s2">            implementação e de suas responsabilidades técnicas.</span>
+
+<span class="s2">            .. toctree::</span>
+<span class="s2">               :maxdepth: 1</span>
+
+<span class="s2">               codigo/index</span>
+<span class="s2">            """</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.criar_conteudo_regras_negocio">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.criar_conteudo_regras_negocio">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar_conteudo_regras_negocio</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuracao_app</span><span class="p">:</span> <span class="n">AppConfig</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Cria o conteúdo inicial do documento de regras de negócio.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            configuracao_app: Configuração do app Django.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Conteúdo inicial do arquivo regras-negocio.rst.</span>
+<span class="sd">        """</span>
+        <span class="n">nome_dominio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatar_nome_dominio</span><span class="p">(</span><span class="n">configuracao_app</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dedent</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"""</span><span class="se">\</span>
+<span class="s2">            Esta seção documenta as regras de negócio que orientam o</span>
+<span class="s2">            funcionamento do domínio **</span><span class="si">{</span><span class="n">nome_dominio</span><span class="si">}</span><span class="s2">**.</span>
+
+<span class="s2">            Identificador Único</span>
+<span class="s2">            -------------------</span>
+
+<span class="s2">            Cada registro do domínio possui um identificador único no formato</span>
+<span class="s2">            **UUID (Universally Unique Identifier)**.</span>
+
+<span class="s2">            O identificador é gerado automaticamente pelo sistema no momento</span>
+<span class="s2">            da criação do registro e não pode ser alterado manualmente.</span>
+
+<span class="s2">            O UUID deve ser utilizado para identificar de forma inequívoca</span>
+<span class="s2">            cada registro do domínio.</span>
+
+<span class="s2">            Auditoria de Criação</span>
+<span class="s2">            --------------------</span>
+
+<span class="s2">            Os registros possuem informações de auditoria relacionadas à sua</span>
+<span class="s2">            criação.</span>
+
+<span class="s2">            A data e hora de criação são registradas automaticamente pelo</span>
+<span class="s2">            sistema. Quando disponível, o usuário responsável pela criação</span>
+<span class="s2">            também é registrado.</span>
+
+<span class="s2">            Auditoria de Atualização</span>
+<span class="s2">            ------------------------</span>
+
+<span class="s2">            Os registros possuem informações de auditoria relacionadas às</span>
+<span class="s2">            alterações realizadas.</span>
+
+<span class="s2">            A data e hora da última atualização são atualizadas</span>
+<span class="s2">            automaticamente pelo sistema. Quando disponível, o usuário</span>
+<span class="s2">            responsável pela atualização também é registrado.</span>
+
+<span class="s2">            Exclusão e Restauração</span>
+<span class="s2">            ----------------------</span>
+
+<span class="s2">            Os registros utilizam exclusão lógica para preservar as</span>
+<span class="s2">            informações após uma exclusão.</span>
+
+<span class="s2">            Ao realizar uma exclusão lógica, o sistema registra a data e hora</span>
+<span class="s2">            da exclusão e, quando disponível, o usuário responsável pela ação.</span>
+
+<span class="s2">            Registros excluídos logicamente não são retornados pelo</span>
+<span class="s2">            gerenciamento padrão dos objetos.</span>
+
+<span class="s2">            Registros excluídos podem ser restaurados, retornando ao conjunto</span>
+<span class="s2">            de registros disponíveis para consulta e utilização.</span>
+<span class="s2">        """</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.criar_conteudo_indice_codigo">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.criar_conteudo_indice_codigo">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar_conteudo_indice_codigo</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuracao_app</span><span class="p">:</span> <span class="n">AppConfig</span><span class="p">,</span>
+        <span class="n">modulos</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Cria o índice da documentação técnica do código.</span>
+
+<span class="sd">        Este arquivo será preservado nas execuções posteriores para permitir</span>
+<span class="sd">        referências à documentação gerada automaticamente.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            configuracao_app: Configuração do app Django.</span>
+<span class="sd">            modulos: Lista dos arquivos RST dos módulos.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Conteúdo inicial do arquivo codigo/index.rst.</span>
+<span class="sd">        """</span>
+        <span class="n">nome_dominio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatar_nome_dominio</span><span class="p">(</span><span class="n">configuracao_app</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">categorias</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">"Models"</span><span class="p">,</span>
+            <span class="s2">"Serializers"</span><span class="p">,</span>
+            <span class="s2">"Views"</span><span class="p">,</span>
+            <span class="s2">"Services"</span><span class="p">,</span>
+            <span class="s2">"Repositories"</span><span class="p">,</span>
+            <span class="s2">"Commands"</span><span class="p">,</span>
+            <span class="s2">"Tasks"</span><span class="p">,</span>
+            <span class="s2">"Outros Módulos"</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="n">modulos_por_categoria</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">categoria</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">categoria</span> <span class="ow">in</span> <span class="n">categorias</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">modulo</span><span class="p">,</span> <span class="n">nome_arquivo</span> <span class="ow">in</span> <span class="n">modulos</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">categoria</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classificar_modulo</span><span class="p">(</span><span class="n">modulo</span><span class="p">)</span>
+            <span class="n">modulos_por_categoria</span><span class="p">[</span><span class="n">categoria</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nome_arquivo</span><span class="p">)</span>
+
+        <span class="n">linhas</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">"Esta seção contém a documentação técnica gerada a partir do"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"código-fonte do domínio **</span><span class="si">{</span><span class="n">nome_dominio</span><span class="si">}</span><span class="s2">**."</span><span class="p">,</span>
+            <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"A documentação de código complementa a documentação de negócio."</span><span class="p">,</span>
+            <span class="s2">""</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">categoria</span> <span class="ow">in</span> <span class="n">categorias</span><span class="p">:</span>
+            <span class="n">modulos_categoria</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">modulos_por_categoria</span><span class="p">[</span><span class="n">categoria</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">modulos_categoria</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">linhas</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">categoria</span><span class="p">,</span>
+                    <span class="s2">"-"</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">categoria</span><span class="p">),</span>
+                    <span class="s2">""</span><span class="p">,</span>
+                    <span class="s2">".. toctree::"</span><span class="p">,</span>
+                    <span class="s2">"   :maxdepth: 2"</span><span class="p">,</span>
+                    <span class="s2">""</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">nome_arquivo</span> <span class="ow">in</span> <span class="n">modulos_categoria</span><span class="p">:</span>
+                <span class="n">linhas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"   </span><span class="si">{</span><span class="n">nome_arquivo</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+            <span class="n">linhas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">linhas</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.criar_conteudo_indice_dominios">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.criar_conteudo_indice_dominios">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar_conteudo_indice_dominios</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dominios</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Cria o conteúdo do índice central de domínios.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dominios: Lista de domínios que possuem documentação.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Conteúdo do arquivo docs/dominios/index.rst.</span>
+<span class="sd">        """</span>
+        <span class="n">titulo</span> <span class="o">=</span> <span class="s2">"Documentação"</span>
+
+        <span class="n">linhas</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">titulo</span><span class="p">,</span>
+            <span class="s2">"="</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">titulo</span><span class="p">),</span>
+            <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"Esta seção apresenta os domínios de negócio do sistema de "</span>
+            <span class="s2">"Manutenção Escolar."</span><span class="p">,</span>
+            <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">".. toctree::"</span><span class="p">,</span>
+            <span class="s2">"   :maxdepth: 2"</span><span class="p">,</span>
+            <span class="s2">""</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">dominio</span> <span class="ow">in</span> <span class="n">dominios</span><span class="p">:</span>
+            <span class="n">linhas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"   </span><span class="si">{</span><span class="n">dominio</span><span class="si">}</span><span class="s2">/index"</span><span class="p">)</span>
+
+        <span class="n">linhas</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s2">"   glossario"</span><span class="p">,</span>
+                <span class="s2">""</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">linhas</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.formatar_nome_dominio">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.formatar_nome_dominio">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">formatar_nome_dominio</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">nome_app</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Altera o label técnico do app em um nome legível.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nome_app: Label técnico do app.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Nome formatado para apresentação na documentação.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">nome_app</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"_"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Command.gerar_documentacao_modulos">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.gerar_documentacao_modulos">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gerar_documentacao_modulos</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuracao_app</span><span class="p">:</span> <span class="n">AppConfig</span><span class="p">,</span>
+        <span class="n">diretorio_codigo</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Gera a documentação automática dos módulos Python do app.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            configuracao_app: Configuração do app Django.</span>
+<span class="sd">            diretorio_codigo: Diretório da documentação automática.</span>
+<span class="sd">        """</span>
+        <span class="n">modulos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obter_modulos_python</span><span class="p">(</span><span class="n">configuracao_app</span><span class="p">)</span>
+        <span class="n">modulos_documentados</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">modulo</span> <span class="ow">in</span> <span class="n">modulos</span><span class="p">:</span>
+            <span class="n">nome_arquivo</span> <span class="o">=</span> <span class="n">modulo</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">)</span>
+            <span class="n">caminho_arquivo</span> <span class="o">=</span> <span class="n">diretorio_codigo</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nome_arquivo</span><span class="si">}</span><span class="s2">.rst"</span>
+
+            <span class="n">caminho_arquivo</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">criar_conteudo_modulo</span><span class="p">(</span>
+                    <span class="n">modulo</span><span class="o">=</span><span class="n">modulo</span><span class="p">,</span>
+                    <span class="n">configuracao_app</span><span class="o">=</span><span class="n">configuracao_app</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">modulos_documentados</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">modulo</span><span class="p">,</span> <span class="n">nome_arquivo</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Código documentado: </span><span class="si">{</span><span class="n">caminho_arquivo</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">atualizar_indice_codigo</span><span class="p">(</span>
+            <span class="n">configuracao_app</span><span class="o">=</span><span class="n">configuracao_app</span><span class="p">,</span>
+            <span class="n">diretorio_codigo</span><span class="o">=</span><span class="n">diretorio_codigo</span><span class="p">,</span>
+            <span class="n">modulos</span><span class="o">=</span><span class="n">modulos_documentados</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.obter_modulos_python">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.obter_modulos_python">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obter_modulos_python</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuracao_app</span><span class="p">:</span> <span class="n">AppConfig</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Retorna os módulos Python encontrados no app.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            configuracao_app: Configuração do app Django.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Lista ordenada dos módulos Python encontrados.</span>
+<span class="sd">        """</span>
+        <span class="n">diretorio_app</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">configuracao_app</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">modulos</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">diretorios_ignorados</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"migrations"</span><span class="p">,</span>
+            <span class="s2">"tests"</span><span class="p">,</span>
+            <span class="s2">"schemas"</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">palavras_ignoradas</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"test"</span><span class="p">,</span>
+            <span class="s2">"schemas"</span><span class="p">,</span>
+            <span class="s2">"urls"</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">arquivo</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">diretorio_app</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*.py"</span><span class="p">)):</span>
+            <span class="n">nome_arquivo</span> <span class="o">=</span> <span class="n">arquivo</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">casefold</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">arquivo</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"__init__.py"</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="n">parte</span><span class="o">.</span><span class="n">casefold</span><span class="p">()</span> <span class="ow">in</span> <span class="n">diretorios_ignorados</span>
+                <span class="k">for</span> <span class="n">parte</span> <span class="ow">in</span> <span class="n">arquivo</span><span class="o">.</span><span class="n">parts</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">palavra</span> <span class="ow">in</span> <span class="n">nome_arquivo</span> <span class="k">for</span> <span class="n">palavra</span> <span class="ow">in</span> <span class="n">palavras_ignoradas</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">caminho_relativo</span> <span class="o">=</span> <span class="n">arquivo</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">diretorio_app</span><span class="p">)</span>
+            <span class="n">partes</span> <span class="o">=</span> <span class="n">caminho_relativo</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span>
+
+            <span class="n">modulo</span> <span class="o">=</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">configuracao_app</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">partes</span><span class="p">])</span>
+
+            <span class="n">modulos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modulo</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">modulos</span></div>
+
+
+<div class="viewcode-block" id="Command.criar_conteudo_modulo">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.criar_conteudo_modulo">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar_conteudo_modulo</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">modulo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">configuracao_app</span><span class="p">:</span> <span class="n">AppConfig</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Cria o conteúdo RST para documentação automática de um módulo.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            modulo: Caminho completo do módulo Python.</span>
+<span class="sd">            configuracao_app: Configuração do app Django.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Conteúdo RST do módulo.</span>
+<span class="sd">        """</span>
+        <span class="n">partes</span> <span class="o">=</span> <span class="n">modulo</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+
+        <span class="n">conteudo</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">modulo</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'='</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">modulo</span><span class="p">)</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">".. automodule:: </span><span class="si">{</span><span class="n">modulo</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"   :members:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"   :undoc-members:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"   :show-inheritance:</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"tasks"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">partes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">conteudo</span>
+
+        <span class="n">tarefas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obter_tasks_celery</span><span class="p">(</span>
+            <span class="n">configuracao_app</span><span class="o">=</span><span class="n">configuracao_app</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tarefas</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">conteudo</span>
+
+        <span class="n">conteudo</span> <span class="o">+=</span> <span class="s2">""</span>
+
+        <span class="k">for</span> <span class="n">tarefa</span> <span class="ow">in</span> <span class="n">tarefas</span><span class="p">:</span>
+            <span class="n">conteudo</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">".. automethod:: </span><span class="si">{</span><span class="n">modulo</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">tarefa</span><span class="si">}</span><span class="s2">.run</span><span class="se">\n\n</span><span class="s2">"</span>
+
+        <span class="k">return</span> <span class="n">conteudo</span></div>
+
+
+<div class="viewcode-block" id="Command.atualizar_indice_codigo">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.atualizar_indice_codigo">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">atualizar_indice_codigo</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuracao_app</span><span class="p">:</span> <span class="n">AppConfig</span><span class="p">,</span>
+        <span class="n">diretorio_codigo</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">modulos</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Atualiza o índice da documentação automática do código.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            configuracao_app: Configuração do app Django.</span>
+<span class="sd">            diretorio_codigo: Diretório da documentação automática.</span>
+<span class="sd">            modulos: Lista dos nomes dos arquivos RST dos módulos.</span>
+<span class="sd">        """</span>
+        <span class="n">caminho_indice</span> <span class="o">=</span> <span class="n">diretorio_codigo</span> <span class="o">/</span> <span class="n">INDEX</span>
+
+        <span class="n">conteudo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">criar_conteudo_indice_codigo</span><span class="p">(</span>
+            <span class="n">configuracao_app</span><span class="o">=</span><span class="n">configuracao_app</span><span class="p">,</span>
+            <span class="n">modulos</span><span class="o">=</span><span class="n">modulos</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">caminho_indice</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="n">conteudo</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Índice de código atualizado: </span><span class="si">{</span><span class="n">caminho_indice</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.classificar_modulo">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.classificar_modulo">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">classificar_modulo</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">modulo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Classifica um módulo Python conforme sua responsabilidade.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            modulo: Caminho completo do módulo Python.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Categoria do módulo.</span>
+<span class="sd">        """</span>
+        <span class="n">partes</span> <span class="o">=</span> <span class="n">modulo</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">"models"</span> <span class="ow">in</span> <span class="n">partes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">"Models"</span>
+
+        <span class="k">if</span> <span class="s2">"serializers"</span> <span class="ow">in</span> <span class="n">partes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">"Serializers"</span>
+
+        <span class="k">if</span> <span class="s2">"views"</span> <span class="ow">in</span> <span class="n">partes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">"Views"</span>
+
+        <span class="k">if</span> <span class="s2">"services"</span> <span class="ow">in</span> <span class="n">partes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">"Services"</span>
+
+        <span class="k">if</span> <span class="s2">"repository"</span> <span class="ow">in</span> <span class="n">partes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">"Repositories"</span>
+
+        <span class="k">if</span> <span class="s2">"management"</span> <span class="ow">in</span> <span class="n">partes</span> <span class="ow">and</span> <span class="s2">"commands"</span> <span class="ow">in</span> <span class="n">partes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">"Commands"</span>
+
+        <span class="k">if</span> <span class="s2">"tasks"</span> <span class="ow">in</span> <span class="n">partes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">"Tasks"</span>
+
+        <span class="k">return</span> <span class="s2">"Outros Módulos"</span></div>
+
+
+<div class="viewcode-block" id="Command.obter_tasks_celery">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.obter_tasks_celery">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obter_tasks_celery</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuracao_app</span><span class="p">:</span> <span class="n">AppConfig</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Retorna os nomes das funções decoradas com shared_task.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            configuracao_app: Configuração do app Django.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Lista ordenada dos nomes das tasks Celery encontradas.</span>
+<span class="sd">        """</span>
+        <span class="n">diretorio_app</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">configuracao_app</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">caminho_tasks</span> <span class="o">=</span> <span class="n">diretorio_app</span> <span class="o">/</span> <span class="s2">"tasks.py"</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">caminho_tasks</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">arvore</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+            <span class="n">caminho_tasks</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">),</span>
+            <span class="n">filename</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">caminho_tasks</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">tasks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">no</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">arvore</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">no</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span> <span class="o">|</span> <span class="n">ast</span><span class="o">.</span><span class="n">AsyncFunctionDef</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">decorator</span> <span class="ow">in</span> <span class="n">no</span><span class="o">.</span><span class="n">decorator_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">decorator</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">decorator</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">"shared_task"</span>
+                <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">decorator</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decorator</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">decorator</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">"shared_task"</span>
+                <span class="p">):</span>
+                    <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">no</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command.criar_glossario_geral">
+<a class="viewcode-back" href="../../../../../dominios/core/codigo/apps_core_management_commands_gerar_docs.html#apps.core.management.commands.gerar_docs.Command.criar_glossario_geral">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar_glossario_geral</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">caminho_glossario</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Cria o glossário geral dos domínios.</span>
+
+<span class="sd">        O arquivo existente é preservado para evitar a perda de conteúdo</span>
+<span class="sd">        mantido manualmente.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            caminho_glossario: Caminho do glossário geral.</span>
+<span class="sd">        """</span>
+        <span class="n">conteudo</span> <span class="o">=</span> <span class="n">dedent</span><span class="p">(</span>
+<span class="w">            </span><span class="sd">"""\</span>
+<span class="sd">            Glossário</span>
+<span class="sd">            =========</span>
+
+<span class="sd">            Esta seção apresenta os principais termos de negócio utilizados</span>
+<span class="sd">            pelos domínios do sistema.</span>
+
+<span class="sd">            UE</span>
+<span class="sd">            --</span>
+
+<span class="sd">            **Unidade Educacional**.</span>
+
+<span class="sd">            DRE</span>
+<span class="sd">            ---</span>
+
+<span class="sd">            **Diretoria Regional de Educação**.</span>
+
+<span class="sd">            """</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">criar_arquivo_se_nao_existir</span><span class="p">(</span>
+            <span class="n">caminho_arquivo</span><span class="o">=</span><span class="n">caminho_glossario</span><span class="p">,</span>
+            <span class="n">conteudo</span><span class="o">=</span><span class="n">conteudo</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

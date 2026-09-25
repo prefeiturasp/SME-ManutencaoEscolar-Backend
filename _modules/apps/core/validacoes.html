@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.core.validacoes &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dominios/index.html">Documentação</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../dominios/core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dominios/empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dominios/lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dominios/glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código do módulo</a></li>
+      <li class="breadcrumb-item active">apps.core.validacoes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código-fonte para apps.core.validacoes</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Utilitários para validação e normalização de campos.</span>
+
+<span class="sd">Centraliza expressões regulares, validadores do Django e funções utilizadas</span>
+<span class="sd">para validar formatos de CNPJ, CEP, links de rastreamento, telefones e</span>
+<span class="sd">endereços de e-mail.</span>
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.core.validators</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegexValidator</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CepInvalidoError</span><span class="p">,</span>
+    <span class="n">CnpjInvalidoError</span><span class="p">,</span>
+    <span class="n">EmailInvalidoError</span><span class="p">,</span>
+    <span class="n">LinkRastreioInvalidoError</span><span class="p">,</span>
+    <span class="n">TelefoneInvalidoError</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">CNPJ_FORMATO_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^[A-Z0-9]</span><span class="si">{12}</span><span class="s2">\d</span><span class="si">{2}</span><span class="s2">$"</span><span class="p">)</span>
+
+<span class="n">cnpj_formato_validacao</span> <span class="o">=</span> <span class="n">RegexValidator</span><span class="p">(</span>
+    <span class="n">regex</span><span class="o">=</span><span class="n">CNPJ_FORMATO_REGEX</span><span class="p">,</span>
+    <span class="n">message</span><span class="o">=</span><span class="p">(</span>
+        <span class="s2">"CNPJ inválido: deve ter 14 posições, sendo as 12 primeiras "</span>
+        <span class="s2">"alfanuméricas (0-9, A-Z) e as 2 últimas numéricas."</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">LINK_FORMATO_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^https?://[^\s]+$"</span><span class="p">)</span>
+
+<span class="n">link_formato_validacao</span> <span class="o">=</span> <span class="n">RegexValidator</span><span class="p">(</span>
+    <span class="n">regex</span><span class="o">=</span><span class="n">LINK_FORMATO_REGEX</span><span class="p">,</span>
+    <span class="n">message</span><span class="o">=</span><span class="s2">"Link inválido: deve ser uma URL válida."</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">apenas_digitos_validator</span> <span class="o">=</span> <span class="n">RegexValidator</span><span class="p">(</span>
+    <span class="n">regex</span><span class="o">=</span><span class="sa">r</span><span class="s2">"^\d+$"</span><span class="p">,</span>
+    <span class="n">message</span><span class="o">=</span><span class="s2">"Este campo deve conter apenas dígitos numéricos."</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">EMAIL_FORMATO_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="formata_cnpj">
+<a class="viewcode-back" href="../../../dominios/core/codigo/apps_core_validacoes.html#apps.core.validacoes.formata_cnpj">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">formata_cnpj</span><span class="p">(</span><span class="n">valor</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Normaliza a representação de um CNPJ.</span>
+
+<span class="sd">    Remove pontos, barras, hífens e espaços e converte as letras para</span>
+<span class="sd">    maiúsculas. A função não verifica se o valor possui um formato de CNPJ</span>
+<span class="sd">    válido.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        valor (str): CNPJ que será normalizado.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: CNPJ sem máscara e com caracteres alfabéticos em maiúsculas.</span>
+<span class="sd">            Retorna uma string vazia quando ``valor`` for vazio.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">valor</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">""</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[.\-/\s]"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">valor</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="validar_formato_cnpj">
+<a class="viewcode-back" href="../../../dominios/core/codigo/apps_core_validacoes.html#apps.core.validacoes.validar_formato_cnpj">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validar_formato_cnpj</span><span class="p">(</span><span class="n">cnpj</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Valida o formato estrutural de um CNPJ.</span>
+
+<span class="sd">    Verifica se o valor possui 14 posições, sendo as 12 primeiras</span>
+<span class="sd">    alfanuméricas e as duas últimas exclusivamente numéricas.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cnpj (str): CNPJ que será validado.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        CnpjInvalidoError: Se o CNPJ não atender ao formato esperado.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">CNPJ_FORMATO_REGEX</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">cnpj</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">CnpjInvalidoError</span><span class="p">(</span>
+            <span class="s2">"CNPJ deve ter 14 posições: as 12 primeiras alfanuméricas "</span>
+            <span class="s2">"(0-9, A-Z) e as 2 últimas numéricas."</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="validar_formato_cep">
+<a class="viewcode-back" href="../../../dominios/core/codigo/apps_core_validacoes.html#apps.core.validacoes.validar_formato_cep">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validar_formato_cep</span><span class="p">(</span><span class="n">cep</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Valida o formato estrutural de um CEP.</span>
+
+<span class="sd">    O valor deve conter exatamente oito dígitos numéricos.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cep (str): CEP que será validado.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        CepInvalidoError: Se o CEP não possuir exatamente oito dígitos</span>
+<span class="sd">            numéricos.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^\d</span><span class="si">{8}</span><span class="s2">$"</span><span class="p">,</span> <span class="n">cep</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">CepInvalidoError</span><span class="p">(</span>
+            <span class="s2">"CEP inválido. Deve conter 8 dígitos numéricos."</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="validar_formato_link_rastreio">
+<a class="viewcode-back" href="../../../dominios/core/codigo/apps_core_validacoes.html#apps.core.validacoes.validar_formato_link_rastreio">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validar_formato_link_rastreio</span><span class="p">(</span><span class="n">link</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Valida o formato de um link de rastreamento.</span>
+
+<span class="sd">    Verifica se o valor inicia com ``http://`` ou ``https://`` e não</span>
+<span class="sd">    contém espaços em branco.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        link (str): URL de rastreamento que será validada.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        LinkRastreioInvalidoError: Se o link não atender ao formato esperado.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">LINK_FORMATO_REGEX</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">link</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">LinkRastreioInvalidoError</span><span class="p">(</span>
+            <span class="s2">"Link inválido. Deve ser uma URL válida."</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="validar_telefone">
+<a class="viewcode-back" href="../../../dominios/core/codigo/apps_core_validacoes.html#apps.core.validacoes.validar_telefone">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validar_telefone</span><span class="p">(</span><span class="n">telefone</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Valida o formato de um número de telefone.</span>
+
+<span class="sd">    O valor deve conter exclusivamente dígitos e possuir 10 ou 11 posições.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        telefone (str): Número de telefone que será validado.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TelefoneInvalidoError: Se o telefone não possuir 10 ou 11 dígitos</span>
+<span class="sd">            numéricos.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^\d{10,11}$"</span><span class="p">,</span> <span class="n">telefone</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">TelefoneInvalidoError</span><span class="p">(</span>
+            <span class="s2">"Telefone inválido. Deve conter 10 ou 11 dígitos numéricos."</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="validar_email">
+<a class="viewcode-back" href="../../../dominios/core/codigo/apps_core_validacoes.html#apps.core.validacoes.validar_email">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validar_email</span><span class="p">(</span><span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Valida o formato básico de um endereço de e-mail.</span>
+
+<span class="sd">    A validação verifica se o valor corresponde ao padrão de e-mail definido</span>
+<span class="sd">    pela expressão regular da aplicação. Não realiza validação da existência</span>
+<span class="sd">    ou acessibilidade do endereço.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        email (str): Endereço de e-mail que será validado.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        EmailInvalidoError: Se o endereço não atender ao formato esperado.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">EMAIL_FORMATO_REGEX</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">email</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">EmailInvalidoError</span><span class="p">(</span>
+            <span class="s2">"E-mail inválido. Deve possuir um endereço de e-mail válido."</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

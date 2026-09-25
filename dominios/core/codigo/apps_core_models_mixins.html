@@ -1,0 +1,988 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.core.models.mixins &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../search.html" />
+    <link rel="next" title="apps.core.serializers.anexo" href="apps_core_serializers_anexo.html" />
+    <link rel="prev" title="apps.core.models.anexo" href="apps_core_models_anexo.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Documentação</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Core</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#documentacao-do-codigo">Documentação do código</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Documentação</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Core</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Models</a></li>
+      <li class="breadcrumb-item active">apps.core.models.mixins</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/dominios/core/codigo/apps_core_models_mixins.rst.txt" rel="nofollow"> Ver código-fonte da página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-apps.core.models.mixins">
+<span id="apps-core-models-mixins"></span><h1>apps.core.models.mixins<a class="headerlink" href="#module-apps.core.models.mixins" title="Link para este cabeçalho"></a></h1>
+<p>Mixins e modelo base para padronizar comportamentos dos modelos Django.</p>
+<p>Este módulo fornece componentes reutilizáveis para adicionar aos modelos:</p>
+<ul class="simple">
+<li><p>identificação por UUID;</p></li>
+<li><p>informações de criação e atualização;</p></li>
+<li><p>auditoria do usuário responsável pelas operações;</p></li>
+<li><p>exclusão lógica (soft delete) e restauração;</p></li>
+<li><p>armazenamento e acesso a arquivos anexados.</p></li>
+</ul>
+<p>Os mixins são abstratos e não criam tabelas próprias no banco de dados.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.core.models.mixins.</span></span><span class="sig-name descname"><span class="pre">AnexoMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#AnexoMixin"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin" title="Link para esta definição"></a></dt>
+<dd><p>Base: <a class="reference internal" href="#apps.core.models.mixins.BaseModel" title="apps.core.models.mixins.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Adiciona suporte a arquivos anexados armazenados em storage privado.</p>
+<p>Além dos recursos fornecidos por <a class="reference internal" href="#apps.core.models.mixins.BaseModel" title="apps.core.models.mixins.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a>, disponibiliza campos
+para armazenar informações sobre o arquivo original, seu tipo, MIME e
+tamanho.</p>
+<p>O arquivo é armazenado utilizando o storage retornado por
+<code class="xref py py-func docutils literal notranslate"><span class="pre">get_private_storage()</span></code>, em uma estrutura de diretórios organizada
+por ano, mês e dia.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#AnexoMixin.Meta"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.Meta" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.Meta.abstract">
+<span class="sig-name descname"><span class="pre">abstract</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.Meta.abstract" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.arquivo">
+<span class="sig-name descname"><span class="pre">arquivo</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.arquivo" title="Link para esta definição"></a></dt>
+<dd><p>The descriptor for the file attribute on the model instance. Return a
+FieldFile when accessed so you can write code like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">myapp.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">MyModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instance</span> <span class="o">=</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instance</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">size</span>
+</pre></div>
+</div>
+<p>Assign a file object on assignment so you can do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'/path/to/hello.world'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">instance</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.atualizado_em">
+<span class="sig-name descname"><span class="pre">atualizado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.atualizado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.atualizado_por">
+<span class="sig-name descname"><span class="pre">atualizado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.atualizado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.atualizado_por_id">
+<span class="sig-name descname"><span class="pre">atualizado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.atualizado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.criado_em">
+<span class="sig-name descname"><span class="pre">criado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.criado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.criado_por">
+<span class="sig-name descname"><span class="pre">criado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.criado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.criado_por_id">
+<span class="sig-name descname"><span class="pre">criado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.criado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.deletado_em">
+<span class="sig-name descname"><span class="pre">deletado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.deletado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.deletado_por">
+<span class="sig-name descname"><span class="pre">deletado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.deletado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.deletado_por_id">
+<span class="sig-name descname"><span class="pre">deletado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.deletado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.get_next_by_atualizado_em">
+<span class="sig-name descname"><span class="pre">get_next_by_atualizado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">atualizado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.get_next_by_atualizado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.get_next_by_criado_em">
+<span class="sig-name descname"><span class="pre">get_next_by_criado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">criado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.get_next_by_criado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.get_previous_by_atualizado_em">
+<span class="sig-name descname"><span class="pre">get_previous_by_atualizado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">atualizado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.get_previous_by_atualizado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.get_previous_by_criado_em">
+<span class="sig-name descname"><span class="pre">get_previous_by_criado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">criado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.get_previous_by_criado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.get_tipo_display">
+<span class="sig-name descname"><span class="pre">get_tipo_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.CharField:</span> <span class="pre">tipo&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.get_tipo_display" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.nome_bucket">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nome_bucket</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.nome_bucket" title="Link para esta definição"></a></dt>
+<dd><p>Retorna o caminho/nome do objeto no storage.</p>
+<p>Apesar do nome da propriedade, o valor retornado não é o nome do
+bucket. Ele corresponde ao valor de <code class="docutils literal notranslate"><span class="pre">arquivo.name</span></code>, que identifica
+o caminho e o nome do objeto dentro do storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Retorna<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Caminho e nome do objeto armazenado.</p>
+</dd>
+<dt class="field-even">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Levanta<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – Se nenhum arquivo tiver sido associado ao objeto.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.nome_original">
+<span class="sig-name descname"><span class="pre">nome_original</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.nome_original" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.tamanho_bytes">
+<span class="sig-name descname"><span class="pre">tamanho_bytes</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.tamanho_bytes" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.tipo">
+<span class="sig-name descname"><span class="pre">tipo</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.tipo" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.tipo_mime">
+<span class="sig-name descname"><span class="pre">tipo_mime</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.tipo_mime" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.url">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.url" title="Link para esta definição"></a></dt>
+<dd><p>Retorna a URL de acesso ao arquivo.</p>
+<p>A URL é obtida diretamente do storage configurado no campo
+<a class="reference internal" href="#apps.core.models.mixins.AnexoMixin.arquivo" title="apps.core.models.mixins.AnexoMixin.arquivo"><code class="xref py py-attr docutils literal notranslate"><span class="pre">arquivo</span></code></a>. Para storages privados, ela pode ser uma URL
+assinada ou temporária, dependendo da implementação do storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Retorna<span class="colon">:</span></dt>
+<dd class="field-odd"><p>URL utilizada para acessar o arquivo armazenado.</p>
+</dd>
+<dt class="field-even">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AnexoMixin.uuid">
+<span class="sig-name descname"><span class="pre">uuid</span></span><a class="headerlink" href="#apps.core.models.mixins.AnexoMixin.uuid" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AtualizacaoMixin">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.core.models.mixins.</span></span><span class="sig-name descname"><span class="pre">AtualizacaoMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#AtualizacaoMixin"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.AtualizacaoMixin" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Adiciona informações de auditoria relacionadas à atualização.</p>
+<p>A data e hora da última atualização são atualizadas automaticamente pelo
+Django sempre que o objeto é salvo. O usuário responsável pela alteração
+pode ser registrado por meio do campo <code class="docutils literal notranslate"><span class="pre">atualizado_por</span></code>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AtualizacaoMixin.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#AtualizacaoMixin.Meta"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.AtualizacaoMixin.Meta" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AtualizacaoMixin.Meta.abstract">
+<span class="sig-name descname"><span class="pre">abstract</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#apps.core.models.mixins.AtualizacaoMixin.Meta.abstract" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AtualizacaoMixin.atualizado_em">
+<span class="sig-name descname"><span class="pre">atualizado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.AtualizacaoMixin.atualizado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AtualizacaoMixin.atualizado_por">
+<span class="sig-name descname"><span class="pre">atualizado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.AtualizacaoMixin.atualizado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AtualizacaoMixin.atualizado_por_id">
+<span class="sig-name descname"><span class="pre">atualizado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.AtualizacaoMixin.atualizado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AtualizacaoMixin.get_next_by_atualizado_em">
+<span class="sig-name descname"><span class="pre">get_next_by_atualizado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">atualizado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AtualizacaoMixin.get_next_by_atualizado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AtualizacaoMixin.get_previous_by_atualizado_em">
+<span class="sig-name descname"><span class="pre">get_previous_by_atualizado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">atualizado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AtualizacaoMixin.get_previous_by_atualizado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.core.models.mixins.</span></span><span class="sig-name descname"><span class="pre">AuditMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#AuditMixin"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.AuditMixin" title="Link para esta definição"></a></dt>
+<dd><p>Base: <a class="reference internal" href="#apps.core.models.mixins.CriacaoMixin" title="apps.core.models.mixins.CriacaoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">CriacaoMixin</span></code></a>, <a class="reference internal" href="#apps.core.models.mixins.AtualizacaoMixin" title="apps.core.models.mixins.AtualizacaoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtualizacaoMixin</span></code></a>, <a class="reference internal" href="#apps.core.models.mixins.SoftDeleteMixin" title="apps.core.models.mixins.SoftDeleteMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">SoftDeleteMixin</span></code></a></p>
+<p>Combina os recursos de criação, atualização e exclusão lógica.</p>
+<p>Fornece, em um único mixin, os campos e comportamentos necessários para
+registrar:</p>
+<ul class="simple">
+<li><p>quando e por quem o registro foi criado;</p></li>
+<li><p>quando e por quem o registro foi atualizado;</p></li>
+<li><p>quando e por quem o registro foi excluído logicamente;</p></li>
+<li><p>restauração de registros excluídos.</p></li>
+</ul>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#AuditMixin.Meta"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.Meta" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.Meta.abstract">
+<span class="sig-name descname"><span class="pre">abstract</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.Meta.abstract" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.atualizado_em">
+<span class="sig-name descname"><span class="pre">atualizado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.atualizado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.atualizado_por">
+<span class="sig-name descname"><span class="pre">atualizado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.atualizado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.atualizado_por_id">
+<span class="sig-name descname"><span class="pre">atualizado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.atualizado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.criado_em">
+<span class="sig-name descname"><span class="pre">criado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.criado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.criado_por">
+<span class="sig-name descname"><span class="pre">criado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.criado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.criado_por_id">
+<span class="sig-name descname"><span class="pre">criado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.criado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.deletado_em">
+<span class="sig-name descname"><span class="pre">deletado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.deletado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.deletado_por">
+<span class="sig-name descname"><span class="pre">deletado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.deletado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.deletado_por_id">
+<span class="sig-name descname"><span class="pre">deletado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.deletado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.get_next_by_atualizado_em">
+<span class="sig-name descname"><span class="pre">get_next_by_atualizado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">atualizado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.get_next_by_atualizado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.get_next_by_criado_em">
+<span class="sig-name descname"><span class="pre">get_next_by_criado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">criado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.get_next_by_criado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.get_previous_by_atualizado_em">
+<span class="sig-name descname"><span class="pre">get_previous_by_atualizado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">atualizado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.get_previous_by_atualizado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.AuditMixin.get_previous_by_criado_em">
+<span class="sig-name descname"><span class="pre">get_previous_by_criado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">criado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.AuditMixin.get_previous_by_criado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.core.models.mixins.</span></span><span class="sig-name descname"><span class="pre">BaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#BaseModel"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.BaseModel" title="Link para esta definição"></a></dt>
+<dd><p>Base: <a class="reference internal" href="#apps.core.models.mixins.UUIDMixin" title="apps.core.models.mixins.UUIDMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">UUIDMixin</span></code></a>, <a class="reference internal" href="#apps.core.models.mixins.AuditMixin" title="apps.core.models.mixins.AuditMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuditMixin</span></code></a></p>
+<p>Modelo base para entidades persistidas da aplicação.</p>
+<p>Combina identificação por UUID, auditoria de criação e atualização e
+exclusão lógica.</p>
+<p>Modelos podem herdar desta classe para obter automaticamente
+esses recursos sem precisar declarar os campos individualmente.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#BaseModel.Meta"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.BaseModel.Meta" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.Meta.abstract">
+<span class="sig-name descname"><span class="pre">abstract</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#apps.core.models.mixins.BaseModel.Meta.abstract" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.atualizado_em">
+<span class="sig-name descname"><span class="pre">atualizado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.atualizado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.atualizado_por">
+<span class="sig-name descname"><span class="pre">atualizado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.atualizado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.atualizado_por_id">
+<span class="sig-name descname"><span class="pre">atualizado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.atualizado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.criado_em">
+<span class="sig-name descname"><span class="pre">criado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.criado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.criado_por">
+<span class="sig-name descname"><span class="pre">criado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.criado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.criado_por_id">
+<span class="sig-name descname"><span class="pre">criado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.criado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.deletado_em">
+<span class="sig-name descname"><span class="pre">deletado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.deletado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.deletado_por">
+<span class="sig-name descname"><span class="pre">deletado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.deletado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.deletado_por_id">
+<span class="sig-name descname"><span class="pre">deletado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.deletado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.get_next_by_atualizado_em">
+<span class="sig-name descname"><span class="pre">get_next_by_atualizado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">atualizado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.get_next_by_atualizado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.get_next_by_criado_em">
+<span class="sig-name descname"><span class="pre">get_next_by_criado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">criado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.get_next_by_criado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.get_previous_by_atualizado_em">
+<span class="sig-name descname"><span class="pre">get_previous_by_atualizado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">atualizado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.get_previous_by_atualizado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.get_previous_by_criado_em">
+<span class="sig-name descname"><span class="pre">get_previous_by_criado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">criado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.get_previous_by_criado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.BaseModel.uuid">
+<span class="sig-name descname"><span class="pre">uuid</span></span><a class="headerlink" href="#apps.core.models.mixins.BaseModel.uuid" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CriacaoMixin">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.core.models.mixins.</span></span><span class="sig-name descname"><span class="pre">CriacaoMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#CriacaoMixin"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.CriacaoMixin" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Adiciona informações de auditoria relacionadas à criação.</p>
+<p>Registra automaticamente a data e hora em que o objeto foi criado e
+permite associá-lo ao usuário responsável pela criação.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CriacaoMixin.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#CriacaoMixin.Meta"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.CriacaoMixin.Meta" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CriacaoMixin.Meta.abstract">
+<span class="sig-name descname"><span class="pre">abstract</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#apps.core.models.mixins.CriacaoMixin.Meta.abstract" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CriacaoMixin.criado_em">
+<span class="sig-name descname"><span class="pre">criado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.CriacaoMixin.criado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CriacaoMixin.criado_por">
+<span class="sig-name descname"><span class="pre">criado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.CriacaoMixin.criado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CriacaoMixin.criado_por_id">
+<span class="sig-name descname"><span class="pre">criado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.CriacaoMixin.criado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CriacaoMixin.get_next_by_criado_em">
+<span class="sig-name descname"><span class="pre">get_next_by_criado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">criado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.CriacaoMixin.get_next_by_criado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CriacaoMixin.get_previous_by_criado_em">
+<span class="sig-name descname"><span class="pre">get_previous_by_criado_em</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">criado_em&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#apps.core.models.mixins.CriacaoMixin.get_previous_by_criado_em" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CustomManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.core.models.mixins.</span></span><span class="sig-name descname"><span class="pre">CustomManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#CustomManager"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.CustomManager" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">Manager</span></code></p>
+<p>Gerenciador que retorna apenas registros que não foram excluídos.</p>
+<p>Este gerenciador é utilizado pelo <a class="reference internal" href="#apps.core.models.mixins.SoftDeleteMixin" title="apps.core.models.mixins.SoftDeleteMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">SoftDeleteMixin</span></code></a> como o
+gerenciador padrão (<cite>objects</cite>). Registros cujo campo <code class="docutils literal notranslate"><span class="pre">deletado_em</span></code>
+esteja preenchido são automaticamente excluídos dos querysets.</p>
+<p>Para consultar também os registros excluídos logicamente, utilize o
+gerenciador <code class="docutils literal notranslate"><span class="pre">dm_objects</span></code> disponibilizado pelo
+<a class="reference internal" href="#apps.core.models.mixins.SoftDeleteMixin" title="apps.core.models.mixins.SoftDeleteMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">SoftDeleteMixin</span></code></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.CustomManager.get_queryset">
+<span class="sig-name descname"><span class="pre">get_queryset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuerySet</span></span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#CustomManager.get_queryset"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.CustomManager.get_queryset" title="Link para esta definição"></a></dt>
+<dd><p>Retorna os registros que não possuem data de exclusão.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Retorna<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Queryset filtrado para conter somente registros
+cujo campo <code class="docutils literal notranslate"><span class="pre">deletado_em</span></code> seja <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt class="field-even">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-even"><p>models.QuerySet</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.core.models.mixins.</span></span><span class="sig-name descname"><span class="pre">SoftDeleteMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#SoftDeleteMixin"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Adiciona exclusão lógica e restauração de registros.</p>
+<p>A exclusão lógica não remove o registro do banco de dados. Em vez disso,
+preenche <code class="docutils literal notranslate"><span class="pre">deletado_em</span></code> com a data e hora da exclusão e, opcionalmente,
+registra o usuário responsável em <code class="docutils literal notranslate"><span class="pre">deletado_por</span></code>.</p>
+<p>O gerenciador <code class="docutils literal notranslate"><span class="pre">objects</span></code> oculta automaticamente os registros excluídos.
+O gerenciador <code class="docutils literal notranslate"><span class="pre">dm_objects</span></code> permite consultar todos os registros,
+incluindo os excluídos logicamente.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#SoftDeleteMixin.Meta"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.Meta" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.Meta.abstract">
+<span class="sig-name descname"><span class="pre">abstract</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.Meta.abstract" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.deletado_em">
+<span class="sig-name descname"><span class="pre">deletado_em</span></span><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.deletado_em" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.deletado_por">
+<span class="sig-name descname"><span class="pre">deletado_por</span></span><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.deletado_por" title="Link para esta definição"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">'children'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.deletado_por_id">
+<span class="sig-name descname"><span class="pre">deletado_por_id</span></span><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.deletado_por_id" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">using</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_parents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#SoftDeleteMixin.delete"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.delete" title="Link para esta definição"></a></dt>
+<dd><p>Remove fisicamente o registro do banco de dados.</p>
+<p>Diferentemente de <a class="reference internal" href="#apps.core.models.mixins.SoftDeleteMixin.soft_delete" title="apps.core.models.mixins.SoftDeleteMixin.soft_delete"><code class="xref py py-meth docutils literal notranslate"><span class="pre">soft_delete()</span></code></a>, este método executa a exclusão
+física padrão do Django. O registro e suas relações sujeitas à
+política de exclusão configurada podem ser removidos definitivamente.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>using</strong> – Alias da conexão do banco de dados a ser utilizada.</p></li>
+<li><p><strong>keep_parents</strong> – Indica se os registros dos modelos-pai devem ser
+preservados em uma herança multi-tabela.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Retorna<span class="colon">:</span></dt>
+<dd class="field-even"><p>Quantidade de objetos removidos e
+quantidade de objetos removidos por tipo de modelo.</p>
+</dd>
+<dt class="field-odd">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[int, dict[str, int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.dm_objects">
+<span class="sig-name descname"><span class="pre">dm_objects</span></span><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.dm_objects" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.objects" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.restore">
+<span class="sig-name descname"><span class="pre">restore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#SoftDeleteMixin.restore"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.restore" title="Link para esta definição"></a></dt>
+<dd><p>Restaura um registro excluído logicamente.</p>
+<p>Define <code class="docutils literal notranslate"><span class="pre">deletado_em</span></code> como <code class="docutils literal notranslate"><span class="pre">None</span></code>, fazendo com que o registro volte
+a aparecer nas consultas realizadas por meio do gerenciador
+<code class="docutils literal notranslate"><span class="pre">objects</span></code>.</p>
+<p>O campo <code class="docutils literal notranslate"><span class="pre">deletado_por</span></code> não é alterado durante a restauração, o que
+preserva a informação sobre quem realizou a última exclusão lógica.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.models.mixins.SoftDeleteMixin.soft_delete">
+<span class="sig-name descname"><span class="pre">soft_delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usuario</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#SoftDeleteMixin.soft_delete"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.SoftDeleteMixin.soft_delete" title="Link para esta definição"></a></dt>
+<dd><p>Realiza a exclusão lógica do registro.</p>
+<p>O registro permanece armazenado no banco de dados, mas passa a ser
+ocultado pelo gerenciador padrão <code class="docutils literal notranslate"><span class="pre">objects</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>usuario</strong> – Usuário responsável pela exclusão. Pode ser <code class="docutils literal notranslate"><span class="pre">None</span></code>
+quando a operação não estiver associada a um usuário.</p>
+</dd>
+<dt class="field-even">Retorna<span class="colon">:</span></dt>
+<dd class="field-even"><p>Quantidade de registros afetados e
+um dicionário contendo o label do modelo e a quantidade afetada,
+seguindo o formato utilizado pelo método <code class="docutils literal notranslate"><span class="pre">delete()</span></code> do Django.</p>
+</dd>
+<dt class="field-odd">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[int, dict[str, int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.UUIDMixin">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.core.models.mixins.</span></span><span class="sig-name descname"><span class="pre">UUIDMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#UUIDMixin"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.UUIDMixin" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Adiciona um UUID como identificador primário do modelo.</p>
+<p>O UUID é gerado automaticamente na criação do registro e não pode ser
+alterado.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.models.mixins.UUIDMixin.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../../../_modules/apps/core/models/mixins.html#UUIDMixin.Meta"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.models.mixins.UUIDMixin.Meta" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.UUIDMixin.Meta.abstract">
+<span class="sig-name descname"><span class="pre">abstract</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#apps.core.models.mixins.UUIDMixin.Meta.abstract" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.core.models.mixins.UUIDMixin.uuid">
+<span class="sig-name descname"><span class="pre">uuid</span></span><a class="headerlink" href="#apps.core.models.mixins.UUIDMixin.uuid" title="Link para esta definição"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Rodapé">
+        <a href="apps_core_models_anexo.html" class="btn btn-neutral float-left" title="apps.core.models.anexo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="apps_core_serializers_anexo.html" class="btn btn-neutral float-right" title="apps.core.serializers.anexo" accesskey="n" rel="next">Próximo <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

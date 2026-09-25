@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.lote.filters &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dominios/index.html">Documentação</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../dominios/core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dominios/empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dominios/lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../dominios/lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dominios/glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dominios/glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Código do módulo</a></li>
+      <li class="breadcrumb-item active">apps.lote.filters</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código-fonte para apps.lote.filters</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Filtros do domínio Lote."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django_filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">rest_framework</span> <span class="k">as</span> <span class="n">filters</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.lote.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Lote</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_converter_status</span><span class="p">(</span><span class="n">valor</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Converta o status recebido como texto para booleano."""</span>
+    <span class="k">return</span> <span class="n">valor</span> <span class="o">==</span> <span class="s2">"true"</span>
+
+
+<div class="viewcode-block" id="NumberInFilter">
+<a class="viewcode-back" href="../../../dominios/lote/codigo/apps_lote_filters.html#apps.lote.filters.NumberInFilter">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NumberInFilter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">BaseInFilter</span><span class="p">,</span> <span class="n">filters</span><span class="o">.</span><span class="n">NumberFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Filtre por múltiplos valores numéricos."""</span>
+
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="LoteFilter">
+<a class="viewcode-back" href="../../../dominios/lote/codigo/apps_lote_filters.html#apps.lote.filters.LoteFilter">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LoteFilter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">FilterSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Filtros disponíveis para Lote."""</span>
+
+    <span class="n">codigo_cadastro</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">CharFilter</span><span class="p">(</span>
+        <span class="n">field_name</span><span class="o">=</span><span class="s2">"codigo_cadastro"</span><span class="p">,</span>
+        <span class="n">lookup_expr</span><span class="o">=</span><span class="s2">"icontains"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">nome</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">CharFilter</span><span class="p">(</span>
+        <span class="n">field_name</span><span class="o">=</span><span class="s2">"nome"</span><span class="p">,</span>
+        <span class="n">lookup_expr</span><span class="o">=</span><span class="s2">"icontains"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">status</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">TypedChoiceFilter</span><span class="p">(</span>
+        <span class="n">field_name</span><span class="o">=</span><span class="s2">"status"</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">"true"</span><span class="p">,</span> <span class="s2">"Ativo"</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">"false"</span><span class="p">,</span> <span class="s2">"Inativo"</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">coerce</span><span class="o">=</span><span class="n">_converter_status</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">empresa</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">NumberFilter</span><span class="p">(</span>
+        <span class="n">field_name</span><span class="o">=</span><span class="s2">"empresa_id"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">diretorias_regionais</span> <span class="o">=</span> <span class="n">NumberInFilter</span><span class="p">(</span>
+        <span class="n">field_name</span><span class="o">=</span><span class="p">(</span><span class="s2">"vinculos_diretoria_regional__diretoria_regional_id"</span><span class="p">),</span>
+        <span class="n">lookup_expr</span><span class="o">=</span><span class="s2">"in"</span><span class="p">,</span>
+        <span class="n">distinct</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">periodo_inicial</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">DateFilter</span><span class="p">(</span>
+        <span class="n">field_name</span><span class="o">=</span><span class="s2">"periodo_inicial"</span><span class="p">,</span>
+        <span class="n">lookup_expr</span><span class="o">=</span><span class="s2">"gte"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">periodo_final</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">DateFilter</span><span class="p">(</span>
+        <span class="n">field_name</span><span class="o">=</span><span class="s2">"periodo_final"</span><span class="p">,</span>
+        <span class="n">lookup_expr</span><span class="o">=</span><span class="s2">"lte"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="LoteFilter.Meta">
+<a class="viewcode-back" href="../../../dominios/lote/codigo/apps_lote_filters.html#apps.lote.filters.LoteFilter.Meta">[documentos]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Lote</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">"codigo_cadastro"</span><span class="p">,</span>
+            <span class="s2">"nome"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">,</span>
+            <span class="s2">"empresa"</span><span class="p">,</span>
+            <span class="s2">"diretorias_regionais"</span><span class="p">,</span>
+            <span class="s2">"periodo_inicial"</span><span class="p">,</span>
+            <span class="s2">"periodo_final"</span><span class="p">,</span>
+        <span class="p">]</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

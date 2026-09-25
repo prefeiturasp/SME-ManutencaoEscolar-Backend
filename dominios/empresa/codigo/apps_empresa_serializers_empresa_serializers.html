@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.empresa.serializers.empresa_serializers &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../search.html" />
+    <link rel="next" title="apps.empresa.serializers.responsavel_serializers" href="apps_empresa_serializers_responsavel_serializers.html" />
+    <link rel="prev" title="apps.empresa.serializers.anexo_serializers" href="apps_empresa_serializers_anexo_serializers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Documentação</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Empresas</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#documentacao-do-codigo">Documentação do código</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="index.html">Models</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Documentação</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Empresas</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Models</a></li>
+      <li class="breadcrumb-item active">apps.empresa.serializers.empresa_serializers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/dominios/empresa/codigo/apps_empresa_serializers_empresa_serializers.rst.txt" rel="nofollow"> Ver código-fonte da página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-apps.empresa.serializers.empresa_serializers">
+<span id="apps-empresa-serializers-empresa-serializers"></span><h1>apps.empresa.serializers.empresa_serializers<a class="headerlink" href="#module-apps.empresa.serializers.empresa_serializers" title="Link para este cabeçalho"></a></h1>
+<p>Serializers da aplicação Empresa.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.empresa.serializers.empresa_serializers.</span></span><span class="sig-name descname"><span class="pre">EmpresaCriarAtualizarSerializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/empresa/serializers/empresa_serializers.html#EmpresaCriarAtualizarSerializer"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelSerializer</span></code></p>
+<p>Serializa o cadastro de empresas.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../../../_modules/apps/empresa/serializers/empresa_serializers.html#EmpresaCriarAtualizarSerializer.Meta"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.Meta" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Configuração do serializer de empresa.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.Meta.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('nome',</span> <span class="pre">'cnpj',</span> <span class="pre">'razao_social',</span> <span class="pre">'status',</span> <span class="pre">'link_rastreio',</span> <span class="pre">'cep',</span> <span class="pre">'logradouro',</span> <span class="pre">'numero',</span> <span class="pre">'complemento',</span> <span class="pre">'cidade',</span> <span class="pre">'estado',</span> <span class="pre">'responsaveis_tecnicos')</span></em><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.Meta.fields" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.Meta.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.Meta.model" title="Link para esta definição"></a></dt>
+<dd><p>apelido de <a class="reference internal" href="apps_empresa_models.html#apps.empresa.models.Empresa" title="apps.empresa.models.Empresa"><code class="xref py py-class docutils literal notranslate"><span class="pre">Empresa</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.responsaveis_tecnicos">
+<span class="sig-name descname"><span class="pre">responsaveis_tecnicos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="apps_empresa_serializers_responsavel_serializers.html#apps.empresa.serializers.responsavel_serializers.ResponsavelTecnicoSerializer" title="apps.empresa.serializers.responsavel_serializers.ResponsavelTecnicoSerializer"><span class="pre">ResponsavelTecnicoSerializer</span></a></em><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.responsaveis_tecnicos" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.validate_cep">
+<span class="sig-name descname"><span class="pre">validate_cep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/apps/empresa/serializers/empresa_serializers.html#EmpresaCriarAtualizarSerializer.validate_cep"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.validate_cep" title="Link para esta definição"></a></dt>
+<dd><p>Garante que o CEP contenha apenas dígitos e tenha 8 caracteres.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.validate_cnpj">
+<span class="sig-name descname"><span class="pre">validate_cnpj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/apps/empresa/serializers/empresa_serializers.html#EmpresaCriarAtualizarSerializer.validate_cnpj"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.validate_cnpj" title="Link para esta definição"></a></dt>
+<dd><p>Valida o formato e a duplicação entre empresas não apagadas.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.validate_link_rastreio">
+<span class="sig-name descname"><span class="pre">validate_link_rastreio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/apps/empresa/serializers/empresa_serializers.html#EmpresaCriarAtualizarSerializer.validate_link_rastreio"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.validate_link_rastreio" title="Link para esta definição"></a></dt>
+<dd><p>Garante que o link de rastreio seja uma URL válida.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.validate_responsaveis_tecnicos">
+<span class="sig-name descname"><span class="pre">validate_responsaveis_tecnicos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/apps/empresa/serializers/empresa_serializers.html#EmpresaCriarAtualizarSerializer.validate_responsaveis_tecnicos"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaCriarAtualizarSerializer.validate_responsaveis_tecnicos" title="Link para esta definição"></a></dt>
+<dd><p>Valida a lista de responsáveis técnicos.</p>
+<p>Exige ao menos um responsável e proíbe mais de um do mesmo <code class="docutils literal notranslate"><span class="pre">tipo</span></code>
+no payload.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaSerializer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.empresa.serializers.empresa_serializers.</span></span><span class="sig-name descname"><span class="pre">EmpresaSerializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/apps/empresa/serializers/empresa_serializers.html#EmpresaSerializer"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaSerializer" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelSerializer</span></code></p>
+<p>Serializa a empresa para listagem e detalhes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaSerializer.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../../../_modules/apps/empresa/serializers/empresa_serializers.html#EmpresaSerializer.Meta"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaSerializer.Meta" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Configuração do serializer de empresa.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaSerializer.Meta.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('id',</span> <span class="pre">'uuid',</span> <span class="pre">'nome',</span> <span class="pre">'cnpj',</span> <span class="pre">'status',</span> <span class="pre">'razao_social',</span> <span class="pre">'link_rastreio',</span> <span class="pre">'cep',</span> <span class="pre">'logradouro',</span> <span class="pre">'numero',</span> <span class="pre">'complemento',</span> <span class="pre">'cidade',</span> <span class="pre">'estado',</span> <span class="pre">'criado_por',</span> <span class="pre">'criado_em',</span> <span class="pre">'atualizado_por',</span> <span class="pre">'atualizado_em',</span> <span class="pre">'responsaveis_tecnicos')</span></em><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaSerializer.Meta.fields" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaSerializer.Meta.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaSerializer.Meta.model" title="Link para esta definição"></a></dt>
+<dd><p>apelido de <a class="reference internal" href="apps_empresa_models.html#apps.empresa.models.Empresa" title="apps.empresa.models.Empresa"><code class="xref py py-class docutils literal notranslate"><span class="pre">Empresa</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaSerializer.atualizado_por">
+<span class="sig-name descname"><span class="pre">atualizado_por</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SlugRelatedField</span></em><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaSerializer.atualizado_por" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaSerializer.criado_por">
+<span class="sig-name descname"><span class="pre">criado_por</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SlugRelatedField</span></em><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaSerializer.criado_por" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.empresa.serializers.empresa_serializers.EmpresaSerializer.responsaveis_tecnicos">
+<span class="sig-name descname"><span class="pre">responsaveis_tecnicos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="apps_empresa_serializers_responsavel_serializers.html#apps.empresa.serializers.responsavel_serializers.ResponsavelTecnicoSerializer" title="apps.empresa.serializers.responsavel_serializers.ResponsavelTecnicoSerializer"><span class="pre">ResponsavelTecnicoSerializer</span></a></em><a class="headerlink" href="#apps.empresa.serializers.empresa_serializers.EmpresaSerializer.responsaveis_tecnicos" title="Link para esta definição"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Rodapé">
+        <a href="apps_empresa_serializers_anexo_serializers.html" class="btn btn-neutral float-left" title="apps.empresa.serializers.anexo_serializers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="apps_empresa_serializers_responsavel_serializers.html" class="btn btn-neutral float-right" title="apps.empresa.serializers.responsavel_serializers" accesskey="n" rel="next">Próximo <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

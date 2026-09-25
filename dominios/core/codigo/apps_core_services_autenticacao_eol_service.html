@@ -1,0 +1,457 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.core.services.autenticacao_eol_service &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../search.html" />
+    <link rel="next" title="apps.core.services.email_service" href="apps_core_services_email_service.html" />
+    <link rel="prev" title="apps.core.services.anexo_service" href="apps_core_services_anexo_service.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Documentação</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Core</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#documentacao-do-codigo">Documentação do código</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#views">Views</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Documentação</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Core</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Models</a></li>
+      <li class="breadcrumb-item active">apps.core.services.autenticacao_eol_service</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/dominios/core/codigo/apps_core_services_autenticacao_eol_service.rst.txt" rel="nofollow"> Ver código-fonte da página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-apps.core.services.autenticacao_eol_service">
+<span id="apps-core-services-autenticacao-eol-service"></span><h1>apps.core.services.autenticacao_eol_service<a class="headerlink" href="#module-apps.core.services.autenticacao_eol_service" title="Link para este cabeçalho"></a></h1>
+<p>Serviços responsáveis pela autenticaçãoe integração com o EOL/CoreSSO.</p>
+<p>Este módulo centraliza as operações necessárias para autenticar usuários no
+serviço EOL, consultar dados funcionais, sincronizar informações do usuário
+local e realizar operações relacionadas à senha no CoreSSO.</p>
+<p>O fluxo de autenticação também é responsável pela geração dos tokens JWT
+utilizados pela aplicação após a autenticação bem-sucedida.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.core.services.autenticacao_eol_service.AutenticacaoEOLService">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.core.services.autenticacao_eol_service.</span></span><span class="sig-name descname"><span class="pre">AutenticacaoEOLService</span></span><a class="reference internal" href="../../../_modules/apps/core/services/autenticacao_eol_service.html#AutenticacaoEOLService"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService" title="Link para esta definição"></a></dt>
+<dd><p>Base: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Serviço para autenticação de usuários no EOL.</p>
+<p>O serviço é responsável por coordenar a comunicação com o EOL/CoreSSO e
+integrar os dados retornados pelo serviço externo com os usuários da
+aplicação.</p>
+<p>Entre as operações disponibilizadas estão:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>autenticação de credenciais no EOL;</p></li>
+<li><p>verificação da existência de usuários no CoreSSO;</p></li>
+<li><p>consulta de cargos funcionais;</p></li>
+<li><p>consulta de dados funcionais do usuário;</p></li>
+<li><p>sincronização do usuário local;</p></li>
+<li><p>geração de tokens JWT;</p></li>
+<li><p>alteração de senha no CoreSSO;</p></li>
+<li><p>atualização da senha do usuário na aplicação.</p></li>
+</ul>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.alterar_senha_no_coresso">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alterar_senha_no_coresso</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">login</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nova_senha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/apps/core/services/autenticacao_eol_service.html#AutenticacaoEOLService.alterar_senha_no_coresso"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.alterar_senha_no_coresso" title="Link para esta definição"></a></dt>
+<dd><p>Altera a senha do usuário e invalida o token de recuperação.</p>
+<p>Monta os dados necessários para a requisição à API do CoreSSO e
+delega a alteração da senha ao repositório de integração. Após uma
+alteração bem-sucedida, invalida o token de recuperação de senha
+associado ao usuário.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>login</strong> (<em>str</em>) – Login do usuário cuja senha será alterada</p></li>
+<li><p><strong>nova_senha</strong> (<em>str</em>) – Nova senha que será definida para o usuário.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Levanta<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.FalhaAutenticacaoError" title="apps.core.exceptions.FalhaAutenticacaoError"><strong>FalhaAutenticacaoError</strong></a> – Levantada quando ocorre uma falha de
+    autenticação durante a alteração da senha no CoreSSO.</p></li>
+<li><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.SmeIntegracaoError" title="apps.core.exceptions.SmeIntegracaoError"><strong>SmeIntegracaoError</strong></a> – Levantada quando ocorre uma falha na
+    comunicação ou no processamento da requisição pela API de
+    integração do SME.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.autentica">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">autentica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">login</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">senha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/apps/core/services/autenticacao_eol_service.html#AutenticacaoEOLService.autentica"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.autentica" title="Link para esta definição"></a></dt>
+<dd><p>Realiza a autenticação de um usuário no serviço EOL da SME.</p>
+<p>O método valida as credenciais informadas, monta a requisição para o
+endpoint de autenticação, envia a solicitação ao serviço externo e
+processa a resposta retornada.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>login</strong> (<em>object</em>) – Identificador do usuário (RF ou CPF).</p></li>
+<li><p><strong>senha</strong> (<em>object</em>) – Senha utilizada para autenticação.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Retorna<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dados retornados pelo EOL após a autenticação</dt><dd><p>bem-sucedida.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, Any]</p>
+</dd>
+<dt class="field-even">Levanta<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.FalhaAutenticacaoError" title="apps.core.exceptions.FalhaAutenticacaoError"><strong>FalhaAutenticacaoError</strong></a> – Caso o login ou a senha sejam inválidos ou as credenciais
+    não atendam às validações de entrada.</p></li>
+<li><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.SmeIntegracaoError" title="apps.core.exceptions.SmeIntegracaoError"><strong>SmeIntegracaoError</strong></a> – Caso ocorra erro de comunicação, timeout, indisponibilidade
+    do serviço ou qualquer falha retornada pela API do EOL.</p></li>
+<li><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.InternalError" title="apps.core.exceptions.InternalError"><strong>InternalError</strong></a> – Caso ocorra um erro interno ou de configuração da aplicação.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.buscar_cargos">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">buscar_cargos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registro_funcional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../../_modules/apps/core/services/autenticacao_eol_service.html#AutenticacaoEOLService.buscar_cargos"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.buscar_cargos" title="Link para esta definição"></a></dt>
+<dd><p>Consulta cargos de um servidor na SME pelo RF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>registro_funcional</strong> (<em>str</em>) – Registro funcional do servidor.</p>
+</dd>
+<dt class="field-even">Retorna<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nome  e código do cargo base do servidor.</p>
+</dd>
+<dt class="field-odd">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Levanta<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.SmeIntegracaoError" title="apps.core.exceptions.SmeIntegracaoError"><strong>SmeIntegracaoError</strong></a> – Quando a consulta falha.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.dados_usuario">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dados_usuario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registro_funcional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/apps/core/services/autenticacao_eol_service.html#AutenticacaoEOLService.dados_usuario"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.dados_usuario" title="Link para esta definição"></a></dt>
+<dd><p>Consulta dados de um servidor na SME pelo RF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>registro_funcional</strong> (<em>str</em>) – Registro funcional do servidor.</p>
+</dd>
+<dt class="field-even">Retorna<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dados do usuário retornados pela API.</p>
+</dd>
+<dt class="field-odd">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Levanta<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.SmeIntegracaoError" title="apps.core.exceptions.SmeIntegracaoError"><strong>SmeIntegracaoError</strong></a> – Se ocorrer uma falha durante a consulta à
+    API do EOL.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.login">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">login</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">senha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/apps/core/services/autenticacao_eol_service.html#AutenticacaoEOLService.login"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.login" title="Link para esta definição"></a></dt>
+<dd><p>Realiza o fluxo completo de login da aplicação.</p>
+<p>Autentica as credenciais no EOL e, após a autenticação bem-sucedida:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>obtém o registro funcional retornado pelo EOL;</p></li>
+<li><p>consulta o cargo do servidor;</p></li>
+<li><p>consulta os dados funcionais do usuário;</p></li>
+<li><p>sincroniza o usuário com a base local;</p></li>
+<li><p>gera os tokens JWT da aplicação;</p></li>
+<li><p>combina os dados locais e funcionais na resposta final.</p></li>
+</ol>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>login</strong> (<em>object</em>) – Identificador(RF ou CPF) utilizado para
+autenticação no EOL.</p></li>
+<li><p><strong>senha</strong> (<em>object</em>) – Senha utilizada para autenticação.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Retorna<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dados da sessão autenticada, contendo:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">refresh</span></code>: Token JWT de renovação.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">access</span></code>: Token JWT de acesso.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">access_expires_in</span></code>: Tempo de validade do access token,</dt><dd><p>em segundos.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">refresh_expires_in</span></code>: Tempo de validade do refresh token,</dt><dd><p>em segundos.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">usuario</span></code>: Dados do usuário sincronizado, acrescidos das</dt><dd><p>informações de diretoria regional e unidade educacional.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, Any]</p>
+</dd>
+<dt class="field-even">Levanta<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.FalhaAutenticacaoError" title="apps.core.exceptions.FalhaAutenticacaoError"><strong>FalhaAutenticacaoError</strong></a> – Se as credenciais forem inválidas.</p></li>
+<li><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.SmeIntegracaoError" title="apps.core.exceptions.SmeIntegracaoError"><strong>SmeIntegracaoError</strong></a> – Se ocorrer falha na comunicação ou na
+    integração com o EOL/CoreSSO.</p></li>
+<li><p><a class="reference internal" href="apps_core_exceptions.html#apps.core.exceptions.InternalError" title="apps.core.exceptions.InternalError"><strong>InternalError</strong></a> – Se ocorrer erro interno ou problema de configuração
+    durante o processo.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.usuario_existe_no_coresso">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">usuario_existe_no_coresso</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">login</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/apps/core/services/autenticacao_eol_service.html#AutenticacaoEOLService.usuario_existe_no_coresso"><span class="viewcode-link"><span class="pre">[código-fonte]</span></span></a><a class="headerlink" href="#apps.core.services.autenticacao_eol_service.AutenticacaoEOLService.usuario_existe_no_coresso" title="Link para esta definição"></a></dt>
+<dd><p>Verifica se um usuário está cadastrado no CoreSSO.</p>
+<p>Realiza uma requisição à API de integração do CoreSSO para verificar
+se o usuário identificado pelo RF ou CPF informado já possui cadastro
+no sistema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>login</strong> (<em>str</em>) – login: RF (7 dígitos) ou CPF (11 dígitos) do usuário.</p>
+</dd>
+<dt class="field-even">Retorna<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">True</span></code> se o usuário existir no CoreSSO (HTTP 200);</dt><dd><p>caso contrário, retorna <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Rodapé">
+        <a href="apps_core_services_anexo_service.html" class="btn btn-neutral float-left" title="apps.core.services.anexo_service" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="apps_core_services_email_service.html" class="btn btn-neutral float-right" title="apps.core.services.email_service" accesskey="n" rel="next">Próximo <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

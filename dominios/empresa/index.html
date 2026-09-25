@@ -1,0 +1,498 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Empresas &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../search.html" />
+    <link rel="next" title="Identificação e auditoria" href="regras_negocio.html" />
+    <link rel="prev" title="apps.core.validacoes" href="../core/codigo/apps_core_validacoes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Documentação</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Documentação</a></li>
+      <li class="breadcrumb-item active">Empresas</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/dominios/empresa/index.rst.txt" rel="nofollow"> Ver código-fonte da página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="empresas">
+<h1>Empresas<a class="headerlink" href="#empresas" title="Link para este cabeçalho"></a></h1>
+<section id="visao-geral">
+<h2>Visão geral<a class="headerlink" href="#visao-geral" title="Link para este cabeçalho"></a></h2>
+<p>O módulo de empresas gerencia o cadastro das empresas prestadoras de serviço,
+seus responsáveis técnicos e os anexos associados a esses responsáveis.</p>
+<p>Cada empresa possui dados cadastrais, endereço, situação e, opcionalmente, um
+link de rastreio. O módulo disponibiliza operações de consulta, criação,
+atualização integral e exclusão lógica, além da sincronização dos responsáveis
+técnicos e de seus arquivos.</p>
+<section id="responsabilidades">
+<h3>Responsabilidades<a class="headerlink" href="#responsabilidades" title="Link para este cabeçalho"></a></h3>
+<ul class="simple">
+<li><p>cadastrar empresas com seus responsáveis técnicos;</p></li>
+<li><p>validar CNPJ, CEP, endereço e link de rastreio;</p></li>
+<li><p>impedir a repetição de CNPJ entre empresas não excluídas;</p></li>
+<li><p>consultar empresas com filtros e paginação;</p></li>
+<li><p>atualizar integralmente os dados de uma empresa;</p></li>
+<li><p>sincronizar responsáveis técnicos e seus anexos;</p></li>
+<li><p>realizar a exclusão lógica de empresas e responsáveis técnicos;</p></li>
+<li><p>registrar os usuários responsáveis pela criação, atualização e exclusão.</p></li>
+</ul>
+</section>
+<section id="arquitetura-funcional">
+<h3>Arquitetura funcional<a class="headerlink" href="#arquitetura-funcional" title="Link para este cabeçalho"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Empresas</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Consulta</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Listagem</span> <span class="n">paginada</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Consulta</span> <span class="n">individual</span> <span class="n">por</span> <span class="n">UUID</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Filtros</span> <span class="n">por</span> <span class="n">nome</span><span class="p">,</span> <span class="n">razão</span> <span class="n">social</span><span class="p">,</span> <span class="n">CNPJ</span> <span class="n">e</span> <span class="n">status</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Cadastro</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">dos</span> <span class="n">dados</span> <span class="n">cadastrais</span> <span class="n">e</span> <span class="n">do</span> <span class="n">endereço</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">dos</span> <span class="n">responsáveis</span> <span class="n">técnicos</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Criação</span> <span class="n">transacional</span> <span class="n">da</span> <span class="n">empresa</span> <span class="n">e</span> <span class="n">dos</span> <span class="n">responsáveis</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Armazenamento</span> <span class="n">dos</span> <span class="n">anexos</span> <span class="n">dos</span> <span class="n">responsáveis</span> <span class="n">técnicos</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Atualização</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Alteração</span> <span class="n">integral</span> <span class="n">dos</span> <span class="n">dados</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Sincronização</span> <span class="n">dos</span> <span class="n">responsáveis</span> <span class="n">por</span> <span class="n">UUID</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Sincronização</span> <span class="n">dos</span> <span class="n">anexos</span> <span class="n">por</span> <span class="n">UUID</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Exclusão</span>
+    <span class="o">+--</span> <span class="n">Remoção</span> <span class="n">dos</span> <span class="n">anexos</span>
+    <span class="o">+--</span> <span class="n">Exclusão</span> <span class="n">lógica</span> <span class="n">dos</span> <span class="n">responsáveis</span>
+    <span class="o">+--</span> <span class="n">Exclusão</span> <span class="n">lógica</span> <span class="n">da</span> <span class="n">empresa</span>
+    <span class="o">+--</span> <span class="n">Registro</span> <span class="n">do</span> <span class="n">usuário</span> <span class="n">responsável</span> <span class="n">pela</span> <span class="n">ação</span>
+</pre></div>
+</div>
+</section>
+<section id="principais-fluxos">
+<h3>Principais fluxos<a class="headerlink" href="#principais-fluxos" title="Link para este cabeçalho"></a></h3>
+<section id="cadastro-de-empresa">
+<h4>Cadastro de empresa<a class="headerlink" href="#cadastro-de-empresa" title="Link para este cabeçalho"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Cliente</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">POST</span> <span class="o">/</span><span class="n">empresas</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">dos</span> <span class="n">dados</span> <span class="n">da</span> <span class="n">empresa</span>
+   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">da</span> <span class="n">lista</span> <span class="n">de</span> <span class="n">responsáveis</span>
+   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">dos</span> <span class="n">anexos</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Serviço</span> <span class="n">de</span> <span class="n">empresas</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Registra</span> <span class="n">o</span> <span class="n">usuário</span> <span class="n">responsável</span>
+   <span class="o">+--</span> <span class="n">Separa</span> <span class="n">os</span> <span class="n">dados</span> <span class="n">da</span> <span class="n">empresa</span><span class="p">,</span> <span class="n">responsáveis</span> <span class="n">e</span> <span class="n">anexos</span> <span class="n">para</span> <span class="n">persistência</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Persistência</span> <span class="n">transacional</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Cria</span> <span class="n">a</span> <span class="n">empresa</span>
+   <span class="o">+--</span> <span class="n">Cria</span> <span class="n">os</span> <span class="n">responsáveis</span> <span class="n">técnicos</span>
+   <span class="o">+--</span> <span class="n">Cria</span> <span class="n">e</span> <span class="n">armazena</span> <span class="n">os</span> <span class="n">novos</span> <span class="n">anexos</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Resposta</span> <span class="n">do</span> <span class="n">cadastro</span>
+</pre></div>
+</div>
+<p>O cadastro exige ao menos um responsável técnico e não aceita tipos repetidos
+na mesma requisição. A empresa e seus responsáveis são criados em uma única
+transação, com o usuário autenticado registrado na auditoria.</p>
+<p>Engenheiros civis e engenheiros eletricistas devem receber ao menos um anexo.
+O preposto pode ser cadastrado sem arquivos.</p>
+</section>
+<section id="atualizacao-de-empresa">
+<h4>Atualização de empresa<a class="headerlink" href="#atualizacao-de-empresa" title="Link para este cabeçalho"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Cliente</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">PUT</span> <span class="o">/</span><span class="n">empresas</span><span class="o">/</span><span class="p">{</span><span class="n">uuid</span><span class="p">}</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">integral</span> <span class="n">dos</span> <span class="n">dados</span>
+   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">dos</span> <span class="n">UUIDs</span> <span class="n">dos</span> <span class="n">responsáveis</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Atualização</span> <span class="n">transacional</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Atualiza</span> <span class="n">a</span> <span class="n">empresa</span>
+   <span class="o">+--</span> <span class="n">Atualiza</span> <span class="n">responsáveis</span> <span class="n">com</span> <span class="n">UUID</span>
+   <span class="o">+--</span> <span class="n">Cria</span> <span class="n">responsáveis</span> <span class="n">sem</span> <span class="n">UUID</span>
+   <span class="o">+--</span> <span class="n">Remove</span> <span class="n">responsáveis</span> <span class="n">omitidos</span>
+   <span class="o">+--</span> <span class="n">Preserva</span> <span class="n">anexos</span> <span class="n">com</span> <span class="n">UUID</span>
+   <span class="o">+--</span> <span class="n">Cria</span> <span class="n">anexos</span> <span class="n">sem</span> <span class="n">UUID</span>
+   <span class="o">+--</span> <span class="n">Remove</span> <span class="n">anexos</span> <span class="n">omitidos</span>
+   <span class="o">+--</span> <span class="n">Registro</span> <span class="n">do</span> <span class="n">usuário</span> <span class="n">responsável</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Resposta</span> <span class="n">da</span> <span class="n">atualização</span>
+</pre></div>
+</div>
+<p>Os responsáveis técnicos são sincronizados a partir da lista enviada. Um item
+com UUID atualiza o registro correspondente, enquanto um item sem UUID cria um
+novo responsável. Responsáveis existentes que não estejam na lista são
+excluídos logicamente.</p>
+<p>O UUID informado deve pertencer a um responsável da própria empresa. A lista
+de anexos também é sincronizada: itens com UUID são preservados, novos arquivos
+são criados e anexos omitidos são removidos.</p>
+</section>
+<section id="exclusao-de-empresa">
+<h4>Exclusão de empresa<a class="headerlink" href="#exclusao-de-empresa" title="Link para este cabeçalho"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Cliente</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">DELETE</span> <span class="o">/</span><span class="n">empresas</span><span class="o">/</span><span class="p">{</span><span class="n">uuid</span><span class="p">}</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Remoção</span> <span class="n">dos</span> <span class="n">anexos</span> <span class="n">dos</span> <span class="n">responsáveis</span>
+   <span class="o">+--</span> <span class="n">Remoção</span> <span class="n">dos</span> <span class="n">anexos</span> <span class="n">armazenados</span> <span class="n">no</span> <span class="n">storage</span>
+   <span class="o">+--</span> <span class="n">Exclusão</span> <span class="n">lógica</span> <span class="n">dos</span> <span class="n">responsáveis</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Exclusão</span> <span class="n">lógica</span> <span class="n">da</span> <span class="n">empresa</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Resposta</span> <span class="n">sem</span> <span class="n">conteúdo</span>
+</pre></div>
+</div>
+<p>A exclusão preserva os registros da empresa e de seus responsáveis no banco de
+dados, marcando-os como excluídos. Os respectivos anexos são removidos, e os
+arquivos são apagados do storage após a confirmação da transação.</p>
+</section>
+</section>
+<section id="entidades">
+<h3>Entidades<a class="headerlink" href="#entidades" title="Link para este cabeçalho"></a></h3>
+<section id="empresa">
+<h4>Empresa<a class="headerlink" href="#empresa" title="Link para este cabeçalho"></a></h4>
+<p>Representa a empresa prestadora de serviço. Seus campos funcionalmente
+relevantes são:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">uuid</span></code>: identificador utilizado nas operações individuais da API;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nome</span></code> e <code class="docutils literal notranslate"><span class="pre">razao_social</span></code>: identificação da empresa;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cnpj</span></code>: cadastro nacional sem pontuação, com 14 dígitos;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">status</span></code>: indica se a empresa está ativa ou inativa;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">link_rastreio</span></code>: URL opcional para rastreamento;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cep</span></code>, <code class="docutils literal notranslate"><span class="pre">logradouro</span></code>, <code class="docutils literal notranslate"><span class="pre">numero</span></code>, <code class="docutils literal notranslate"><span class="pre">complemento</span></code>, <code class="docutils literal notranslate"><span class="pre">cidade</span></code> e
+<code class="docutils literal notranslate"><span class="pre">estado</span></code>: informações do endereço da empresa.</p></li>
+</ul>
+<p>Empresas são criadas como ativas quando o status não é informado. A ordenação
+padrão apresenta primeiro as empresas ativas e, dentro de cada situação, os
+registros de maior identificador (id) numérico.</p>
+</section>
+<section id="responsavel-tecnico">
+<h4>Responsável técnico<a class="headerlink" href="#responsavel-tecnico" title="Link para este cabeçalho"></a></h4>
+<p>Representa uma pessoa tecnicamente responsável por uma empresa. Os tipos
+permitidos são <code class="docutils literal notranslate"><span class="pre">preposto</span></code>, <code class="docutils literal notranslate"><span class="pre">engenheiro_civil</span></code> e
+<code class="docutils literal notranslate"><span class="pre">engenheiro_eletricista</span></code>.</p>
+<p>Além do tipo e do nome, o responsável possui e-mail, telefone e campos
+opcionais para os números do CREA e da ART. A exclusão física de uma empresa
+remove seus responsáveis em cascata, embora o fluxo da API utilize exclusão
+lógica.</p>
+</section>
+<section id="anexo-do-responsavel-tecnico">
+<h4>Anexo do responsável técnico<a class="headerlink" href="#anexo-do-responsavel-tecnico" title="Link para este cabeçalho"></a></h4>
+<p>Representa um arquivo vinculado a um responsável técnico. O registro mantém o
+nome original, o tipo, o tipo MIME, o tamanho e a referência ao objeto salvo no
+storage privado.</p>
+<p>São aceitos arquivos <code class="docutils literal notranslate"><span class="pre">.jpg</span></code>, <code class="docutils literal notranslate"><span class="pre">.jpeg</span></code>, <code class="docutils literal notranslate"><span class="pre">.png</span></code> e <code class="docutils literal notranslate"><span class="pre">.pdf</span></code> com até 2 MB.
+O nome físico do arquivo é gerado com UUID, preservando sua extensão.</p>
+</section>
+</section>
+<section id="integracoes">
+<h3>Integrações<a class="headerlink" href="#integracoes" title="Link para este cabeçalho"></a></h3>
+<section id="core">
+<h4>Core<a class="headerlink" href="#core" title="Link para este cabeçalho"></a></h4>
+<p>O módulo utiliza o domínio Core para UUID, auditoria, exclusão lógica,
+validação de CNPJ, CEP, telefone e URL, além da validação e preparação dos
+arquivos enviados.</p>
+</section>
+<section id="usuarios">
+<h4>Usuários<a class="headerlink" href="#usuarios" title="Link para este cabeçalho"></a></h4>
+<p>O usuário autenticado é associado às operações de criação, atualização e
+exclusão. O envio de anexos também valida a existência do usuário responsável.</p>
+</section>
+<section id="storage-privado">
+<h4>Storage privado<a class="headerlink" href="#storage-privado" title="Link para este cabeçalho"></a></h4>
+<p>O conteúdo dos anexos é armazenado no storage privado configurado pela
+aplicação. O banco de dados mantém os metadados e a referência ao arquivo.</p>
+</section>
+</section>
+<section id="permissoes-e-acesso">
+<h3>Permissões e acesso<a class="headerlink" href="#permissoes-e-acesso" title="Link para este cabeçalho"></a></h3>
+<p>Todas as operações utilizam a autenticação JWT e exigem usuário autenticado,
+conforme a configuração global do Django REST Framework.</p>
+</section>
+<section id="auditoria">
+<h3>Auditoria<a class="headerlink" href="#auditoria" title="Link para este cabeçalho"></a></h3>
+<p>Na criação, o usuário autenticado é registrado na empresa, nos responsáveis
+técnicos e nos anexos enviados.</p>
+<p>Na atualização, o usuário é registrado como responsável pela alteração da
+empresa e dos responsáveis atualizados.</p>
+<p>Na exclusão lógica, o usuário e a data da operação são registrados na empresa
+e nos responsáveis técnicos removidos.</p>
+<p>As respostas de consulta apresentam os
+nomes dos usuários e as datas de criação e atualização.</p>
+</section>
+<section id="estados-e-transicoes">
+<h3>Estados e transições<a class="headerlink" href="#estados-e-transicoes" title="Link para este cabeçalho"></a></h3>
+<p>A empresa possui dois estados representados pelo campo <code class="docutils literal notranslate"><span class="pre">status</span></code>:</p>
+<ul class="simple">
+<li><p>ativa;</p></li>
+<li><p>inativa.</p></li>
+</ul>
+<p>Quando o status não é informado no cadastro, a empresa inicia ativa. O
+cadastro e a atualização permitem definir explicitamente qualquer um dos dois
+estados.</p>
+</section>
+</section>
+<section id="regras-de-negocio">
+<h2>Regras de Negócio<a class="headerlink" href="#regras-de-negocio" title="Link para este cabeçalho"></a></h2>
+<p>Esta seção apresenta as regras de negócio que orientam o funcionamento do
+domínio <strong>Empresa</strong>.</p>
+<p>As regras descrevem comportamentos, restrições, validações e condições que
+precisam ser respeitados pelas funcionalidades do domínio.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</div>
+</section>
+<section id="documentacao-do-codigo">
+<h2>Documentação do código<a class="headerlink" href="#documentacao-do-codigo" title="Link para este cabeçalho"></a></h2>
+<p>Esta seção apresenta a documentação técnica dos componentes que implementam o
+domínio <strong>Empresa</strong>.</p>
+<p>A documentação é gerada automaticamente a partir dos módulos Python do app e
+tem como objetivo facilitar a compreensão da implementação e de suas
+responsabilidades técnicas.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#views">Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#services">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Rodapé">
+        <a href="../core/codigo/apps_core_validacoes.html" class="btn btn-neutral float-left" title="apps.core.validacoes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="regras_negocio.html" class="btn btn-neutral float-right" title="Identificação e auditoria" accesskey="n" rel="next">Próximo <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

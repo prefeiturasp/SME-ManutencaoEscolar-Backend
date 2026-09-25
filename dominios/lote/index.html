@@ -1,0 +1,557 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lotes &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../search.html" />
+    <link rel="next" title="Cadastro" href="regras_negocio.html" />
+    <link rel="prev" title="apps.empresa.filters" href="../empresa/codigo/apps_empresa_filters.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Documentação</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Documentação</a></li>
+      <li class="breadcrumb-item active">Lotes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/dominios/lote/index.rst.txt" rel="nofollow"> Ver código-fonte da página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lotes">
+<h1>Lotes<a class="headerlink" href="#lotes" title="Link para este cabeçalho"></a></h1>
+<section id="visao-geral">
+<h2>Visão geral<a class="headerlink" href="#visao-geral" title="Link para este cabeçalho"></a></h2>
+<p>O módulo de lotes gerencia o cadastro de lotes associados a empresas e
+Diretorias Regionais de Educação (DREs).</p>
+<p>Cada lote possui um código de cadastro, nome, situação, empresa responsável,
+período de vigência e um conjunto de DREs vinculadas. O módulo disponibiliza
+operações de consulta, criação, alteração parcial e exclusão lógica, além de
+um processo automático para inativar lotes com período encerrado.</p>
+<section id="responsabilidades">
+<h3>Responsabilidades<a class="headerlink" href="#responsabilidades" title="Link para este cabeçalho"></a></h3>
+<ul class="simple">
+<li><p>cadastrar lotes e associá-los a uma empresa;</p></li>
+<li><p>vincular uma ou mais DREs aos lotes;</p></li>
+<li><p>impedir que uma DRE vinculada a um lote ativo e não excluído seja associada
+a outro lote;</p></li>
+<li><p>consultar lotes com filtros e paginação;</p></li>
+<li><p>atualizar parcialmente os dados e vínculos de um lote;</p></li>
+<li><p>realizar a exclusão lógica de lotes;</p></li>
+<li><p>registrar os usuários responsáveis pela criação, atualização e exclusão;</p></li>
+<li><p>inativar lotes cujo período final tenha terminado.</p></li>
+</ul>
+</section>
+<section id="arquitetura-funcional">
+<h3>Arquitetura funcional<a class="headerlink" href="#arquitetura-funcional" title="Link para este cabeçalho"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Lotes</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Consulta</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Listagem</span> <span class="n">paginada</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Consulta</span> <span class="n">individual</span> <span class="n">por</span> <span class="n">UUID</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Filtros</span> <span class="n">por</span> <span class="n">identificação</span><span class="p">,</span> <span class="n">situação</span> <span class="n">e</span> <span class="n">relacionamentos</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Filtros</span> <span class="n">por</span> <span class="n">período</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Cadastro</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">dos</span> <span class="n">dados</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Associação</span> <span class="n">com</span> <span class="n">empresa</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">das</span> <span class="n">DREs</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Criação</span> <span class="n">dos</span> <span class="n">vínculos</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Atualização</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Alteração</span> <span class="n">parcial</span> <span class="n">dos</span> <span class="n">dados</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">das</span> <span class="n">DREs</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Sincronização</span> <span class="n">dos</span> <span class="n">vínculos</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Exclusão</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Registro</span> <span class="n">do</span> <span class="n">usuário</span> <span class="n">responsável</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Exclusão</span> <span class="n">lógica</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Validade</span>
+    <span class="o">+--</span> <span class="n">Task</span> <span class="n">Celery</span>
+    <span class="o">+--</span> <span class="n">Comando</span> <span class="n">de</span> <span class="n">verificação</span>
+    <span class="o">+--</span> <span class="n">Inativação</span> <span class="n">dos</span> <span class="n">lotes</span> <span class="n">vencidos</span>
+</pre></div>
+</div>
+</section>
+<section id="principais-fluxos">
+<h3>Principais fluxos<a class="headerlink" href="#principais-fluxos" title="Link para este cabeçalho"></a></h3>
+<section id="cadastro-de-lote">
+<h4>Cadastro de lote<a class="headerlink" href="#cadastro-de-lote" title="Link para este cabeçalho"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Cliente</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">POST</span> <span class="o">/</span><span class="n">lotes</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">dos</span> <span class="n">campos</span> <span class="n">e</span> <span class="n">do</span> <span class="n">período</span>
+   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">de</span> <span class="n">DREs</span> <span class="n">repetidas</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Serviço</span> <span class="n">de</span> <span class="n">lotes</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Remove</span> <span class="n">espaços</span> <span class="n">externos</span> <span class="n">do</span> <span class="n">nome</span> <span class="n">e</span> <span class="n">do</span> <span class="n">código</span>
+   <span class="o">+--</span> <span class="n">Verifica</span> <span class="n">vínculos</span> <span class="n">com</span> <span class="n">outros</span> <span class="n">lotes</span> <span class="n">ativos</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Persistência</span> <span class="n">transacional</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Cria</span> <span class="n">o</span> <span class="n">lote</span>
+   <span class="o">+--</span> <span class="n">Cria</span> <span class="n">os</span> <span class="n">vínculos</span> <span class="n">com</span> <span class="k">as</span> <span class="n">DREs</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Resposta</span> <span class="n">do</span> <span class="n">cadastro</span>
+</pre></div>
+</div>
+<p>O cadastro recebe a empresa por UUID e as DREs por seus identificadores
+numéricos. O nome e o código têm seus espaços externos removidos antes da
+persistência.</p>
+<p>A criação do lote e de seus vínculos ocorre em uma única transação. Se uma
+das DREs estiver associada a outro lote ativo e não excluído, a operação é
+rejeitada e a resposta identifica as DREs indisponíveis e os respectivos
+códigos dos lotes.</p>
+</section>
+<section id="atualizacao-de-lote">
+<h4>Atualização de lote<a class="headerlink" href="#atualizacao-de-lote" title="Link para este cabeçalho"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Cliente</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">PATCH</span> <span class="o">/</span><span class="n">lotes</span><span class="o">/</span><span class="p">{</span><span class="n">uuid</span><span class="p">}</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">dos</span> <span class="n">dados</span> <span class="n">recebidos</span>
+   <span class="o">+--</span> <span class="n">Validação</span> <span class="n">dos</span> <span class="n">novos</span> <span class="n">vínculos</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Atualização</span> <span class="n">do</span> <span class="n">lote</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Alteração</span> <span class="n">dos</span> <span class="n">campos</span>
+   <span class="o">+--</span> <span class="n">Remoção</span> <span class="n">dos</span> <span class="n">vínculos</span> <span class="n">não</span> <span class="n">mantidos</span>
+   <span class="o">+--</span> <span class="n">Criação</span> <span class="n">dos</span> <span class="n">novos</span> <span class="n">vínculos</span>
+   <span class="o">+--</span> <span class="n">Registro</span> <span class="n">do</span> <span class="n">usuário</span> <span class="n">responsável</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Resposta</span> <span class="n">da</span> <span class="n">atualização</span>
+</pre></div>
+</div>
+<p>Quando uma lista não vazia de DREs é enviada, os vínculos atuais que não
+estiverem nessa lista são removidos e os novos vínculos são criados. A
+validação de exclusividade desconsidera o próprio lote que está sendo
+alterado.</p>
+<p>O comportamento para uma lista vazia de DREs apresenta uma limitação descrita
+em <code class="docutils literal notranslate"><span class="pre">Observações</span></code>.</p>
+</section>
+<section id="exclusao-de-lote">
+<h4>Exclusão de lote<a class="headerlink" href="#exclusao-de-lote" title="Link para este cabeçalho"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Cliente</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">DELETE</span> <span class="o">/</span><span class="n">lotes</span><span class="o">/</span><span class="p">{</span><span class="n">uuid</span><span class="p">}</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Identificação</span> <span class="n">do</span> <span class="n">usuário</span>
+   <span class="o">+--</span> <span class="n">Registro</span> <span class="n">do</span> <span class="n">responsável</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Exclusão</span> <span class="n">lógica</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Resposta</span> <span class="n">sem</span> <span class="n">conteúdo</span>
+</pre></div>
+</div>
+<p>A exclusão mantém o lote persistido e registra o usuário responsável. O
+comportamento completo de visibilidade e restauração depende da implementação
+compartilhada de exclusão lógica, que não fez parte dos arquivos analisados.</p>
+</section>
+<section id="inativacao-por-vencimento">
+<h4>Inativação por vencimento<a class="headerlink" href="#inativacao-por-vencimento" title="Link para este cabeçalho"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Task</span> <span class="n">Celery</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Comando</span> <span class="n">inativar_lotes_expirados</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Localiza</span> <span class="n">lotes</span> <span class="n">ativos</span>
+   <span class="o">+--</span> <span class="n">Ignora</span> <span class="n">lotes</span> <span class="n">excluídos</span>
+   <span class="o">+--</span> <span class="n">Compara</span> <span class="n">o</span> <span class="n">período</span> <span class="n">final</span> <span class="n">com</span> <span class="n">a</span> <span class="n">data</span> <span class="n">atual</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Altera</span> <span class="n">a</span> <span class="n">situação</span> <span class="n">para</span> <span class="n">inativa</span>
+</pre></div>
+</div>
+<p>O processo considera vencido o lote cujo período final seja anterior à data
+local da execução. Lotes que vencem na própria data da execução ainda não são
+inativados.</p>
+</section>
+</section>
+<section id="entidades">
+<h3>Entidades<a class="headerlink" href="#entidades" title="Link para este cabeçalho"></a></h3>
+<section id="lote">
+<h4>Lote<a class="headerlink" href="#lote" title="Link para este cabeçalho"></a></h4>
+<p>Representa o agrupamento associado a uma empresa e às DREs atendidas.</p>
+<p>Os campos funcionalmente relevantes são:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">uuid</span></code>: identificador utilizado nas operações individuais da API;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">codigo_cadastro</span></code>: código de identificação do lote;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nome</span></code>: denominação do lote;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">status</span></code>: indica se o lote está ativo ou inativo;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">empresa</span></code>: empresa associada ao lote;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">periodo_inicial</span></code>: início opcional do período de vigência;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">periodo_final</span></code>: término opcional do período de vigência.</p></li>
+</ul>
+<p>O código e o nome aceitam até 255 caracteres. Os lotes são criados como
+ativos quando o status não é informado.</p>
+</section>
+<section id="lotediretoriaregional">
+<h4>LoteDiretoriaRegional<a class="headerlink" href="#lotediretoriaregional" title="Link para este cabeçalho"></a></h4>
+<p>Representa a associação entre um lote e uma DRE. A existência dessa entidade
+permite que um lote possua diversas DREs.</p>
+<p>A exclusão física de um lote remove seus vínculos em cascata. Uma DRE
+referenciada por um vínculo não pode ser fisicamente removida enquanto a
+referência existir.</p>
+<p>A exclusividade funcional da DRE é validada pela aplicação considerando
+somente vínculos com lotes ativos e não excluídos.</p>
+</section>
+<section id="empresa">
+<h4>Empresa<a class="headerlink" href="#empresa" title="Link para este cabeçalho"></a></h4>
+<p>Representa a empresa responsável pelo lote. A empresa é informada pelo UUID
+no cadastro e na atualização, mas é apresentada de forma detalhada nas
+consultas.</p>
+<p>Uma empresa associada a um lote não pode ser fisicamente excluída enquanto
+a referência existir.</p>
+</section>
+</section>
+<section id="integracoes">
+<h3>Integrações<a class="headerlink" href="#integracoes" title="Link para este cabeçalho"></a></h3>
+<section id="core">
+<h4>Core<a class="headerlink" href="#core" title="Link para este cabeçalho"></a></h4>
+<p>O módulo utiliza o domínio Core para UUID, auditoria, exclusão lógica.</p>
+</section>
+<section id="usuarios">
+<h4>Usuários<a class="headerlink" href="#usuarios" title="Link para este cabeçalho"></a></h4>
+<p>O usuário autenticado é associado às operações de criação, atualização e exclusão. O envio de anexos também valida a existência do usuário responsável.</p>
+</section>
+<section id="id1">
+<h4>Empresa<a class="headerlink" href="#id1" title="Link para este cabeçalho"></a></h4>
+<p>O módulo utiliza o domínio de empresas para validar e apresentar a empresa
+associada ao lote.</p>
+<p>No cadastro e na alteração, a empresa deve corresponder a um UUID existente.
+Nas respostas de consulta, seus dados são apresentados pelo serializer do
+domínio de empresas.</p>
+</section>
+<section id="diretoria-regional">
+<h4>Diretoria Regional<a class="headerlink" href="#diretoria-regional" title="Link para este cabeçalho"></a></h4>
+<p>O módulo utiliza o domínio de escolas para validar e apresentar as DREs
+associadas ao lote.</p>
+<p>As DREs são informadas por identificadores numéricos. Identificadores
+inexistentes são rejeitados durante a validação da requisição.</p>
+</section>
+<section id="celery-e-comandos-django">
+<h4>Celery e comandos Django<a class="headerlink" href="#celery-e-comandos-django" title="Link para este cabeçalho"></a></h4>
+<p>A task <code class="docutils literal notranslate"><span class="pre">executar_validade_lote</span></code> executa o comando
+<code class="docutils literal notranslate"><span class="pre">inativar_lotes_expirados</span></code>. O comando verifica a validade dos lotes e
+inativa os vencidos.</p>
+<p>Será executado uma vez ao dia conforme a regra de agendamento definida no Celery Beat. O comando registra em log o início e a conclusão da verificação,
+a quantidade de lotes vencidos encontrados.</p>
+</section>
+</section>
+<section id="permissoes-e-acesso">
+<h3>Permissões e acesso<a class="headerlink" href="#permissoes-e-acesso" title="Link para este cabeçalho"></a></h3>
+<p>As operações de criação, atualização e exclusão exigem que
+<code class="docutils literal notranslate"><span class="pre">request.user</span></code> seja uma instância válida de usuário da aplicação. Caso
+contrário, a operação é rejeitada como não autenticada.</p>
+</section>
+<section id="processamento-assincrono">
+<h3>Processamento assíncrono<a class="headerlink" href="#processamento-assincrono" title="Link para este cabeçalho"></a></h3>
+<p>A task Celery <code class="docutils literal notranslate"><span class="pre">executar_validade_lote</span></code> delega a execução ao comando
+<code class="docutils literal notranslate"><span class="pre">inativar_lotes_expirados</span></code>.</p>
+<p>O comando registra em log:</p>
+<ul class="simple">
+<li><p>o início da verificação;</p></li>
+<li><p>a quantidade de lotes vencidos encontrados;</p></li>
+<li><p>os lotes processados;</p></li>
+<li><p>a conclusão da verificação.</p></li>
+</ul>
+<p>Não existe política explícita de retry na task analisada.</p>
+</section>
+<section id="auditoria">
+<h3>Auditoria<a class="headerlink" href="#auditoria" title="Link para este cabeçalho"></a></h3>
+<p>Na criação, o usuário autenticado é registrado como responsável pela criação
+e pela última atualização do lote.</p>
+<p>Na atualização, o usuário autenticado é registrado como responsável pela
+alteração.</p>
+<p>Na exclusão lógica, o usuário autenticado é registrado como responsável pela
+exclusão.</p>
+<p>As consultas apresentam os identificadores e nomes dos usuários responsáveis,
+além das datas de criação e atualização fornecidas pelo modelo base.</p>
+</section>
+<section id="estados-e-transicoes">
+<h3>Estados e transições<a class="headerlink" href="#estados-e-transicoes" title="Link para este cabeçalho"></a></h3>
+<p>O lote possui dois estados representados pelo campo <code class="docutils literal notranslate"><span class="pre">status</span></code>:</p>
+<ul class="simple">
+<li><p>ativo;</p></li>
+<li><p>inativo.</p></li>
+</ul>
+<p>Quando o status não é informado no cadastro, o lote inicia ativo. O cadastro
+e a atualização permitem informar explicitamente qualquer um dos dois
+estados.</p>
+<p>A inativação automática executa a seguinte transição:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ATIVO</span>
+  <span class="o">|</span>
+  <span class="o">|</span> <span class="n">período</span> <span class="n">final</span> <span class="n">anterior</span> <span class="n">à</span> <span class="n">data</span> <span class="n">atual</span>
+  <span class="n">v</span>
+<span class="n">INATIVO</span>
+</pre></div>
+</div>
+<p>Não foram identificadas restrições que impeçam a reativação manual de um lote
+por meio de alteração parcial.</p>
+</section>
+</section>
+<section id="regras-de-negocio">
+<h2>Regras de Negócio<a class="headerlink" href="#regras-de-negocio" title="Link para este cabeçalho"></a></h2>
+<p>Esta seção apresenta as regras de negócio que orientam o
+funcionamento do domínio <strong>Lote</strong>.</p>
+<p>As regras descrevem comportamentos, restrições, validações
+e condições que precisam ser respeitados pelas funcionalidades
+do domínio.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</div>
+</section>
+<section id="documentacao-do-codigo">
+<h2>Documentação do código<a class="headerlink" href="#documentacao-do-codigo" title="Link para este cabeçalho"></a></h2>
+<p>Esta seção apresenta a documentação técnica dos componentes que
+implementam o domínio <strong>Lote</strong>.</p>
+<p>A documentação é gerada automaticamente a partir dos módulos
+Python do app e tem como objetivo facilitar a compreensão da
+implementação e de suas responsabilidades técnicas.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#views">Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#services">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Rodapé">
+        <a href="../empresa/codigo/apps_empresa_filters.html" class="btn btn-neutral float-left" title="apps.empresa.filters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="regras_negocio.html" class="btn btn-neutral float-right" title="Cadastro" accesskey="n" rel="next">Próximo <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

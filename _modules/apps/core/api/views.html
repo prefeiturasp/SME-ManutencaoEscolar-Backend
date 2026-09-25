@@ -1,0 +1,703 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.core.api.views &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dominios/index.html">Documentação</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Código do módulo</a></li>
+      <li class="breadcrumb-item active">apps.core.api.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código-fonte para apps.core.api.views</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Views responsáveis pelos endpoints da aplicação Core.</span>
+
+<span class="sd">Disponibiliza endpoints para verificação de saúde da aplicação, autenticação,</span>
+<span class="sd">gerenciamento de tokens, recuperação de senha e gerenciamento de anexos.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">drf_spectacular.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">extend_schema</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">status</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework.parsers</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormParser</span><span class="p">,</span> <span class="n">JSONParser</span><span class="p">,</span> <span class="n">MultiPartParser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework.permissions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AllowAny</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework.response</span><span class="w"> </span><span class="kn">import</span> <span class="n">Response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIView</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework_simplejwt.views</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">TokenObtainPairView</span><span class="p">,</span>
+    <span class="n">TokenRefreshView</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AnexoArquivoError</span><span class="p">,</span>
+    <span class="n">EnvioEmailError</span><span class="p">,</span>
+    <span class="n">FalhaAutenticacaoError</span><span class="p">,</span>
+    <span class="n">InternalError</span><span class="p">,</span>
+    <span class="n">SmeIntegracaoError</span><span class="p">,</span>
+    <span class="n">TokenInvalidoError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.schemas</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ALTERAR_SENHA</span><span class="p">,</span>
+    <span class="n">ATUALIZA_TOKEN</span><span class="p">,</span>
+    <span class="n">LOGIN</span><span class="p">,</span>
+    <span class="n">LOGOUT</span><span class="p">,</span>
+    <span class="n">REDEFINIR_SENHA</span><span class="p">,</span>
+    <span class="n">UPLOAD_ARQUIVO</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.serializers.anexo</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ArquivoResponseSerializer</span><span class="p">,</span>
+    <span class="n">ArquivoUploadSerializer</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.serializers.autenticacao</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AlterarSenhaSerializer</span><span class="p">,</span>
+    <span class="n">AtualizarTokenSerializer</span><span class="p">,</span>
+    <span class="n">AutenticacaoSerializer</span><span class="p">,</span>
+    <span class="n">LoginResponseSerializer</span><span class="p">,</span>
+    <span class="n">LogoutSerializer</span><span class="p">,</span>
+    <span class="n">RecuperarSenhaSerializer</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.services.anexo_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnexoService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.services.autenticacao_eol_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutenticacaoEOLService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.services.token_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">TokenService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.usuarios.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EmailUsuarioNaoEncontradoError</span><span class="p">,</span>
+    <span class="n">UsuarioNaoEncontradoError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.usuarios.services.usuario_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">UsuarioService</span>
+
+
+<div class="viewcode-block" id="HealthCheckView">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.HealthCheckView">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HealthCheckView</span><span class="p">(</span><span class="n">APIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Disponibiliza o endpoint público de verificação da aplicação.</span>
+
+<span class="sd">    Permite que orquestradores e mecanismos de monitoramento verifiquem</span>
+<span class="sd">    se a aplicação está respondendo corretamente.</span>
+<span class="sd">    """</span>
+
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">AllowAny</span><span class="p">]</span>
+
+<div class="viewcode-block" id="HealthCheckView.get">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.HealthCheckView.get">[documentos]</a>
+    <span class="nd">@extend_schema</span><span class="p">(</span>
+        <span class="n">auth</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">summary</span><span class="o">=</span><span class="s2">"Endpoint de Health Check"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Retorna o status atual da aplicação para os "</span>
+            <span class="s2">"orquestradores de cluster."</span>
+        <span class="p">),</span>
+        <span class="n">responses</span><span class="o">=</span><span class="p">{</span><span class="mi">200</span><span class="p">:</span> <span class="nb">dict</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Retorna o status OK da aplicação de forma pública.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request: Objeto contendo os dados da requisição HTTP.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Objeto Response contendo um dicionário informando o status 'ok'.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">({</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"ok"</span><span class="p">})</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LoginView">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.LoginView">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LoginView</span><span class="p">(</span><span class="n">TokenObtainPairView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Disponibiliza o endpoint de autenticação do usuário.</span>
+
+<span class="sd">    Recebe as credenciais informadas pelo cliente, delega a autenticação</span>
+<span class="sd">    ao serviço de integração com o EOL/CoreSSO e retorna os tokens JWT</span>
+<span class="sd">    juntamente com os dados do usuário autenticado.</span>
+<span class="sd">    """</span>
+
+    <span class="c1"># TokenObtainPairView herda de TokenViewBase, que define permission_classes</span>
+    <span class="c1"># como uma tupla</span>
+    <span class="n">permission_classes</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">AllowAny</span><span class="p">,)</span>
+
+<div class="viewcode-block" id="LoginView.post">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.LoginView.post">[documentos]</a>
+    <span class="nd">@LOGIN</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Autentica o usuário e retorna os dados da sessão.</span>
+
+<span class="sd">        Valida os dados de entrada, realiza a autenticação no EOL/CoreSSO</span>
+<span class="sd">        e serializa a resposta contendo os tokens JWT e os dados do usuário.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): Requisição HTTP contendo login e senha.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Response: Resposta HTTP com os tokens e dados do usuário em caso</span>
+<span class="sd">                de sucesso.</span>
+<span class="sd">        """</span>
+        <span class="n">serializer</span> <span class="o">=</span> <span class="n">AutenticacaoSerializer</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">serializer</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">login</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">"login"</span><span class="p">]</span>
+        <span class="n">senha</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">"senha"</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dados_autenticacao</span> <span class="o">=</span> <span class="n">AutenticacaoEOLService</span><span class="o">.</span><span class="n">login</span><span class="p">(</span>
+                <span class="n">login</span><span class="o">=</span><span class="n">login</span><span class="p">,</span>
+                <span class="n">senha</span><span class="o">=</span><span class="n">senha</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">response_serializer</span> <span class="o">=</span> <span class="n">LoginResponseSerializer</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">dados_autenticacao</span>
+            <span class="p">)</span>
+            <span class="n">response_serializer</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="n">response_serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_200_OK</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">FalhaAutenticacaoError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Usuário e/ou senha inválida"</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">SmeIntegracaoError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Parece que estamos com uma instabilidade no "</span>
+                    <span class="s2">"momento. Tente entrar novamente daqui a pouco."</span>
+                <span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">InternalError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Parece que estamos com uma instabilidade no "</span>
+                    <span class="s2">"momento. Tente entrar novamente daqui a pouco."</span>
+                <span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_500_INTERNAL_SERVER_ERROR</span><span class="p">,</span>
+            <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AtualizarTokenView">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.AtualizarTokenView">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AtualizarTokenView</span><span class="p">(</span><span class="n">TokenRefreshView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Disponibiliza o endpoint de atualização do access token.</span>
+
+<span class="sd">    Antes de delegar a atualização ao fluxo padrão do Simple JWT, valida</span>
+<span class="sd">    o refresh token e verifica se o usuário associado ainda está autorizado</span>
+<span class="sd">    no CoreSSO.</span>
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="AtualizarTokenView.post">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.AtualizarTokenView.post">[documentos]</a>
+    <span class="nd">@ATUALIZA_TOKEN</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Valida o refresh token e solicita a renovação da autenticação.</span>
+
+<span class="sd">        O refresh token é validado e o usuário associado é consultado.</span>
+<span class="sd">        Em seguida, verifica-se se o usuário continua autorizado no CoreSSO.</span>
+<span class="sd">        Caso esteja válido, a implementação herdada de</span>
+<span class="sd">        :class:`TokenRefreshView` gera o novo access token.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): Requisição HTTP contendo o refresh token.</span>
+<span class="sd">            *args (Any): Argumentos posicionais recebidos pela view base.</span>
+<span class="sd">            **kwargs (Any): Argumentos nomeados recebidos pela view base.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Response: Resposta HTTP contendo o novo access token ou um erro</span>
+<span class="sd">                de autenticação.</span>
+<span class="sd">        """</span>
+        <span class="n">serializer</span> <span class="o">=</span> <span class="n">AtualizarTokenSerializer</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">serializer</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dados_usuario</span> <span class="o">=</span> <span class="n">TokenService</span><span class="o">.</span><span class="n">atualizar_token</span><span class="p">(</span>
+                <span class="n">serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">"refresh"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">usuario_existe</span> <span class="o">=</span> <span class="n">AutenticacaoEOLService</span><span class="o">.</span><span class="n">usuario_existe_no_coresso</span><span class="p">(</span>
+                <span class="n">dados_usuario</span><span class="p">[</span><span class="s2">"username"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">usuario_existe</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Usuário não autorizado."</span><span class="p">},</span>
+                    <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">TokenInvalidoError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Refresh token inválido."</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">UsuarioNaoEncontradoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LogoutView">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.LogoutView">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LogoutView</span><span class="p">(</span><span class="n">APIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Disponibiliza o endpoint de logout do usuário autenticado.</span>
+
+<span class="sd">    O logout revoga o refresh token informado, impedindo sua reutilização</span>
+<span class="sd">    para obtenção de novos tokens de acesso.</span>
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="LogoutView.post">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.LogoutView.post">[documentos]</a>
+    <span class="nd">@LOGOUT</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revoga o refresh token e encerra a sessão do usuário.</span>
+
+<span class="sd">        Valida o refresh token recebido e verifica sua associação com o</span>
+<span class="sd">        usuário autenticado antes de solicitar sua revogação.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): Requisição HTTP contendo o refresh token.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Response: HTTP indicando o resultado da operação.</span>
+<span class="sd">        """</span>
+        <span class="n">serializer</span> <span class="o">=</span> <span class="n">LogoutSerializer</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">serializer</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">id_usuario</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="k">if</span> <span class="n">id_usuario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Usuário autenticado inválido."</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TokenService</span><span class="o">.</span><span class="n">logout</span><span class="p">(</span>
+                <span class="n">id_usuario</span><span class="p">,</span> <span class="n">serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">"refresh"</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">TokenInvalidoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Logout realizado com sucesso."</span><span class="p">},</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_205_RESET_CONTENT</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RedefinirSenhaView">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.RedefinirSenhaView">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RedefinirSenhaView</span><span class="p">(</span><span class="n">APIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Disponibiliza o endpoint para iniciar a recuperação de senha.</span>
+
+<span class="sd">    Identifica o usuário pelo registro funcional ou CPF, solicita o envio</span>
+<span class="sd">    do e-mail de recuperação e retorna o endereço de e-mail mascarado.</span>
+<span class="sd">    """</span>
+
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">AllowAny</span><span class="p">]</span>
+
+<div class="viewcode-block" id="RedefinirSenhaView.post">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.RedefinirSenhaView.post">[documentos]</a>
+    <span class="nd">@REDEFINIR_SENHA</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Solicita o envio de instruções para recuperação de senha.</span>
+
+<span class="sd">        Após identificar o usuário e solicitar o envio do e-mail, mascara</span>
+<span class="sd">        parte do endereço eletrônico antes de retorná-lo ao cliente.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): Requisição HTTP contendo o registro funcional</span>
+<span class="sd">                ou CPF do usuário</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Response: Resposta HTTP contendo o e-mail mascarado.</span>
+<span class="sd">        """</span>
+        <span class="n">serializer</span> <span class="o">=</span> <span class="n">RecuperarSenhaSerializer</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">serializer</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">rf_ou_cpf</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">"registro_funcional_ou_cpf"</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">usuario</span> <span class="o">=</span> <span class="n">UsuarioService</span><span class="o">.</span><span class="n">obter_usuario_por_rf_cpf</span><span class="p">(</span><span class="n">rf_ou_cpf</span><span class="p">)</span>
+            <span class="n">UsuarioService</span><span class="o">.</span><span class="n">enviar_email_recuperacao_senha</span><span class="p">(</span><span class="n">usuario</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">UsuarioNaoEncontradoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s2">"detail"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_404_NOT_FOUND</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">EmailUsuarioNaoEncontradoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s2">"detail"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_404_NOT_FOUND</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">EnvioEmailError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s2">"detail"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">parte_local</span><span class="p">,</span> <span class="n">dominio</span> <span class="o">=</span> <span class="n">usuario</span><span class="p">[</span><span class="s2">"email"</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">"@"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">quantidade_letras_visiveis</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="n">email_mascarado</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">parte_local</span><span class="p">[:</span><span class="n">quantidade_letras_visiveis</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'*'</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parte_local</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">quantidade_letras_visiveis</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"@</span><span class="si">{</span><span class="n">dominio</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Response</span><span class="p">({</span><span class="s2">"email"</span><span class="p">:</span> <span class="n">email_mascarado</span><span class="p">},</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_200_OK</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AlterarSenhaView">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.AlterarSenhaView">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AlterarSenhaView</span><span class="p">(</span><span class="n">APIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Disponibiliza o endpoint para alteração da senha do usuário.</span>
+
+<span class="sd">    Valida o token de recuperação e, caso seja válido, solicita a alteração</span>
+<span class="sd">    da senha do usuário no CoreSSO.</span>
+<span class="sd">    """</span>
+
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">AllowAny</span><span class="p">]</span>
+
+<div class="viewcode-block" id="AlterarSenhaView.post">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.AlterarSenhaView.post">[documentos]</a>
+    <span class="nd">@ALTERAR_SENHA</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Valida o token e altera a senha do usuário.</span>
+
+<span class="sd">        Valida os dados da requisição, verifica o token de recuperação</span>
+<span class="sd">        e solicita ao serviço de autenticação a alteração da senha no</span>
+<span class="sd">        CoreSSO.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): Requisição HTTP contendo identificador,</span>
+<span class="sd">                token e nova senha.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Response: Resposta HTTP indicando o resultado da alteração.</span>
+<span class="sd">        """</span>
+        <span class="n">serializer</span> <span class="o">=</span> <span class="n">AlterarSenhaSerializer</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">serializer</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">"registro_funcional_ou_cpf"</span><span class="p">]</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">"token"</span><span class="p">]</span>
+        <span class="n">senha</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">"senha"</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TokenService</span><span class="o">.</span><span class="n">validar_token_recuperar_senha</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
+            <span class="n">AutenticacaoEOLService</span><span class="o">.</span><span class="n">alterar_senha_no_coresso</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">senha</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">UsuarioNaoEncontradoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s2">"detail"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_404_NOT_FOUND</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">TokenInvalidoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s2">"detail"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">FalhaAutenticacaoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Erro ao alterar senha"</span><span class="p">,</span> <span class="s2">"detail"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">SmeIntegracaoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Erro ao alterar senha"</span><span class="p">,</span> <span class="s2">"detail"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_502_BAD_GATEWAY</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Senha alterada com sucesso."</span><span class="p">},</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_200_OK</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AnexoView">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.AnexoView">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AnexoView</span><span class="p">(</span><span class="n">APIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Disponibiliza os endpoints relacionados ao gerenciamento de anexos.</span>
+
+<span class="sd">    Suporta o recebimento de arquivos por requisições multipart e delega</span>
+<span class="sd">    a validação, preparação e persistência dos arquivos ao serviço</span>
+<span class="sd">    especializado.</span>
+<span class="sd">    """</span>
+
+    <span class="n">parser_classes</span> <span class="o">=</span> <span class="p">(</span><span class="n">MultiPartParser</span><span class="p">,</span> <span class="n">FormParser</span><span class="p">,</span> <span class="n">JSONParser</span><span class="p">)</span>
+    <span class="n">lookup_field</span> <span class="o">=</span> <span class="s2">"uuid"</span>
+
+<div class="viewcode-block" id="AnexoView.post">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_api_views.html#apps.core.api.views.AnexoView.post">[documentos]</a>
+    <span class="nd">@UPLOAD_ARQUIVO</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Recebe, valida e armazena um arquivo enviado pelo usuário.</span>
+
+<span class="sd">        Valida o arquivo recebido pelo serializer, identifica o usuário</span>
+<span class="sd">        autenticado e delega o processamento ao :class:`AnexoService`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            request (Request): Requisição HTTP contendo o arquivo no campo</span>
+<span class="sd">                ``arquivo``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Response: Resposta HTTP com os dados do arquivo criado.</span>
+<span class="sd">        """</span>
+        <span class="n">serializer</span> <span class="o">=</span> <span class="n">ArquivoUploadSerializer</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">serializer</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">arquivo</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">"arquivo"</span><span class="p">]</span>
+        <span class="n">id_usuario</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">if</span> <span class="n">id_usuario</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Usuário não autenticado."</span><span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">anexo</span> <span class="o">=</span> <span class="n">AnexoService</span><span class="p">()</span><span class="o">.</span><span class="n">enviar_arquivo</span><span class="p">(</span><span class="n">arquivo</span><span class="p">,</span> <span class="n">id_usuario</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">ArquivoResponseSerializer</span><span class="p">(</span><span class="n">anexo</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">AnexoArquivoError</span> <span class="k">as</span> <span class="n">erro</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">"title"</span><span class="p">:</span> <span class="n">erro</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                    <span class="s2">"detail"</span><span class="p">:</span> <span class="n">erro</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_400_BAD_REQUEST</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">UsuarioNaoEncontradoError</span> <span class="k">as</span> <span class="n">erro</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">"title"</span><span class="p">:</span> <span class="n">erro</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                    <span class="s2">"detail"</span><span class="p">:</span> <span class="n">erro</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_404_NOT_FOUND</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_201_CREATED</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

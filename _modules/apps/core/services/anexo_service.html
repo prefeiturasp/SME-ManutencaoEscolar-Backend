@@ -1,0 +1,660 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.core.services.anexo_service &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dominios/index.html">Documentação</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Código do módulo</a></li>
+      <li class="breadcrumb-item active">apps.core.services.anexo_service</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código-fonte para apps.core.services.anexo_service</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Serviços responsáveis pela gerencia dos anexos.</span>
+
+<span class="sd">Este módulo centraliza a validação, preparação, armazenamento, consulta,</span>
+<span class="sd">listagem e exclusão de arquivos anexados à aplicação.</span>
+
+<span class="sd">As operações de persistência são delegadas ao :class:`AnexoRepository`,</span>
+<span class="sd">enquanto as validações e transformações específicas dos arquivos são</span>
+<span class="sd">realizadas neste serviço.</span>
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">mimetypes</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.core.files.uploadedfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">UploadedFile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">transaction</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.constants</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MAPA_EXTENSOES_TIPO_ARQUIVO</span><span class="p">,</span>
+    <span class="n">TAMANHO_MAXIMO_ARQUIVO</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnexoArquivoError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.repository.anexo_repository</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnexoRepository</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.usuarios.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UsuarioNaoEncontradoError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.usuarios.repository.usuario_repository</span><span class="w"> </span><span class="kn">import</span> <span class="n">UsuarioRepository</span>
+
+
+<div class="viewcode-block" id="AnexoService">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_anexo_service.html#apps.core.services.anexo_service.AnexoService">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AnexoService</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Centraliza as ações relacionadas aos anexos.</span>
+
+<span class="sd">    O serviço é responsável por validar os arquivos recebidos, preparar seus</span>
+<span class="sd">    metadados e delegar as operações de persistência ao</span>
+<span class="sd">    :class:`AnexoRepository`.</span>
+
+<span class="sd">    Entre as responsabilidades aplicadas estão:</span>
+
+<span class="sd">        - validação da existência do usuário responsável;</span>
+<span class="sd">        - validação da presença, nome e tamanho do arquivo;</span>
+<span class="sd">        - validação da extensão do arquivo;</span>
+<span class="sd">        - identificação do tipo do anexo;</span>
+<span class="sd">        - geração de um nome único para armazenamento;</span>
+<span class="sd">        - identificação do tipo MIME;</span>
+<span class="sd">        - obtenção de URL para acesso ao arquivo;</span>
+<span class="sd">        - preparação dos dados necessários para download;</span>
+<span class="sd">        - exclusão do anexo e do arquivo armazenado.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">repository</span><span class="p">:</span> <span class="n">AnexoRepository</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Inicializa o serviço com o repositório de anexos.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            repository (AnexoRepository): Repositório utilizado para</span>
+<span class="sd">                persistência e consulta dos anexos. Quando não informado, uma</span>
+<span class="sd">                instância padrão de ``AnexoRepository`` é criada.</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repository</span> <span class="o">=</span> <span class="n">repository</span> <span class="ow">or</span> <span class="n">AnexoRepository</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AnexoService.enviar_arquivo">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_anexo_service.html#apps.core.services.anexo_service.AnexoService.enviar_arquivo">[documentos]</a>
+    <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">enviar_arquivo</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">arquivo</span><span class="p">:</span> <span class="n">UploadedFile</span><span class="p">,</span> <span class="n">id_usuario</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Valida e persiste um arquivo anexado.</span>
+
+<span class="sd">        Executa o fluxo completo de envio de um arquivo: valida a existência</span>
+<span class="sd">        do usuário, valida os dados do arquivo, prepara seus metadados e</span>
+<span class="sd">        delega a persistência ao :class:`AnexoRepository`.</span>
+
+<span class="sd">        A operação é executada dentro de uma transação atômica para as</span>
+<span class="sd">        operações de banco de dados realizadas durante o fluxo.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            arquivo: Arquivo que será validado e armazenado.</span>
+<span class="sd">            id_usuario: Identificador do usuário responsável pelo envio.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dados do anexo persistido.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AnexoArquivoError: Se o arquivo informado for inválido.</span>
+<span class="sd">            UsuarioNaoEncontradoError: Se o usuário não existir.</span>
+<span class="sd">        """</span>
+        <span class="n">dados_anexo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validar_e_preparar_anexo</span><span class="p">(</span><span class="n">arquivo</span><span class="p">,</span> <span class="n">id_usuario</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">criar</span><span class="p">(</span><span class="o">**</span><span class="n">dados_anexo</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AnexoService.validar_e_preparar_anexo">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_anexo_service.html#apps.core.services.anexo_service.AnexoService.validar_e_preparar_anexo">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validar_e_preparar_anexo</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">arquivo</span><span class="p">:</span> <span class="n">UploadedFile</span><span class="p">,</span> <span class="n">id_usuario</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Valida um arquivo e prepara seus dados para persistência.</span>
+
+<span class="sd">        O arquivo recebido é validado quanto ao nome, tamanho e extensão.</span>
+<span class="sd">        Após as validações, seus metadados são preparados para que o</span>
+<span class="sd">        repositório possa persistir o anexo.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            arquivo: Arquivo que será validado e preparado.</span>
+<span class="sd">            id_usuario: Identificador do usuário responsável pelo envio.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Metadados do anexo prontos para persistência.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AnexoArquivoError: Se o arquivo for inválido, estiver vazio,</span>
+<span class="sd">                possuir uma extensão não permitida ou ultrapassar o tamanho</span>
+<span class="sd">                máximo permitido de 2 MB.</span>
+<span class="sd">            UsuarioNaoEncontradoError: Se o usuário não existir.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">id_usuario</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">UsuarioRepository</span><span class="o">.</span><span class="n">usuario_existe_por_id</span><span class="p">(</span>
+            <span class="n">id_usuario</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="n">UsuarioNaoEncontradoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">"Usuário não encontrado"</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"O usuário responsável pelo anexo não foi encontrado."</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">nome_arquivo</span><span class="p">,</span> <span class="n">tamanho_bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validar_arquivo_recebido</span><span class="p">(</span>
+            <span class="n">arquivo</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">tamanho_bytes</span> <span class="o">&gt;</span> <span class="n">TAMANHO_MAXIMO_ARQUIVO</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AnexoArquivoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">"Arquivo muito grande"</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"O arquivo não pode ultrapassar 2 MB."</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">tipo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validar_extensao_arquivo</span><span class="p">(</span><span class="n">nome_arquivo</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preparar_anexo</span><span class="p">(</span>
+            <span class="n">arquivo</span><span class="o">=</span><span class="n">arquivo</span><span class="p">,</span>
+            <span class="n">tipo</span><span class="o">=</span><span class="n">tipo</span><span class="p">,</span>
+            <span class="n">nome_original</span><span class="o">=</span><span class="n">nome_arquivo</span><span class="p">,</span>
+            <span class="n">tamanho_bytes</span><span class="o">=</span><span class="n">tamanho_bytes</span><span class="p">,</span>
+            <span class="n">id_usuario</span><span class="o">=</span><span class="n">id_usuario</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AnexoService.buscar_por_uuid">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_anexo_service.html#apps.core.services.anexo_service.AnexoService.buscar_por_uuid">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">buscar_por_uuid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">identificador</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Busca um anexo pelo seu identificador.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identificador (str): Identificador UUID do anexo que será</span>
+<span class="sd">                consultado.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">             dict[str, Any]: Dicionário contendo os dados do anexo encontrado.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AnexoArquivoError: Se o anexo não for encontrado.</span>
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">buscar_por_uuid</span><span class="p">(</span>
+                <span class="n">identificador</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">AnexoArquivoError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AnexoArquivoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span></div>
+
+
+<div class="viewcode-block" id="AnexoService.listar">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_anexo_service.html#apps.core.services.anexo_service.AnexoService.listar">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">listar</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tipo</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">"""Lista os anexos, opcionalmente filtrados por tipo.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tipo (str): Tipo do anexo utilizado como filtro. Quando ``None``,</span>
+<span class="sd">                retorna anexos de todos os tipos.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict[str, list[dict[str, Any]]]: Dicionário contendo a chave</span>
+<span class="sd">            ``arquivos`` com a lista de anexos encontrados.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">listar</span><span class="p">(</span>
+            <span class="n">tipo</span><span class="o">=</span><span class="n">tipo</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AnexoService.excluir">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_anexo_service.html#apps.core.services.anexo_service.AnexoService.excluir">[documentos]</a>
+    <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">excluir</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">identificador</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Exclui um anexo e seu arquivo armazenado.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identificador (str):  Identificador UUID do anexo que será</span>
+<span class="sd">                excluído.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AnexoArquivoError: Se o anexo não for encontrado.</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">excluir</span><span class="p">(</span>
+            <span class="n">identificador</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AnexoService.obter_url">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_anexo_service.html#apps.core.services.anexo_service.AnexoService.obter_url">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obter_url</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">identificador</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Obtém a URL de acesso a um arquivo armazenado.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identificador (str): Identificador UUID do anexo que será</span>
+<span class="sd">                consultado.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: URL de acesso ao arquivo armazenado.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AnexoArquivoError: Se o anexo não for encontrado.</span>
+<span class="sd">        """</span>
+        <span class="n">arquivo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">buscar_por_uuid</span><span class="p">(</span>
+            <span class="n">identificador</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">arquivo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"url"</span><span class="p">)</span>
+        <span class="n">nome</span> <span class="o">=</span> <span class="n">arquivo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nome"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AnexoArquivoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">"URL inválida."</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Arquivo </span><span class="si">{</span><span class="n">nome</span><span class="si">}</span><span class="s2"> não possui URL para download"</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_preparar_anexo</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">arquivo</span><span class="p">:</span> <span class="n">UploadedFile</span><span class="p">,</span>
+        <span class="n">tipo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">nome_original</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">tamanho_bytes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">id_usuario</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Prepara os metadados e persiste um arquivo.</span>
+
+<span class="sd">        O nome original é normalizado para remover qualquer componente</span>
+<span class="sd">        de caminho. Em seguida, é gerado um nome único para o arquivo</span>
+<span class="sd">        que será armazenado. O tipo MIME é obtido a partir do arquivo</span>
+<span class="sd">        enviado ou, caso não esteja disponível, inferido pela extensão</span>
+<span class="sd">        do nome original.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            arquivo (UploadedFile): Arquivo que será armazenado.</span>
+<span class="sd">            tipo (str): Tipo do anexo que será registrado.</span>
+<span class="sd">            nome_original (str):  Nome original validado do arquivo.</span>
+<span class="sd">            tamanho_bytes (int): Tamanho validado do arquivo em bytes.</span>
+<span class="sd">            id_usuario (int): Identificador do usuário responsável pela criação</span>
+<span class="sd">            do anexo.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict[str, Any]: Dicionário contendo os dados do anexo criado e</span>
+<span class="sd">                persistido contendo:</span>
+<span class="sd">                - ``nome_original``: Nome original.</span>
+<span class="sd">                - ``tipo``: Tipo do arquivo.</span>
+<span class="sd">                - ``tipo_mime``: Tipo MIME identificado.</span>
+<span class="sd">                - ``tamanho_bytes``: Tamanho do arquivo em bytes.</span>
+<span class="sd">                - ``arquivo``: Arquivo com nome único para armazenamento.</span>
+<span class="sd">                - ``usuario_id``: Identificador do usuário responsável.</span>
+<span class="sd">        """</span>
+        <span class="n">nome_original</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="n">nome_original</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">nome_arquivo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gerar_nome_arquivo</span><span class="p">(</span>
+            <span class="n">nome_original</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">arquivo</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">nome_arquivo</span>
+
+        <span class="n">tipo_mime</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">arquivo</span><span class="o">.</span><span class="n">content_type</span>
+            <span class="ow">or</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_type</span><span class="p">(</span>
+                <span class="n">nome_original</span><span class="p">,</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="ow">or</span> <span class="s2">"application/octet-stream"</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"nome_original"</span><span class="p">:</span> <span class="n">nome_original</span><span class="p">,</span>
+            <span class="s2">"tipo"</span><span class="p">:</span> <span class="n">tipo</span><span class="p">,</span>
+            <span class="s2">"tipo_mime"</span><span class="p">:</span> <span class="n">tipo_mime</span><span class="p">,</span>
+            <span class="s2">"tamanho_bytes"</span><span class="p">:</span> <span class="n">tamanho_bytes</span><span class="p">,</span>
+            <span class="s2">"arquivo"</span><span class="p">:</span> <span class="n">arquivo</span><span class="p">,</span>
+            <span class="s2">"usuario_id"</span><span class="p">:</span> <span class="n">id_usuario</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gerar_nome_arquivo</span><span class="p">(</span>
+        <span class="n">nome_original</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Gera um nome único preservando a extensão do arquivo.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nome_original (str): Nome original do arquivo.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Nome composto por um UUID e pela extensão original.</span>
+<span class="sd">        """</span>
+        <span class="n">extensao</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="n">nome_original</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}{</span><span class="n">extensao</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_obter_extensao</span><span class="p">(</span>
+        <span class="n">nome_arquivo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Obtém a extensão de um arquivo em letras minúsculas.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nome_arquivo (str): Nome do arquivo cuja extensão será obtida.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Extensão do arquivo, incluindo o ponto inicial.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="n">nome_arquivo</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validar_arquivo_recebido</span><span class="p">(</span>
+        <span class="n">arquivo</span><span class="p">:</span> <span class="n">UploadedFile</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Valida e retorna os metadados básicos de um arquivo.</span>
+
+<span class="sd">        Verifica se o arquivo foi informado, se possui nome, se seu tamanho</span>
+<span class="sd">        pode ser determinado e se possui conteúdo.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            arquivo (UploadedFile): Arquivo recebido pela aplicação.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           tuple[str, int]:  Uma tupla contendo o nome do arquivo e seu</span>
+<span class="sd">            tamanho em bytes.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AnexoArquivoError: Se o arquivo não for informado, não possuir</span>
+<span class="sd">                nome, não permitir determinar seu tamanho ou estiver vazio.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">arquivo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AnexoArquivoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">"Arquivo não informado"</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Nenhum arquivo foi informado."</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">nome</span> <span class="o">=</span> <span class="n">arquivo</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">tamanho</span> <span class="o">=</span> <span class="n">arquivo</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nome</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AnexoArquivoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">"Nome do arquivo ausente"</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"O arquivo precisa possuir um nome."</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tamanho</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AnexoArquivoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">"Tamanho do arquivo indisponível"</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Não foi possível determinar o tamanho do arquivo."</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tamanho</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AnexoArquivoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">"Arquivo vazio"</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Não é permitido enviar um arquivo vazio."</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nome</span><span class="p">,</span> <span class="n">tamanho</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validar_extensao_arquivo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nome_arquivo</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Valida a extensão do arquivo e identifica seu tipo.</span>
+
+<span class="sd">        Obtém a extensão do nome do arquivo e verifica se ela está</span>
+<span class="sd">        cadastrada no mapa de extensões permitidas. Quando a extensão</span>
+<span class="sd">        é válida, retorna o tipo de arquivo correspondente.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nome_arquivo (str): Nome do arquivo que terá a extensão validada.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AnexoArquivoError: Quando a extensão do arquivo não está entre as</span>
+<span class="sd">                extensões permitidas.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Tipo de arquivo correspondente à extensão informada.</span>
+<span class="sd">        """</span>
+        <span class="n">extensao</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obter_extensao</span><span class="p">(</span><span class="n">nome_arquivo</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MAPA_EXTENSOES_TIPO_ARQUIVO</span><span class="p">[</span><span class="n">extensao</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AnexoArquivoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">"Tipo de arquivo não permitido"</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"O tipo de arquivo informado não é permitido."</span><span class="p">,</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+<div class="viewcode-block" id="AnexoService.obter_para_download">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_services_anexo_service.html#apps.core.services.anexo_service.AnexoService.obter_para_download">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obter_para_download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identificador</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Obtém os dados de um anexo para realização do download.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identificador (str): Identificador UUID do anexo.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict[str, Any]: Dicionário contendo:</span>
+<span class="sd">                - ``arquivo``: Referência ao arquivo armazenado.</span>
+<span class="sd">                - ``nome_original``: Nome original do arquivo.</span>
+<span class="sd">                - ``tipo_mime``: Tipo MIME do arquivo.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">buscar_para_download</span><span class="p">(</span><span class="n">identificador</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.empresa.services.empresa_service &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dominios/index.html">Documentação</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Código do módulo</a></li>
+      <li class="breadcrumb-item active">apps.empresa.services.empresa_service</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código-fonte para apps.empresa.services.empresa_service</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Serviços de Empresa."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">transaction</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.empresa.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Empresa</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.empresa.repository.empresa_repository</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EmpresaRepository</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.empresa.services.responsavel_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResponsavelTecnicoService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.usuarios.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Usuario</span>
+
+
+<div class="viewcode-block" id="EmpresaService">
+<a class="viewcode-back" href="../../../../dominios/empresa/codigo/apps_empresa_services_empresa_service.html#apps.empresa.services.empresa_service.EmpresaService">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EmpresaService</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Orquestra as regras de negócio relacionadas a Empresa."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">empresa_repository</span><span class="p">:</span> <span class="n">EmpresaRepository</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">responsavel_tecnico_service</span><span class="p">:</span> <span class="n">ResponsavelTecnicoService</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Inicializa o serviço com os repositórios informados ou os padrões.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            empresa_repository: Repositório de empresas a ser utilizado.</span>
+<span class="sd">                Quando não informado, uma instância padrão de</span>
+<span class="sd">                `EmpresaRepository` é criada.</span>
+<span class="sd">            responsavel_tecnico_service: Serviço de responsáveis técnicos</span>
+<span class="sd">                a ser utilizado. Quando não informado, uma instância padrão</span>
+<span class="sd">                de `ResponsavelTecnicoService` é criada.</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">empresa_repository</span> <span class="o">=</span> <span class="n">empresa_repository</span> <span class="ow">or</span> <span class="n">EmpresaRepository</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">responsavel_tecnico_service</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">responsavel_tecnico_service</span> <span class="ow">or</span> <span class="n">ResponsavelTecnicoService</span><span class="p">()</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="EmpresaService.criar">
+<a class="viewcode-back" href="../../../../dominios/empresa/codigo/apps_empresa_services_empresa_service.html#apps.empresa.services.empresa_service.EmpresaService.criar">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">dados</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">usuario</span><span class="p">:</span> <span class="n">Usuario</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Cria uma empresa e retorna seus dados serializados.</span>
+
+<span class="sd">        Registra o usuário logado como responsável pela criação.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dados: Dados da empresa a ser criada.</span>
+<span class="sd">            usuario: Usuário logado responsável pela criação.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dados serializados da empresa criada.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">criar_com_responsaveis</span><span class="p">({</span><span class="o">**</span><span class="n">dados</span><span class="p">,</span> <span class="s2">"criado_por"</span><span class="p">:</span> <span class="n">usuario</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="EmpresaService.criar_com_responsaveis">
+<a class="viewcode-back" href="../../../../dominios/empresa/codigo/apps_empresa_services_empresa_service.html#apps.empresa.services.empresa_service.EmpresaService.criar_com_responsaveis">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">criar_com_responsaveis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dados</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Cria uma empresa e seus responsáveis técnicos em uma transação.</span>
+
+<span class="sd">        Registra o usuário logado como responsável pela criação da empresa</span>
+<span class="sd">        e de cada responsável técnico vinculado.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dados: Dados da empresa, incluindo a lista de responsáveis</span>
+<span class="sd">                técnicos em "responsaveis_tecnicos".</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dados serializados da empresa criada.</span>
+<span class="sd">        """</span>
+        <span class="n">responsaveis_dados</span> <span class="o">=</span> <span class="n">dados</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"responsaveis_tecnicos"</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
+            <span class="n">empresa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empresa_repository</span><span class="o">.</span><span class="n">criar</span><span class="p">({</span><span class="o">**</span><span class="n">dados</span><span class="p">})</span>
+
+            <span class="n">empresa</span><span class="p">[</span><span class="s2">"responsaveis_tecnicos"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">responsavel_tecnico_service</span><span class="o">.</span><span class="n">bulk_criar</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="o">**</span><span class="n">responsavel_dados</span><span class="p">,</span>
+                            <span class="s2">"empresa_id"</span><span class="p">:</span> <span class="n">empresa</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span>
+                            <span class="s2">"criado_por"</span><span class="p">:</span> <span class="n">dados</span><span class="p">[</span><span class="s2">"criado_por"</span><span class="p">],</span>
+                        <span class="p">}</span>
+                        <span class="k">for</span> <span class="n">responsavel_dados</span> <span class="ow">in</span> <span class="n">responsaveis_dados</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">empresa</span></div>
+
+
+<div class="viewcode-block" id="EmpresaService.atualizar">
+<a class="viewcode-back" href="../../../../dominios/empresa/codigo/apps_empresa_services_empresa_service.html#apps.empresa.services.empresa_service.EmpresaService.atualizar">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">atualizar</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">empresa</span><span class="p">:</span> <span class="n">Empresa</span><span class="p">,</span>
+        <span class="n">dados</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">usuario</span><span class="p">:</span> <span class="n">Usuario</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Atualiza uma empresa existente e retorna seus dados serializados.</span>
+
+<span class="sd">        Registra o usuário logado como responsável pela atualização. Quando</span>
+<span class="sd">        ``dados`` contém a chave ``responsaveis_tecnicos``, a lista informada</span>
+<span class="sd">        é sincronizada dentro de uma transação (upsert por ``uuid``:</span>
+<span class="sd">        atualiza os existentes, cria os novos e remove os ausentes).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            empresa: Instância da empresa a ser atualizada.</span>
+<span class="sd">            dados: Dados a serem aplicados na atualização, podendo incluir</span>
+<span class="sd">                a lista de responsáveis técnicos em ``responsaveis_tecnicos``.</span>
+<span class="sd">            usuario: Usuário logado responsável pela atualização.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dados serializados da empresa atualizada.</span>
+<span class="sd">        """</span>
+        <span class="n">dados</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">dados</span><span class="p">,</span> <span class="s2">"atualizado_por"</span><span class="p">:</span> <span class="n">usuario</span><span class="p">}</span>
+        <span class="n">responsaveis_dados</span> <span class="o">=</span> <span class="n">dados</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"responsaveis_tecnicos"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
+            <span class="n">empresa_atualizada</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empresa_repository</span><span class="o">.</span><span class="n">atualizar</span><span class="p">(</span>
+                <span class="n">empresa</span><span class="p">,</span> <span class="n">dados</span>
+            <span class="p">)</span>
+            <span class="n">empresa_atualizada</span><span class="p">[</span><span class="s2">"responsaveis_tecnicos"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">responsavel_tecnico_service</span><span class="o">.</span><span class="n">sincronizar</span><span class="p">(</span>
+                    <span class="n">empresa_id</span><span class="o">=</span><span class="n">empresa_atualizada</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span>
+                    <span class="n">dados_lista</span><span class="o">=</span><span class="n">responsaveis_dados</span><span class="p">,</span>
+                    <span class="n">usuario</span><span class="o">=</span><span class="n">usuario</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">empresa_atualizada</span></div>
+
+
+<div class="viewcode-block" id="EmpresaService.deletar">
+<a class="viewcode-back" href="../../../../dominios/empresa/codigo/apps_empresa_services_empresa_service.html#apps.empresa.services.empresa_service.EmpresaService.deletar">[documentos]</a>
+    <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deletar</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">empresa</span><span class="p">:</span> <span class="n">Empresa</span><span class="p">,</span> <span class="n">usuario</span><span class="p">:</span> <span class="n">Usuario</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Realiza a exclusão lógica da empresa e de seus responsáveis.</span>
+
+<span class="sd">        Registra o usuário logado como responsável pela exclusão.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            empresa: Instância da empresa a ser deletada.</span>
+<span class="sd">            usuario: Usuário logado responsável pela exclusão.</span>
+<span class="sd">        """</span>
+        <span class="n">responsaveis</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">empresa</span><span class="o">.</span><span class="n">responsaveis_tecnicos</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">responsavel_tecnico_service</span><span class="o">.</span><span class="n">remover</span><span class="p">(</span><span class="n">responsaveis</span><span class="p">,</span> <span class="n">usuario</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">empresa_repository</span><span class="o">.</span><span class="n">deletar</span><span class="p">(</span><span class="n">empresa</span><span class="p">,</span> <span class="n">usuario</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

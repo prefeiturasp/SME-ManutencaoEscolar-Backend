@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identificação e auditoria &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../search.html" />
+    <link rel="next" title="Models" href="codigo/index.html" />
+    <link rel="prev" title="Empresas" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Documentação</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Empresas</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#regras-de-negocio">Regras de Negócio</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Documentação</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Empresas</a></li>
+      <li class="breadcrumb-item active">Identificação e auditoria</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/dominios/empresa/regras_negocio.rst.txt" rel="nofollow"> Ver código-fonte da página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>Esta seção documenta as regras de negócio que orientam o funcionamento do domínio <strong>Empresa</strong>.</p>
+<section id="identificacao-e-auditoria">
+<h1>Identificação e auditoria<a class="headerlink" href="#identificacao-e-auditoria" title="Link para este cabeçalho"></a></h1>
+<p>Empresas, responsáveis técnicos e anexos possuem um UUID único, gerado
+automaticamente pelo sistema.</p>
+<p>A criação e a atualização registram, quando disponível, o usuário autenticado
+responsável pela operação e suas respectivas datas. A exclusão lógica registra
+a data e o usuário responsável.</p>
+</section>
+<section id="cadastro-da-empresa">
+<h1>Cadastro da empresa<a class="headerlink" href="#cadastro-da-empresa" title="Link para este cabeçalho"></a></h1>
+<p>O cadastro de uma empresa deve informar:</p>
+<ul class="simple">
+<li><p>nome e razão social;</p></li>
+<li><p>CNPJ;</p></li>
+<li><p>status;</p></li>
+<li><p>CEP, logradouro, número, cidade e estado;</p></li>
+<li><p>ao menos um responsável técnico.</p></li>
+</ul>
+<p>O complemento do endereço é opcional. O link de rastreio também é opcional e,
+quando informado, deve ser uma URL válida.</p>
+<p>O CNPJ deve possuir formato válido e não pode estar associado a outra empresa
+que não tenha sido excluída logicamente. Na atualização, a própria empresa é
+desconsiderada nessa verificação. O CNPJ de uma empresa excluída logicamente
+pode ser reutilizado.</p>
+<p>O CEP deve conter exatamente oito dígitos numéricos. O estado deve ser uma das
+unidades federativas aceitas pela aplicação.</p>
+<p>Empresas são criadas como ativas por padrão. A listagem apresenta primeiro as
+empresas ativas e, dentro de cada situação, os registros mais recentes.</p>
+</section>
+<section id="responsaveis-tecnicos">
+<h1>Responsáveis técnicos<a class="headerlink" href="#responsaveis-tecnicos" title="Link para este cabeçalho"></a></h1>
+<p>Cada responsável técnico pertence a uma empresa e deve possuir nome, tipo,
+e-mail e telefone. Os tipos permitidos são:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">preposto</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">engenheiro_civil</span></code>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">engenheiro_eletricista</span></code>.</p></li>
+</ul>
+<p>O telefone deve conter dez ou onze dígitos numéricos. Os campos de número do
+CREA e número da ART são opcionais para o tipo preposto.</p>
+<p>Uma empresa deve possuir ao menos um responsável técnico. Não é permitido
+informar mais de um responsável do mesmo tipo no cadastro da empresa.</p>
+<p>Engenheiros civis e engenheiros eletricistas devem possuir ao menos um anexo.
+Essa obrigatoriedade não se aplica ao preposto.</p>
+</section>
+<section id="sincronizacao-dos-responsaveis-tecnicos">
+<h1>Sincronização dos responsáveis técnicos<a class="headerlink" href="#sincronizacao-dos-responsaveis-tecnicos" title="Link para este cabeçalho"></a></h1>
+<p>Na atualização de uma empresa, os responsáveis técnicos são sincronizados a
+partir da lista enviada:</p>
+<ul class="simple">
+<li><p>um item com UUID atualiza o responsável correspondente;</p></li>
+<li><p>um item sem UUID cria um novo responsável;</p></li>
+<li><p>um responsável existente que não consta na lista é excluído logicamente.</p></li>
+</ul>
+<p>Todo UUID informado deve pertencer a um responsável técnico da própria
+empresa. Caso contrário, a atualização é rejeitada.</p>
+<p>A criação da empresa e de seus responsáveis, assim como a atualização do
+conjunto, ocorre em uma transação. Se alguma etapa falhar, as alterações no
+banco de dados são revertidas.</p>
+</section>
+<section id="anexos-dos-responsaveis-tecnicos">
+<h1>Anexos dos responsáveis técnicos<a class="headerlink" href="#anexos-dos-responsaveis-tecnicos" title="Link para este cabeçalho"></a></h1>
+<p>Os anexos pertencem a um responsável técnico e utilizam as validações comuns
+de arquivo fornecidas pelo domínio Core, incluindo extensão, tamanho e tipo
+MIME.</p>
+<p>Na sincronização dos anexos:</p>
+<ul class="simple">
+<li><p>um anexo informado por UUID é preservado;</p></li>
+<li><p>um arquivo novo, sem UUID, é validado e armazenado;</p></li>
+<li><p>um anexo existente que não consta na lista é excluído.</p></li>
+</ul>
+<p>Os metadados do anexo são mantidos no banco de dados, enquanto o conteúdo é
+armazenado no storage privado configurado. A resposta expõe o UUID, o nome
+original, a URL do arquivo e os dados de auditoria do anexo.</p>
+<p>A remoção física do arquivo do storage ocorre somente após a confirmação da
+transação no banco de dados.</p>
+</section>
+<section id="exclusao-logica">
+<h1>Exclusão lógica<a class="headerlink" href="#exclusao-logica" title="Link para este cabeçalho"></a></h1>
+<p>A exclusão de uma empresa não remove fisicamente seu registro. A empresa e
+seus responsáveis técnicos são marcados como excluídos e deixam de aparecer
+nas consultas realizadas pelos gerenciadores padrão.</p>
+<p>Antes da exclusão lógica de cada responsável, seus anexos são removidos. Toda
+a operação de exclusão da empresa é transacional para evitar um estado
+parcial em caso de falha.</p>
+</section>
+<section id="consulta-e-filtros">
+<h1>Consulta e filtros<a class="headerlink" href="#consulta-e-filtros" title="Link para este cabeçalho"></a></h1>
+<p>As operações da API exigem autenticação. A consulta de uma empresa utiliza o
+UUID como identificador público; um UUID inexistente retorna resposta de
+recurso não encontrado.</p>
+<p>A listagem permite os seguintes filtros:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">nome</span></code>: correspondência parcial, sem diferenciar maiúsculas e minúsculas;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">razao_social</span></code>: correspondência parcial, sem diferenciar maiúsculas e
+minúsculas;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cnpj</span></code>: correspondência parcial;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">status</span></code>: correspondência exata por valor booleano.</p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Rodapé">
+        <a href="index.html" class="btn btn-neutral float-left" title="Empresas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="codigo/index.html" class="btn btn-neutral float-right" title="Models" accesskey="n" rel="next">Próximo <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

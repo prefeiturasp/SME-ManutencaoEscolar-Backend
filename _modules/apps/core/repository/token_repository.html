@@ -1,0 +1,396 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>apps.core.repository.token_repository &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dominios/index.html">Documentação</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/core/index.html">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/index.html#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/core/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/core/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../dominios/lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../dominios/glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../dominios/glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Código do módulo</a></li>
+      <li class="breadcrumb-item active">apps.core.repository.token_repository</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código-fonte para apps.core.repository.token_repository</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Repositório para gerenciamento de tokens JWT e recuperação de senha.</span>
+
+<span class="sd">Este módulo centraliza a geração de tokens JWT utilizados na autenticação dos</span>
+<span class="sd">usuários e a geração e validação de tokens temporários para recuperação de</span>
+<span class="sd">senha.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.tokens</span><span class="w"> </span><span class="kn">import</span> <span class="n">PasswordResetTokenGenerator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ObjectDoesNotExist</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework_simplejwt.tokens</span><span class="w"> </span><span class="kn">import</span> <span class="n">RefreshToken</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TokenInvalidoError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apps.usuarios.models.usuario</span><span class="w"> </span><span class="kn">import</span> <span class="n">Usuario</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">config</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="TokenRepository">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_repository_token_repository.html#apps.core.repository.token_repository.TokenRepository">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TokenRepository</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Centraliza operações relacionadas aos tokens de usuários.</span>
+
+<span class="sd">    O repositório disponibiliza dois mecanismos distintos de token:</span>
+
+<span class="sd">        * tokens JWT ``access`` e ``refresh`` para autenticação;</span>
+<span class="sd">        * tokens de recuperação de senha gerados pelo mecanismo padrão do</span>
+<span class="sd">          Django.</span>
+
+<span class="sd">    Os tokens JWT são gerados utilizando :class:`RefreshToken` do</span>
+<span class="sd">    ``rest_framework_simplejwt`` e têm seus tempos de expiração definidos pelas</span>
+<span class="sd">    configurações ``ACCESS_TOKEN_LIFETIME`` e ``REFRESH_TOKEN_LIFETIME`` de</span>
+<span class="sd">    ``SIMPLE_JWT``.</span>
+
+<span class="sd">    Os tokens de recuperação de senha são gerados e validados por meio de</span>
+<span class="sd">    :class:`PasswordResetTokenGenerator`.</span>
+<span class="sd">    """</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_consulta_por_username</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Usuario</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Recupera um usuário pelo username.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            username (str): Nome de usuário utilizado para localizar</span>
+<span class="sd">                o usuário.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Usuario: Usuário encontrado.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ObjectDoesNotExist: Quando não existe usuário com o</span>
+<span class="sd">                username informado.</span>
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Usuario</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ObjectDoesNotExist</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ObjectDoesNotExist</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+<div class="viewcode-block" id="TokenRepository.gerar_tokens">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_repository_token_repository.html#apps.core.repository.token_repository.TokenRepository.gerar_tokens">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gerar_tokens</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">usuario_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Gera os tokens JWT de acesso e renovação para um usuário.</span>
+
+<span class="sd">        Cria um token ``refresh`` para o usuário informado e, a partir dele,</span>
+<span class="sd">        gera o respectivo token ``access``.</span>
+
+<span class="sd">        Além dos tokens, retorna os tempos de expiração configurados para cada</span>
+<span class="sd">        tipo de token em segundos.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            usuario_id (int):  Identificador do usuário para o qual os tokens</span>
+<span class="sd">                serão gerados.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict[str, str]:  Dicionário contendo:</span>
+<span class="sd">                - ``refresh``: Token JWT utilizado para renovação da</span>
+<span class="sd">                  autenticação.</span>
+<span class="sd">                - ``access``: Token JWT utilizado para autenticar requisições.</span>
+<span class="sd">                - ``access_expires_in``: Tempo de validade do token de acesso,</span>
+<span class="sd">                  em segundos.</span>
+<span class="sd">                - ``refresh_expires_in``: Tempo de validade do token de</span>
+<span class="sd">                  renovação, em segundos.</span>
+<span class="sd">        """</span>
+        <span class="n">usuario</span> <span class="o">=</span> <span class="n">Usuario</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">usuario_id</span><span class="p">)</span>
+
+        <span class="n">refresh</span> <span class="o">=</span> <span class="n">RefreshToken</span><span class="o">.</span><span class="n">for_user</span><span class="p">(</span><span class="n">usuario</span><span class="p">)</span>
+
+        <span class="n">access_expira_em</span><span class="p">:</span> <span class="n">timedelta</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
+            <span class="n">timedelta</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">SIMPLE_JWT</span><span class="p">[</span><span class="s2">"ACCESS_TOKEN_LIFETIME"</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">refresh_expira_em</span><span class="p">:</span> <span class="n">timedelta</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
+            <span class="n">timedelta</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">SIMPLE_JWT</span><span class="p">[</span><span class="s2">"REFRESH_TOKEN_LIFETIME"</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"refresh"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">refresh</span><span class="p">),</span>
+            <span class="s2">"access"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">refresh</span><span class="o">.</span><span class="n">access_token</span><span class="p">),</span>
+            <span class="s2">"access_expires_in"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">access_expira_em</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()),</span>
+            <span class="s2">"refresh_expires_in"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">refresh_expira_em</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="TokenRepository.gerar_token_recuperar_senha">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_repository_token_repository.html#apps.core.repository.token_repository.TokenRepository.gerar_token_recuperar_senha">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gerar_token_recuperar_senha</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Gera um token para recuperação de senha do usuário.</span>
+
+<span class="sd">        Busca o usuário pelo nome de usuário e gera um token de recuperação</span>
+<span class="sd">        de senha utilizando o ``PasswordResetTokenGenerator`` do Django.</span>
+
+<span class="sd">        O token gerado é vinculado ao estado atual do usuário e deve ser</span>
+<span class="sd">        posteriormente validado por :meth:`verificar_token_atualizar_senha`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            username (str):  Nome de usuário utilizado para localizar o</span>
+<span class="sd">                usuário que terá o token de recuperação gerado.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict[str, str]: Dicionário contendo o token de recuperação na chave</span>
+<span class="sd">                ``token_recuperacao``.</span>
+<span class="sd">        """</span>
+        <span class="n">usuario</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_consulta_por_username</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+
+        <span class="n">token_generator</span> <span class="o">=</span> <span class="n">PasswordResetTokenGenerator</span><span class="p">()</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">token_generator</span><span class="o">.</span><span class="n">make_token</span><span class="p">(</span><span class="n">usuario</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"token_recuperacao"</span><span class="p">:</span> <span class="n">token</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="TokenRepository.verificar_token_atualizar_senha">
+<a class="viewcode-back" href="../../../../dominios/core/codigo/apps_core_repository_token_repository.html#apps.core.repository.token_repository.TokenRepository.verificar_token_atualizar_senha">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verificar_token_atualizar_senha</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Valida um token de recuperação de senha..</span>
+
+<span class="sd">        Localiza o usuário pelo nome de usuário e verifica se o token de</span>
+<span class="sd">        recuperação ainda é válido e não expirou.</span>
+
+<span class="sd">        Apesar do nome do método, esta operação **não altera a senha do</span>
+<span class="sd">        usuário**. Ela apenas valida o token. A alteração efetiva da senha</span>
+<span class="sd">        deve ser realizada pela camada responsável por essa operação após a</span>
+<span class="sd">        validação bem-sucedida.</span>
+
+<span class="sd">        A validade do token é determinada pelo</span>
+<span class="sd">        :class:`PasswordResetTokenGenerator` do Django</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            username (str): Nome de usuário (RF ou CPF) do usuário.</span>
+<span class="sd">            token (str): Token de recuperação de senha enviado por e-mail.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TokenInvalidoError: Se o token for inválido ou expirado.</span>
+<span class="sd">        """</span>
+        <span class="n">usuario</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_consulta_por_username</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+        <span class="n">token_generator</span> <span class="o">=</span> <span class="n">PasswordResetTokenGenerator</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">token_generator</span><span class="o">.</span><span class="n">check_token</span><span class="p">(</span><span class="n">usuario</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">TokenInvalidoError</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">"Token inválido."</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="p">(</span>
+                    <span class="s2">"O token de recuperação de senha é inválido ou expirou."</span>
+                <span class="p">),</span>
+            <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

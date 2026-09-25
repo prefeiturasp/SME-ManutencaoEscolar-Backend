@@ -1,0 +1,467 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Core &mdash; Documentação SME Manutenção Escolar 1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=865f286f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=c0c8e3fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=71a39b36"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Buscar" href="../../search.html" />
+    <link rel="next" title="Identificação e auditoria" href="regras_negocio.html" />
+    <link rel="prev" title="Documentação" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SME Manutenção Escolar
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Conteúdo:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Documentação</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#visao-geral">Visão Geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sessao">Sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#identificacao">Identificação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#comunicacao-assincrona">Comunicação assíncrona</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#health-check">Health Check</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../empresa/index.html">Empresas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../empresa/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../empresa/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#cadastro-da-empresa">Cadastro da empresa</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#responsaveis-tecnicos">Responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#sincronizacao-dos-responsaveis-tecnicos">Sincronização dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#anexos-dos-responsaveis-tecnicos">Anexos dos responsáveis técnicos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/regras_negocio.html#consulta-e-filtros">Consulta e filtros</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../empresa/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../empresa/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../lote/index.html">Lotes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../lote/index.html#visao-geral">Visão geral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#responsabilidades">Responsabilidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#arquitetura-funcional">Arquitetura funcional</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#principais-fluxos">Principais fluxos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#entidades">Entidades</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#integracoes">Integrações</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#permissoes-e-acesso">Permissões e acesso</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#processamento-assincrono">Processamento assíncrono</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#auditoria">Auditoria</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/index.html#estados-e-transicoes">Estados e transições</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../lote/index.html#regras-de-negocio">Regras de Negócio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html">Cadastro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#vinculos-com-diretorias-regionais">Vínculos com Diretorias Regionais</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#consulta">Consulta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#atualizacao">Atualização</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#validade">Validade</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#auditoria-e-exclusao">Auditoria e exclusão</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/regras_negocio.html#integridade-referencial">Integridade referencial</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../lote/index.html#documentacao-do-codigo">Documentação do código</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html">Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#views">Views</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#services">Services</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lote/codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../glossario.html">Glossário</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../glossario.html#ue">UE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../glossario.html#dre">DRE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SME Manutenção Escolar</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Documentação</a></li>
+      <li class="breadcrumb-item active">Core</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/dominios/core/index.rst.txt" rel="nofollow"> Ver código-fonte da página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="core">
+<h1>Core<a class="headerlink" href="#core" title="Link para este cabeçalho"></a></h1>
+<section id="visao-geral">
+<h2>Visão Geral<a class="headerlink" href="#visao-geral" title="Link para este cabeçalho"></a></h2>
+<p>O domínio <strong>Core</strong> é responsável por fornecer funcionalidades utilizadas pelos demais domínios da aplicação.</p>
+<p>Seu objetivo é centralizar serviços relacionados à autenticação e autorização,
+integração com sistemas externos, gerenciamento de arquivos, auditoria,
+comunicação assíncrona e funcionalidades comuns aos demais módulos.</p>
+<p>O Core não representa um domínio de negócio específico. Ele fornece
+infraestrutura e serviços compartilhados que garantem comportamento
+consistente entre os diferentes módulos da aplicação.</p>
+<section id="responsabilidades">
+<h3>Responsabilidades<a class="headerlink" href="#responsabilidades" title="Link para este cabeçalho"></a></h3>
+<p>As principais responsabilidades do Core são:</p>
+<ul class="simple">
+<li><p>autenticação de usuários;</p></li>
+<li><p>gerenciamento de tokens JWT;</p></li>
+<li><p>controle de sessão e logout;</p></li>
+<li><p>recuperação e alteração de senha;</p></li>
+<li><p>integração com o EOL/CoreSSO;</p></li>
+<li><p>sincronização dos dados do usuário;</p></li>
+<li><p>armazenamento de arquivos em storage privado;</p></li>
+<li><p>envio assíncrono de e-mails;</p></li>
+<li><p>auditoria dos registros;</p></li>
+<li><p>exclusão lógica e restauração de registros;</p></li>
+<li><p>disponibilização de funcionalidades e componentes reutilizáveis.</p></li>
+</ul>
+</section>
+<section id="arquitetura-funcional">
+<h3>Arquitetura funcional<a class="headerlink" href="#arquitetura-funcional" title="Link para este cabeçalho"></a></h3>
+<p>A estrutura funcional do Core pode ser representada da seguinte forma:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Core</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Autenticação</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Login</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">JWT</span> <span class="n">Access</span> <span class="n">Token</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">JWT</span> <span class="n">Refresh</span> <span class="n">Token</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Renovação</span> <span class="n">de</span> <span class="n">sessão</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Logout</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Recuperação</span> <span class="n">de</span> <span class="n">senha</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Alteração</span> <span class="n">de</span> <span class="n">senha</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Integrações</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">EOL</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">CoreSSO</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Consulta</span> <span class="n">de</span> <span class="n">usuário</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Consulta</span> <span class="n">de</span> <span class="n">cargo</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Alteração</span> <span class="n">de</span> <span class="n">senha</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Arquivos</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Upload</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Validação</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Metadados</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Storage</span> <span class="n">privado</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Comunicação</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">E</span><span class="o">-</span><span class="n">mail</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Celery</span>
+<span class="o">|</span>   <span class="o">+--</span> <span class="n">Retry</span> <span class="n">de</span> <span class="n">tarefas</span>
+<span class="o">|</span>
+<span class="o">+--</span> <span class="n">Persistência</span>
+    <span class="o">+--</span> <span class="n">UUID</span>
+    <span class="o">+--</span> <span class="n">Auditoria</span>
+    <span class="o">+--</span> <span class="n">Soft</span> <span class="n">Delete</span>
+    <span class="o">+--</span> <span class="n">Restauração</span>
+</pre></div>
+</div>
+</section>
+<section id="autenticacao">
+<h3>Autenticação<a class="headerlink" href="#autenticacao" title="Link para este cabeçalho"></a></h3>
+<p>O Core é responsável pelo fluxo de autenticação da aplicação.</p>
+<p>O usuário pode realizar login utilizando seu Registro Funcional (RF) ou CPF.
+As credenciais são validadas através da integração com o EOL/CoreSSO.</p>
+<p>Após uma autenticação bem-sucedida, o Core obtém os dados complementares do
+usuário, sincroniza as informações necessárias localmente e disponibiliza os
+tokens utilizados pela aplicação.</p>
+<p>O fluxo geral é:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Cliente</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Login</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Core</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">EOL</span><span class="o">/</span><span class="n">CoreSSO</span>
+   <span class="o">|</span>
+   <span class="o">+--</span> <span class="n">Autenticação</span>
+   <span class="o">+--</span> <span class="n">Consulta</span> <span class="n">do</span> <span class="n">usuário</span>
+   <span class="o">+--</span> <span class="n">Consulta</span> <span class="n">do</span> <span class="n">cargo</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Sincronização</span> <span class="n">local</span>
+   <span class="o">|</span>
+   <span class="n">v</span>
+<span class="n">Access</span> <span class="n">Token</span> <span class="o">+</span> <span class="n">Refresh</span> <span class="n">Token</span>
+</pre></div>
+</div>
+</section>
+<section id="sessao">
+<h3>Sessão<a class="headerlink" href="#sessao" title="Link para este cabeçalho"></a></h3>
+<p>A autenticação utiliza JWT para representar a sessão do usuário.</p>
+<p>O <code class="docutils literal notranslate"><span class="pre">access</span> <span class="pre">token</span></code> é utilizado para acesso aos recursos protegidos da API.</p>
+<p>O <code class="docutils literal notranslate"><span class="pre">refresh</span> <span class="pre">token</span></code> permite solicitar uma nova sessão sem que o usuário
+precise informar novamente suas credenciais.</p>
+<p>O Core também controla a revogação dos refresh tokens, impedindo que tokens
+revogados sejam utilizados posteriormente.</p>
+</section>
+<section id="recuperacao-de-senha">
+<h3>Recuperação de senha<a class="headerlink" href="#recuperacao-de-senha" title="Link para este cabeçalho"></a></h3>
+<p>O Core disponibiliza o fluxo de recuperação de senha integrado ao
+CoreSSO.</p>
+<p>O usuário informa seu RF ou CPF e, quando os dados necessários estão
+disponíveis, o sistema gera um token de recuperação e envia um e-mail de
+forma assíncrona.</p>
+<p>O link recebido permite que o usuário informe uma nova senha.</p>
+<p>A alteração efetiva da senha é realizada através da integração com o
+CoreSSO.</p>
+</section>
+<section id="arquivos-e-anexos">
+<h3>Arquivos e anexos<a class="headerlink" href="#arquivos-e-anexos" title="Link para este cabeçalho"></a></h3>
+<p>O Core fornece uma estrutura comum para gerenciamento de arquivos anexados
+aos registros da aplicação.</p>
+<p>Os arquivos recebidos são validados antes do armazenamento. São verificadas
+características como:</p>
+<ul class="simple">
+<li><p>existência do arquivo;</p></li>
+<li><p>nome;</p></li>
+<li><p>tamanho;</p></li>
+<li><p>extensão;</p></li>
+<li><p>tipo MIME.</p></li>
+</ul>
+<p>Os metadados do arquivo são persistidos no banco de dados, enquanto o
+conteúdo é armazenado em storage privado.</p>
+<p>Atualmente, o storage utilizado é o MinIO.</p>
+<p>O nome original do arquivo é preservado como informação de negócio, mas o
+nome físico utilizado no storage é gerado pelo sistema através de UUID.</p>
+</section>
+<section id="auditoria">
+<h3>Auditoria<a class="headerlink" href="#auditoria" title="Link para este cabeçalho"></a></h3>
+<p>Os modelos que utilizam a estrutura base do Core possuem informações de
+auditoria.</p>
+<p>São registrados, quando aplicável:</p>
+<ul class="simple">
+<li><p>usuário responsável pela criação;</p></li>
+<li><p>data e hora da criação;</p></li>
+<li><p>usuário responsável pela última alteração;</p></li>
+<li><p>data e hora da última alteração;</p></li>
+<li><p>usuário responsável pela exclusão;</p></li>
+<li><p>data e hora da exclusão.</p></li>
+</ul>
+</section>
+<section id="identificacao">
+<h3>Identificação<a class="headerlink" href="#identificacao" title="Link para este cabeçalho"></a></h3>
+<p>Os registros possuem um UUID gerado automaticamente pelo sistema.</p>
+<p>O UUID é utilizado como identificador dos registros expostos pela aplicação
+e não deve ser alterado manualmente.</p>
+</section>
+<section id="exclusao-logica">
+<h3>Exclusão lógica<a class="headerlink" href="#exclusao-logica" title="Link para este cabeçalho"></a></h3>
+<p>O Core utiliza exclusão lógica para preservar os registros no banco de
+dados.</p>
+<p>Ao excluir um registro, o sistema registra a data e o usuário responsável
+pela operação, sem remover fisicamente o registro.</p>
+<p>As consultas padrão retornam somente registros que não foram excluídos.</p>
+<p>Quando necessário, registros excluídos podem ser consultados através do
+gerenciador apropriado e restaurados.</p>
+</section>
+<section id="comunicacao-assincrona">
+<h3>Comunicação assíncrona<a class="headerlink" href="#comunicacao-assincrona" title="Link para este cabeçalho"></a></h3>
+<p>Operações que não precisam ser executadas dentro do ciclo da requisição HTTP
+podem ser processadas de forma assíncrona.</p>
+<p>O envio de e-mails utiliza Celery, permitindo que a aplicação continue o
+processamento da requisição sem aguardar a conclusão da comunicação com o
+servidor de e-mail.</p>
+<p>As tarefas assíncronas possuem mecanismo de nova tentativa para lidar com
+falhas transitórias.</p>
+</section>
+<section id="health-check">
+<h3>Health Check<a class="headerlink" href="#health-check" title="Link para este cabeçalho"></a></h3>
+<p>O Core disponibiliza um endpoint público de health check.</p>
+<p>O endpoint permite que mecanismos de infraestrutura verifiquem se a
+aplicação está respondendo corretamente.</p>
+</section>
+</section>
+<section id="regras-de-negocio">
+<h2>Regras de Negócio<a class="headerlink" href="#regras-de-negocio" title="Link para este cabeçalho"></a></h2>
+<p>Esta seção apresenta as regras de negócio que orientam o
+funcionamento do domínio <strong>Core</strong>.</p>
+<p>As regras descrevem comportamentos, restrições, validações
+e condições que precisam ser respeitados pelas funcionalidades
+do domínio.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html">Identificação e auditoria</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#exclusao-logica">Exclusão lógica</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#autenticacao">Autenticação</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#renovacao-de-sessao">Renovação de sessão</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#logout">Logout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#recuperacao-de-senha">Recuperação de senha</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#arquivos-e-anexos">Arquivos e anexos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#e-mails">E-mails</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#integracao-com-sistemas-externos">Integração com sistemas externos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#health-check">Health Check</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#consistencia-documental">Consistência documental</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#observacoes">Observações</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#identificador-unico">Identificador Único</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#auditoria-de-criacao">Auditoria de Criação</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#auditoria-de-atualizacao">Auditoria de Atualização</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regras_negocio.html#exclusao-e-restauracao">Exclusão e Restauração</a></li>
+</ul>
+</div>
+</section>
+<section id="documentacao-do-codigo">
+<h2>Documentação do código<a class="headerlink" href="#documentacao-do-codigo" title="Link para este cabeçalho"></a></h2>
+<p>Esta seção apresenta a documentação técnica dos componentes que
+implementam o domínio <strong>Core</strong>.</p>
+<p>A documentação é gerada automaticamente a partir dos módulos
+Python do app e tem como objetivo facilitar a compreensão da
+implementação e de suas responsabilidades técnicas.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#serializers">Serializers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#views">Views</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#services">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#repositories">Repositories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#commands">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#tasks">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codigo/index.html#outros-modulos">Outros Módulos</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Rodapé">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Documentação" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="regras_negocio.html" class="btn btn-neutral float-right" title="Identificação e auditoria" accesskey="n" rel="next">Próximo <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2026, Prefeitura de São Paulo.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
