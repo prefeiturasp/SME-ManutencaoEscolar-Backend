@@ -2,12 +2,12 @@
 
 from django.db import models
 
-from apps.core.models.mixins import UUIDMixin
+from apps.core.models.mixins import BaseModel
 from apps.escola.models import ResponsavelUnidade
 from apps.lote.models import Lote
 
 
-class Unidadeeducacional(UUIDMixin):
+class Unidadeeducacional(BaseModel):
     """Representa uma unidade escolar cadastrada no sistema EOL."""
 
     codigo_eol = models.CharField(
