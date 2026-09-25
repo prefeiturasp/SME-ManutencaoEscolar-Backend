@@ -164,6 +164,7 @@ def unidade_educacional_emef(
     diretoria_regional_centro,
     tipo_escola_emef,
     subprefeitura_se,
+    usuario_sincronizacao,
 ):
     """Cria uma unidade educacional do tipo EMEF para testes."""
     return Unidadeeducacional.objects.create(
@@ -173,6 +174,7 @@ def unidade_educacional_emef(
         tipo_escola=tipo_escola_emef,
         subprefeitura=subprefeitura_se,
         status=True,
+        atualizado_por=usuario_sincronizacao,
     )
 
 
@@ -340,7 +342,7 @@ def resposta_dados_unidade():
 
 
 @pytest.fixture
-def dados_unidade_emef(unidade_educacional_emef):
+def dados_unidade_emef(unidade_educacional_emef, usuario_sincronizacao):
     """Fixture de DadosUnidadeEducacional."""
     return DadosUnidadeEducacional.objects.create(
         unidade_educacional=unidade_educacional_emef,
@@ -352,4 +354,5 @@ def dados_unidade_emef(unidade_educacional_emef):
         cep="08032450",
         municipio="SAO PAULO",
         uf="SP",
+        atualizado_por=usuario_sincronizacao,
     )
