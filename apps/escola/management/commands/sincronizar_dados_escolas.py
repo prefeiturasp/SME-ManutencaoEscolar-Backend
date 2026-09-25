@@ -33,6 +33,7 @@ from apps.core.exceptions import EmailInvalidoError, TelefoneInvalidoError
 from apps.core.validacoes import validar_email, validar_telefone
 from apps.escola.constants import ENDPOINT_DADOS_ESCOLA
 from apps.escola.models import DadosUnidadeEducacional, Unidadeeducacional
+from apps.usuarios.models.usuario import Usuario
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
 
 logger = logging.getLogger(__name__)
@@ -87,7 +88,6 @@ class Command(BaseCommand):
         }
 
         unidades = Unidadeeducacional.objects.all()
-
         if not unidades.exists():
             raise CommandError("Nenhuma unidade educacional cadastrada.")
 
@@ -132,38 +132,27 @@ class Command(BaseCommand):
             if numero % 500 == 0 or numero == total:
                 logger.info(f"{numero} de {total} unidades processadas.")
 
-        quantidade_criados = 0
-        quantidade_atualizados = 0
+        quantidades = {"criados": 0, "atualizados": 0, "ignorados": 0}
+        try:
+            usuario = Usuario.objects.get(username="sincronizacao_eol")
+        except Usuario.DoesNotExist as exc:
+            raise CommandError(
+                "Usuário de sincronização de dados não encontrado."
+            ) from exc
 
         with transaction.atomic():
             for registro in registros:
-                _, foi_criado = (
-                    DadosUnidadeEducacional.objects.update_or_create(
-                        unidade_educacional=registro["unidade_educacional"],
-                        defaults={
-                            "email": registro["email"],
-                            "telefone": registro["telefone"],
-                            "logradouro": registro["logradouro"],
-                            "numero": registro["numero"],
-                            "bairro": registro["bairro"],
-                            "cep": registro["cep"],
-                            "municipio": registro["municipio"],
-                            "uf": registro["uf"],
-                        },
-                    )
-                )
-
-                if foi_criado:
-                    quantidade_criados += 1
-                else:
-                    quantidade_atualizados += 1
+                resultado = self._salvar_dados_unidade(registro, usuario)
+                quantidades[resultado["status"]] += 1
 
         tempo_execucao = (time.perf_counter() - inicio) / 60
 
         logger.info(
-            f"Importação concluída em {tempo_execucao:.2f} minutos: "
-            f"{quantidade_criados} criados, {quantidade_atualizados} "
-            f"atualizados, {quantidade_erros} erros."
+            f"Importação concluída em {tempo_execucao:.2f} minutos:\n"
+            f"{quantidades['criados']} criados\n"
+            f"{quantidades['atualizados']} atualizados\n"
+            f"{quantidades['ignorados']} não atualizados\n"
+            f"{quantidade_erros} com erros."
         )
 
     @staticmethod
@@ -450,3 +439,50 @@ class Command(BaseCommand):
             return ""
 
         return email
+
+    @staticmethod
+    def _salvar_dados_unidade(
+        registro: dict, usuario: Usuario
+    ) -> dict[str, Any]:
+        dados_unidade, foi_criado = (
+            DadosUnidadeEducacional.objects.get_or_create(
+                unidade_educacional=registro["unidade_educacional"],
+                defaults={
+                    "email": registro["email"],
+                    "telefone": registro["telefone"],
+                    "logradouro": registro["logradouro"],
+                    "numero": registro["numero"],
+                    "bairro": registro["bairro"],
+                    "cep": registro["cep"],
+                    "municipio": registro["municipio"],
+                    "uf": registro["uf"],
+                },
+            )
+        )
+        if foi_criado:
+            return {"status": "criados"}
+
+        if not (
+            dados_unidade.atualizado_por is None
+            or dados_unidade.atualizado_por == usuario
+        ):
+            usuario_atualizacao = dados_unidade.atualizado_por
+            logger.info(
+                f"Unidade {dados_unidade.unidade_educacional.nome} não "
+                "atualizada: última alteração realizada pelo usuário "
+                f"{usuario_atualizacao.username}."
+            )
+            return {"status": "ignorados"}
+
+        dados_unidade.email = registro["email"]
+        dados_unidade.telefone = registro["telefone"]
+        dados_unidade.logradouro = registro["logradouro"]
+        dados_unidade.numero = registro["numero"]
+        dados_unidade.bairro = registro["bairro"]
+        dados_unidade.cep = registro["cep"]
+        dados_unidade.municipio = registro["municipio"]
+        dados_unidade.uf = registro["uf"]
+        dados_unidade.atualizado_por = usuario
+        dados_unidade.save()
+
+        return {"status": "atualizados"}
