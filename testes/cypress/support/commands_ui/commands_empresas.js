@@ -822,14 +822,8 @@ Cypress.Commands.add('clicar_editar_empresa', () => {
 })
 
 Cypress.Commands.add('editar_dados_empresa', () => {
-  const nomeEmpresa = faker.company.name() 
   const nomeResponsavel = faker.person.fullName()
   
-  cy.get(empresas_localizadores.campo_razao_social())
-    .should('be.visible')
-    .clear()
-    .type(nomeEmpresa)
-
   cy.get(empresas_localizadores.btn_salvar_cadastro())
     .should('be.visible')
     .click()
@@ -849,27 +843,21 @@ Cypress.Commands.add('validar_edicao_empresa', () => {
   cy.contains('Alteração')  
 })
 
-Cypress.Commands.add('dados_obrigatorios_editar_dados_empresa', () => {
-  const nomeEmpresa = faker.company.name() 
-  
-  cy.get(empresas_localizadores.campo_razao_social())
-    .should('be.visible')
-    .type(nomeEmpresa)
-
+Cypress.Commands.add('dados_obrigatorios_editar_dados_empresa', () => { 
   cy.get(empresas_localizadores.btn_salvar_cadastro())
     .should('be.visible')
     .click()
-	
+
   cy.get(empresas_localizadores.campo_nome_responsavel_tecnico())
     .should('be.visible')
-    .clear()	
+    .clear()
 
   cy.get(empresas_localizadores.campo_telefone_responsavel_tecnico())
-    .should('be.visible')   
+    .should('be.visible')
     .clear()
-  
+
   cy.get(empresas_localizadores.campo_email_responsavel_tecnico())
-    .should('be.visible')  
+    .should('be.visible')
     .clear()
 })
 
