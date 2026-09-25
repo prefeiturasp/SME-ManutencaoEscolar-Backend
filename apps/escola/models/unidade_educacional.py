@@ -118,7 +118,7 @@ class Unidadeeducacional(BaseModel):
         return lote_diretoria.lote if lote_diretoria else None
 
 
-class DadosUnidadeEducacional(models.Model):
+class DadosUnidadeEducacional(BaseModel):
     """Armazena dados de contato e endereço de uma unidade educacional."""
 
     unidade_educacional = models.OneToOneField(

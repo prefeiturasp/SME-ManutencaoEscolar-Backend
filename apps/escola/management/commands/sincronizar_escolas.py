@@ -97,7 +97,7 @@ class Command(BaseCommand):
         )
         logger.info("Iniciando análise das informações. Aguarde...")
         unidades_educacionais = self._coletar_registros(
-            base_url, headers, payload[:500]
+            base_url, headers, payload
         )
         total_escolas = len(unidades_educacionais)
         logger.info(
