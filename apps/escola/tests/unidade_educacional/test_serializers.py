@@ -7,6 +7,7 @@ from apps.escola.models.responsavel_unidade import (
     ResponsavelUnidade,
 )
 from apps.escola.serializers.unidade_educacional_serializers import (
+    UnidadeEducacionalAtualizarSerializer,
     UnidadeEducacionalListSerializer,
     UnidadeEducacionalSerializer,
 )
@@ -124,19 +125,13 @@ class TestUnidadeEducacionalSerializer:
         )
         responsavel = serializer.data["responsaveis"][0]
 
-        assert responsavel["responsavel"]["registro_funcional"] == (
+        assert responsavel["registro_funcional"] == (
             responsavel_unidade.registro_funcional
         )
-        assert responsavel["responsavel"]["nome"] == responsavel_unidade.nome
-        assert responsavel["responsavel"]["email"] == responsavel_unidade.email
-        assert (
-            responsavel["responsavel"]["telefone"]
-            == responsavel_unidade.telefone
-        )
-        assert (
-            responsavel["responsavel"]["celular"]
-            == responsavel_unidade.celular
-        )
+        assert responsavel["nome"] == responsavel_unidade.nome
+        assert responsavel["email"] == responsavel_unidade.email
+        assert responsavel["telefone"] == responsavel_unidade.telefone
+        assert responsavel["celular"] == responsavel_unidade.celular
 
         assert responsavel["cargo"]["codigo"] == obter_cargo_diretor.codigo
         assert responsavel["cargo"]["nome"] == obter_cargo_diretor.nome
@@ -175,7 +170,7 @@ class TestUnidadeEducacionalSerializer:
 
         assert len(responsaveis) == 1
         assert (
-            responsaveis[0]["responsavel"]["registro_funcional"]
+            responsaveis[0]["registro_funcional"]
             == responsavel_unidade.registro_funcional
         )
 
@@ -211,7 +206,7 @@ class TestUnidadeEducacionalSerializer:
         assert len(responsaveis) == 2
 
         registros_funcionais = {
-            item["responsavel"]["registro_funcional"] for item in responsaveis
+            item["registro_funcional"] for item in responsaveis
         }
 
         assert registros_funcionais == {
@@ -283,3 +278,80 @@ class TestUnidadeEducacionalListSerializer:
         )
 
         assert "dados" not in serializer.data
+
+
+class TestUnidadeEducacionalAtualizarSerializer:
+    """Testa o serializer de atualização da unidade educacional."""
+
+    def dados_validos(self):
+        """Retorna dados válidos para atualização."""
+        return {
+            "email": "unidade@email.com",
+            "telefone": "1133334444",
+            "ativo": True,
+            "responsaveis": [
+                {
+                    "registro_funcional": "1234567",
+                    "nome": "João da Silva",
+                    "cargo": "DIRETOR",
+                    "email": "joao@email.com",
+                    "telefone": "",
+                    "celular": "",
+                },
+            ],
+        }
+
+    def test_deve_validar_dados_validos(self):
+        """Deve aceitar dados válidos."""
+        serializer = UnidadeEducacionalAtualizarSerializer(
+            data=self.dados_validos(),
+        )
+
+        assert serializer.is_valid(), serializer.errors
+
+    def test_deve_rejeitar_rf_com_letras(self):
+        """Deve rejeitar RF contendo caracteres não numéricos."""
+        dados = self.dados_validos()
+        dados["responsaveis"][0]["registro_funcional"] = "12345AB"
+
+        serializer = UnidadeEducacionalAtualizarSerializer(
+            data=dados,
+        )
+
+        assert not serializer.is_valid()
+        assert "registro_funcional" in serializer.errors["responsaveis"][0]
+
+    def test_deve_rejeitar_rf_com_quantidade_invalida_de_digitos(self):
+        """Deve rejeitar RF que não possua 7 ou 11 dígitos."""
+        dados = self.dados_validos()
+        dados["responsaveis"][0]["registro_funcional"] = "123456"
+
+        serializer = UnidadeEducacionalAtualizarSerializer(
+            data=dados,
+        )
+
+        assert not serializer.is_valid()
+        assert "registro_funcional" in serializer.errors["responsaveis"][0]
+
+    def test_deve_aceitar_cpf_com_11_digitos(self):
+        """Deve aceitar CPF com 11 dígitos."""
+        dados = self.dados_validos()
+        dados["responsaveis"][0]["registro_funcional"] = "12345678901"
+
+        serializer = UnidadeEducacionalAtualizarSerializer(
+            data=dados,
+        )
+
+        assert serializer.is_valid(), serializer.errors
+
+    def test_deve_rejeitar_lista_de_responsaveis_vazia(self):
+        """Deve exigir pelo menos um responsável."""
+        dados = self.dados_validos()
+        dados["responsaveis"] = []
+
+        serializer = UnidadeEducacionalAtualizarSerializer(
+            data=dados,
+        )
+
+        assert not serializer.is_valid()
+        assert "responsaveis" in serializer.errors

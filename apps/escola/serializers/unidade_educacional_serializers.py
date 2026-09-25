@@ -108,12 +108,57 @@ class CargoResponsavelUnidadeSerializer(serializers.ModelSerializer):
 class ResponsavelAtualUnidadeSerializer(serializers.ModelSerializer):
     """Serializa um vínculo atual de responsável com a unidade."""
 
-    responsavel = ResponsavelUnidadeSerializer(read_only=True)
+    uuid = serializers.UUIDField(
+        source="responsavel.uuid",
+        read_only=True,
+    )
+    registro_funcional = serializers.CharField(
+        source="responsavel.registro_funcional",
+        read_only=True,
+    )
+    nome = serializers.CharField(
+        source="responsavel.nome",
+        read_only=True,
+    )
+    email = serializers.EmailField(
+        source="responsavel.email",
+        read_only=True,
+    )
+    telefone = serializers.CharField(
+        source="responsavel.telefone",
+        read_only=True,
+    )
+    celular = serializers.CharField(
+        source="responsavel.celular",
+        read_only=True,
+    )
     cargo = CargoResponsavelUnidadeSerializer(read_only=True)
+
+    criado_pelo_sincronizador = serializers.SerializerMethodField()
 
     class Meta:
         model = HistoricoResponsavel
-        fields = ("responsavel", "cargo", "ativo")
+        fields = (
+            "uuid",
+            "registro_funcional",
+            "nome",
+            "email",
+            "telefone",
+            "celular",
+            "cargo",
+            "ativo",
+            "criado_pelo_sincronizador",
+        )
+
+    def get_criado_pelo_sincronizador(
+        self,
+        obj: HistoricoResponsavel,
+    ) -> bool:
+        """Indica se o responsável foi criado pelo usuário sincronizador."""
+        return (
+            obj.responsavel.criado_por is not None
+            and obj.responsavel.criado_por.username == "sincronizacao_eol"
+        )
 
 
 class UnidadeEducacionalSerializer(serializers.ModelSerializer):
@@ -176,3 +221,57 @@ class UnidadeEducacionalListSerializer(
             "lote",
             "status",
         )
+
+
+class ResponsavelUnidadeAtualizacaoSerializer(serializers.Serializer):
+    """Valida os dados de um responsável na atualização da unidade."""
+
+    uuid = serializers.UUIDField(
+        required=False,
+    )
+    registro_funcional = serializers.CharField(
+        max_length=11,
+    )
+    nome = serializers.CharField(
+        max_length=255,
+    )
+    cargo = serializers.CharField()
+    email = serializers.EmailField()
+    telefone = serializers.CharField(
+        allow_blank=True,
+        required=False,
+    )
+    celular = serializers.CharField(
+        allow_blank=True,
+        required=False,
+    )
+
+    def validate_registro_funcional(
+        self,
+        value: str,
+    ) -> str:
+        """Valida o formato do registro funcional ou CPF."""
+        if not value.isdigit():
+            raise serializers.ValidationError(
+                "RF ou CPF deve conter apenas números.",
+            )
+
+        if len(value) not in (7, 11):
+            raise serializers.ValidationError(
+                "RF deve conter 7 dígitos ou CPF deve conter 11 dígitos.",
+            )
+
+        return value
+
+
+class UnidadeEducacionalAtualizarSerializer(serializers.Serializer):
+    """Valida os dados para atualização da unidade educacional."""
+
+    email = serializers.EmailField()
+    telefone = serializers.CharField()
+    ativo = serializers.BooleanField()
+
+    responsaveis = ResponsavelUnidadeAtualizacaoSerializer(
+        many=True,
+        allow_empty=False,
+    )

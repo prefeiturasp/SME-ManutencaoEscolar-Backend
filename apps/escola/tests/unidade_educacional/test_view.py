@@ -250,23 +250,6 @@ class TestUnidadeEducacionalViewSet:
 
         assert resposta.status_code == (status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_nao_deve_permitir_atualizacao(
-        self,
-        api_cliente,
-        unidade_educacional_emef,
-    ):
-        """Não deve permitir atualização de unidades educacionais."""
-        resposta = api_cliente.put(
-            f"{self.url}{unidade_educacional_emef.uuid}/",
-            data={
-                "codigo_eol": "999999",
-                "nome": "Unidade Alterada",
-            },
-            format="json",
-        )
-
-        assert resposta.status_code == (status.HTTP_405_METHOD_NOT_ALLOWED)
-
     def test_nao_deve_permitir_atualizacao_parcial(
         self,
         api_cliente,
@@ -296,3 +279,317 @@ class TestUnidadeEducacionalViewSet:
         assert Unidadeeducacional.objects.filter(
             uuid=unidade_educacional_emef.uuid,
         ).exists()
+
+    def test_deve_atualizar_unidade_educacional(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        dados_unidade_emef,
+        historico_responsavel,
+        usuario_sincronizacao,
+    ):
+        """Deve atualizar os dados da unidade educacional."""
+        dados = {
+            "email": "atualizado@email.com",
+            "telefone": "1133334444",
+            "ativo": False,
+            "responsaveis": [
+                {
+                    "uuid": str(historico_responsavel.responsavel.uuid),
+                    "registro_funcional": (
+                        historico_responsavel.responsavel.registro_funcional
+                    ),
+                    "nome": "Diretor Atualizado",
+                    "cargo": historico_responsavel.cargo.codigo,
+                    "email": "diretor@atualizado.com",
+                    "telefone": "",
+                    "celular": "",
+                },
+            ],
+        }
+
+        api_cliente.force_authenticate(
+            user=usuario_sincronizacao,
+        )
+
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_200_OK, resposta.data
+
+        unidade_educacional_emef.refresh_from_db()
+        dados_unidade_emef.refresh_from_db()
+        historico_responsavel.responsavel.refresh_from_db()
+
+        assert unidade_educacional_emef.status is False
+        assert dados_unidade_emef.email == "atualizado@email.com"
+        assert dados_unidade_emef.telefone == "1133334444"
+
+        assert historico_responsavel.responsavel.nome == "Diretor Atualizado"
+        assert (
+            historico_responsavel.responsavel.email == "diretor@atualizado.com"
+        )
+
+    def test_nao_deve_atualizar_com_email_invalido(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        historico_responsavel,
+        usuario_sincronizacao,
+    ):
+        """Deve retornar 400 quando o e-mail da unidade for inválido."""
+        dados = {
+            "email": "email-invalido",
+            "telefone": "1133334444",
+            "ativo": True,
+            "responsaveis": [
+                {
+                    "uuid": str(historico_responsavel.responsavel.uuid),
+                    "registro_funcional": (
+                        historico_responsavel.responsavel.registro_funcional
+                    ),
+                    "nome": historico_responsavel.responsavel.nome,
+                    "cargo": historico_responsavel.cargo.codigo,
+                    "email": historico_responsavel.responsavel.email,
+                    "telefone": "",
+                    "celular": "",
+                },
+            ],
+        }
+
+        api_cliente.force_authenticate(
+            user=usuario_sincronizacao,
+        )
+
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+        assert "email" in resposta.data
+
+    def test_nao_deve_atualizar_com_rf_invalido(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        historico_responsavel,
+        usuario_sincronizacao,
+    ):
+        """Deve retornar 400 quando o RF possuir formato inválido."""
+        dados = {
+            "email": "atualizado@email.com",
+            "telefone": "1133334444",
+            "ativo": True,
+            "responsaveis": [
+                {
+                    "uuid": str(historico_responsavel.responsavel.uuid),
+                    "registro_funcional": "ABC123",
+                    "nome": "Diretor Atualizado",
+                    "cargo": historico_responsavel.cargo.codigo,
+                    "email": "diretor@email.com",
+                    "telefone": "",
+                    "celular": "",
+                },
+            ],
+        }
+
+        api_cliente.force_authenticate(
+            user=usuario_sincronizacao,
+        )
+
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+        assert "responsaveis" in resposta.data
+
+    def test_nao_deve_atualizar_sem_responsaveis(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        usuario_sincronizacao,
+    ):
+        """Deve retornar 400 quando responsáveis não forem informados."""
+        dados = {
+            "email": "atualizado@email.com",
+            "telefone": "1133334444",
+            "ativo": True,
+        }
+
+        api_cliente.force_authenticate(
+            user=usuario_sincronizacao,
+        )
+
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+        assert "responsaveis" in resposta.data
+
+    def test_nao_deve_atualizar_com_lista_de_responsaveis_vazia(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        usuario_sincronizacao,
+    ):
+        """Deve retornar 400 quando a lista de responsáveis estiver vazia."""
+        dados = {
+            "email": "atualizado@email.com",
+            "telefone": "1133334444",
+            "ativo": True,
+            "responsaveis": [],
+        }
+
+        api_cliente.force_authenticate(
+            user=usuario_sincronizacao,
+        )
+
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+        assert "responsaveis" in resposta.data
+
+    def test_nao_deve_atualizar_com_rf_ja_existente_no_banco(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        responsavel_unidade,
+        usuario_sincronizacao,
+    ):
+        """Deve retornar 400 quando o RF já estiver cadastrado."""
+        dados = {
+            "email": "atualizado@email.com",
+            "telefone": "1133334444",
+            "ativo": True,
+            "responsaveis": [
+                {
+                    "registro_funcional": (
+                        responsavel_unidade.registro_funcional
+                    ),
+                    "nome": "Novo Responsável",
+                    "cargo": "DIRETOR",
+                    "email": "novo@email.com",
+                    "telefone": "",
+                    "celular": "",
+                },
+            ],
+        }
+
+        api_cliente.force_authenticate(
+            user=usuario_sincronizacao,
+        )
+
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+        assert resposta.data["title"] == "Não é possível adicionar o contato"
+        assert (
+            responsavel_unidade.registro_funcional in resposta.data["message"]
+        )
+
+    def test_nao_deve_atualizar_com_responsavel_sem_vinculo(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        responsavel_unidade,
+        cargo_perfil_diretor,
+        usuario_sincronizacao,
+    ):
+        """Deve retornar 400 quando responsável não estiver vinculado."""
+        dados = {
+            "email": "atualizado@email.com",
+            "telefone": "1133334444",
+            "ativo": True,
+            "responsaveis": [
+                {
+                    "uuid": str(responsavel_unidade.uuid),
+                    "registro_funcional": (
+                        responsavel_unidade.registro_funcional
+                    ),
+                    "nome": responsavel_unidade.nome,
+                    "cargo": cargo_perfil_diretor.codigo,
+                    "email": responsavel_unidade.email,
+                    "telefone": "",
+                    "celular": "",
+                },
+            ],
+        }
+
+        api_cliente.force_authenticate(
+            user=usuario_sincronizacao,
+        )
+
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+        assert resposta.data["title"] == "Não é possível adicionar o contato"
+        assert (
+            responsavel_unidade.registro_funcional in resposta.data["message"]
+        )
+        assert (
+            "não está vinculado à unidade educacional."
+            in resposta.data["message"]
+        )
+
+    def test_nao_deve_atualizar_com_telefone_do_responsavel_invalido(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        historico_responsavel,
+        usuario_sincronizacao,
+    ):
+        """Deve retornar 400 quando o telefone exceder o limite do model."""
+        dados = {
+            "email": "atualizado@email.com",
+            "telefone": "1133334444",
+            "ativo": True,
+            "responsaveis": [
+                {
+                    "uuid": str(historico_responsavel.responsavel.uuid),
+                    "registro_funcional": (
+                        historico_responsavel.responsavel.registro_funcional
+                    ),
+                    "nome": historico_responsavel.responsavel.nome,
+                    "cargo": historico_responsavel.cargo.codigo,
+                    "email": historico_responsavel.responsavel.email,
+                    "telefone": "1" * 21,
+                    "celular": "",
+                },
+            ],
+        }
+
+        api_cliente.force_authenticate(
+            user=usuario_sincronizacao,
+        )
+
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+        assert "telefone" in resposta.data

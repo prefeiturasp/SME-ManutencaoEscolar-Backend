@@ -1,8 +1,12 @@
 """View do app escola."""
 
+from typing import Any
+
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.serializers import BaseSerializer
+from rest_framework.serializers import ValidationError as DRFValidationError
 
 from apps.core.pagination import PaginacaoPadrao
 from apps.escola.filters import (
@@ -33,9 +37,14 @@ from apps.escola.serializers.tipo_unidade_serializers import (
     TipoEscolaSerializer,
 )
 from apps.escola.serializers.unidade_educacional_serializers import (
+    UnidadeEducacionalAtualizarSerializer,
     UnidadeEducacionalListSerializer,
     UnidadeEducacionalSerializer,
 )
+from apps.escola.services.unidade_educacional_service import (
+    UnidadeEducacionalService,
+)
+from apps.usuarios.models.usuario import Usuario
 
 
 @TIPO_ESCOLA
@@ -86,10 +95,10 @@ class SubprefeituraViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 @UNIDADE_EDUCACIONAL
-class UnidadeEducacionalViewSet(viewsets.ReadOnlyModelViewSet):
+class UnidadeEducacionalViewSet(viewsets.ModelViewSet):
     """Disponibiliza operações de leitura para unidades educacionais."""
 
-    http_method_names = ["get", "options"]
+    http_method_names = ["get", "put", "options"]
     queryset = Unidadeeducacional.objects.select_related(
         "diretoria_regional",
         "tipo_escola",
@@ -104,8 +113,41 @@ class UnidadeEducacionalViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = UnidadeEducacionalFilter
     pagination_class = PaginacaoPadrao
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.service = UnidadeEducacionalService()
+
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer adequado para cada operação."""
         if self.action == "list":
             return UnidadeEducacionalListSerializer
+        if self.action == "update":
+            return UnidadeEducacionalAtualizarSerializer
         return UnidadeEducacionalSerializer
+
+    def _usuario_logado(self) -> Usuario | None:
+        """Retorna o usuário autenticado da requisição, se houver."""
+        usuario = self.request.user
+        return usuario if usuario.is_authenticated else None
+
+    def perform_update(self, serializer: BaseSerializer) -> None:
+        """
+        Atualiza uma unidade educacional existente usando o serviço.
+
+        Args:
+            serializer (BaseSerializer): Serializer contendo os dados da
+                unidade educacional.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
+        try:
+            unidade = self.service.atualizar(
+                unidade=self.get_object(),
+                dados=serializer.validated_data,
+                usuario=self._usuario_logado(),
+            )
+        except DjangoValidationError as exc:
+            raise DRFValidationError(exc.message_dict) from exc
+
+        serializer.instance = unidade
