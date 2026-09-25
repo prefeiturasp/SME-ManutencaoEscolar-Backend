@@ -57,6 +57,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve criar uma escola retornada pela API."""
         mock_get.side_effect = respostas_api
@@ -83,6 +84,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve atualizar uma escola existente."""
         escola = Unidadeeducacional.objects.create(
@@ -111,6 +113,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar a API EOL com o token configurado."""
         mock_get.side_effect = respostas_api
@@ -137,6 +140,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar a Subprefeitura específica da escola."""
         mock_get.side_effect = respostas_api
@@ -153,6 +157,7 @@ class TestSincronizarEscolas:
         mock_get,
         configurar_api_eol,
         diretoria_regional_centro,
+        usuario_sincronizacao,
     ):
         """Deve ignorar escolas com tipo não aceito."""
         sigla_nao_aceita = next(iter(TIPO_ESCOLA_NAO_ACEITAS))
@@ -519,6 +524,7 @@ class TestSincronizarEscolas:
         subprefeitura_se,
         configurar_api_eol,
         diretoria_regional_centro,
+        usuario_sincronizacao,
     ):
         """Deve continuar quando uma escola tiver DRE inexistente."""
         resposta = Mock()
@@ -720,6 +726,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve atualizar o progresso ao processar 500 escolas."""
         escolas = [
