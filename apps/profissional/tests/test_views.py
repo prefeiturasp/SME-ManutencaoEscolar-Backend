@@ -11,6 +11,7 @@ from apps.core.pagination import PaginacaoPadrao
 from apps.profissional.api.views import ProfissionalViewSet
 from apps.profissional.models import FuncaoProfissional, Profissional
 from apps.profissional.serializers.profissional_serializers import (
+    ProfissionalCriarAtualizarSerializer,
     ProfissionalListSerializer,
     ProfissionalSerializer,
 )
@@ -80,12 +81,63 @@ def test_view_usa_serializer_de_detalhes_para_outras_acoes():
     assert view.get_serializer_class() is ProfissionalSerializer
 
 
+def test_view_usa_serializer_de_escrita_na_atualizacao():
+    """Seleciona o serializer de escrita na atualização integral."""
+    view = ProfissionalViewSet()
+    view.action = "update"
+
+    assert view.get_serializer_class() is ProfissionalCriarAtualizarSerializer
+
+
 def test_view_configura_listagem_paginada():
     """Configura filtros e paginação padrão para a listagem."""
     view = ProfissionalViewSet()
 
     assert view.pagination_class is PaginacaoPadrao
-    assert view.http_method_names == ["get", "post", "options"]
+    assert view.http_method_names == ["get", "post", "put", "options"]
+
+
+def test_atualiza_profissional_com_funcoes(
+    api_cliente, cargo_profissional, usuario_ativo
+):
+    """PUT atualiza o profissional e preserva a função pelo UUID."""
+    cargo_profissional.exige_documento = False
+    cargo_profissional.save(update_fields=["exige_documento"])
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional,
+        cargo=cargo_profissional,
+    )
+
+    resposta = api_cliente.put(
+        f"/api/v1/profissionais/{profissional.uuid}/",
+        {
+            "nome": "José Atualizado",
+            "cpf": profissional.cpf,
+            "rg": profissional.rg,
+            "status": False,
+            "funcoes": [
+                {
+                    "uuid": str(funcao.uuid),
+                    "uuid_cargo": str(cargo_profissional.uuid),
+                    "documentos": [],
+                }
+            ],
+        },
+        format="json",
+    )
+
+    profissional.refresh_from_db()
+    funcao.refresh_from_db()
+    assert resposta.status_code == status.HTTP_200_OK
+    assert profissional.nome == "José Atualizado"
+    assert profissional.status is False
+    assert profissional.atualizado_por == usuario_ativo
+    assert funcao.atualizado_por == usuario_ativo
 
 
 def test_lista_profissionais_com_funcoes(

@@ -1,6 +1,7 @@
 """Schemas para a API de profissionais."""
 
 from drf_spectacular.helpers import forced_singular_serializer
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiParameter,
@@ -17,6 +18,8 @@ from apps.profissional.serializers.profissional_serializers import (
 )
 
 _TAG_PROFISSIONAL = "Profissional"
+_CREDENCIAIS_INVALIDAS = "Credenciais inválidas"
+_ERRO_SERVIDOR = "Erro no servidor"
 
 _PROFISSIONAL_EXEMPLO_ENTRADA: dict[str, object] = {
     "nome": "José da Silva",
@@ -26,7 +29,7 @@ _PROFISSIONAL_EXEMPLO_ENTRADA: dict[str, object] = {
     "funcoes": [
         {
             "uuid_cargo": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
-            "documentos": [{"nome": "Certificado NR-10"}],
+            "documentos": [{"arquivo": "certificado-nr10.pdf"}],
         }
     ],
 }
@@ -42,13 +45,39 @@ _PROFISSIONAL_EXEMPLO_SAIDA: dict[str, object] = {
             "criado_em": "2026-09-17T10:00:00-03:00",
             "atualizado_por": None,
             "atualizado_em": "2026-09-17T10:00:00-03:00",
-            "documentos": [{"nome": "Certificado NR-10"}],
+            "documentos": [
+                {
+                    "uuid": "4a9f9f9f-1d0d-4eb4-bd5d-345678901cde",
+                    "nome_original": "certificado-nr10.pdf",
+                    "arquivo": (
+                        "https://arquivos.exemplo.com/"
+                        "profissionais/certificado-nr10.pdf"
+                    ),
+                    "tipo": "documento",
+                    "tipo_mime": "application/pdf",
+                    "tamanho_bytes": 102400,
+                }
+            ],
         }
     ],
 }
 
 _PROFISSIONAL_EXEMPLO_DADOS_INVALIDOS: dict[str, object] = {
     "cpf": ["Já existe um profissional cadastrado com este CPF."],
+}
+
+_PROFISSIONAL_EXEMPLO_ATUALIZACAO: dict[str, object] = {
+    "nome": "José da Silva Atualizado",
+    "cpf": "12345678901",
+    "rg": "123456789",
+    "status": True,
+    "funcoes": [
+        {
+            "uuid": "3f8e8e8e-0c9c-4da3-ac4c-234567890bcd",
+            "uuid_cargo": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
+            "documentos": [{"arquivo": "certificado-nr10-atualizado.pdf"}],
+        }
+    ],
 }
 
 _PROFISSIONAIS_EXEMPLO_LISTAGEM: dict[str, object] = {
@@ -115,11 +144,8 @@ PROFISSIONAL_SCHEMA = extend_schema_view(
             ),
             OpenApiParameter(
                 name="funcao",
-                type=str,
-                description=(
-                    "Filtra profissionais cujo nome do cargo contenha o "
-                    "valor informado."
-                ),
+                type=OpenApiTypes.UUID,
+                description="Filtra profissionais pelo UUID do cargo.",
             ),
             OpenApiParameter(
                 name="status",
@@ -131,8 +157,8 @@ PROFISSIONAL_SCHEMA = extend_schema_view(
         ],
         responses={
             200: _PROFISSIONAIS_LISTAGEM_RESPONSE,
-            401: OpenApiResponse(description="Credenciais inválidas"),
-            500: OpenApiResponse(description="Erro no servidor"),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
             OpenApiExample(
@@ -161,8 +187,8 @@ PROFISSIONAL_SCHEMA = extend_schema_view(
                     "duplicada ou documentos obrigatórios não informados."
                 ),
             ),
-            401: OpenApiResponse(description="Credenciais inválidas"),
-            500: OpenApiResponse(description="Erro no servidor"),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
             OpenApiExample(
@@ -184,4 +210,44 @@ PROFISSIONAL_SCHEMA = extend_schema_view(
             ),
         ],
     ),
+    update=extend_schema(
+        tags=[_TAG_PROFISSIONAL],
+        summary="Atualiza um profissional",
+        description=(
+            "Atualiza integralmente o profissional e sincroniza suas funções "
+            "e documentos. Informe o UUID para preservar ou atualizar uma "
+            "função existente. As funções sem UUID são criadas e as funções "
+            "omitidas são removidas. Para cada função, envie novamente os "
+            "arquivos que devem permanecer vinculados."
+        ),
+        operation_id="atualizarProfissional",
+        request=ProfissionalCriarAtualizarSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=ProfissionalCriarAtualizarSerializer,
+                description="Profissional atualizado com sucesso",
+            ),
+            400: OpenApiResponse(description="Dados inválidos"),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            404: OpenApiResponse(description="Profissional não encontrado"),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+        examples=[
+            OpenApiExample(
+                name="Exemplo de atualização de profissional",
+                request_only=True,
+                value=_PROFISSIONAL_EXEMPLO_ATUALIZACAO,
+            ),
+            OpenApiExample(
+                name="Profissional atualizado com sucesso",
+                response_only=True,
+                status_codes=["200"],
+                value={
+                    **_PROFISSIONAL_EXEMPLO_SAIDA,
+                    "nome": "José da Silva Atualizado",
+                },
+            ),
+        ],
+    ),
+    partial_update=extend_schema(exclude=True),
 )

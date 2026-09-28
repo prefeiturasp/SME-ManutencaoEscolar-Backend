@@ -4,6 +4,7 @@ from typing import Any
 
 from django.db import transaction
 
+from apps.profissional.models import Profissional
 from apps.profissional.repository.profissional_repository import (
     ProfissionalRepository,
 )
@@ -63,3 +64,42 @@ class ProfissionalService:
         )
         profissional["funcoes"] = funcoes_criadas
         return profissional
+
+    def atualizar(
+        self,
+        profissional: Profissional,
+        dados: dict[str, Any],
+        usuario: Usuario | None = None,
+    ) -> dict[str, Any]:
+        """Atualiza e serializa um profissional existente.
+
+        Registra o usuário logado como responsável pela atualização. Quando
+        ``dados`` contém a chave ``funcoes``, a lista informada
+        é sincronizada dentro de uma transação (upsert por ``uuid``:
+        atualiza os existentes, cria os novos e remove os ausentes).
+
+        Args:
+            profissional: Instância do profissional a ser atualizado.
+            dados: Dados a serem aplicados na atualização, podendo incluir
+                a lista de funções em ``funcoes``.
+            usuario: Usuário logado responsável pela atualização.
+
+        Returns:
+            Dados serializados do profissional atualizado.
+        """
+        dados = {**dados, "atualizado_por": usuario}
+        funcoes_dados = dados.pop("funcoes", None)
+
+        with transaction.atomic():
+            profissional_atualizado = self.profissional_repository.atualizar(
+                profissional, dados
+            )
+            profissional_atualizado["funcoes"] = (
+                self.funcao_profissional_service.sincronizar(
+                    profissional_id=profissional_atualizado["id"],
+                    dados_lista=funcoes_dados,
+                    usuario=usuario,
+                )
+            )
+
+        return profissional_atualizado

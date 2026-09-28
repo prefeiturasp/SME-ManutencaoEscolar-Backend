@@ -53,6 +53,44 @@ def test_documento_service_valida_e_cria_documentos(usuario_ativo):
             "criado_por": usuario_ativo,
         }
     )
+    repository.excluir_nao_preservados.assert_called_once_with(
+        funcao_id=10,
+        uuids_preservados=[repository.criar.return_value["uuid"]],
+    )
+
+
+def test_documento_service_preserva_existentes_e_exclui_ausentes():
+    """Preserva os UUIDs informados e remove documentos omitidos."""
+    repository = MagicMock()
+    preservado = SimpleNamespace(uuid="uuid-preservado")
+    ausente = SimpleNamespace(uuid="uuid-ausente")
+    repository.listar_por_funcao.return_value = [preservado, ausente]
+    service = DocumentoFuncaoProfissionalService(repository, MagicMock())
+
+    resultado = service.sincronizar(10, [{"uuid": "uuid-preservado"}])
+
+    repository.excluir_nao_preservados.assert_called_once_with(
+        funcao_id=10,
+        uuids_preservados=["uuid-preservado"],
+    )
+    assert resultado == []
+
+
+def test_documento_service_rejeita_uuid_de_outra_funcao():
+    """Impede preservar documento que não pertence à função."""
+    repository = MagicMock()
+    repository.listar_por_funcao.return_value = []
+    service = DocumentoFuncaoProfissionalService(repository, MagicMock())
+
+    with pytest.raises(ValidationError) as exc_info:
+        service.sincronizar(10, [{"uuid": "uuid-inexistente"}])
+
+    assert exc_info.value.message_dict == {
+        "documentos": [
+            ProfissionalErrorMessages.DOCUMENTO_FUNCAO_NAO_ENCONTRADO
+        ]
+    }
+    repository.excluir_nao_preservados.assert_not_called()
 
 
 def test_funcao_service_cria_funcao_e_delega_documentos():
@@ -97,6 +135,96 @@ def test_funcao_service_exige_documento_quando_configurado():
     repository.criar.assert_not_called()
 
 
+def test_funcao_service_sincroniza_por_uuid_e_remove_ausentes():
+    """Atualiza por UUID, cria novas funções e remove as ausentes."""
+    repository = MagicMock()
+    documento_service = MagicMock()
+    funcao_existente = SimpleNamespace(id=1, uuid="uuid-existente")
+    funcao_ausente = SimpleNamespace(id=2, uuid="uuid-ausente")
+    repository.listar_por_profissional.return_value = [
+        funcao_existente,
+        funcao_ausente,
+    ]
+    repository.atualizar.return_value = {
+        "id": 1,
+        "uuid": "uuid-existente",
+    }
+    repository.criar.return_value = {"id": 3, "uuid": "uuid-novo"}
+    documento_service.sincronizar.side_effect = [
+        [{"uuid": "documento-existente"}],
+        [],
+    ]
+    cargo = SimpleNamespace(exige_documento=False)
+    usuario = SimpleNamespace(id=10)
+    service = FuncaoProfissionalService(repository, documento_service)
+
+    resultado = service.sincronizar(
+        20,
+        [
+            {
+                "uuid": "uuid-existente",
+                "cargo": cargo,
+                "documentos": [{"uuid": "documento-existente"}],
+            },
+            {"cargo": cargo, "documentos": []},
+        ],
+        usuario,
+    )
+
+    repository.remover.assert_called_once_with(funcao_ausente, usuario)
+    repository.atualizar.assert_called_once_with(
+        funcao_existente,
+        {
+            "uuid": "uuid-existente",
+            "cargo": cargo,
+            "atualizado_por": usuario,
+        },
+    )
+    repository.criar.assert_called_once_with(
+        {
+            "cargo": cargo,
+            "profissional_id": 20,
+            "criado_por": usuario,
+        }
+    )
+    assert resultado == [
+        {
+            "id": 1,
+            "uuid": "uuid-existente",
+            "documentos": [{"uuid": "documento-existente"}],
+        },
+        {"id": 3, "uuid": "uuid-novo", "documentos": []},
+    ]
+
+
+def test_funcao_service_rejeita_uuid_de_outro_profissional():
+    """Impede a sincronização de função alheia ao profissional."""
+    repository = MagicMock()
+    repository.listar_por_profissional.return_value = []
+    service = FuncaoProfissionalService(repository, MagicMock())
+    cargo = SimpleNamespace(exige_documento=False)
+
+    with pytest.raises(ValidationError) as exc_info:
+        service.sincronizar(
+            20,
+            [
+                {
+                    "uuid": "uuid-inexistente",
+                    "cargo": cargo,
+                }
+            ],
+        )
+
+    assert exc_info.value.message_dict == {
+        "funcoes": [
+            ProfissionalErrorMessages.FUNCAO_PROFISSIONAL_NAO_ENCONTRADA
+        ]
+    }
+    repository.atualizar.assert_not_called()
+    repository.criar.assert_not_called()
+    repository.remover.assert_not_called()
+
+
 @pytest.mark.django_db
 def test_profissional_service_cria_agregado(cargo_profissional):
     """Cria o profissional e sincroniza suas funções."""
@@ -128,3 +256,33 @@ def test_profissional_service_cria_agregado(cargo_profissional):
     funcao_service.sincronizar.assert_called_once_with(1, funcoes, None)
     assert resultado == profissional
     assert resultado["funcoes"] == funcoes_criadas
+
+
+@pytest.mark.django_db
+def test_profissional_service_atualiza_agregado(usuario_ativo):
+    """Atualiza o profissional e sincroniza funções na mesma transação."""
+    repository = MagicMock()
+    instancia = SimpleNamespace(id=1)
+    repository.atualizar.return_value = {"id": 1}
+    funcao_service = MagicMock()
+    funcoes = [{"uuid": "uuid-funcao"}]
+    funcoes_atualizadas = [{"id": 2, "documentos": []}]
+    funcao_service.sincronizar.return_value = funcoes_atualizadas
+    service = ProfissionalService(repository, funcao_service)
+
+    resultado = service.atualizar(
+        instancia,
+        {"nome": "Nome atualizado", "funcoes": funcoes},
+        usuario_ativo,
+    )
+
+    repository.atualizar.assert_called_once_with(
+        instancia,
+        {"nome": "Nome atualizado", "atualizado_por": usuario_ativo},
+    )
+    funcao_service.sincronizar.assert_called_once_with(
+        profissional_id=1,
+        dados_lista=funcoes,
+        usuario=usuario_ativo,
+    )
+    assert resultado["funcoes"] == funcoes_atualizadas
