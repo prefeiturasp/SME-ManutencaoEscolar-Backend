@@ -146,3 +146,30 @@ class TestUnidadeEducacionalFilter:
         )
 
         assert list(filtro.qs) == [unidade_educacional_cemei]
+
+    def test_filtra_por_lote_ativo_e_desconsidera_vinculo_excluido(
+        self,
+        unidade_educacional_emef,
+        unidade_educacional_cemei,
+        diretoria_regional_centro,
+        lote_centro,
+    ):
+        """Deve filtrar pelo nome do lote e ignorar vínculos excluídos."""
+        filtro = UnidadeEducacionalFilter(
+            data={"lote": "Centro"},
+            queryset=Unidadeeducacional.objects.all(),
+        )
+
+        assert list(filtro.qs) == [unidade_educacional_emef]
+
+        vinculo = lote_centro.vinculos_diretoria_regional.get(
+            diretoria_regional=diretoria_regional_centro,
+        )
+        vinculo.soft_delete()
+
+        filtro = UnidadeEducacionalFilter(
+            data={"lote": "Centro"},
+            queryset=Unidadeeducacional.objects.all(),
+        )
+
+        assert not filtro.qs.exists()

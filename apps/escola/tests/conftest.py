@@ -13,7 +13,6 @@ from apps.escola.models.unidade_educacional import (
     DadosUnidadeEducacional,
     Unidadeeducacional,
 )
-from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 
@@ -66,16 +65,6 @@ def resposta_api_tipos_escolas():
         },
     ]
     return resposta
-
-
-@pytest.fixture
-def diretoria_regional_centro():
-    """Cria uma Diretoria Regional para os testes."""
-    return DiretoriaRegional.objects.create(
-        codigo="DRE01",
-        nome="DIRETORIA REGIONAL DE EDUCACAO CENTRO",
-        abreviacao="CT",
-    )
 
 
 @pytest.fixture
@@ -291,22 +280,6 @@ def historico_responsavel(
         cargo=obter_cargo_diretor,
         ativo=True,
     )
-
-
-@pytest.fixture
-def lote_centro(diretoria_regional_centro, empresa):
-    """Fixture de lote."""
-    lote = Lote.objects.create(
-        codigo_cadastro="LOTE-001",
-        nome="Lote Centro",
-        empresa=empresa,
-        status=True,
-    )
-    LoteDiretoriaRegional.objects.create(
-        lote=lote,
-        diretoria_regional=diretoria_regional_centro,
-    )
-    return lote
 
 
 @pytest.fixture

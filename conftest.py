@@ -4,6 +4,8 @@ import pytest
 from rest_framework.test import APIClient, APIRequestFactory
 
 from apps.empresa.models import Empresa
+from apps.escola.models.diretoria_regional import DiretoriaRegional
+from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
@@ -136,3 +138,31 @@ def configurar_api_eol(monkeypatch: pytest.MonkeyPatch) -> None:
             f"{modulo}.SME_API_EOL_TOKEN",
             "token-teste",
         )
+
+
+@pytest.fixture
+def diretoria_regional_centro() -> DiretoriaRegional:
+    """Cria uma Diretoria Regional para os testes."""
+    return DiretoriaRegional.objects.create(
+        codigo="DRE01",
+        nome="DIRETORIA REGIONAL DE EDUCACAO CENTRO",
+        abreviacao="CT",
+    )
+
+
+@pytest.fixture
+def lote_centro(
+    diretoria_regional_centro: DiretoriaRegional, empresa: Empresa
+) -> Lote:
+    """Fixture de lote."""
+    lote = Lote.objects.create(
+        codigo_cadastro="LOTE-001",
+        nome="Lote Centro",
+        empresa=empresa,
+        status=True,
+    )
+    LoteDiretoriaRegional.objects.create(
+        lote=lote,
+        diretoria_regional=diretoria_regional_centro,
+    )
+    return lote
