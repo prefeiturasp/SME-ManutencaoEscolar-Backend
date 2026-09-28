@@ -243,7 +243,7 @@ def resposta_dados_complementares():
         "codigoUe": "100001",
         "nomeUe": "EMEF Escola Teste",
         "enderecoUe": "Rua Teste, 100",
-        "telefoneUe": "1122223333",
+        "telefoneUe": "22223333",
         "email": "diretor.um@email.com",
         "nome": "Diretor Escola",
         "cpf": "12345678900",
@@ -270,7 +270,7 @@ def usuario_sincronizacao(cargo_perfil_diretor):
 def responsavel_unidade() -> ResponsavelUnidade:
     """Cria um responsável de unidade para os testes."""
     return ResponsavelUnidade.objects.create(
-        registro_funcional="000000011",
+        registro_funcional="0000011",
         nome="DIRETOR TESTE",
         email="responsavel.emef@teste.com",
         telefone="11999999999",

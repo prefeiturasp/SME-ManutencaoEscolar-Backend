@@ -7,8 +7,13 @@ from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.core.pagination import PaginacaoPadrao
 from apps.profissional.api.views import ProfissionalViewSet
-from apps.profissional.models import Profissional
+from apps.profissional.models import FuncaoProfissional, Profissional
+from apps.profissional.serializers.profissional_serializers import (
+    ProfissionalListSerializer,
+    ProfissionalSerializer,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -59,12 +64,120 @@ def test_requisicao_sem_autenticacao_retorna_401(profissional_payload):
     assert resposta.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_view_usa_serializer_de_leitura_para_outras_acoes():
-    """Seleciona o serializer de leitura fora da criação."""
+def test_view_usa_serializer_de_listagem():
+    """Seleciona o serializer resumido na listagem."""
     view = ProfissionalViewSet()
     view.action = "list"
 
-    assert view.get_serializer_class().__name__ == "ProfissionalSerializer"
+    assert view.get_serializer_class() is ProfissionalListSerializer
+
+
+def test_view_usa_serializer_de_detalhes_para_outras_acoes():
+    """Seleciona o serializer detalhado fora da criação e listagem."""
+    view = ProfissionalViewSet()
+    view.action = "retrieve"
+
+    assert view.get_serializer_class() is ProfissionalSerializer
+
+
+def test_view_configura_listagem_paginada():
+    """Configura filtros e paginação padrão para a listagem."""
+    view = ProfissionalViewSet()
+
+    assert view.pagination_class is PaginacaoPadrao
+    assert view.http_method_names == ["get", "post", "options"]
+
+
+def test_lista_profissionais_com_funcoes(
+    api_cliente, cargo_profissional, usuario_ativo
+):
+    """Lista profissionais paginados com os dados de suas funções."""
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+        criado_por=usuario_ativo,
+    )
+    FuncaoProfissional.objects.create(
+        profissional=profissional,
+        cargo=cargo_profissional,
+        criado_por=usuario_ativo,
+    )
+
+    resposta = api_cliente.get("/api/v1/profissionais/")
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json() == {
+        "count": 1,
+        "next": None,
+        "previous": None,
+        "results": [
+            {
+                "uuid": str(profissional.uuid),
+                "nome": "José da Silva",
+                "cpf": "12345678901",
+                "rg": "123456789",
+                "status": True,
+                "funcoes": ["Eletricista"],
+            }
+        ],
+    }
+
+
+@pytest.mark.parametrize(
+    ("parametros", "nome_esperado"),
+    [
+        ({"nome": "maria"}, "Maria Souza"),
+        ({"cpf": "222"}, "Maria Souza"),
+        ({"rg": "444"}, "Maria Souza"),
+        ({"status": "false"}, "Maria Souza"),
+    ],
+)
+def test_lista_profissionais_com_filtros(
+    api_cliente, parametros, nome_esperado
+):
+    """Filtra a listagem por nome, CPF, RG e status."""
+    Profissional.objects.create(
+        nome="José da Silva", cpf="11111111111", rg="333333333", status=True
+    )
+    Profissional.objects.create(
+        nome="Maria Souza", cpf="22222222222", rg="444444444", status=False
+    )
+
+    resposta = api_cliente.get("/api/v1/profissionais/", parametros)
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json()["count"] == 1
+    assert resposta.json()["results"][0]["nome"] == nome_esperado
+
+
+def test_lista_profissionais_filtra_funcao_pelo_nome_do_cargo(
+    api_cliente, cargo_profissional
+):
+    """Filtra profissionais pelo nome parcial e sem caixa do cargo."""
+    eletricista = Profissional.objects.create(
+        nome="José da Silva", cpf="11111111111", rg="333333333"
+    )
+    Profissional.objects.create(
+        nome="Maria Souza", cpf="22222222222", rg="444444444"
+    )
+    FuncaoProfissional.objects.create(
+        profissional=eletricista,
+        cargo=cargo_profissional,
+    )
+
+    resposta = api_cliente.get("/api/v1/profissionais/", {"funcao": "ELETRIC"})
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json()["count"] == 1
+    assert resposta.json()["results"][0]["nome"] == "José da Silva"
+
+
+def test_listagem_sem_autenticacao_retorna_401():
+    """Protege a listagem contra acesso não autenticado."""
+    resposta = APIClient().get("/api/v1/profissionais/")
+
+    assert resposta.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_criacao_converte_validation_error_do_django(

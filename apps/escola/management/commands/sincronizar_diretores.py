@@ -32,6 +32,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.core.constants import ENDPOINT_DADOS_PARA_COMAPRE, TIMEOUT_DEFAULT
+from apps.core.exceptions import TelefoneInvalidoError
+from apps.core.validacoes import validar_telefone
 from apps.escola.constants import (
     ENDPOINT_OBTER_FUNCIONARIOS_POR_CARGO,
     FORMATO_DATA_FUNCIONARIOS_POR_CARGO,
@@ -435,7 +437,7 @@ class Command(BaseCommand):
             "email": self._normalizar_string(
                 dados_adicionais.get("email"),
             ),
-            "telefone": self._normalizar_string(
+            "telefone": self._normalizar_telefone(
                 dados_adicionais.get("telefoneUe"),
             ),
             "esta_afastado": registro["estaAfastado"],
@@ -883,3 +885,30 @@ class Command(BaseCommand):
             quantidades[f"{prefixo}atualizados"] += 1
         else:
             quantidades[f"{prefixo}ignorados"] += 1
+
+    def _normalizar_telefone(self, valor: Any) -> str:
+        """Normaliza um telefone para armazenamento.
+
+        O telefone deve possuir oito ou nove dígitos. Para valores válidos,
+        adiciona o DDD 11 como prefixo. Valores fora desse padrão retornam
+        uma string vazia.
+
+        Args:
+            valor (Any): Telefone retornado pela API EOL.
+
+        Returns:
+            str: Telefone normalizado com o DDD 11 ou string vazia.
+        """
+        telefone = self._normalizar_string(valor)
+
+        if len(telefone) not in (8, 9):
+            return ""
+
+        telefone = f"11{telefone}"
+
+        try:
+            validar_telefone(telefone)
+        except TelefoneInvalidoError:
+            return ""
+
+        return telefone
