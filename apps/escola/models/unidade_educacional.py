@@ -110,6 +110,7 @@ class Unidadeeducacional(BaseModel):
         lote_diretoria = (
             self.diretoria_regional.vinculo_lote.filter(
                 lote__status=True,
+                deletado_em__isnull=True,
             )
             .select_related("lote")
             .first()

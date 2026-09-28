@@ -237,10 +237,11 @@ class LoteRepository:
             Tupla contendo a quantidade de registros deletados e um dicionário
                 com a quantidade de exclusões por tipo de objeto.
         """
-        model_lote.deletado_por = usuario
-
-        model_lote.save(
-            update_fields=["deletado_por"],
+        vinculos = self.vinculo_model.objects.filter(
+            lote=model_lote,
+            deletado_em__isnull=True,
         )
 
+        for vinculo in vinculos:
+            vinculo.soft_delete(usuario=usuario)
         return model_lote.soft_delete(usuario=usuario)

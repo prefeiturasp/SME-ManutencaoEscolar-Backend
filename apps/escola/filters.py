@@ -93,8 +93,7 @@ class UnidadeEducacionalFilter(django_filters.FilterSet):
         lookup_expr="exact",
     )
     lote = django_filters.CharFilter(
-        field_name="diretoria_regional__vinculo_lote__lote__nome",
-        lookup_expr="icontains",
+        method="filtrar_lote",
     )
 
     def filtrar_subprefeitura(
@@ -122,6 +121,22 @@ class UnidadeEducacionalFilter(django_filters.FilterSet):
             return queryset.filter(subprefeitura__isnull=True)
 
         return queryset.filter(subprefeitura__uuid=value)
+
+    def filtrar_lote(
+        self,
+        queryset: QuerySet[Unidadeeducacional],
+        name: str,
+        value: str,
+    ) -> QuerySet[Unidadeeducacional]:
+        """Filtra unidades educacionais por lote ativo.
+
+        Considera apenas os vínculos entre Diretoria Regional e lote
+        que não foram excluídos logicamente.
+        """
+        return queryset.filter(
+            diretoria_regional__vinculo_lote__deletado_em__isnull=True,
+            diretoria_regional__vinculo_lote__lote__nome__icontains=value,
+        )
 
     class Meta:
         model = Unidadeeducacional
