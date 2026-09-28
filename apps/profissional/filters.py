@@ -12,7 +12,7 @@ class ProfissionalFilter(django_filters.FilterSet):
     cpf = django_filters.CharFilter(lookup_expr="icontains")
     rg = django_filters.CharFilter(lookup_expr="icontains")
     funcao = django_filters.CharFilter(
-        field_name="funcoes__cargo__nome",
+        field_name="funcoes__cargo__uuid",
         lookup_expr="icontains",
         distinct=True,
     )

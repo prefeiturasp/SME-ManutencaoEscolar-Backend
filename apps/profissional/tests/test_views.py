@@ -151,10 +151,10 @@ def test_lista_profissionais_com_filtros(
     assert resposta.json()["results"][0]["nome"] == nome_esperado
 
 
-def test_lista_profissionais_filtra_funcao_pelo_nome_do_cargo(
+def test_lista_profissionais_filtra_funcao_pelo_uuid_do_cargo(
     api_cliente, cargo_profissional
 ):
-    """Filtra profissionais pelo nome parcial e sem caixa do cargo."""
+    """Filtra profissionais pelo UUID do cargo."""
     eletricista = Profissional.objects.create(
         nome="José da Silva", cpf="11111111111", rg="333333333"
     )
@@ -166,7 +166,9 @@ def test_lista_profissionais_filtra_funcao_pelo_nome_do_cargo(
         cargo=cargo_profissional,
     )
 
-    resposta = api_cliente.get("/api/v1/profissionais/", {"funcao": "ELETRIC"})
+    resposta = api_cliente.get(
+        "/api/v1/profissionais/", {"funcao": str(cargo_profissional.uuid)}
+    )
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json()["count"] == 1
