@@ -2,7 +2,10 @@
 
 from typing import Any
 
+from django.core.exceptions import ValidationError
+
 from apps.core.services.anexo_service import AnexoService
+from apps.profissional.constants import ProfissionalErrorMessages
 from apps.profissional.repository.documento_funcao_repository import (
     DocumentoFuncaoProfissionalRepository,
 )
@@ -37,7 +40,7 @@ class DocumentoFuncaoProfissionalService:
         usuario: Usuario | None = None,
     ) -> list[dict[str, Any]]:
         """
-        Cria documentos conforme a lista informada.
+        Sincroniza os documentos informados com os documentos da função.
 
         Args:
             funcao_id: ID da função à qual os documentos pertencem.
@@ -45,22 +48,53 @@ class DocumentoFuncaoProfissionalService:
             usuario: Usuário que está realizando a operação.
 
         returns:
-            Lista de documentos criados.
+            Lista dos novos documentos criados.
+
+        Raises:
+            ValidationError: Se um UUID informado não pertencer à função.
         """
-        documentos = []
-        for documento in documentos_lista:
-            arquivo = documento["arquivo"]
-            dados = self.anexo_service.validar_e_preparar_anexo(
-                arquivo=arquivo,
-                id_usuario=usuario.id if usuario is not None else None,
-            )
-            dados.pop("usuario_id", None)
-            documento = self.repository.criar(
+        existentes = self.repository.listar_por_funcao(funcao_id)
+        existentes_uuids = {str(documento["uuid"]) for documento in existentes}
+        documentos_uuids_preservados = [
+            str(dados["uuid"])
+            for dados in documentos_lista
+            if dados.get("uuid") is not None
+        ]
+
+        if set(documentos_uuids_preservados) - existentes_uuids:
+            raise ValidationError(
                 {
-                    **dados,
-                    "funcao_profissional_id": funcao_id,
-                    "criado_por": usuario,
+                    "documentos": (
+                        ProfissionalErrorMessages.DOCUMENTO_FUNCAO_NAO_ENCONTRADO
+                    )
                 }
             )
-            documentos.append(documento)
-        return documentos
+
+        documentos_criados = []
+        for documento in documentos_lista:
+            if documento.get("uuid") is None:
+                arquivo = documento["arquivo"]
+                dados = self.anexo_service.validar_e_preparar_anexo(
+                    arquivo=arquivo,
+                    id_usuario=usuario.id if usuario is not None else None,
+                )
+                dados.pop("usuario_id", None)
+
+                documento = self.repository.criar(
+                    {
+                        **dados,
+                        "funcao_profissional_id": funcao_id,
+                        "criado_por": usuario,
+                    }
+                )
+                documentos_criados.append(documento)
+
+        documentos_uuids_preservados.extend(
+            anexo["uuid"] for anexo in documentos_criados
+        )
+
+        self.repository.excluir_nao_preservados(
+            funcao_id=funcao_id,
+            uuids_preservados=documentos_uuids_preservados,
+        )
+        return documentos_criados

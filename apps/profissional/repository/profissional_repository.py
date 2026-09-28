@@ -25,6 +25,24 @@ class ProfissionalRepository:
         profissional.save()
         return self._serializar(profissional)
 
+    def atualizar(
+        self, profissional: Profissional, dados: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Atualiza e serializa um profissional.
+
+        Args:
+            profissional: Profissional que será atualizado.
+            dados: Campos que devem ser aplicados ao profissional.
+
+        Returns:
+            Dados serializados do profissional atualizado.
+        """
+        for campo, valor in dados.items():
+            setattr(profissional, campo, valor)
+        profissional.full_clean()
+        profissional.save()
+        return self._serializar(profissional)
+
     @staticmethod
     def _serializar(profissional: Profissional) -> dict[str, Any]:
         """
