@@ -92,3 +92,68 @@ def test_documento_repository_cria(cargo_profissional, usuario_ativo):
     assert documento["tipo_mime"] == documento_persistido.tipo_mime
     assert documento["tamanho_bytes"] == documento_persistido.tamanho_bytes
     assert documento_persistido.criado_por == usuario_ativo
+
+
+def test_funcao_repository_atualiza_sem_alteracoes(cargo_profissional):
+    """Serializa a função sem executar uma atualização desnecessária."""
+    profissional = Profissional.objects.create(
+        nome="José", cpf="12345678901", rg="123456789"
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+
+    resultado = FuncaoProfissionalRepository().atualizar(
+        funcao,
+        {"uuid": funcao.uuid, "cargo": cargo_profissional},
+    )
+
+    assert resultado["id"] == funcao.id
+    assert resultado["cargo"] == cargo_profissional
+
+
+def test_funcao_repository_remove(cargo_profissional, usuario_ativo):
+    """Remove logicamente uma função e registra o usuário responsável."""
+    profissional = Profissional.objects.create(
+        nome="José", cpf="12345678901", rg="123456789"
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+
+    FuncaoProfissionalRepository().remover(funcao, usuario_ativo)
+
+    assert not FuncaoProfissional.objects.filter(pk=funcao.pk).exists()
+
+
+def test_documento_repository_exclui_arquivo_apos_commit(
+    cargo_profissional,
+    django_capture_on_commit_callbacks,
+):
+    """Exclui o documento físico somente após confirmar a transação."""
+    profissional = Profissional.objects.create(
+        nome="José", cpf="12345678901", rg="123456789"
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+    documento = DocumentoFuncaoProfissional.objects.create(
+        nome_original="NR10.pdf",
+        arquivo=SimpleUploadedFile("NR10.pdf", b"conteudo"),
+        tipo=TipoArquivo.DOCUMENTO,
+        tipo_mime="application/pdf",
+        tamanho_bytes=len(b"conteudo"),
+        funcao_profissional=funcao,
+    )
+    nome_arquivo = documento.arquivo.name
+    storage = documento.arquivo.storage
+
+    with django_capture_on_commit_callbacks(execute=True):
+        DocumentoFuncaoProfissionalRepository().excluir_nao_preservados(
+            funcao.id, []
+        )
+
+    assert not DocumentoFuncaoProfissional.objects.filter(
+        pk=documento.pk
+    ).exists()
+    assert not storage.exists(nome_arquivo)

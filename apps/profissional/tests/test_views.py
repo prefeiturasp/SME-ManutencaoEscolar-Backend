@@ -247,3 +247,45 @@ def test_criacao_converte_validation_error_do_django(
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
     assert resposta.json()["cpf"] == ["CPF inválido"]
+
+
+def test_atualizacao_converte_validation_error_do_django(
+    api_cliente, cargo_profissional
+):
+    """Converte erros da atualização em resposta de validação da API."""
+    cargo_profissional.exige_documento = False
+    cargo_profissional.save(update_fields=["exige_documento"])
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional,
+        cargo=cargo_profissional,
+    )
+
+    with patch(
+        "apps.profissional.api.views.ProfissionalService.atualizar",
+        side_effect=ValidationError({"cpf": ["CPF inválido"]}),
+    ):
+        resposta = api_cliente.put(
+            f"/api/v1/profissionais/{profissional.uuid}/",
+            {
+                "nome": profissional.nome,
+                "cpf": profissional.cpf,
+                "rg": profissional.rg,
+                "status": profissional.status,
+                "funcoes": [
+                    {
+                        "uuid": str(funcao.uuid),
+                        "uuid_cargo": str(cargo_profissional.uuid),
+                        "documentos": [],
+                    }
+                ],
+            },
+            format="json",
+        )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json()["cpf"] == ["CPF inválido"]
