@@ -168,3 +168,26 @@ class CargoRepository:
         resultado["pk"] = cargo.pk
 
         return resultado
+
+    def deletar(
+        self,
+        usuario: Usuario,
+        model_cargo: Cargo,
+    ) -> tuple[int, dict[str, int]]:
+        """
+        Marca uma cargo como deletada e registra o usuário.
+
+        Args:
+            cargo (Cargo): Instância da cargo a ser deletada.
+            usuario (Usuario | None): Usuário que está realizando a deleção.
+        Returns:
+            Tupla contendo a quantidade de registros deletados e um dicionário
+                com a quantidade de exclusões por tipo de objeto.
+        """
+        model_cargo.deletado_por = usuario
+
+        model_cargo.save(
+            update_fields=["deletado_por"],
+        )
+
+        return model_cargo.soft_delete(usuario=usuario)

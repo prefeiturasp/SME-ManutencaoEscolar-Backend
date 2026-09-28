@@ -273,16 +273,25 @@ EMPRESA_SCHEMA = extend_schema_view(
     destroy=extend_schema(
         tags=["Empresa"],
         summary="Remove uma empresa",
-        description="Remove uma empresa existente do sistema.",
+        description=(
+            "Remove uma empresa existente do sistema. A exclusão é impedida "
+            "quando a empresa possui lotes vinculados."
+        ),
         operation_id="deletarEmpresa",
         responses={
             204: OpenApiResponse(description="Empresa removida com sucesso"),
+            400: OpenApiResponse(
+                description=(
+                    "Não é possível excluir a empresa porque ela possui "
+                    "um ou mais lotes vinculados."
+                ),
+            ),
             401: OpenApiResponse(description=_CREDENCIAL_INVALID_DESCRIPTION),
             404: OpenApiResponse(
                 description=_EMPRESA_NAO_ENCONTRADA_DESCRIPTION
             ),
-            503: OpenApiResponse(description="Instabilidade"),
             500: OpenApiResponse(description=_ERRO_SERVIDOR_DESCRIPTION),
+            503: OpenApiResponse(description="Instabilidade"),
         },
     ),
 )
