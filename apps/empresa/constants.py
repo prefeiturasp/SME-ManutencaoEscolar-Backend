@@ -5,6 +5,8 @@ class EmpresaErrorMessages:
     """Mensagens de erro padronizadas para o domínio."""
 
     CNPJ_INVALIDO = "CNPJ inválido."
+    CNPJ_JA_CADASTRADO_TITULO_CRIAR="Não é possível criar a empresa"
+    CNPJ_JA_CADASTRADO_TITULO_EDITAR="Não é possível editar os dados da empresa"
     CNPJ_JA_CADASTRADO = "Já existe uma empresa cadastrada com este CNPJ."
     CEP_INVALIDO = "CEP inválido. Deve conter 8 dígitos numéricos."
     TELEFONE_INVALIDO = (

@@ -15,6 +15,7 @@ from apps.core.validacoes import (
     validar_formato_link_rastreio,
 )
 from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.exceptions import EmpresaJaPossuiCNPJ
 from apps.empresa.models import Empresa
 from apps.empresa.serializers.responsavel_serializers import (
     ResponsavelTecnicoSerializer,
@@ -99,8 +100,14 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
         if self.instance is not None:
             empresas = empresas.exclude(pk=self.instance.pk)
         if empresas.exists():
-            raise serializers.ValidationError(
-                EmpresaErrorMessages.CNPJ_JA_CADASTRADO
+            if self.instance is None:
+                titulo = EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_CRIAR
+            else:
+                titulo = EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_EDITAR
+
+            raise EmpresaJaPossuiCNPJ(
+                title=titulo,
+                detail=EmpresaErrorMessages.CNPJ_JA_CADASTRADO,
             )
         return value
 

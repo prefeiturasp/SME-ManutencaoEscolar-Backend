@@ -15,6 +15,7 @@ from apps.core.exceptions import (
     LinkRastreioInvalidoError,
 )
 from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.exceptions import EmpresaJaPossuiCNPJ
 from apps.empresa.models import Empresa
 from apps.empresa.serializers.anexo_serializers import (
     AnexoResponsavelTecnicoSerializer,
@@ -126,10 +127,12 @@ class TestEmpresaCriarAtualizarSerializer:
         apagada: bool,
         atualizacao: bool,
     ) -> None:
-        """Deve permitir reutilizar CNPJ somente de empresa apagada."""
+        """Permite CNPJ de empresa apagada e distingue criação de edição."""
         existente = Empresa.objects.create(**empresa_payload_valido)
+
         if apagada:
             existente.soft_delete()
+
         instancia = (
             Empresa.objects.create(
                 **{**empresa_payload_valido, "cnpj": "43210987654321"}
@@ -137,17 +140,30 @@ class TestEmpresaCriarAtualizarSerializer:
             if atualizacao
             else None
         )
+
         serializer = EmpresaCriarAtualizarSerializer(
             instance=instancia,
             data={"cnpj": existente.cnpj},
             partial=True,
         )
 
-        assert serializer.is_valid() is apagada
-        if not apagada:
-            assert serializer.errors["cnpj"][0] == (
-                EmpresaErrorMessages.CNPJ_JA_CADASTRADO
-            )
+        if apagada:
+            assert serializer.is_valid(), serializer.errors
+            return
+
+        with pytest.raises(EmpresaJaPossuiCNPJ) as exc_info:
+            serializer.is_valid()
+
+        titulo_esperado = (
+            EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_EDITAR
+            if atualizacao
+            else EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_CRIAR
+        )
+
+        assert exc_info.value.detail["title"] == titulo_esperado
+        assert exc_info.value.detail["message"] == (
+            EmpresaErrorMessages.CNPJ_JA_CADASTRADO
+        )
 
     def test_atualizacao_permite_manter_proprio_cnpj(
         self, empresa_payload_valido: dict[str, Any]

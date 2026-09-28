@@ -1,4 +1,5 @@
 """Exceções para a API de Empresa."""
+from rest_framework.exceptions import APIException
 
 
 class EmpresaNaoEncontradoError(Exception):
@@ -21,3 +22,13 @@ class EmpresaPossuiLotesVinculadosError(Exception):
         self.title = title
         self.detail = detail
         super().__init__(title)
+
+class EmpresaJaPossuiCNPJ(APIException):
+    status_code = 400
+    default_code = "cnpj_ja_cadastrado"
+
+    def __init__(self, *, title: str, detail: str) -> None:
+        super().__init__({
+            "title": title,
+            "message": detail,
+        })
