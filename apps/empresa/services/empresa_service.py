@@ -203,7 +203,7 @@ class EmpresaService:
         Raises:
             EmpresaJaPossuiCNPJError: Se outra empresa utilizar o CNPJ.
         """
-        if self.empresa_repository.existe_por_cnpj(
+        if self.empresa_repository.existe_cnpj_duplicado(
             cnpj,
             empresa_ignorada=empresa_ignorada,
         ):

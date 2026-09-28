@@ -77,7 +77,7 @@ class EmpresaRepository:
         dados_empresa["uuid"] = str(empresa.uuid)
         return dados_empresa
 
-    def existe_por_cnpj(
+    def existe_cnpj_duplicado(
         self,
         cnpj: str,
         empresa_ignorada: Empresa | None = None,
