@@ -1,7 +1,5 @@
 """Exceções para a API de Empresa."""
 
-from rest_framework.exceptions import APIException
-
 
 class EmpresaNaoEncontradoError(Exception):
     """Levantada quando uma empresa não é encontrada."""
@@ -25,22 +23,11 @@ class EmpresaPossuiLotesVinculadosError(Exception):
         super().__init__(title)
 
 
-class EmpresaJaPossuiCNPJ(APIException):
+class EmpresaJaPossuiCNPJError(Exception):
     """Indica que o CNPJ já pertence a outra empresa cadastrada."""
 
-    status_code = 400
-    default_code = "cnpj_ja_cadastrado"
-
     def __init__(self, *, title: str, detail: str) -> None:
-        """Inicializa o título e a mensagem retornados pela API.
-
-        Args:
-            title: Título do erro.
-            detail: Mensagem que explica a duplicidade do CNPJ.
-        """
-        super().__init__(
-            {
-                "title": title,
-                "message": detail,
-            }
-        )
+        """Representa um cargo ou documento que já está vinculado a usuário."""
+        self.title = title
+        self.detail = detail
+        super().__init__(detail)

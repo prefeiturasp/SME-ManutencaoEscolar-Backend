@@ -9,6 +9,10 @@ class EmpresaErrorMessages:
     CNPJ_JA_CADASTRADO_TITULO_EDITAR = (
         "Não é possível editar os dados da empresa"
     )
+    CNPJ_JA_CADASTRADO_MENSAGEM = (
+        "O CNPJ {cnpj} já está cadastrado no sistema. "
+        "Verifique as informações e tente novamente"
+    )
     CNPJ_JA_CADASTRADO = "Já existe uma empresa cadastrada com este CNPJ."
     CEP_INVALIDO = "CEP inválido. Deve conter 8 dígitos numéricos."
     TELEFONE_INVALIDO = (
