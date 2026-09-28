@@ -1,6 +1,6 @@
 """Views da API do domínio Profissional."""
 
-from typing import Any
+from typing import Any, cast
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django_filters.rest_framework import DjangoFilterBackend
@@ -13,6 +13,7 @@ from apps.profissional.models import Profissional
 from apps.profissional.schemas import PROFISSIONAL_SCHEMA
 from apps.profissional.serializers.profissional_serializers import (
     ProfissionalCriarAtualizarSerializer,
+    ProfissionalListSerializer,
     ProfissionalSerializer,
 )
 from apps.profissional.services.profissional_services import (
@@ -23,13 +24,13 @@ from apps.usuarios.models import Usuario
 
 @PROFISSIONAL_SCHEMA
 class ProfissionalViewSet(ModelViewSet):
-    """Disponibiliza o cadastro de profissionais."""
+    """Disponibiliza o cadastro e listagem de profissionais."""
 
     queryset = Profissional.objects.prefetch_related(
         "funcoes__cargo", "funcoes__documentos"
     )
     lookup_field = "uuid"
-    http_method_names = ["post", "options"]
+    http_method_names = ["get", "post", "put", "options"]
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProfissionalFilter
 
@@ -39,8 +40,10 @@ class ProfissionalViewSet(ModelViewSet):
 
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer apropriado para a ação atual."""
-        if self.action == "create":
+        if self.action in ("create", "update"):
             return ProfissionalCriarAtualizarSerializer
+        if self.action == "list":
+            return ProfissionalListSerializer
         return ProfissionalSerializer
 
     def _usuario_logado(self) -> Usuario | None:
@@ -56,3 +59,23 @@ class ProfissionalViewSet(ModelViewSet):
             )
         except DjangoValidationError as exc:
             raise DRFValidationError(exc.message_dict) from exc
+
+    def perform_update(self, serializer: BaseSerializer) -> None:
+        """Atualiza um profissional por meio da camada de serviço.
+
+        Args:
+            serializer: Serializer contendo os dados validados.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
+        try:
+            profissional = self.service.atualizar(
+                cast(Profissional, serializer.instance),
+                serializer.validated_data,
+                self._usuario_logado(),
+            )
+        except DjangoValidationError as exc:
+            raise DRFValidationError(exc.message_dict) from exc
+
+        serializer.instance = profissional

@@ -34,7 +34,7 @@ class CargoViewSet(viewsets.ModelViewSet):
     Delegando regras de negócio ao CargosService.
     """
 
-    http_method_names = ["get", "post", "patch", "options"]
+    http_method_names = ["get", "post", "patch", "options", "delete"]
     queryset = Cargo.objects.all()
     lookup_field = "uuid"
 
@@ -176,3 +176,14 @@ class CargoViewSet(viewsets.ModelViewSet):
             raise NotAuthenticated("Usuário não identificado.")
 
         return usuario
+
+    def perform_destroy(self, instance: Cargo) -> None:
+        """
+        Deleta um cargo existente usando o serviço.
+
+        Args:
+            instance (Cargo): Instância do cargo a ser deletada.
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
+        self.service.deletar(instance, self._obter_usuario())

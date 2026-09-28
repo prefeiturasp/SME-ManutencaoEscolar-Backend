@@ -7,8 +7,14 @@ from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.core.pagination import PaginacaoPadrao
 from apps.profissional.api.views import ProfissionalViewSet
-from apps.profissional.models import Profissional
+from apps.profissional.models import FuncaoProfissional, Profissional
+from apps.profissional.serializers.profissional_serializers import (
+    ProfissionalCriarAtualizarSerializer,
+    ProfissionalListSerializer,
+    ProfissionalSerializer,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -59,12 +65,173 @@ def test_requisicao_sem_autenticacao_retorna_401(profissional_payload):
     assert resposta.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_view_usa_serializer_de_leitura_para_outras_acoes():
-    """Seleciona o serializer de leitura fora da criação."""
+def test_view_usa_serializer_de_listagem():
+    """Seleciona o serializer resumido na listagem."""
     view = ProfissionalViewSet()
     view.action = "list"
 
-    assert view.get_serializer_class().__name__ == "ProfissionalSerializer"
+    assert view.get_serializer_class() is ProfissionalListSerializer
+
+
+def test_view_usa_serializer_de_detalhes_para_outras_acoes():
+    """Seleciona o serializer detalhado fora da criação e listagem."""
+    view = ProfissionalViewSet()
+    view.action = "retrieve"
+
+    assert view.get_serializer_class() is ProfissionalSerializer
+
+
+def test_view_usa_serializer_de_escrita_na_atualizacao():
+    """Seleciona o serializer de escrita na atualização integral."""
+    view = ProfissionalViewSet()
+    view.action = "update"
+
+    assert view.get_serializer_class() is ProfissionalCriarAtualizarSerializer
+
+
+def test_view_configura_listagem_paginada():
+    """Configura filtros e paginação padrão para a listagem."""
+    view = ProfissionalViewSet()
+
+    assert view.pagination_class is PaginacaoPadrao
+    assert view.http_method_names == ["get", "post", "put", "options"]
+
+
+def test_atualiza_profissional_com_funcoes(
+    api_cliente, cargo_profissional, usuario_ativo
+):
+    """PUT atualiza o profissional e preserva a função pelo UUID."""
+    cargo_profissional.exige_documento = False
+    cargo_profissional.save(update_fields=["exige_documento"])
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional,
+        cargo=cargo_profissional,
+    )
+
+    resposta = api_cliente.put(
+        f"/api/v1/profissionais/{profissional.uuid}/",
+        {
+            "nome": "José Atualizado",
+            "cpf": profissional.cpf,
+            "rg": profissional.rg,
+            "status": False,
+            "funcoes": [
+                {
+                    "uuid": str(funcao.uuid),
+                    "uuid_cargo": str(cargo_profissional.uuid),
+                    "documentos": [],
+                }
+            ],
+        },
+        format="json",
+    )
+
+    profissional.refresh_from_db()
+    funcao.refresh_from_db()
+    assert resposta.status_code == status.HTTP_200_OK
+    assert profissional.nome == "José Atualizado"
+    assert profissional.status is False
+    assert profissional.atualizado_por == usuario_ativo
+    assert funcao.atualizado_por == usuario_ativo
+
+
+def test_lista_profissionais_com_funcoes(
+    api_cliente, cargo_profissional, usuario_ativo
+):
+    """Lista profissionais paginados com os dados de suas funções."""
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+        criado_por=usuario_ativo,
+    )
+    FuncaoProfissional.objects.create(
+        profissional=profissional,
+        cargo=cargo_profissional,
+        criado_por=usuario_ativo,
+    )
+
+    resposta = api_cliente.get("/api/v1/profissionais/")
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json() == {
+        "count": 1,
+        "next": None,
+        "previous": None,
+        "results": [
+            {
+                "uuid": str(profissional.uuid),
+                "nome": "José da Silva",
+                "cpf": "12345678901",
+                "rg": "123456789",
+                "status": True,
+                "funcoes": ["Eletricista"],
+            }
+        ],
+    }
+
+
+@pytest.mark.parametrize(
+    ("parametros", "nome_esperado"),
+    [
+        ({"nome": "maria"}, "Maria Souza"),
+        ({"cpf": "222"}, "Maria Souza"),
+        ({"rg": "444"}, "Maria Souza"),
+        ({"status": "false"}, "Maria Souza"),
+    ],
+)
+def test_lista_profissionais_com_filtros(
+    api_cliente, parametros, nome_esperado
+):
+    """Filtra a listagem por nome, CPF, RG e status."""
+    Profissional.objects.create(
+        nome="José da Silva", cpf="11111111111", rg="333333333", status=True
+    )
+    Profissional.objects.create(
+        nome="Maria Souza", cpf="22222222222", rg="444444444", status=False
+    )
+
+    resposta = api_cliente.get("/api/v1/profissionais/", parametros)
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json()["count"] == 1
+    assert resposta.json()["results"][0]["nome"] == nome_esperado
+
+
+def test_lista_profissionais_filtra_funcao_pelo_uuid_do_cargo(
+    api_cliente, cargo_profissional
+):
+    """Filtra profissionais pelo UUID do cargo."""
+    eletricista = Profissional.objects.create(
+        nome="José da Silva", cpf="11111111111", rg="333333333"
+    )
+    Profissional.objects.create(
+        nome="Maria Souza", cpf="22222222222", rg="444444444"
+    )
+    FuncaoProfissional.objects.create(
+        profissional=eletricista,
+        cargo=cargo_profissional,
+    )
+
+    resposta = api_cliente.get(
+        "/api/v1/profissionais/", {"funcao": str(cargo_profissional.uuid)}
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json()["count"] == 1
+    assert resposta.json()["results"][0]["nome"] == "José da Silva"
+
+
+def test_listagem_sem_autenticacao_retorna_401():
+    """Protege a listagem contra acesso não autenticado."""
+    resposta = APIClient().get("/api/v1/profissionais/")
+
+    assert resposta.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_criacao_converte_validation_error_do_django(
@@ -78,6 +245,48 @@ def test_criacao_converte_validation_error_do_django(
     ):
         resposta = api_cliente.post(
             "/api/v1/profissionais/", profissional_payload, format="json"
+        )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json()["cpf"] == ["CPF inválido"]
+
+
+def test_atualizacao_converte_validation_error_do_django(
+    api_cliente, cargo_profissional
+):
+    """Converte erros da atualização em resposta de validação da API."""
+    cargo_profissional.exige_documento = False
+    cargo_profissional.save(update_fields=["exige_documento"])
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional,
+        cargo=cargo_profissional,
+    )
+
+    with patch(
+        "apps.profissional.api.views.ProfissionalService.atualizar",
+        side_effect=ValidationError({"cpf": ["CPF inválido"]}),
+    ):
+        resposta = api_cliente.put(
+            f"/api/v1/profissionais/{profissional.uuid}/",
+            {
+                "nome": profissional.nome,
+                "cpf": profissional.cpf,
+                "rg": profissional.rg,
+                "status": profissional.status,
+                "funcoes": [
+                    {
+                        "uuid": str(funcao.uuid),
+                        "uuid_cargo": str(cargo_profissional.uuid),
+                        "documentos": [],
+                    }
+                ],
+            },
+            format="json",
         )
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST

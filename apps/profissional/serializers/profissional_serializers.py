@@ -13,7 +13,7 @@ from apps.usuarios.models.usuario import Usuario
 
 
 class ProfissionalSerializer(serializers.ModelSerializer):
-    """Serializa um profissional para listagem e detalhes."""
+    """Serializa um profissional para detalhes."""
 
     criado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
@@ -40,6 +40,36 @@ class ProfissionalSerializer(serializers.ModelSerializer):
             "criado_em",
             "atualizado_por",
             "atualizado_em",
+            "funcoes",
+        )
+
+
+class ProfissionalListSerializer(serializers.ModelSerializer):
+    """Serializa um profissional para listagem."""
+
+    funcoes = serializers.SerializerMethodField()
+
+    def get_funcoes(self, profissional: Profissional) -> list[str]:
+        """Retorna os nomes dos cargos exercidos pelo profissional.
+
+        Args:
+            profissional: Profissional que está sendo serializado.
+
+        Returns:
+            Nomes dos cargos vinculados ao profissional.
+        """
+        return [funcao.cargo.nome for funcao in profissional.funcoes.all()]
+
+    class Meta:
+        """Configuração do serializer de profissional."""
+
+        model = Profissional
+        fields = (
+            "uuid",
+            "nome",
+            "cpf",
+            "rg",
+            "status",
             "funcoes",
         )
 
