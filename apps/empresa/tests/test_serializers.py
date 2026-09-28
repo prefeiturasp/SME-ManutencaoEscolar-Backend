@@ -149,7 +149,7 @@ class TestEmpresaCriarAtualizarSerializer:
         )
 
         def validar() -> None:
-            EmpresaService._validar_cnpj_duplicado(
+            EmpresaService()._validar_cnpj_duplicado(
                 existente.cnpj,
                 titulo=titulo,
                 empresa_ignorada=instancia,

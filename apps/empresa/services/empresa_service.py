@@ -186,25 +186,30 @@ class EmpresaService:
         self.responsavel_tecnico_service.remover(responsaveis, usuario)
         self.empresa_repository.deletar(empresa, usuario)
 
-    @staticmethod
     def _validar_cnpj_duplicado(
+        self,
         cnpj: str,
         *,
         titulo: str,
         empresa_ignorada: Empresa | None = None,
     ) -> None:
-        """Verifica se outra empresa já utiliza o CNPJ."""
-        empresas = Empresa.objects.filter(cnpj=cnpj)
+        """Valida se outra empresa já utiliza o CNPJ informado.
 
-        if empresa_ignorada is not None:
-            empresas = empresas.exclude(pk=empresa_ignorada.pk)
+        Args:
+            cnpj: CNPJ a ser validado.
+            titulo: Título exibido quando o CNPJ estiver duplicado.
+            empresa_ignorada: Empresa desconsiderada consulta durante a edição.
 
-        if empresas.exists():
+        Raises:
+            EmpresaJaPossuiCNPJError: Se outra empresa utilizar o CNPJ.
+        """
+        if self.empresa_repository.existe_por_cnpj(
+            cnpj,
+            empresa_ignorada=empresa_ignorada,
+        ):
             raise EmpresaJaPossuiCNPJError(
                 title=titulo,
-                detail=(
-                    EmpresaErrorMessages.CNPJ_JA_CADASTRADO_MENSAGEM.format(
-                        cnpj=cnpj
-                    )
+                detail=EmpresaErrorMessages.CNPJ_JA_CADASTRADO_MENSAGEM.format(
+                    cnpj=cnpj
                 ),
             )

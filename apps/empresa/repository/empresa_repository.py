@@ -76,3 +76,24 @@ class EmpresaRepository:
         dados_empresa["id"] = empresa.id
         dados_empresa["uuid"] = str(empresa.uuid)
         return dados_empresa
+
+    def existe_por_cnpj(
+        self,
+        cnpj: str,
+        empresa_ignorada: Empresa | None = None,
+    ) -> bool:
+        """Verifica se outra empresa já utiliza o CNPJ informado.
+
+        Args:
+            cnpj:CNPJ a ser consultado.
+            empresa_ignorada: Empresa que deve ser desconsiderada na consulta.
+
+        Returns:
+            True se outra empresa utilizar o CNPJ; caso contrário, False.
+        """
+        queryset = self.model.objects.filter(cnpj=cnpj)
+
+        if empresa_ignorada is not None:
+            queryset = queryset.exclude(pk=empresa_ignorada.pk)
+
+        return queryset.exists()
