@@ -62,7 +62,9 @@ class FuncaoProfissionalService:
                 forem informados, ou se um UUID não pertencer ao profissional.
         """
         existentes = self.repository.listar_por_profissional(profissional_id)
-        existentes_uuids = {str(funcao.uuid): funcao for funcao in existentes}
+        existentes_uuids = {
+            str(funcao["uuid"]): funcao for funcao in existentes
+        }
         uuids_informados = {
             str(dados["uuid"]) for dados in dados_lista if dados.get("uuid")
         }
@@ -87,7 +89,7 @@ class FuncaoProfissionalService:
                 )
 
         for funcao_existente in existentes:
-            if str(funcao_existente.uuid) not in uuids_informados:
+            if str(funcao_existente["uuid"]) not in uuids_informados:
                 self.repository.remover(funcao_existente, usuario)
 
         funcoes: list[dict[str, Any]] = []
@@ -96,8 +98,9 @@ class FuncaoProfissionalService:
             documentos = dados.pop("documentos", [])
             uuid = dados.get("uuid")
             if uuid:
+                funcao_existente = existentes_uuids[str(uuid)]
                 funcao_serializada = self.repository.atualizar(
-                    existentes_uuids[str(uuid)],
+                    funcao_existente,
                     {**dados, "atualizado_por": usuario},
                 )
             else:

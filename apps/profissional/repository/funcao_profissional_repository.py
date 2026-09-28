@@ -27,17 +27,20 @@ class FuncaoProfissionalRepository:
         return self._serializar(funcao)
 
     def atualizar(
-        self, funcao: FuncaoProfissional, dados: dict[str, Any]
+        self,
+        funcao: FuncaoProfissional | dict[str, Any],
+        dados: dict[str, Any],
     ) -> dict[str, Any]:
         """Atualiza e serializa uma função profissional.
 
         Args:
-            funcao: Função profissional que será atualizada.
+            funcao: Função profissional ou seus dados serializados.
             dados: Campos que devem ser aplicados à função.
 
         Returns:
             Dados serializados da função atualizada.
         """
+        funcao = self._obter_instancia(funcao)
         campos = {**dados}
         campos.pop("uuid", None)
         campos_alterados = [
@@ -54,29 +57,45 @@ class FuncaoProfissionalRepository:
 
     def listar_por_profissional(
         self, profissional_id: int
-    ) -> list[FuncaoProfissional]:
+    ) -> list[dict[str, Any]]:
         """Lista as funções ativas de um profissional.
 
         Args:
             profissional_id: ID do profissional dono das funções.
 
         Returns:
-            Funções ativas vinculadas ao profissional.
+            Lista de dicionários com as funções ativas do profissional.
         """
-        return list(self.model.objects.filter(profissional_id=profissional_id))
+        funcoes = self.model.objects.filter(profissional_id=profissional_id)
+        return [self._serializar(funcao) for funcao in funcoes]
 
     def remover(
         self,
-        funcao: FuncaoProfissional,
+        funcao: FuncaoProfissional | dict[str, Any],
         usuario: Usuario | None = None,
     ) -> None:
         """Remove logicamente uma função profissional.
 
         Args:
-            funcao: Função profissional que será removida.
+            funcao: Função profissional ou seus dados serializados.
             usuario: Usuário responsável pela remoção.
         """
-        funcao.soft_delete(usuario=usuario)
+        self._obter_instancia(funcao).soft_delete(usuario=usuario)
+
+    def _obter_instancia(
+        self, funcao: FuncaoProfissional | dict[str, Any]
+    ) -> FuncaoProfissional:
+        """Obtém a instância de uma função profissional.
+
+        Args:
+            funcao: Instância ou dados serializados da função profissional.
+
+        Returns:
+            Instância persistida da função profissional.
+        """
+        if isinstance(funcao, self.model):
+            return funcao
+        return self.model.objects.get(pk=funcao["id"])
 
     @staticmethod
     def _serializar(funcao: FuncaoProfissional) -> dict[str, Any]:

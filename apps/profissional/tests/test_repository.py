@@ -59,6 +59,24 @@ def test_funcao_repository_cria(cargo_profissional, usuario_ativo):
     assert funcao_persistida.criado_por == usuario_ativo
 
 
+def test_funcao_repository_lista_por_profissional(cargo_profissional):
+    """Lista as funções do profissional em formato de dicionário."""
+    profissional = Profissional.objects.create(
+        nome="José", cpf="12345678901", rg="123456789"
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+
+    resultado = FuncaoProfissionalRepository().listar_por_profissional(
+        profissional.id
+    )
+
+    assert resultado[0]["id"] == funcao.id
+    assert resultado[0]["uuid"] == str(funcao.uuid)
+    assert resultado[0]["cargo"] == cargo_profissional
+
+
 def test_documento_repository_cria(cargo_profissional, usuario_ativo):
     """Persiste um documento de função."""
     profissional = Profissional.objects.create(
@@ -92,6 +110,32 @@ def test_documento_repository_cria(cargo_profissional, usuario_ativo):
     assert documento["tipo_mime"] == documento_persistido.tipo_mime
     assert documento["tamanho_bytes"] == documento_persistido.tamanho_bytes
     assert documento_persistido.criado_por == usuario_ativo
+
+
+def test_documento_repository_lista_por_funcao(cargo_profissional):
+    """Lista os documentos da função em formato de dicionário."""
+    profissional = Profissional.objects.create(
+        nome="José", cpf="12345678901", rg="123456789"
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+    documento = DocumentoFuncaoProfissional.objects.create(
+        nome_original="NR10.pdf",
+        arquivo=SimpleUploadedFile("NR10.pdf", b"conteudo"),
+        tipo=TipoArquivo.DOCUMENTO,
+        tipo_mime="application/pdf",
+        tamanho_bytes=len(b"conteudo"),
+        funcao_profissional=funcao,
+    )
+
+    resultado = DocumentoFuncaoProfissionalRepository().listar_por_funcao(
+        funcao.id
+    )
+
+    assert resultado[0]["id"] == documento.id
+    assert resultado[0]["uuid"] == str(documento.uuid)
+    assert resultado[0]["nome_original"] == documento.nome_original
 
 
 def test_funcao_repository_atualiza_sem_alteracoes(cargo_profissional):

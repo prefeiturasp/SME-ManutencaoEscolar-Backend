@@ -55,20 +55,19 @@ class DocumentoFuncaoProfissionalRepository:
 
         documentos_nao_preservados.delete()
 
-    def listar_por_funcao(
-        self, funcao_id: int
-    ) -> list[DocumentoFuncaoProfissional]:
+    def listar_por_funcao(self, funcao_id: int) -> list[dict[str, Any]]:
         """Lista os documentos ativos vinculados a uma função.
 
         Args:
             funcao_id: ID da função profissional.
 
         Returns:
-            Documentos ativos da função.
+            Lista de dicionários com os documentos ativos da função.
         """
-        return list(
-            self.model.objects.filter(funcao_profissional_id=funcao_id)
+        documentos = self.model.objects.filter(
+            funcao_profissional_id=funcao_id
         )
+        return [self._serializar(documento) for documento in documentos]
 
     @staticmethod
     def _serializar(documento: DocumentoFuncaoProfissional) -> dict[str, Any]:

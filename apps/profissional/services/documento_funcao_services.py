@@ -54,7 +54,7 @@ class DocumentoFuncaoProfissionalService:
             ValidationError: Se um UUID informado não pertencer à função.
         """
         existentes = self.repository.listar_por_funcao(funcao_id)
-        existentes_uuids = {str(documento.uuid) for documento in existentes}
+        existentes_uuids = {str(documento["uuid"]) for documento in existentes}
         documentos_uuids_preservados = [
             str(dados["uuid"])
             for dados in documentos_lista

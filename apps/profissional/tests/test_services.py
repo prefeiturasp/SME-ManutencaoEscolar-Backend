@@ -62,8 +62,8 @@ def test_documento_service_valida_e_cria_documentos(usuario_ativo):
 def test_documento_service_preserva_existentes_e_exclui_ausentes():
     """Preserva os UUIDs informados e remove documentos omitidos."""
     repository = MagicMock()
-    preservado = SimpleNamespace(uuid="uuid-preservado")
-    ausente = SimpleNamespace(uuid="uuid-ausente")
+    preservado = {"uuid": "uuid-preservado"}
+    ausente = {"uuid": "uuid-ausente"}
     repository.listar_por_funcao.return_value = [preservado, ausente]
     service = DocumentoFuncaoProfissionalService(repository, MagicMock())
 
@@ -139,8 +139,8 @@ def test_funcao_service_sincroniza_por_uuid_e_remove_ausentes():
     """Atualiza por UUID, cria novas funções e remove as ausentes."""
     repository = MagicMock()
     documento_service = MagicMock()
-    funcao_existente = SimpleNamespace(id=1, uuid="uuid-existente")
-    funcao_ausente = SimpleNamespace(id=2, uuid="uuid-ausente")
+    funcao_existente = {"id": 1, "uuid": "uuid-existente"}
+    funcao_ausente = {"id": 2, "uuid": "uuid-ausente"}
     repository.listar_por_profissional.return_value = [
         funcao_existente,
         funcao_ausente,
