@@ -15,6 +15,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.empresa.exceptions import (
     EmpresaCnpjDuplicadoError,
+    EmpresaJaPossuiCNPJError,
     EmpresaPossuiLotesVinculadosError,
 )
 from apps.empresa.filters import EmpresaFilter
@@ -72,6 +73,13 @@ class EmpresaViewSet(ModelViewSet):
             empresa = self.service.criar(
                 serializer.validated_data, self._usuario_logado()
             )
+        except EmpresaJaPossuiCNPJError as exc:
+            raise DRFValidationError(
+                {
+                    "title": exc.title,
+                    "detail": exc.detail,
+                }
+            ) from exc
         except EmpresaCnpjDuplicadoError as exc:
             raise DRFValidationError({"cnpj": str(exc)}) from exc
         except DjangoValidationError as exc:
@@ -96,6 +104,13 @@ class EmpresaViewSet(ModelViewSet):
                 serializer.validated_data,
                 self._usuario_logado(),
             )
+        except EmpresaJaPossuiCNPJError as exc:
+            raise DRFValidationError(
+                {
+                    "title": exc.title,
+                    "detail": exc.detail,
+                }
+            ) from exc
         except EmpresaCnpjDuplicadoError as exc:
             raise DRFValidationError({"cnpj": str(exc)}) from exc
         except DjangoValidationError as exc:

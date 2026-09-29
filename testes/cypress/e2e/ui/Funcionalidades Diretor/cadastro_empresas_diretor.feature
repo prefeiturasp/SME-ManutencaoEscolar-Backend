@@ -1,6 +1,6 @@
 # language: pt
 
-Funcionalidade: Cadastro de Empresa
+Funcionalidade: Cadastro de empresa
 
   Contexto:
     Dado eu acesso o sistema com a visualização "web"
@@ -64,7 +64,7 @@ Funcionalidade: Cadastro de Empresa
   Esquema do Cenário: Cadastrar mais de um Responsável Técnico 
     E acesso a tela Empresas
     Quando crio cadastro com responsáveis técnicos
-    Então o sistema salva a empresa com responsável técnico
+    Então o sistema salva a empresa com todos responsáveis
 
   Esquema do Cenário: <caso>
     E acesso a tela Empresas
