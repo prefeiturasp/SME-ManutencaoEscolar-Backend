@@ -7,8 +7,10 @@ from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.exceptions import (
     EmpresaCnpjDuplicadoError,
+    EmpresaJaPossuiCNPJError,
     EmpresaPossuiLotesVinculadosError,
 )
 from apps.empresa.models import Empresa, ResponsavelTecnico
@@ -240,6 +242,67 @@ def test_atualizacao_mapeia_cnpj_duplicado_para_erro_de_validacao(
     assert response.json()["cnpj"] == (
         "Já existe uma empresa cadastrada com este CNPJ."
     )
+
+
+def test_criacao_retorna_titulo_e_detalhe_para_cnpj_duplicado(
+    api_cliente, empresa_payload_valido_com_responsaveis
+) -> None:
+    """Retorna o título e a mensagem da duplicidade na criação."""
+    titulo = EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_CRIAR
+    mensagem = EmpresaErrorMessages.CNPJ_JA_CADASTRADO_MENSAGEM.format(
+        cnpj=empresa_payload_valido_com_responsaveis["cnpj"]
+    )
+
+    with patch(
+        "apps.empresa.api.views.empresa_views.EmpresaService.criar",
+        side_effect=EmpresaJaPossuiCNPJError(
+            title=titulo,
+            detail=mensagem,
+        ),
+    ):
+        response = api_cliente.post(
+            "/api/v1/empresas/",
+            empresa_payload_valido_com_responsaveis,
+            format="json",
+        )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "title": titulo,
+        "detail": mensagem,
+    }
+
+
+def test_atualizacao_retorna_titulo_e_detalhe_para_cnpj_duplicado(
+    api_cliente,
+    empresa_payload_valido,
+    empresa_payload_valido_com_responsaveis,
+) -> None:
+    """Retorna o título e a mensagem da duplicidade na edição."""
+    empresa = Empresa.objects.create(**empresa_payload_valido)
+    titulo = EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_EDITAR
+    mensagem = EmpresaErrorMessages.CNPJ_JA_CADASTRADO_MENSAGEM.format(
+        cnpj=empresa_payload_valido_com_responsaveis["cnpj"]
+    )
+
+    with patch(
+        "apps.empresa.api.views.empresa_views.EmpresaService.atualizar",
+        side_effect=EmpresaJaPossuiCNPJError(
+            title=titulo,
+            detail=mensagem,
+        ),
+    ):
+        response = api_cliente.put(
+            f"/api/v1/empresas/{empresa.uuid}/",
+            empresa_payload_valido_com_responsaveis,
+            format="json",
+        )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        "title": titulo,
+        "detail": mensagem,
+    }
 
 
 def test_atualizacao_mapeia_validation_error_do_django(
