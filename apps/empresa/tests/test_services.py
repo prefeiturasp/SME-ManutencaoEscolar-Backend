@@ -159,20 +159,21 @@ class TestEmpresaService:
             {**empresa_payload_valido_com_responsaveis, "criado_por": usuario}
         )
 
-        def test_criar_sem_usuario_define_criado_por_como_none(
-            self, empresa_payload_valido_com_responsaveis
-        ) -> None:
-            """Deve definir criado_por como None quando não houver usuário."""
-            service = EmpresaService()
+    @pytest.mark.django_db
+    def test_criar_sem_usuario_define_criado_por_como_none(
+        self, empresa_payload_valido_com_responsaveis
+    ) -> None:
+        """Deve definir criado_por como None quando não houver usuário."""
+        service = EmpresaService()
 
-            with patch.object(
-                service, "criar_com_responsaveis", return_value={}
-            ) as mock_criar_com_responsaveis:
-                service.criar(empresa_payload_valido_com_responsaveis)
+        with patch.object(
+            service, "criar_com_responsaveis", return_value={}
+        ) as mock_criar_com_responsaveis:
+            service.criar(empresa_payload_valido_com_responsaveis)
 
-            mock_criar_com_responsaveis.assert_called_once_with(
-                {**empresa_payload_valido_com_responsaveis, "criado_por": None}
-            )
+        mock_criar_com_responsaveis.assert_called_once_with(
+            {**empresa_payload_valido_com_responsaveis, "criado_por": None}
+        )
 
     @pytest.mark.django_db
     def test_criar_com_responsaveis_cria_empresa_e_responsaveis(
