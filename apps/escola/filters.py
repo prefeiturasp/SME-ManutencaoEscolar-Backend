@@ -132,6 +132,18 @@ class UnidadeEducacionalFilter(django_filters.FilterSet):
 
         Considera apenas os vínculos entre Diretoria Regional e lote
         que não foram excluídos logicamente.
+
+        Args:
+            queryset (QuerySet[Unidadeeducacional]):QuerySet de unidades
+                educacionais a ser filtrado.
+            name (str):  Nome do campo do filtro.
+            value (str): Nome ou parte do nome do lote utilizado como critério
+            de busca.
+
+        Returns:
+            QuerySet[Unidadeeducacional]: QuerySet contendo as unidades
+                educacionais vinculadas a lotes ativos cujo nome corresponde
+                ao valor informado.
         """
         return queryset.filter(
             diretoria_regional__vinculo_lote__deletado_em__isnull=True,

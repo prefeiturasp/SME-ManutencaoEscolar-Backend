@@ -468,6 +468,28 @@ class Command(BaseCommand):
 
     @staticmethod
     def _salvar_unidade(registro: dict, usuario: Usuario) -> dict[str, Any]:
+        """Cria ou atualiza uma unidade educacional.
+
+        A unidade é identificada pelo código EOL. Quando não existe,
+        uma nova unidade é criada com os dados do registro. Caso já exista,
+        a atualização somente é realizada quando a última alteração foi feita
+        pelo mesmo usuário informado ou quando a unidade ainda não possui
+        usuário responsável pela atualização.
+
+        Args:
+            registro (dict): Dados da unidade educacional, contendo o código
+                EOL, nome, Diretoria Regional, tipo de escola e Subprefeitura.
+            usuario (Usuario): Usuário responsável pela sincronização ou
+                atualização dos dados da unidade educacional.
+
+        Returns:
+            dict[str, Any]:  Dicionário contendo o status da operação. Retorna
+            ``{"status": "criadas"}`` quando uma nova unidade é criada,
+            ``{"status": "atualizadas"}`` quando uma unidade existente é
+            atualizada ou ``{"status": "ignoradas"}`` quando a atualização
+            não é realizada por ter sido feita anteriormente por outro
+            usuário.
+        """
         unidade, foi_criado = Unidadeeducacional.objects.get_or_create(
             codigo_eol=registro["codigo_eol"],
             defaults={

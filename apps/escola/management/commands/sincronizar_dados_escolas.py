@@ -444,6 +444,30 @@ class Command(BaseCommand):
     def _salvar_dados_unidade(
         registro: dict, usuario: Usuario
     ) -> dict[str, Any]:
+        """Cria ou atualiza os dados de uma unidade educacional.
+
+        Os dados são identificados pela unidade educacional. Quando não
+        existem, um novo registro é criado com as informações fornecidas. Caso
+        já exista, a atualização somente é realizada quando a última alteração
+        foi feita pelo mesmo usuário informado ou quando o registro ainda não
+        possui usuário responsável pela atualização.
+
+        Args:
+            registro (dict): Dados da unidade educacional, contendo a unidade
+                educacional e suas informações de contato e endereço, como
+                e-mail, telefone, logradouro, número, bairro, CEP, município
+                e UF.
+            usuario (Usuario): Usuário responsável pela sincronização ou
+                atualização dos dados da unidade educacional.
+
+        Returns:
+            dict[str, Any]: Dicionário contendo o status da operação. Retorna
+            ``{"status": "criados"}`` quando os dados da unidade são criados,
+            ``{"status": "atualizados"}`` quando os dados existentes são
+            atualizados ou ``{"status": "ignorados"}`` quando a atualização
+            não é realizada por ter sido feita anteriormente por outro
+            usuário.
+        """
         dados_unidade, foi_criado = (
             DadosUnidadeEducacional.objects.get_or_create(
                 unidade_educacional=registro["unidade_educacional"],
