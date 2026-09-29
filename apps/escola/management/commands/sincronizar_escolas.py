@@ -34,6 +34,7 @@ from apps.escola.models import (
     TipoEscola,
     Unidadeeducacional,
 )
+from apps.usuarios.models.usuario import Usuario
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
 
 logger = logging.getLogger(__name__)
@@ -103,20 +104,18 @@ class Command(BaseCommand):
             "Análise finalizada. \n Processando informações de "
             f"{total_escolas} unidades para base de dados."
         )
-        quantidades = {"criadas": 0, "atualizadas": 0}
+        quantidades = {"criadas": 0, "atualizadas": 0, "ignoradas": 0}
+        try:
+            usuario = Usuario.objects.get(username="sincronizacao_eol")
+        except Usuario.DoesNotExist as exc:
+            raise CommandError(
+                "Usuário de sincronização de dados não encontrado."
+            ) from exc
+
         with transaction.atomic():
             for numero, registro in enumerate(unidades_educacionais, start=1):
-                _, foi_criado = Unidadeeducacional.objects.update_or_create(
-                    codigo_eol=registro["codigo_eol"],
-                    defaults={
-                        "nome": registro["nome"],
-                        "diretoria_regional": registro["diretoria_regional"],
-                        "tipo_escola": registro["tipo_escola"],
-                        "subprefeitura": registro["subprefeitura"],
-                    },
-                )
-                quantidades["criadas" if foi_criado else "atualizadas"] += 1
-
+                resultado = self._salvar_unidade(registro, usuario)
+                quantidades[resultado["status"]] += 1
                 if numero % 500 == 0 or numero == total_escolas:
                     logger.info(
                         f"{numero} de {total_escolas} escolas processadas. "
@@ -127,8 +126,9 @@ class Command(BaseCommand):
         tempo_execucao_minutos = tempo_execucao_segundos / 60
         logger.info(
             f"Importação concluída em {tempo_execucao_minutos:.2f} minutos:\n"
-            f"{quantidades['criadas']} criados\n"
-            f"{quantidades['atualizadas']} atualizados\n"
+            f"{quantidades['criadas']} unidades criadas\n"
+            f"{quantidades['atualizadas']} unidades atualizadas\n"
+            f"{quantidades['ignoradas']} unidades não atualizadas\n"
         )
 
     def _coletar_registros(
@@ -465,3 +465,59 @@ class Command(BaseCommand):
             )
 
         return payload
+
+    @staticmethod
+    def _salvar_unidade(registro: dict, usuario: Usuario) -> dict[str, Any]:
+        """Cria ou atualiza uma unidade educacional.
+
+        A unidade é identificada pelo código EOL. Quando não existe,
+        uma nova unidade é criada com os dados do registro. Caso já exista,
+        a atualização somente é realizada quando a última alteração foi feita
+        pelo mesmo usuário informado ou quando a unidade ainda não possui
+        usuário responsável pela atualização.
+
+        Args:
+            registro (dict): Dados da unidade educacional, contendo o código
+                EOL, nome, Diretoria Regional, tipo de escola e Subprefeitura.
+            usuario (Usuario): Usuário responsável pela sincronização ou
+                atualização dos dados da unidade educacional.
+
+        Returns:
+            dict[str, Any]:  Dicionário contendo o status da operação. Retorna
+            ``{"status": "criadas"}`` quando uma nova unidade é criada,
+            ``{"status": "atualizadas"}`` quando uma unidade existente é
+            atualizada ou ``{"status": "ignoradas"}`` quando a atualização
+            não é realizada por ter sido feita anteriormente por outro
+            usuário.
+        """
+        unidade, foi_criado = Unidadeeducacional.objects.get_or_create(
+            codigo_eol=registro["codigo_eol"],
+            defaults={
+                "nome": registro["nome"],
+                "diretoria_regional": registro["diretoria_regional"],
+                "tipo_escola": registro["tipo_escola"],
+                "subprefeitura": registro["subprefeitura"],
+            },
+        )
+        if foi_criado:
+            return {"status": "criadas"}
+
+        if not (
+            unidade.atualizado_por is None or unidade.atualizado_por == usuario
+        ):
+            usuario_atualizacao = unidade.atualizado_por
+            logger.info(
+                f"Unidade {unidade.nome} não atualizada: última alteração "
+                "realizada pelo usuário "
+                f"{usuario_atualizacao.username}."
+            )
+            return {"status": "ignoradas"}
+
+        unidade.nome = registro["nome"]
+        unidade.diretoria_regional = registro["diretoria_regional"]
+        unidade.tipo_escola = registro["tipo_escola"]
+        unidade.subprefeitura = registro["subprefeitura"]
+        unidade.atualizado_por = usuario
+        unidade.save()
+
+        return {"status": "atualizadas"}

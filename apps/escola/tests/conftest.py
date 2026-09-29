@@ -13,7 +13,6 @@ from apps.escola.models.unidade_educacional import (
     DadosUnidadeEducacional,
     Unidadeeducacional,
 )
-from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 
@@ -66,16 +65,6 @@ def resposta_api_tipos_escolas():
         },
     ]
     return resposta
-
-
-@pytest.fixture
-def diretoria_regional_centro():
-    """Cria uma Diretoria Regional para os testes."""
-    return DiretoriaRegional.objects.create(
-        codigo="DRE01",
-        nome="DIRETORIA REGIONAL DE EDUCACAO CENTRO",
-        abreviacao="CT",
-    )
 
 
 @pytest.fixture
@@ -164,6 +153,7 @@ def unidade_educacional_emef(
     diretoria_regional_centro,
     tipo_escola_emef,
     subprefeitura_se,
+    usuario_sincronizacao,
 ):
     """Cria uma unidade educacional do tipo EMEF para testes."""
     return Unidadeeducacional.objects.create(
@@ -173,6 +163,7 @@ def unidade_educacional_emef(
         tipo_escola=tipo_escola_emef,
         subprefeitura=subprefeitura_se,
         status=True,
+        atualizado_por=usuario_sincronizacao,
     )
 
 
@@ -292,22 +283,6 @@ def historico_responsavel(
 
 
 @pytest.fixture
-def lote_centro(diretoria_regional_centro, empresa):
-    """Fixture de lote."""
-    lote = Lote.objects.create(
-        codigo_cadastro="LOTE-001",
-        nome="Lote Centro",
-        empresa=empresa,
-        status=True,
-    )
-    LoteDiretoriaRegional.objects.create(
-        lote=lote,
-        diretoria_regional=diretoria_regional_centro,
-    )
-    return lote
-
-
-@pytest.fixture
 def resposta_dados_unidade():
     """Retorna uma resposta simulada da API de dados da unidade."""
     resposta = Mock()
@@ -340,7 +315,7 @@ def resposta_dados_unidade():
 
 
 @pytest.fixture
-def dados_unidade_emef(unidade_educacional_emef):
+def dados_unidade_emef(unidade_educacional_emef, usuario_sincronizacao):
     """Fixture de DadosUnidadeEducacional."""
     return DadosUnidadeEducacional.objects.create(
         unidade_educacional=unidade_educacional_emef,
@@ -352,4 +327,5 @@ def dados_unidade_emef(unidade_educacional_emef):
         cep="08032450",
         municipio="SAO PAULO",
         uf="SP",
+        atualizado_por=usuario_sincronizacao,
     )

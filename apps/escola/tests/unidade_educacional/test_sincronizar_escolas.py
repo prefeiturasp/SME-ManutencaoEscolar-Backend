@@ -57,6 +57,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve criar uma escola retornada pela API."""
         mock_get.side_effect = respostas_api
@@ -83,6 +84,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve atualizar uma escola existente."""
         escola = Unidadeeducacional.objects.create(
@@ -111,6 +113,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar a API EOL com o token configurado."""
         mock_get.side_effect = respostas_api
@@ -137,6 +140,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar a Subprefeitura específica da escola."""
         mock_get.side_effect = respostas_api
@@ -153,6 +157,7 @@ class TestSincronizarEscolas:
         mock_get,
         configurar_api_eol,
         diretoria_regional_centro,
+        usuario_sincronizacao,
     ):
         """Deve ignorar escolas com tipo não aceito."""
         sigla_nao_aceita = next(iter(TIPO_ESCOLA_NAO_ACEITAS))
@@ -519,6 +524,7 @@ class TestSincronizarEscolas:
         subprefeitura_se,
         configurar_api_eol,
         diretoria_regional_centro,
+        usuario_sincronizacao,
     ):
         """Deve continuar quando uma escola tiver DRE inexistente."""
         resposta = Mock()
@@ -720,6 +726,7 @@ class TestSincronizarEscolas:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve atualizar o progresso ao processar 500 escolas."""
         escolas = [
@@ -756,3 +763,80 @@ class TestSincronizarEscolas:
         call_command("sincronizar_escolas")
 
         assert Unidadeeducacional.objects.count() == 500
+
+    @patch("apps.escola.management.commands.sincronizar_escolas.requests.get")
+    def test_deve_falhar_quando_usuario_sincronizacao_nao_existir(
+        self,
+        mock_get,
+        respostas_api,
+        diretoria_regional_centro,
+        tipo_escola_emef,
+        subprefeitura_se,
+        configurar_api_eol,
+    ):
+        """Deve falhar quando o usuário de sincronização não existir."""
+        mock_get.side_effect = respostas_api
+
+        with pytest.raises(
+            CommandError,
+            match="Usuário de sincronização de dados não encontrado",
+        ):
+            call_command("sincronizar_escolas")
+
+    def test_deve_ignorar_escola_alterada_por_outro_usuario(
+        self,
+        diretoria_regional_centro,
+        tipo_escola_emef,
+        subprefeitura_se,
+        usuario_sincronizacao,
+        usuario_ativo,
+        unidade_educacional_emef,
+    ):
+        """Deve ignorar escola alterada por outro usuário."""
+        unidade_educacional_emef.atualizado_por = usuario_ativo
+        unidade_educacional_emef.save()
+        unidade_educacional_emef.refresh_from_db()
+
+        resultado = Command()._salvar_unidade(
+            {
+                "codigo_eol": "100001",
+                "nome": "Nome EOL",
+                "diretoria_regional": diretoria_regional_centro,
+                "tipo_escola": tipo_escola_emef,
+                "subprefeitura": subprefeitura_se,
+            },
+            usuario_sincronizacao,
+        )
+
+        unidade_educacional_emef.refresh_from_db()
+
+        assert resultado == {"status": "ignoradas"}
+        assert unidade_educacional_emef.nome == "EMEF ESCOLA TESTE"
+        assert unidade_educacional_emef.atualizado_por == usuario_ativo
+
+    def test_deve_atualizar_escola_alterada_pelo_usuario_da_sincronizacao(
+        self,
+        diretoria_regional_centro,
+        tipo_escola_emef,
+        subprefeitura_se,
+        usuario_sincronizacao,
+        usuario_ativo,
+        unidade_educacional_emef,
+    ):
+        """Deve ignorar escola alterada por outro usuário."""
+        resultado = Command()._salvar_unidade(
+            {
+                "codigo_eol": "100001",
+                "nome": "Nome EOL",
+                "diretoria_regional": diretoria_regional_centro,
+                "tipo_escola": tipo_escola_emef,
+                "subprefeitura": subprefeitura_se,
+            },
+            usuario_sincronizacao,
+        )
+
+        unidade_educacional_emef.refresh_from_db()
+
+        assert resultado == {"status": "atualizadas"}
+        assert unidade_educacional_emef.nome == "Nome EOL"
+        assert unidade_educacional_emef.atualizado_por == usuario_sincronizacao
