@@ -21,6 +21,14 @@ class ProfissionalSerializer(serializers.ModelSerializer):
     atualizado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
     )
+    registro_funcional_criador: serializers.CharField = serializers.CharField(
+        source="criado_por.registro_funcional",
+        read_only=True,
+    )
+    registro_funcional_editor: serializers.CharField = serializers.CharField(
+        source="atualizado_por.registro_funcional",
+        read_only=True,
+    )
     funcoes: FuncaoProfissionalSerializer = FuncaoProfissionalSerializer(
         many=True, read_only=True
     )
@@ -40,6 +48,8 @@ class ProfissionalSerializer(serializers.ModelSerializer):
             "criado_em",
             "atualizado_por",
             "atualizado_em",
+            "registro_funcional_criador",
+            "registro_funcional_editor",
             "funcoes",
         )
 

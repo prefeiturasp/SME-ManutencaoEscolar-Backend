@@ -1,5 +1,7 @@
 """Serializers de funções profissionais."""
 
+from typing import Any
+
 from rest_framework import serializers
 
 from apps.cargo.models import Cargo
@@ -12,6 +14,24 @@ from apps.usuarios.models.usuario import Usuario
 
 class DocumentoFuncaoProfissionalSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de documentos de funções profissionais."""
+
+    uuid: serializers.UUIDField = serializers.UUIDField(required=False)
+    arquivo: serializers.FileField = serializers.FileField(required=False)
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Exige arquivo apenas quando não há documento existente.
+
+        Args:
+            attrs: Dados do documento a serem validados.
+
+        Returns:
+            Dados validados do documento.
+        """
+        if not attrs.get("uuid") and not attrs.get("arquivo"):
+            raise serializers.ValidationError(
+                {"arquivo": self.fields["arquivo"].error_messages["required"]}
+            )
+        return attrs
 
     class Meta:
         """Configura os campos do documento da função profissional."""
@@ -26,7 +46,6 @@ class DocumentoFuncaoProfissionalSerializer(serializers.ModelSerializer):
             "tamanho_bytes",
         )
         read_only_fields = (
-            "uuid",
             "nome_original",
             "tipo",
             "tipo_mime",
@@ -52,6 +71,10 @@ class FuncaoProfissionalSerializer(serializers.ModelSerializer):
     criado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
     )
+    registro_funcional: serializers.CharField = serializers.CharField(
+        source="criado_por.registro_funcional",
+        read_only=True,
+    )
     atualizado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
     )
@@ -71,6 +94,7 @@ class FuncaoProfissionalSerializer(serializers.ModelSerializer):
             "nome_cargo",
             "uuid_cargo",
             "criado_por",
+            "registro_funcional",
             "criado_em",
             "atualizado_por",
             "atualizado_em",
