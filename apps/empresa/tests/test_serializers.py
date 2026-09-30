@@ -15,6 +15,7 @@ from apps.core.exceptions import (
     LinkRastreioInvalidoError,
 )
 from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.exceptions import EmpresaJaPossuiCNPJError
 from apps.empresa.models import Empresa
 from apps.empresa.serializers.anexo_serializers import (
     AnexoResponsavelTecnicoSerializer,
@@ -26,6 +27,7 @@ from apps.empresa.serializers.empresa_serializers import (
 from apps.empresa.serializers.responsavel_serializers import (
     ResponsavelTecnicoSerializer,
 )
+from apps.empresa.services.empresa_service import EmpresaService
 
 pytestmark = pytest.mark.django_db
 
@@ -118,6 +120,7 @@ class TestEmpresaCriarAtualizarSerializer:
 
         assert serializer.is_valid(), serializer.errors
 
+    @pytest.mark.django_db
     @pytest.mark.parametrize("apagada", [False, True])
     @pytest.mark.parametrize("atualizacao", [False, True])
     def test_duplicacao_considera_apenas_empresa_nao_apagada(
@@ -126,10 +129,12 @@ class TestEmpresaCriarAtualizarSerializer:
         apagada: bool,
         atualizacao: bool,
     ) -> None:
-        """Deve permitir reutilizar CNPJ somente de empresa apagada."""
+        """Permite reutilizar CNPJ apagado e rejeita o de empresa ativa."""
         existente = Empresa.objects.create(**empresa_payload_valido)
+
         if apagada:
             existente.soft_delete()
+
         instancia = (
             Empresa.objects.create(
                 **{**empresa_payload_valido, "cnpj": "43210987654321"}
@@ -137,17 +142,32 @@ class TestEmpresaCriarAtualizarSerializer:
             if atualizacao
             else None
         )
-        serializer = EmpresaCriarAtualizarSerializer(
-            instance=instancia,
-            data={"cnpj": existente.cnpj},
-            partial=True,
+        titulo = (
+            EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_EDITAR
+            if atualizacao
+            else EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_CRIAR
         )
 
-        assert serializer.is_valid() is apagada
-        if not apagada:
-            assert serializer.errors["cnpj"][0] == (
-                EmpresaErrorMessages.CNPJ_JA_CADASTRADO
+        def validar() -> None:
+            EmpresaService()._validar_cnpj_duplicado(
+                existente.cnpj,
+                titulo=titulo,
+                empresa_ignorada=instancia,
             )
+
+        if apagada:
+            validar()
+            return
+
+        with pytest.raises(EmpresaJaPossuiCNPJError) as exc_info:
+            validar()
+
+        assert exc_info.value.title == titulo
+        assert exc_info.value.detail == (
+            EmpresaErrorMessages.CNPJ_JA_CADASTRADO_MENSAGEM.format(
+                cnpj=existente.cnpj
+            )
+        )
 
     def test_atualizacao_permite_manter_proprio_cnpj(
         self, empresa_payload_valido: dict[str, Any]

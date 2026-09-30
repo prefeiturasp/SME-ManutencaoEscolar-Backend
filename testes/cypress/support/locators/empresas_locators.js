@@ -30,6 +30,12 @@ class Empresas_Localizadores {
   btn_rastrear_empresa = () => ':nth-child(1) > :nth-child(5) > .font-medium'
   btn_limpar_filtros = () => '.justify-end > :nth-child(1)'
   btn_buscar = () => '.justify-end > :nth-child(2)'
+  btn_cancelar = () => '.mx-auto > :nth-child(1) > .flex > :nth-child(1)'
+
+  // excluir
+  btn_excluir_empresa = () => '.hover\\:bg-destructive\\/20'
+  btn_confirmar_exclusao = () => '[role="alertdialog"] button:contains("Excluir")'
+  btn_cancelar_exclusao = () => '[role="alertdialog"] button:contains("Cancelar")'
 
 }
 

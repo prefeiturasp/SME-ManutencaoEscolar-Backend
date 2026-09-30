@@ -4,6 +4,7 @@ from typing import Any, cast
 
 from apps.cargo.constants import CargoErrorMessages
 from apps.cargo.exceptions import CargoOuDocumentoJaVinculadaError
+from apps.cargo.models import Cargo
 from apps.cargo.repository.cargo_repository import CargoRepository
 from apps.usuarios.models.usuario import Usuario
 
@@ -73,6 +74,76 @@ class CargoService:
             usuario=usuario,
         )
 
+    def atualizar(
+        self,
+        cargo: Cargo,
+        dados: dict[str, Any],
+        usuario: Usuario,
+    ) -> dict[str, Any]:
+        """Normaliza, valida e atualiza um cargo existente.
+
+        Apenas os campos enviados são alterados. O cargo em edição é
+        desconsiderado na verificação de nome duplicado.
+
+        Args:
+            cargo: Instância do cargo a ser atualizado.
+            dados: Campos validados para atualização.
+            usuario: Usuário responsável pela atualização.
+
+        Returns:
+            Dicionário com os dados atualizados do cargo.
+
+        Raises:
+            CargoOuDocumentoJaVinculadaError: Quando outro cargo possui
+                o nome informado ou há documentos com nomes duplicados.
+        """
+        dados_normalizados = dados.copy()
+
+        if "nome" in dados_normalizados:
+            nome = dados_normalizados["nome"].strip()
+
+            if self.repository.existe_por_nome(
+                nome,
+                cargo_ignorado=cargo,
+            ):
+                raise CargoOuDocumentoJaVinculadaError(
+                    title=CargoErrorMessages.CARGO_VINCULADO_TITULO,
+                    detail={
+                        "message": (
+                            CargoErrorMessages.CARGO_VINCULADO_CORPO.format(
+                                nome=nome,
+                            )
+                        ),
+                    },
+                )
+
+            dados_normalizados["nome"] = nome
+
+        if "documentos" in dados_normalizados:
+            documentos = cast(
+                list[dict[str, Any]],
+                dados_normalizados["documentos"],
+            )
+            documentos_normalizados = [
+                {
+                    **documento,
+                    "nome": documento["nome"].strip(),
+                }
+                for documento in documentos
+            ]
+
+            self._validar_documentos_duplicados(
+                documentos=documentos_normalizados,
+                nome_cargo=dados_normalizados.get("nome", cargo.nome),
+            )
+            dados_normalizados["documentos"] = documentos_normalizados
+
+        return self.repository.atualizar(
+            cargo=cargo,
+            dados=dados_normalizados,
+            usuario=usuario,
+        )
+
     def _validar_cargo_duplicado(self, nome: str) -> None:
         """Valida se já existe um cargo com o nome informado.
 
@@ -128,3 +199,22 @@ class CargoService:
                 )
 
             nomes_encontrados.add(nome_normalizado)
+
+    def deletar(
+        self,
+        model_cargo: Cargo,
+        usuario: Usuario,
+    ) -> tuple[int, dict[str, int]]:
+        """Realiza a exclusão lógica de um cargo.
+
+        Registra o usuário logado como responsável pela exclusão.
+
+        Args:
+            model_cargo: Instância do cargo a ser deletada.
+            usuario: Usuário logado responsável pela exclusão.
+
+        Returns:
+            Tupla contendo a quantidade de registros deletados e um dicionário
+            com a quantidade de exclusões por tipo de objeto.
+        """
+        return self.repository.deletar(usuario, model_cargo)

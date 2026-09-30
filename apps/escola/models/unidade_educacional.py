@@ -2,12 +2,12 @@
 
 from django.db import models
 
-from apps.core.models.mixins import UUIDMixin
+from apps.core.models.mixins import BaseModel
 from apps.escola.models import ResponsavelUnidade
 from apps.lote.models import Lote
 
 
-class Unidadeeducacional(UUIDMixin):
+class Unidadeeducacional(BaseModel):
     """Representa uma unidade escolar cadastrada no sistema EOL."""
 
     codigo_eol = models.CharField(
@@ -65,9 +65,13 @@ class Unidadeeducacional(UUIDMixin):
             QuerySet: Históricos dos responsáveis atualmente vinculados,
                 com o responsável e o cargo carregados.
         """
-        return self.historico_responsaveis.filter(
-            ativo=True,
-        ).select_related("responsavel", "cargo")
+        return (
+            self.historico_responsaveis.filter(
+                ativo=True,
+            )
+            .select_related("responsavel", "cargo")
+            .order_by("criado_em")
+        )
 
     @property
     def diretor_atual(self) -> ResponsavelUnidade | None:
@@ -106,6 +110,7 @@ class Unidadeeducacional(UUIDMixin):
         lote_diretoria = (
             self.diretoria_regional.vinculo_lote.filter(
                 lote__status=True,
+                deletado_em__isnull=True,
             )
             .select_related("lote")
             .first()
@@ -114,7 +119,7 @@ class Unidadeeducacional(UUIDMixin):
         return lote_diretoria.lote if lote_diretoria else None
 
 
-class DadosUnidadeEducacional(models.Model):
+class DadosUnidadeEducacional(BaseModel):
     """Armazena dados de contato e endereço de uma unidade educacional."""
 
     unidade_educacional = models.OneToOneField(

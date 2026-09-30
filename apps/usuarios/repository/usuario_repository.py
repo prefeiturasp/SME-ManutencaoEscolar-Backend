@@ -181,7 +181,11 @@ class UsuarioRepository:
                 "cargo": usuario.cargo.nome,
                 "perfil": {
                     "codigo": usuario.perfil,
-                    "descricao": PerfilAcesso(usuario.perfil).label,
+                    "descricao": (
+                        PerfilAcesso(usuario.perfil).label
+                        if usuario.perfil is not None
+                        else None
+                    ),
                 },
             },
         }

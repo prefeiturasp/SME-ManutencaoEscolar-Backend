@@ -88,20 +88,14 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
         )
 
     def validate_cnpj(self, value: str) -> str:
-        """Valida o formato e a duplicação entre empresas não apagadas."""
+        """Valida o formato do CNPJ informado."""
         try:
             validar_formato_cnpj(value)
         except CnpjInvalidoError:
             raise serializers.ValidationError(
                 EmpresaErrorMessages.CNPJ_INVALIDO
             ) from None
-        empresas = Empresa.objects.filter(cnpj=value)
-        if self.instance is not None:
-            empresas = empresas.exclude(pk=self.instance.pk)
-        if empresas.exists():
-            raise serializers.ValidationError(
-                EmpresaErrorMessages.CNPJ_JA_CADASTRADO
-            )
+
         return value
 
     def validate_cep(self, value: str) -> str:

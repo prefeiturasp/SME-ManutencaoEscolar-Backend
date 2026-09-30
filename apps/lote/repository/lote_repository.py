@@ -6,6 +6,7 @@ from typing import Any, cast
 from django.db import transaction
 from django.forms.models import model_to_dict
 
+from apps.empresa.models import Empresa
 from apps.escola.models import DiretoriaRegional
 from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.usuario import Usuario
@@ -61,6 +62,28 @@ class LoteRepository:
         ]
 
         LoteDiretoriaRegional.objects.bulk_create(novos_vinculos)
+
+    def codigos_lotes_vinculados_a_empresa(
+        self, empresa: Empresa
+    ) -> list[str]:
+        """Retorna os códigos dos lotes não excluídos da empresa.
+
+        Args:
+            empresa: Empresa cujos lotes vinculados serão consultados.
+
+        Returns:
+            Lista dos códigos de cadastro dos lotes não excluídos,
+            ordenada pela chave primária. Retorna uma lista vazia quando
+            não houver lotes vinculados.
+        """
+        return list(
+            Lote.objects.filter(
+                empresa=empresa,
+                deletado_em__isnull=True,
+            )
+            .order_by("pk")
+            .values_list("codigo_cadastro", flat=True)
+        )
 
     def _obter_diretorias_regionais_vinculadas(
         self,
@@ -237,10 +260,11 @@ class LoteRepository:
             Tupla contendo a quantidade de registros deletados e um dicionário
                 com a quantidade de exclusões por tipo de objeto.
         """
-        model_lote.deletado_por = usuario
-
-        model_lote.save(
-            update_fields=["deletado_por"],
+        vinculos = self.vinculo_model.objects.filter(
+            lote=model_lote,
+            deletado_em__isnull=True,
         )
 
+        for vinculo in vinculos:
+            vinculo.soft_delete(usuario=usuario)
         return model_lote.soft_delete(usuario=usuario)

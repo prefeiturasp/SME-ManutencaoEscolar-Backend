@@ -15,7 +15,7 @@ class ResponsavelUnidade(BaseModel):
     """
 
     registro_funcional = models.CharField(
-        max_length=7,
+        max_length=11,
         unique=True,
         help_text="Registro funcional do servidor.",
     )

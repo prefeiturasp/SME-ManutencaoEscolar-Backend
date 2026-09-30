@@ -87,10 +87,16 @@ Quando('crio cadastro com responsável técnico {string}',
 
 Então('o sistema salva a empresa com responsável técnico', function () { 
   cy.validar_cadastro_empresa()
+
+  cy.excluir_empresa()
 })
 
 Quando('crio cadastro com responsáveis técnicos', () => {
   cy.criar_empresa_responsaveis_tecnicos()
+})
+
+Então('o sistema salva a empresa com todos responsáveis', function () { 
+  cy.validar_cadastro_empresa()
 })
 
 Então('o sistema não salva a empresa sem preenchimento dos campos', function () { 
@@ -103,4 +109,51 @@ Quando('valido o campo obrigatório {string} de responsáveis na empresa', (camp
 
 Então('o sistema exibe campo obrigatório de responsável técnico', () => {
   cy.validar_cadastro_responsaveis_nao_preenchido_empresa()
+})
+
+Quando('seleciono a empresa {string} para excluir', () => { 
+})
+
+Quando('clico em cancelar no modal de excluir empresa', () => {
+  cy.cancelar_excluir_empresa()
+})
+
+Então('o sistema cancela exclusão da empresa', () => {
+  cy.validar_cadastro_empresa()  
+})
+
+Quando('seleciono na empresa {string} para excluir', () => { 
+  cy.excluir_empresa()
+})
+
+Então('o sistema exclui a empresa', () => { 
+  cy.validar_exclusao_empresa() 
+})
+
+Quando('seleciono a empresa {string} para editar', () => { 
+  cy.clicar_editar_empresa()
+})
+
+Quando('edito o cadastro da empresa', () => { 
+  cy.editar_dados_empresa()
+})
+
+Então('o sistema salva a edição da empresa', () => {
+  cy.validar_edicao_empresa()
+})
+
+Quando('deixo o campo vazio no cadastro da empresa', () => {
+  cy.dados_obrigatorios_editar_dados_empresa()  
+})
+
+Então('o sistema exibe campo obrigadotório na edição da empresa', () => {
+  cy.validar_campo_obrigatorio_empresa()  
+})
+
+Quando('cancelo a edição do cadastro da empresa', () => {
+  cy.cancelar_editar_dados_empresa()   
+})
+
+Então('o sistema retorna sem edição da empresa', () => {
+  cy.validar_consulta_empresa()  
 })

@@ -4,14 +4,17 @@ import pytest
 
 from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
-from apps.escola.models.responsavel_unidade import ResponsavelUnidade
+from apps.escola.models.responsavel_unidade import (
+    HistoricoResponsavel,
+    ResponsavelUnidade,
+)
 from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import (
     DadosUnidadeEducacional,
     Unidadeeducacional,
 )
-from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.models.cargo_eol import CargoEOL
+from apps.usuarios.models.usuario import Usuario
 
 
 @pytest.fixture
@@ -62,40 +65,6 @@ def resposta_api_tipos_escolas():
         },
     ]
     return resposta
-
-
-@pytest.fixture()
-def configurar_api_eol(monkeypatch):
-    """Configura as variáveis da API EOL para os testes."""
-    comandos = (
-        "sincronizar_tipos_escolas",
-        "sincronizar_subprefeituras",
-        "sincronizar_escolas",
-        "sincronizar_diretores",
-        "sincronizar_dados_escolas",
-    )
-
-    for comando in comandos:
-        modulo = f"apps.escola.management.commands.{comando}"
-
-        monkeypatch.setattr(
-            f"{modulo}.SME_API_EOL_URL",
-            "https://api-eol-teste",
-        )
-        monkeypatch.setattr(
-            f"{modulo}.SME_API_EOL_TOKEN",
-            "token-teste",
-        )
-
-
-@pytest.fixture
-def diretoria_regional_centro():
-    """Cria uma Diretoria Regional para os testes."""
-    return DiretoriaRegional.objects.create(
-        codigo="DRE01",
-        nome="DIRETORIA REGIONAL DE EDUCACAO CENTRO",
-        abreviacao="CT",
-    )
 
 
 @pytest.fixture
@@ -184,6 +153,7 @@ def unidade_educacional_emef(
     diretoria_regional_centro,
     tipo_escola_emef,
     subprefeitura_se,
+    usuario_sincronizacao,
 ):
     """Cria uma unidade educacional do tipo EMEF para testes."""
     return Unidadeeducacional.objects.create(
@@ -193,6 +163,7 @@ def unidade_educacional_emef(
         tipo_escola=tipo_escola_emef,
         subprefeitura=subprefeitura_se,
         status=True,
+        atualizado_por=usuario_sincronizacao,
     )
 
 
@@ -263,7 +234,7 @@ def resposta_dados_complementares():
         "codigoUe": "100001",
         "nomeUe": "EMEF Escola Teste",
         "enderecoUe": "Rua Teste, 100",
-        "telefoneUe": "1122223333",
+        "telefoneUe": "22223333",
         "email": "diretor.um@email.com",
         "nome": "Diretor Escola",
         "cpf": "12345678900",
@@ -274,21 +245,23 @@ def resposta_dados_complementares():
 
 
 @pytest.fixture
-def usuario_sincronizacao(usuario_ativo):
+def usuario_sincronizacao(cargo_perfil_diretor):
     """Configura o usuário global como responsável pela sincronização."""
-    usuario_ativo.username = "sincronizacao_eol"
-    usuario_ativo.nome = "Sincronizador Dados do EOL"
-    usuario_ativo.cpf = None
-    usuario_ativo.is_active = False
-    usuario_ativo.save()
-    return usuario_ativo
+    return Usuario.objects.create(
+        username="sincronizacao_eol",
+        nome="Sincronizador Dados do EOL",
+        registro_funcional=None,
+        cpf=None,
+        cargo=cargo_perfil_diretor,
+        is_active=False,
+    )
 
 
 @pytest.fixture
 def responsavel_unidade() -> ResponsavelUnidade:
     """Cria um responsável de unidade para os testes."""
     return ResponsavelUnidade.objects.create(
-        registro_funcional="000000011",
+        registro_funcional="0000011",
         nome="DIRETOR TESTE",
         email="responsavel.emef@teste.com",
         telefone="11999999999",
@@ -297,19 +270,16 @@ def responsavel_unidade() -> ResponsavelUnidade:
 
 
 @pytest.fixture
-def lote_centro(diretoria_regional_centro, empresa):
-    """Fixture de lote."""
-    lote = Lote.objects.create(
-        codigo_cadastro="LOTE-001",
-        nome="Lote Centro",
-        empresa=empresa,
-        status=True,
+def historico_responsavel(
+    responsavel_unidade, unidade_educacional_emef, obter_cargo_diretor
+) -> HistoricoResponsavel:
+    """Cria um histórico de responsável de unidade para os testes."""
+    return HistoricoResponsavel.objects.create(
+        responsavel=responsavel_unidade,
+        unidade_educacional=unidade_educacional_emef,
+        cargo=obter_cargo_diretor,
+        ativo=True,
     )
-    LoteDiretoriaRegional.objects.create(
-        lote=lote,
-        diretoria_regional=diretoria_regional_centro,
-    )
-    return lote
 
 
 @pytest.fixture
@@ -345,7 +315,7 @@ def resposta_dados_unidade():
 
 
 @pytest.fixture
-def dados_unidade_emef(unidade_educacional_emef):
+def dados_unidade_emef(unidade_educacional_emef, usuario_sincronizacao):
     """Fixture de DadosUnidadeEducacional."""
     return DadosUnidadeEducacional.objects.create(
         unidade_educacional=unidade_educacional_emef,
@@ -357,4 +327,5 @@ def dados_unidade_emef(unidade_educacional_emef):
         cep="08032450",
         municipio="SAO PAULO",
         uf="SP",
+        atualizado_por=usuario_sincronizacao,
     )

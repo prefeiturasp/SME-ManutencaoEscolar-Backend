@@ -1,1 +1,0 @@
-"""Service do app escola."""

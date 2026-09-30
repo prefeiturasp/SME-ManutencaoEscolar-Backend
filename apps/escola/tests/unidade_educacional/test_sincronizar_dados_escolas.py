@@ -111,6 +111,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve criar os dados da unidade retornados pela API."""
         mock_get.return_value = resposta_dados_unidade
@@ -144,6 +145,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve atualizar os dados existentes da unidade."""
         dados_existentes = DadosUnidadeEducacional.objects.create(
@@ -187,6 +189,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar o endpoint utilizando o código EOL."""
         mock_get.return_value = resposta_dados_unidade
@@ -211,6 +214,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar a API EOL com o token configurado."""
         mock_get.return_value = resposta_dados_unidade
@@ -612,6 +616,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         mock_get,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve continuar a importação quando uma unidade falhar."""
         mock_get.side_effect = requests.RequestException(
@@ -636,6 +641,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         tipo_escola_emef,
         subprefeitura_se,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve consultar todas as unidades educacionais cadastradas."""
         segunda_unidade = Unidadeeducacional.objects.create(
@@ -690,6 +696,7 @@ class TestSincronizarDadosUnidadesEducacionais:
         resposta_dados_unidade,
         unidade_educacional_emef,
         configurar_api_eol,
+        usuario_sincronizacao,
     ):
         """Deve manter somente um registro para cada unidade."""
         mock_get.return_value = resposta_dados_unidade
@@ -811,3 +818,85 @@ class TestSincronizarDadosUnidadesEducacionais:
         resultado = Command._normalizar_email(email)
 
         assert resultado == resultado_esperado
+
+    @patch(
+        "apps.escola.management.commands."
+        "sincronizar_dados_escolas.requests.get"
+    )
+    def test_deve_falhar_quando_usuario_sincronizacao_nao_existir(
+        self,
+        mock_get,
+        resposta_dados_unidade,
+        unidade_educacional_cemei,
+        configurar_api_eol,
+    ):
+        """Deve falhar quando o usuário de sincronização não existir."""
+        mock_get.return_value = resposta_dados_unidade
+
+        with pytest.raises(
+            CommandError,
+            match="Usuário de sincronização de dados não encontrado",
+        ):
+            call_command("sincronizar_dados_escolas")
+
+    def test_deve_atualizar_dados_alterados_pelo_usuario_da_sincronizacao(
+        self,
+        dados_unidade_emef,
+        usuario_sincronizacao,
+        usuario_ativo,
+        unidade_educacional_emef,
+    ):
+        """Deve atualizar os dados quando alterados pelo sincronização."""
+        resultado = Command._salvar_dados_unidade(
+            {
+                "unidade_educacional": dados_unidade_emef.unidade_educacional,
+                "email": "eol@email.com",
+                "telefone": "1112345678",
+                "logradouro": "RUA EOL",
+                "numero": "001",
+                "bairro": "BAIRRO EOL",
+                "cep": "08032450",
+                "municipio": "SAO PAULO",
+                "uf": "SP",
+            },
+            usuario_sincronizacao,
+        )
+
+        dados_unidade_emef.refresh_from_db()
+
+        assert resultado == {"status": "atualizados"}
+        assert dados_unidade_emef.email == "eol@email.com"
+        assert dados_unidade_emef.atualizado_por == usuario_sincronizacao
+
+    def test_deve_ignorar_dados_alterados_por_outro_usuario(
+        self,
+        dados_unidade_emef,
+        usuario_sincronizacao,
+        usuario_ativo,
+        unidade_educacional_emef,
+    ):
+        """Deve ignorar dados alterados por outro usuário."""
+        dados_unidade_emef.atualizado_por = usuario_ativo
+        dados_unidade_emef.save()
+        dados_unidade_emef.refresh_from_db()
+
+        resultado = Command._salvar_dados_unidade(
+            {
+                "unidade_educacional": dados_unidade_emef.unidade_educacional,
+                "email": "eol@email.com",
+                "telefone": "1112345678",
+                "logradouro": "RUA EOL",
+                "numero": "001",
+                "bairro": "BAIRRO EOL",
+                "cep": "08032450",
+                "municipio": "SAO PAULO",
+                "uf": "SP",
+            },
+            usuario_sincronizacao,
+        )
+
+        dados_unidade_emef.refresh_from_db()
+
+        assert resultado == {"status": "ignorados"}
+        assert dados_unidade_emef.email == "escola@email.com"
+        assert dados_unidade_emef.atualizado_por == usuario_ativo

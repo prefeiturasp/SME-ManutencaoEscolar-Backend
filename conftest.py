@@ -4,6 +4,8 @@ import pytest
 from rest_framework.test import APIClient, APIRequestFactory
 
 from apps.empresa.models import Empresa
+from apps.escola.models.diretoria_regional import DiretoriaRegional
+from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
@@ -66,7 +68,11 @@ def usuario_ativo_dict(usuario_ativo: Usuario) -> dict[str, object]:
             "cargo": usuario_ativo.cargo.nome,
             "perfil": {
                 "codigo": usuario_ativo.perfil,
-                "descricao": PerfilAcesso(usuario_ativo.perfil).label,
+                "descricao": (
+                    PerfilAcesso(usuario_ativo.perfil).label
+                    if usuario_ativo.perfil is not None
+                    else None
+                ),
             },
         },
     }
@@ -103,3 +109,60 @@ def empresa_payload_valido() -> dict[str, str]:
 def empresa(empresa_payload_valido: dict[str, str], db: None) -> Empresa:
     """Fixture de empresa persistida utilizada nos testes de Responsável."""
     return Empresa.objects.create(**empresa_payload_valido)
+
+
+@pytest.fixture()
+def configurar_api_eol(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Configura as variáveis da API EOL para os testes."""
+    comandos = []
+    comandos_app_escola = [
+        "sincronizar_tipos_escolas",
+        "sincronizar_subprefeituras",
+        "sincronizar_escolas",
+        "sincronizar_diretores",
+        "sincronizar_dados_escolas",
+    ]
+    for comando in comandos_app_escola:
+        comandos.append(f"apps.escola.management.commands.{comando}")
+
+    comandos_app_usuario = ["sincronizar_cargos_eol"]
+    for comando in comandos_app_usuario:
+        comandos.append(f"apps.usuarios.management.commands.{comando}")
+
+    for modulo in comandos:
+        monkeypatch.setattr(
+            f"{modulo}.SME_API_EOL_URL",
+            "https://api-eol-teste",
+        )
+        monkeypatch.setattr(
+            f"{modulo}.SME_API_EOL_TOKEN",
+            "token-teste",
+        )
+
+
+@pytest.fixture
+def diretoria_regional_centro() -> DiretoriaRegional:
+    """Cria uma Diretoria Regional para os testes."""
+    return DiretoriaRegional.objects.create(
+        codigo="DRE01",
+        nome="DIRETORIA REGIONAL DE EDUCACAO CENTRO",
+        abreviacao="CT",
+    )
+
+
+@pytest.fixture
+def lote_centro(
+    diretoria_regional_centro: DiretoriaRegional, empresa: Empresa
+) -> Lote:
+    """Fixture de lote."""
+    lote = Lote.objects.create(
+        codigo_cadastro="LOTE-001",
+        nome="Lote Centro",
+        empresa=empresa,
+        status=True,
+    )
+    LoteDiretoriaRegional.objects.create(
+        lote=lote,
+        diretoria_regional=diretoria_regional_centro,
+    )
+    return lote

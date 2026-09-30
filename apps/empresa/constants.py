@@ -5,6 +5,14 @@ class EmpresaErrorMessages:
     """Mensagens de erro padronizadas para o domínio."""
 
     CNPJ_INVALIDO = "CNPJ inválido."
+    CNPJ_JA_CADASTRADO_TITULO_CRIAR = "Não é possível criar a empresa"
+    CNPJ_JA_CADASTRADO_TITULO_EDITAR = (
+        "Não é possível editar os dados da empresa"
+    )
+    CNPJ_JA_CADASTRADO_MENSAGEM = (
+        "O CNPJ {cnpj} já está cadastrado no sistema. "
+        "Verifique as informações e tente novamente"
+    )
     CNPJ_JA_CADASTRADO = "Já existe uma empresa cadastrada com este CNPJ."
     CEP_INVALIDO = "CEP inválido. Deve conter 8 dígitos numéricos."
     TELEFONE_INVALIDO = (
@@ -32,4 +40,16 @@ class EmpresaErrorMessages:
     )
     RESPONSAVEL_TECNICO_NAO_ENCONTRADO = (
         "Responsável técnico não encontrado para esta empresa."
+    )
+
+    EMPRESA_VINCULADA_A_LOTE_TITULO = "Não é possível excluir a empresa"
+
+    EMPRESA_VINCULADA_A_LOTE = (
+        "A empresa com CNPJ {cnpj} possui vínculo com o lote {codigo}. "
+        "Para excluir a empresa, primeiro remova esse vínculo com o lote."
+    )
+
+    EMPRESA_VINCULADA_A_VARIOS_LOTES = (
+        "A empresa com CNPJ {cnpj} possui vínculo com mais de um lote."
+        "Para excluir a empresa, primeiro remova os vínculos."
     )

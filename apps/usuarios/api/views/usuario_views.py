@@ -1,4 +1,7 @@
-"""Views da API da aplicação Usuarios."""
+"""View responsável pelos endpoints relacionados ao usuário.
+
+Disponibiliza endpoints para consulta dos dados do usuário autenticado.
+"""
 
 from rest_framework import status
 from rest_framework.decorators import action
@@ -14,7 +17,7 @@ from apps.usuarios.services.usuario_service import UsuarioService
 
 
 class UsuarioViewSet(ViewSet):
-    """View do usuário."""
+    """Disponibiliza endpoints relacionados ao usuário autenticado."""
 
     @ME
     @action(
@@ -23,7 +26,19 @@ class UsuarioViewSet(ViewSet):
         url_path="me",
     )
     def me(self, request: Request) -> Response:
-        """Retorna os dados do usuário autenticado."""
+        """Retorna os dados do usuário autenticado.
+
+        O usuário é identificado a partir do RF ou CPF informado no
+        ``username`` do usuário autenticado e seus dados são serializados
+        para a resposta da API.
+
+        Args:
+            request (Request): Requisição contendo os dados do usuário
+                autenticado.
+
+        Returns:
+            Response: Resposta HTTP contendo os dados do usuário autenticado.
+        """
         usuario = UsuarioService.obter_usuario_por_rf_cpf(
             request.user.username,
         )

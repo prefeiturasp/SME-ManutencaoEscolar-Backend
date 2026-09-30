@@ -2,6 +2,8 @@
 
 from django.db import models
 
+ENDPOINT_CARGOS_EOL = "/cargos"
+
 
 class PerfilAcesso(models.TextChoices):
     """Perfis de acesso disponíveis no sistema."""

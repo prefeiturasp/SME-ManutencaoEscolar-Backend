@@ -79,7 +79,16 @@ class LoteViewSet(viewsets.ModelViewSet):
         return LoteSerializer
 
     def perform_create(self, serializer: BaseSerializer) -> None:
-        """Cria um lote delegando as regras ao lote."""
+        """
+        Cria um novo Lote usando o serviço.
+
+        Args:
+            serializer (BaseSerializer): Serializer contendo os dados do
+                lote.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
         usuario = self._obter_usuario()
 
         try:
@@ -112,7 +121,16 @@ class LoteViewSet(viewsets.ModelViewSet):
         serializer.instance = lote
 
     def perform_update(self, serializer: BaseSerializer) -> None:
-        """Atualiza um lote delegando as regras ao service."""
+        """
+        Atualiza um lote existente usando o serviço.
+
+        Args:
+            serializer (BaseSerializer): Serializer contendo os dados do
+                lote.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
         usuario = self._obter_usuario()
         lote = self._obter_lote(serializer)
 

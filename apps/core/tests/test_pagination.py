@@ -51,16 +51,21 @@ class TestPaginacaoPadrao:
 
         assert resultado == 25
 
-    def test_deve_desabilitar_paginacao_quando_page_size_for_all(
-        self,
-    ) -> None:
-        """Retorna ``None`` quando ``page_size`` possuir o valor ``all``."""
+    def test_deve_retornar_results_quando_page_size_for_all(self) -> None:
+        """Mantém o envelope paginado quando todos os registros são pedidos."""
         paginacao = PaginacaoPadrao()
         requisicao = criar_requisicao({"page_size": "all"})
+        registros = [{"id": 1}, {"id": 2}]
 
-        resultado = paginacao.get_page_size(requisicao)
+        paginacao.paginate_queryset(registros, requisicao)
+        resposta = paginacao.get_paginated_response(registros)
 
-        assert resultado is None
+        assert resposta.data == {
+            "count": 2,
+            "next": None,
+            "previous": None,
+            "results": registros,
+        }
 
     def test_deve_limitar_tamanho_ao_maximo_permitido(
         self,

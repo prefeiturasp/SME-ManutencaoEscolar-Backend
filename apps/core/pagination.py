@@ -1,7 +1,10 @@
 """Classes de paginação compartilhadas pelos endpoints da API."""
 
+from typing import Any
+
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
+from rest_framework.response import Response
 
 
 class PaginacaoPadrao(PageNumberPagination):
@@ -18,26 +21,55 @@ class PaginacaoPadrao(PageNumberPagination):
     page_size_query_param = "page_size"
     max_page_size = 100
 
-    def get_page_size(self, request: Request) -> int | None:
-        """Obtém a quantidade de registros que deverá compor a página.
+    def paginate_queryset(
+        self,
+        queryset: Any,
+        request: Request,
+        view: Any = None,
+    ) -> Any:
+        """Pagina o conjunto ou o retorna integralmente com ``page_size=all``.
 
-        Quando o parâmetro ``page_size`` possui o valor ``all``, a paginação
-        é desabilitada para a requisição. Para os demais valores, o método
-        utiliza a implementação padrão do Django REST Framework, incluindo
-        as regras de limite configuradas na classe.
+        Nesse caso, preserva o queryset recebido e sinaliza que a resposta
+        deve incluir os metadados de paginação sem links de navegação.
 
         Args:
-            request (Request): Requisição HTTP recebida pela API.
+            queryset: Conjunto de registros a ser paginado.
+            request: Requisição HTTP recebida pela API.
+            view: View que solicitou a paginação, quando disponível.
 
         Returns:
-            int | None: Quantidade de registros por página ou ``None`` para
-            desabilitar a paginação.
+            Any: Página de registros, queryset integral ou ``None`` quando a
+                paginação estiver desabilitada pela configuração da view.
         """
-        page_size = request.query_params.get(
-            self.page_size_query_param,
-        )
+        if request.query_params.get(self.page_size_query_param) == "all":
+            self._all_requested = True
+            return queryset
 
-        if page_size == "all":
-            return None
+        self._all_requested = False
+        return super().paginate_queryset(queryset, request, view)
 
-        return super().get_page_size(request)
+    def get_paginated_response(self, data: Any) -> Response:
+        """Monta a resposta com registros e metadados de paginação.
+
+        Com ``page_size=all``, informa o total de registros serializados e
+        define ``next`` e ``previous`` como ``None``. Nos demais casos,
+        utiliza a resposta padrão do DRF.
+
+        Args:
+            data: Dados serializados da página ou do queryset integral.
+
+        Returns:
+            Response: Resposta com ``count``, ``next``, ``previous`` e
+                ``results``.
+        """
+        if getattr(self, "_all_requested", False):
+            return Response(
+                {
+                    "count": len(data),
+                    "next": None,
+                    "previous": None,
+                    "results": data,
+                },
+            )
+
+        return super().get_paginated_response(data)

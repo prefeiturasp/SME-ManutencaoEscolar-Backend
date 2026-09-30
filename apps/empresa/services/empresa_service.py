@@ -4,11 +4,17 @@ from typing import Any
 
 from django.db import transaction
 
+from apps.empresa.constants import EmpresaErrorMessages
+from apps.empresa.exceptions import (
+    EmpresaJaPossuiCNPJError,
+    EmpresaPossuiLotesVinculadosError,
+)
 from apps.empresa.models import Empresa
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
 from apps.empresa.services.responsavel_service import ResponsavelTecnicoService
+from apps.lote.repository.lote_repository import LoteRepository
 from apps.usuarios.models import Usuario
 
 
@@ -49,6 +55,10 @@ class EmpresaService:
         Returns:
             Dados serializados da empresa criada.
         """
+        self._validar_cnpj_duplicado(
+            dados["cnpj"],
+            titulo=EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_CRIAR,
+        )
         return self.criar_com_responsaveis({**dados, "criado_por": usuario})
 
     def criar_com_responsaveis(self, dados: dict[str, Any]) -> dict[str, Any]:
@@ -109,6 +119,13 @@ class EmpresaService:
         dados = {**dados, "atualizado_por": usuario}
         responsaveis_dados = dados.pop("responsaveis_tecnicos", None)
 
+        if "cnpj" in dados:
+            self._validar_cnpj_duplicado(
+                dados["cnpj"],
+                titulo=EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_EDITAR,
+                empresa_ignorada=empresa,
+            )
+
         with transaction.atomic():
             empresa_atualizada = self.empresa_repository.atualizar(
                 empresa, dados
@@ -125,16 +142,74 @@ class EmpresaService:
 
     @transaction.atomic
     def deletar(
-        self, empresa: Empresa, usuario: Usuario | None = None
+        self,
+        empresa: Empresa,
+        usuario: Usuario | None = None,
     ) -> None:
-        """Realiza a exclusão lógica da empresa e de seus responsáveis.
-
-        Registra o usuário logado como responsável pela exclusão.
+        """Exclui logicamente uma empresa sem lotes vinculados.
 
         Args:
-            empresa: Instância da empresa a ser deletada.
-            usuario: Usuário logado responsável pela exclusão.
+            empresa: Empresa a ser excluída.
+            usuario: Usuário responsável pela exclusão.
+
+        Raises:
+            EmpresaPossuiLotesVinculadosError: Se a empresa possuir lotes
+                não excluídos vinculados.
         """
+        codigos = LoteRepository().codigos_lotes_vinculados_a_empresa(empresa)
+        if codigos:
+            if len(codigos) == 1:
+                detail: dict[str, str | list[str]] = {
+                    "message": (
+                        EmpresaErrorMessages.EMPRESA_VINCULADA_A_LOTE.format(
+                            cnpj=empresa.cnpj,
+                            codigo=codigos[0],
+                        )
+                    ),
+                }
+            else:
+                detail = {
+                    "message": (
+                        EmpresaErrorMessages.EMPRESA_VINCULADA_A_VARIOS_LOTES.format(
+                            cnpj=empresa.cnpj,
+                        )
+                    ),
+                    "vinculados": codigos,
+                }
+
+            raise EmpresaPossuiLotesVinculadosError(
+                title=EmpresaErrorMessages.EMPRESA_VINCULADA_A_LOTE_TITULO,
+                detail=detail,
+            )
+
         responsaveis = list(empresa.responsaveis_tecnicos.all())
         self.responsavel_tecnico_service.remover(responsaveis, usuario)
         self.empresa_repository.deletar(empresa, usuario)
+
+    def _validar_cnpj_duplicado(
+        self,
+        cnpj: str,
+        *,
+        titulo: str,
+        empresa_ignorada: Empresa | None = None,
+    ) -> None:
+        """Valida se outra empresa já utiliza o CNPJ informado.
+
+        Args:
+            cnpj: CNPJ a ser validado.
+            titulo: Título exibido quando o CNPJ estiver duplicado.
+            empresa_ignorada: Empresa desconsiderada consulta durante a edição.
+
+        Raises:
+            EmpresaJaPossuiCNPJError: Se outra empresa utilizar o CNPJ.
+        """
+        if self.empresa_repository.existe_cnpj_duplicado(
+            cnpj,
+            empresa_ignorada=empresa_ignorada,
+        ):
+            raise EmpresaJaPossuiCNPJError(
+                title=titulo,
+                detail=EmpresaErrorMessages.CNPJ_JA_CADASTRADO_MENSAGEM.format(
+                    cnpj=cnpj
+                ),
+            )

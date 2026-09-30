@@ -32,6 +32,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.core.constants import ENDPOINT_DADOS_PARA_COMAPRE, TIMEOUT_DEFAULT
+from apps.core.exceptions import TelefoneInvalidoError
+from apps.core.validacoes import validar_telefone
 from apps.escola.constants import (
     ENDPOINT_OBTER_FUNCIONARIOS_POR_CARGO,
     FORMATO_DATA_FUNCIONARIOS_POR_CARGO,
@@ -125,39 +127,48 @@ class Command(BaseCommand):
         quantidades = {
             "criados": 0,
             "atualizados": 0,
+            "ignorados": 0,
             "historicos_criados": 0,
             "historicos_atualizados": 0,
+            "historicos_ignorados": 0,
         }
 
-        usuario = Usuario.objects.get(username="sincronizacao_eol")
+        try:
+            usuario = Usuario.objects.get(username="sincronizacao_eol")
+        except Usuario.DoesNotExist as exc:
+            raise CommandError(
+                "Usuário de sincronização de dados não encontrado."
+            ) from exc
 
         with transaction.atomic():
             for numero, registro in enumerate(
                 lista_diretores,
                 start=1,
             ):
-                responsavel, responsavel_criado = self._salvar_responsavel(
+                resultado_responsavel = self._salvar_responsavel(
                     registro=registro,
                     usuario=usuario,
                 )
+                responsavel: ResponsavelUnidade = resultado_responsavel[
+                    "responsavel"
+                ]
 
-                quantidades[
-                    "criados" if responsavel_criado else "atualizados"
-                ] += 1
+                self._contabilizar_resultado(
+                    quantidades=quantidades,
+                    resultado=resultado_responsavel,
+                )
 
-                _, historico_criado = self._salvar_historico(
+                resultado_historico = self._salvar_historico(
                     responsavel=responsavel,
                     registro=registro,
                     usuario=usuario,
                 )
 
-                quantidades[
-                    (
-                        "historicos_criados"
-                        if historico_criado
-                        else "historicos_atualizados"
-                    )
-                ] += 1
+                self._contabilizar_resultado(
+                    quantidades=quantidades,
+                    resultado=resultado_historico,
+                    prefixo="historicos_",
+                )
 
                 if numero % 500 == 0 or numero == len(lista_diretores):
                     logger.info(
@@ -173,8 +184,11 @@ class Command(BaseCommand):
             f"{tempo_execucao_minutos:.2f} minutos:\n"
             f"{quantidades['criados']} responsáveis criados\n"
             f"{quantidades['atualizados']} responsáveis atualizados\n"
+            f"{quantidades['ignorados']} responsáveis não atualizados\n"
             f"{quantidades['historicos_criados']} históricos criados\n"
             f"{quantidades['historicos_atualizados']} históricos atualizados\n"
+            f"{quantidades['historicos_ignorados']} históricos não "
+            "atualizados.\n"
         )
 
     def _coletar_registros(
@@ -423,7 +437,7 @@ class Command(BaseCommand):
             "email": self._normalizar_string(
                 dados_adicionais.get("email"),
             ),
-            "telefone": self._normalizar_string(
+            "telefone": self._normalizar_telefone(
                 dados_adicionais.get("telefoneUe"),
             ),
             "esta_afastado": registro["estaAfastado"],
@@ -701,15 +715,17 @@ class Command(BaseCommand):
         self,
         registro: dict[str, Any],
         usuario: Any | None,
-    ) -> tuple[ResponsavelUnidade, bool]:
+    ) -> dict[str, Any]:
         """Cria ou atualiza um responsável com informações de auditoria.
 
         Na criação, os dados do responsável e os usuários de criação e
         atualização são definidos a partir do registro e do usuário informado.
 
-        Na atualização, os dados do responsável são atualizados e o usuário
-        responsável pela alteração é registrado em `atualizado_por`. Os dados
-        originais de criação são preservados.
+        Na atualização, os dados somente são alterados quando `atualizado_por`
+        estiver como `None` ou quando o registro tiver sido atualizado pelo
+        próprio usuário da sincronização. Quando `atualizado_por` corresponder
+        a outro usuário, a alteração é ignorada para preservar uma atualização
+        realizada.
 
         Args:
             registro (dict[str, Any]): Dados do responsável obtidos durante a
@@ -719,9 +735,11 @@ class Command(BaseCommand):
                 sincronização. Pode   ser `None` quando não houver usuário
                 associado à operação.
         Returns:
-            tuple[ResponsavelUnidade, bool]: Tupla contendo o responsável
-                criado ou atualizado e um booleano indicando se um novo
-                registro foi criado.
+            dict[str, Any]: Dicionário contendo:
+                - `responsavel`: Instância do responsável criado ou localizado.
+                - `foi_criado`: Indica se um novo responsável foi criado.
+                - `foi_atualizado`: Indica se um responsável existente foi
+                atualizado.
         """
         responsavel, foi_criado = ResponsavelUnidade.objects.get_or_create(
             registro_funcional=registro["registro_funcional"],
@@ -734,32 +752,59 @@ class Command(BaseCommand):
                 "atualizado_por": usuario,
             },
         )
+        if foi_criado:
+            return {
+                "responsavel": responsavel,
+                "foi_criado": True,
+                "foi_atualizado": False,
+            }
 
-        if not foi_criado:
-            responsavel.nome = registro["nome"]
-            responsavel.email = registro["email"]
-            responsavel.telefone = registro["telefone"]
-            responsavel.esta_afastado = registro["esta_afastado"]
-            responsavel.atualizado_por = usuario
-            responsavel.save()
+        if not (
+            responsavel.atualizado_por is None
+            or responsavel.atualizado_por == usuario
+        ):
+            usuario_atualizacao = responsavel.atualizado_por
+            logger.info(
+                f"Responsável RF {responsavel.registro_funcional} não "
+                "atualizado: última alteração realizada pelo usuário "
+                f"{usuario_atualizacao.username}."
+            )
+            return {
+                "responsavel": responsavel,
+                "foi_criado": False,
+                "foi_atualizado": False,
+            }
 
-        return responsavel, foi_criado
+        responsavel.nome = registro["nome"]
+        responsavel.email = registro["email"]
+        responsavel.telefone = registro["telefone"]
+        responsavel.esta_afastado = registro["esta_afastado"]
+        responsavel.atualizado_por = usuario
+        responsavel.save()
+
+        return {
+            "responsavel": responsavel,
+            "foi_criado": False,
+            "foi_atualizado": True,
+        }
 
     def _salvar_historico(
         self,
         responsavel: ResponsavelUnidade,
         registro: dict[str, Any],
         usuario: Any | None,
-    ) -> tuple[HistoricoResponsavel, bool]:
+    ) -> dict[str, Any]:
         """Cria ou atualiza o vínculo do responsável com a unidade.
 
         O vínculo é identificado pelo responsável, unidade educacional e cargo.
         Na criação, o vínculo é marcado como ativo e são registrados os
         usuários de criação e atualização.
 
-        Na atualização, o vínculo é marcado como ativo e o usuário responsável
-        pela alteração é registrado em `atualizado_por`. Os dados originais de
-        criação são preservados.
+        Na atualização, o vínculo somente é alterado quando `atualizado_por`
+        estiver como `None` ou quando o registro tiver sido atualizado pelo
+        próprio usuário da sincronização. Quando `atualizado_por` corresponder
+        a outro usuário, a alteração é ignorada para preservar uma atualização
+        realizada pela interface web.
 
         Args:
             responsavel (ResponsavelUnidade): Responsável associado ao vínculo.
@@ -770,9 +815,11 @@ class Command(BaseCommand):
                 associado à operação.
 
         Returns:
-            tuple[HistoricoResponsavel, bool]: Tupla contendo o histórico
-                criado ou atualizado e um booleano indicando se um novo
-                registro foi criado.
+            dict[str, Any]: Dicionário contendo:
+                - `historico`: Instância do histórico criado ou localizado.
+                - `foi_criado`: Indica se um novo histórico foi criado.
+                - `foi_atualizado`: Indica se um histórico existente foi
+                atualizado.
         """
         historico, foi_criado = HistoricoResponsavel.objects.get_or_create(
             responsavel=responsavel,
@@ -785,9 +832,83 @@ class Command(BaseCommand):
             },
         )
 
-        if not foi_criado:
-            historico.ativo = True
-            historico.atualizado_por = usuario
-            historico.save()
+        if foi_criado:
+            return {
+                "historico": historico,
+                "foi_criado": True,
+                "foi_atualizado": False,
+            }
 
-        return historico, foi_criado
+        if not (
+            historico.atualizado_por is None
+            or historico.atualizado_por == usuario
+        ):
+            usuario_atualizacao = historico.atualizado_por
+            logger.info(
+                f"Histórico do responsável RF "
+                f"{responsavel.registro_funcional} na unidade "
+                f"{registro['unidade_educacional'].nome} não atualizado: "
+                f"última alteração realizada pelo usuário "
+                f"{usuario_atualizacao.username}"
+            )
+            return {
+                "historico": historico,
+                "foi_criado": False,
+                "foi_atualizado": False,
+            }
+
+        historico.ativo = True
+        historico.atualizado_por = usuario
+        historico.save()
+        return {
+            "historico": historico,
+            "foi_criado": False,
+            "foi_atualizado": True,
+        }
+
+    @staticmethod
+    def _contabilizar_resultado(
+        quantidades: dict[str, int],
+        resultado: dict[str, Any],
+        prefixo: str = "",
+    ) -> None:
+        """Contabiliza o resultado de uma operação de persistência.
+
+        Args:
+            quantidades (dict[str, int]): Contadores da sincronização.
+            resultado (dict[str, Any]): Resultado retornado pela operação.
+            prefixo (str): Prefixo utilizado para os contadores de histórico.
+        """
+        if resultado["foi_criado"]:
+            quantidades[f"{prefixo}criados"] += 1
+        elif resultado["foi_atualizado"]:
+            quantidades[f"{prefixo}atualizados"] += 1
+        else:
+            quantidades[f"{prefixo}ignorados"] += 1
+
+    def _normalizar_telefone(self, valor: Any) -> str:
+        """Normaliza um telefone para armazenamento.
+
+        O telefone deve possuir oito ou nove dígitos. Para valores válidos,
+        adiciona o DDD 11 como prefixo. Valores fora desse padrão retornam
+        uma string vazia.
+
+        Args:
+            valor (Any): Telefone retornado pela API EOL.
+
+        Returns:
+            str: Telefone normalizado com o DDD 11 ou string vazia.
+        """
+        telefone = self._normalizar_string(valor)
+
+        if len(telefone) not in (8, 9):
+            return ""
+
+        telefone = f"11{telefone}"
+
+        try:
+            validar_telefone(telefone)
+        except TelefoneInvalidoError:
+            return ""
+
+        return telefone
