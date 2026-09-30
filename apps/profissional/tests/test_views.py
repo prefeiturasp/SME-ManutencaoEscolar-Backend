@@ -4,9 +4,11 @@ from unittest.mock import patch
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.core.constants import TipoArquivo
 from apps.core.pagination import PaginacaoPadrao
 from apps.profissional.api.views import ProfissionalViewSet
 from apps.profissional.models import FuncaoProfissional, Profissional
@@ -138,6 +140,49 @@ def test_atualiza_profissional_com_funcoes(
     assert profissional.status is False
     assert profissional.atualizado_por == usuario_ativo
     assert funcao.atualizado_por == usuario_ativo
+
+
+def test_atualiza_profissional_preservando_documento_existente(
+    api_cliente, cargo_profissional
+):
+    """PUT preserva documento informado por UUID sem exigir novo arquivo."""
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional,
+        cargo=cargo_profissional,
+    )
+    documento = funcao.documentos.create(
+        nome_original="NR10.pdf",
+        arquivo=SimpleUploadedFile("NR10.pdf", b"conteudo"),
+        tipo=TipoArquivo.DOCUMENTO,
+        tipo_mime="application/pdf",
+        tamanho_bytes=len(b"conteudo"),
+    )
+
+    resposta = api_cliente.put(
+        f"/api/v1/profissionais/{profissional.uuid}/",
+        {
+            "nome": "José Atualizado",
+            "cpf": profissional.cpf,
+            "rg": profissional.rg,
+            "status": profissional.status,
+            "funcoes": [
+                {
+                    "uuid": str(funcao.uuid),
+                    "uuid_cargo": str(cargo_profissional.uuid),
+                    "documentos": [{"uuid": str(documento.uuid)}],
+                }
+            ],
+        },
+        format="json",
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK, resposta.json()
+    assert funcao.documentos.filter(uuid=documento.uuid).exists()
 
 
 def test_lista_profissionais_com_funcoes(

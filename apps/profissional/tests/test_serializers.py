@@ -6,12 +6,23 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.core.constants import TipoArquivo
 from apps.profissional.constants import ProfissionalErrorMessages
 from apps.profissional.models import Profissional
+from apps.profissional.serializers.funcao_serializers import (
+    DocumentoFuncaoProfissionalSerializer,
+)
 from apps.profissional.serializers.profissional_serializers import (
     ProfissionalCriarAtualizarSerializer,
     ProfissionalSerializer,
 )
 
 pytestmark = pytest.mark.django_db
+
+
+def test_serializer_documento_rejeita_dados_sem_uuid_e_arquivo():
+    """Exige arquivo quando não há UUID de documento existente."""
+    serializer = DocumentoFuncaoProfissionalSerializer(data={})
+
+    assert not serializer.is_valid()
+    assert "arquivo" in serializer.errors
 
 
 def test_serializer_valida_e_converte_payload(profissional_payload):
@@ -101,6 +112,25 @@ def test_serializer_atualizacao_ignora_cpf_e_rg_da_propria_instancia(
     assert serializer.is_valid(), serializer.errors
 
 
+def test_serializer_atualizacao_aceita_uuid_de_documento_existente(
+    profissional_payload,
+):
+    """Preserva um documento existente sem exigir novo arquivo."""
+    documento_uuid = "9dc1d88f-d7db-40ff-9d97-a665c0f86c40"
+    profissional_payload["funcoes"][0]["documentos"] = [
+        {"uuid": documento_uuid}
+    ]
+
+    serializer = ProfissionalCriarAtualizarSerializer(
+        data=profissional_payload
+    )
+
+    assert serializer.is_valid(), serializer.errors
+    documento = serializer.validated_data["funcoes"][0]["documentos"][0]
+    assert str(documento["uuid"]) == documento_uuid
+    assert "arquivo" not in documento
+
+
 def test_serializer_de_leitura_inclui_funcao_e_documento(
     cargo_profissional, usuario_ativo
 ):
@@ -111,7 +141,9 @@ def test_serializer_de_leitura_inclui_funcao_e_documento(
         rg="123456789",
         criado_por=usuario_ativo,
     )
-    funcao = profissional.funcoes.create(cargo=cargo_profissional)
+    funcao = profissional.funcoes.create(
+        cargo=cargo_profissional, criado_por=usuario_ativo
+    )
     funcao.documentos.create(
         nome_original="NR10.pdf",
         arquivo=SimpleUploadedFile("NR10.pdf", b"conteudo"),
@@ -124,6 +156,11 @@ def test_serializer_de_leitura_inclui_funcao_e_documento(
 
     assert dados["criado_por"] == usuario_ativo.nome
     assert dados["funcoes"][0]["nome_cargo"] == cargo_profissional.nome
+    assert dados["funcoes"][0]["criado_por"] == usuario_ativo.nome
+    assert (
+        dados["funcoes"][0]["registro_funcional"]
+        == usuario_ativo.registro_funcional
+    )
     documento = dados["funcoes"][0]["documentos"][0]
     assert documento["nome_original"] == "NR10.pdf"
     assert documento["tipo"] == TipoArquivo.DOCUMENTO
