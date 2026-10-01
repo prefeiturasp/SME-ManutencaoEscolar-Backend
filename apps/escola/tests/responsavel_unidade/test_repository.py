@@ -175,3 +175,71 @@ class TestResponsavelUnidadeRepository:
         assert historico_responsavel in resultado
         assert historico_inativo not in resultado
         assert len(resultado) == 1
+
+    def test_deve_inativar_vinculos_ausentes(
+        self,
+        unidade_educacional_emef,
+        historico_responsavel,
+        obter_cargo_diretor,
+        usuario_ativo,
+    ):
+        """Deve inativar e realizar soft-delete dos vínculos ausentes."""
+        responsavel_mantido = historico_responsavel.responsavel
+
+        responsavel_removido = ResponsavelUnidade.objects.create(
+            registro_funcional="7654321",
+            nome="RESPONSÁVEL REMOVIDO",
+            email="removido@email.com",
+            telefone="11999999999",
+            celular="11988888888",
+            esta_afastado=False,
+        )
+
+        historico_removido = HistoricoResponsavel.objects.create(
+            responsavel=responsavel_removido,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=obter_cargo_diretor,
+            ativo=True,
+        )
+
+        ResponsavelUnidadeRepository().inativar_vinculos_ausentes(
+            unidade=unidade_educacional_emef,
+            responsaveis_uuids={str(responsavel_mantido.uuid)},
+            usuario=usuario_ativo,
+        )
+
+        historico_responsavel.refresh_from_db()
+
+        historico_removido = HistoricoResponsavel.dm_objects.get(
+            pk=historico_removido.pk,
+        )
+
+        assert historico_responsavel.ativo is True
+        assert historico_responsavel.deletado_em is None
+
+        assert historico_removido.ativo is False
+        assert historico_removido.deletado_em is not None
+        assert historico_removido.deletado_por == usuario_ativo
+
+    def test_deve_manter_ativos_os_vinculos_presentes_na_lista(
+        self,
+        unidade_educacional_emef,
+        historico_responsavel,
+        obter_cargo_diretor,
+        usuario_sincronizacao,
+    ):
+        """Deve manter ativos os vínculos cujos UUIDs foram enviados."""
+        responsavel = historico_responsavel.responsavel
+
+        repository = ResponsavelUnidadeRepository()
+
+        repository.inativar_vinculos_ausentes(
+            unidade=unidade_educacional_emef,
+            responsaveis_uuids={str(responsavel.uuid)},
+            usuario=usuario_sincronizacao,
+        )
+
+        historico_responsavel.refresh_from_db()
+
+        assert historico_responsavel.ativo is True
+        assert historico_responsavel.deletado_em is None
