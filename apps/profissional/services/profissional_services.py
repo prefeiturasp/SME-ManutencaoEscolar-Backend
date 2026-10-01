@@ -103,3 +103,19 @@ class ProfissionalService:
             )
 
         return profissional_atualizado
+
+    @transaction.atomic
+    def deletar(
+        self,
+        profissional: Profissional,
+        usuario: Usuario | None = None,
+    ) -> None:
+        """Exclui logicamente um profissional.
+
+        Args:
+            profissional: Profissional a ser excluído.
+            usuario: Usuário responsável pela exclusão.
+        """
+        funcoes = list(profissional.funcoes.all())
+        self.funcao_profissional_service.remover(funcoes, usuario)
+        self.profissional_repository.deletar(profissional, usuario)
