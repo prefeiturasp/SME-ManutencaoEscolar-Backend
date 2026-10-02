@@ -35,6 +35,6 @@ class CargoErrorMessages:
     )
     CARGO_VINCULADO_AO_PROFISSIONAL_TITLE = "Não é possível excluir o cargo"
     CARGO_VINCULADO_AO_PROFISSIONAL = (
-        "O cargo {nome_cargo} não pode ser excluído pois possui"
+        "O cargo {nome_cargo} não pode ser excluído pois possui "
         "vinculo com os seguintes profissionais:"
     )
