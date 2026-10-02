@@ -40,6 +40,22 @@ def test_profissional_repository_cria(usuario_ativo):
     assert profissional.criado_por == usuario_ativo
 
 
+def test_profissional_repository_deleta(usuario_ativo):
+    """Exclui logicamente o profissional e registra o usuário responsável."""
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+
+    ProfissionalRepository().deletar(profissional, usuario_ativo)
+
+    assert not Profissional.objects.filter(pk=profissional.pk).exists()
+    profissional_excluido = Profissional.dm_objects.get(pk=profissional.pk)
+    assert profissional_excluido.deletado_em is not None
+    assert profissional_excluido.deletado_por == usuario_ativo
+
+
 def test_funcao_repository_cria(cargo_profissional, usuario_ativo):
     """Persiste uma função profissional."""
     profissional = Profissional.objects.create(

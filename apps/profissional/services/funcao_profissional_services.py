@@ -5,6 +5,7 @@ from typing import Any
 from django.core.exceptions import ValidationError
 
 from apps.profissional.constants import ProfissionalErrorMessages
+from apps.profissional.models import FuncaoProfissional
 from apps.profissional.repository.funcao_profissional_repository import (
     FuncaoProfissionalRepository,
 )
@@ -117,3 +118,22 @@ class FuncaoProfissionalService:
             funcao_serializada["documentos"] = documentos_criados
             funcoes.append(funcao_serializada)
         return funcoes
+
+    def remover(
+        self,
+        funcoes: list[FuncaoProfissional],
+        usuario: Usuario | None = None,
+    ) -> None:
+        """Exclui fisicamente os documentos e logicamente as funcoes.
+
+        Args:
+            funcoes: Instâncias das funções profissionais a remover.
+            usuario: Usuário responsável pela exclusão.
+        """
+        for funcao in funcoes:
+            self.documento_service.sincronizar(
+                funcao_id=funcao.id,
+                documentos_lista=[],
+                usuario=usuario,
+            )
+            self.repository.remover(funcao, usuario)

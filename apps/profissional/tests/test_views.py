@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.core.constants import TipoArquivo
+from apps.core.exceptions import AnexoArquivoError
 from apps.core.pagination import PaginacaoPadrao
 from apps.profissional.api.views import ProfissionalViewSet
 from apps.profissional.models import FuncaoProfissional, Profissional
@@ -96,7 +97,13 @@ def test_view_configura_listagem_paginada():
     view = ProfissionalViewSet()
 
     assert view.pagination_class is PaginacaoPadrao
-    assert view.http_method_names == ["get", "post", "put", "options"]
+    assert view.http_method_names == [
+        "get",
+        "post",
+        "put",
+        "delete",
+        "options",
+    ]
 
 
 def test_atualiza_profissional_com_funcoes(
@@ -296,6 +303,28 @@ def test_criacao_converte_validation_error_do_django(
     assert resposta.json()["cpf"] == ["CPF inválido"]
 
 
+def test_criacao_converte_erro_de_anexo(api_cliente, profissional_payload):
+    """Converte arquivo inválido em resposta de validação da API."""
+    profissional_payload["funcoes"][0]["documentos"] = []
+    erro = AnexoArquivoError(
+        title="Tipo de arquivo não permitido",
+        detail="O tipo de arquivo informado não é permitido.",
+    )
+    with patch(
+        "apps.profissional.api.views.ProfissionalService.criar",
+        side_effect=erro,
+    ):
+        resposta = api_cliente.post(
+            "/api/v1/profissionais/", profissional_payload, format="json"
+        )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json() == {
+        "title": erro.title,
+        "detail": erro.detail,
+    }
+
+
 def test_atualizacao_converte_validation_error_do_django(
     api_cliente, cargo_profissional
 ):
@@ -336,3 +365,117 @@ def test_atualizacao_converte_validation_error_do_django(
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
     assert resposta.json()["cpf"] == ["CPF inválido"]
+
+
+def test_remocao_deleta_profissional_e_some_da_listagem(
+    api_cliente,
+):
+    """Testa se a remoção via API faz a exclusão lógica do profissional."""
+    prof_existente = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+
+    response = api_cliente.delete(
+        f"/api/v1/profissionais/{prof_existente.uuid}/"
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert not Profissional.objects.filter(uuid=prof_existente.uuid).exists()
+
+
+def test_remocao_de_profissional_inexistente_retorna_404(api_cliente):
+    """Testa se a remoção de um profissional inexistente retorna 404."""
+    response = api_cliente.delete(
+        "/api/v1/profissionais/7ef06bb8-418f-43d1-bfe8-c392f13a2b1f/"
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_remocao_passa_profissional_e_usuario_para_o_servico(
+    api_cliente, usuario_ativo
+):
+    """DELETE delega o profissional e o usuário autenticado ao serviço."""
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+
+    with patch(
+        "apps.profissional.api.views.ProfissionalService.deletar"
+    ) as deletar:
+        response = api_cliente.delete(
+            f"/api/v1/profissionais/{profissional.uuid}/"
+        )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    deletar.assert_called_once_with(
+        profissional=profissional,
+        usuario=usuario_ativo,
+    )
+
+
+def test_remocao_converte_validation_error_do_django(api_cliente):
+    """Converte erros da exclusão em resposta de validação da API."""
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+    with patch(
+        "apps.profissional.api.views.ProfissionalService.deletar",
+        side_effect=ValidationError(
+            {"profissional": ["Não foi possível excluir o profissional."]}
+        ),
+    ):
+        resposta = api_cliente.delete(
+            f"/api/v1/profissionais/{profissional.uuid}/"
+        )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json() == {
+        "profissional": ["Não foi possível excluir o profissional."]
+    }
+
+
+def test_atualizacao_converte_erro_de_anexo(api_cliente, cargo_profissional):
+    """Converte arquivo inválido na atualização em resposta HTTP 400."""
+    profissional = Profissional.objects.create(
+        nome="José da Silva",
+        cpf="12345678901",
+        rg="123456789",
+    )
+    erro = AnexoArquivoError(
+        title="Tipo de arquivo não permitido",
+        detail="O tipo de arquivo informado não é permitido.",
+    )
+
+    with patch(
+        "apps.profissional.api.views.ProfissionalService.atualizar",
+        side_effect=erro,
+    ):
+        resposta = api_cliente.put(
+            f"/api/v1/profissionais/{profissional.uuid}/",
+            {
+                "nome": profissional.nome,
+                "cpf": profissional.cpf,
+                "rg": profissional.rg,
+                "status": profissional.status,
+                "funcoes": [
+                    {
+                        "uuid_cargo": str(cargo_profissional.uuid),
+                        "documentos": [],
+                    }
+                ],
+            },
+            format="json",
+        )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json() == {
+        "title": erro.title,
+        "detail": erro.detail,
+    }

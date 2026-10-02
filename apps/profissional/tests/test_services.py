@@ -1,7 +1,7 @@
 """Testes dos serviços do domínio Profissional."""
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -225,6 +225,26 @@ def test_funcao_service_rejeita_uuid_de_outro_profissional():
     repository.remover.assert_not_called()
 
 
+def test_funcao_service_remove_funcoes_e_documentos():
+    """Remove os documentos antes de excluir logicamente cada função."""
+    repository = MagicMock()
+    documento_service = MagicMock()
+    funcoes = [SimpleNamespace(id=1), SimpleNamespace(id=2)]
+    usuario = SimpleNamespace(id=10)
+    service = FuncaoProfissionalService(repository, documento_service)
+
+    service.remover(funcoes, usuario)
+
+    assert documento_service.sincronizar.call_args_list == [
+        call(funcao_id=1, documentos_lista=[], usuario=usuario),
+        call(funcao_id=2, documentos_lista=[], usuario=usuario),
+    ]
+    assert repository.remover.call_args_list == [
+        call(funcoes[0], usuario),
+        call(funcoes[1], usuario),
+    ]
+
+
 @pytest.mark.django_db
 def test_profissional_service_cria_agregado(cargo_profissional):
     """Cria o profissional e sincroniza suas funções."""
@@ -286,3 +306,20 @@ def test_profissional_service_atualiza_agregado(usuario_ativo):
         usuario=usuario_ativo,
     )
     assert resultado["funcoes"] == funcoes_atualizadas
+
+
+@pytest.mark.django_db
+def test_profissional_service_deleta_agregado(usuario_ativo):
+    """Remove as funções antes de excluir logicamente o profissional."""
+    repository = MagicMock()
+    funcao_service = MagicMock()
+    funcoes = [MagicMock(), MagicMock()]
+    profissional = MagicMock()
+    profissional.funcoes.all.return_value = funcoes
+    service = ProfissionalService(repository, funcao_service)
+
+    service.deletar(profissional, usuario_ativo)
+
+    profissional.funcoes.all.assert_called_once_with()
+    funcao_service.remover.assert_called_once_with(funcoes, usuario_ativo)
+    repository.deletar.assert_called_once_with(profissional, usuario_ativo)
