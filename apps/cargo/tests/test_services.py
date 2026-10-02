@@ -9,6 +9,7 @@ from apps.cargo.exceptions import CargoOuDocumentoJaVinculadaError
 from apps.cargo.models import Cargo, DocumentoCargo
 from apps.cargo.repository.cargo_repository import CargoRepository
 from apps.cargo.services.cargo_service import CargoService
+from apps.usuarios.models.usuario import Usuario
 
 pytestmark = pytest.mark.django_db
 
@@ -605,3 +606,60 @@ def test_deletar_cargo(
     }
     assert cargo.deletado_em is not None
     assert cargo.deletado_por == usuario_ativo
+
+
+def test_deletar_deve_rejeitar_cargo_com_profissionais_vinculados(
+    cargo: Cargo,
+    service: CargoService,
+    usuario_ativo: Usuario,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Impede a exclusão e informa os profissionais vinculados ao cargo."""
+    profissionais_vinculados = [
+        {
+            "cpf": "12345678901",
+            "nome": "Ana Silva",
+        },
+        {
+            "cpf": "98765432100",
+            "nome": "Bruno Souza",
+        },
+    ]
+
+    def obter_profissionais_vinculados(
+        _repository: CargoRepository,
+        model_cargo: Cargo,
+    ) -> list[dict[str, str]]:
+        """Retorna os profissionais vinculados ao cargo consultado."""
+        assert model_cargo is cargo
+        return profissionais_vinculados
+
+    monkeypatch.setattr(
+        CargoRepository,
+        "profissionais_vinculados_ao_cargo",
+        obter_profissionais_vinculados,
+    )
+
+    with pytest.raises(CargoOuDocumentoJaVinculadaError) as exc_info:
+        service.deletar(
+            model_cargo=cargo,
+            usuario=usuario_ativo,
+        )
+
+    assert exc_info.value.title == (
+        CargoErrorMessages.CARGO_VINCULADO_AO_PROFISSIONAL_TITLE
+    )
+    assert exc_info.value.detail == {
+        "message": (
+            CargoErrorMessages.CARGO_VINCULADO_AO_PROFISSIONAL.format(
+                nome_cargo=cargo.nome,
+            )
+        ),
+        "vinculados": profissionais_vinculados,
+    }
+
+    cargo.refresh_from_db()
+
+    assert cargo.deletado_em is None
+    assert cargo.deletado_por is None
+    assert Cargo.objects.filter(pk=cargo.pk).exists()
