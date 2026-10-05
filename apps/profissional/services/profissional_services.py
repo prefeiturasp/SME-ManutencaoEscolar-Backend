@@ -116,6 +116,7 @@ class ProfissionalService:
             profissional: Profissional a ser excluído.
             usuario: Usuário responsável pela exclusão.
         """
-        funcoes = list(profissional.funcoes.all())
-        self.funcao_profissional_service.remover(funcoes, usuario)
+        self.funcao_profissional_service.remover_por_profissional(
+            profissional.id, usuario
+        )
         self.profissional_repository.deletar(profissional, usuario)
