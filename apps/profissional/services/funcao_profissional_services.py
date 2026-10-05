@@ -117,3 +117,23 @@ class FuncaoProfissionalService:
             funcao_serializada["documentos"] = documentos_criados
             funcoes.append(funcao_serializada)
         return funcoes
+
+    def remover_por_profissional(
+        self,
+        profissional_id: int,
+        usuario: Usuario | None = None,
+    ) -> None:
+        """Remove as funções vinculadas a um profissional.
+
+        Args:
+            profissional_id: ID do profissional dono das funções.
+            usuario: Usuário responsável pela remoção.
+        """
+        funcoes = self.repository.listar_por_profissional(profissional_id)
+        for funcao in funcoes:
+            self.documento_service.sincronizar(
+                funcao_id=funcao["id"],
+                documentos_lista=[],
+                usuario=usuario,
+            )
+            self.repository.remover(funcao, usuario)

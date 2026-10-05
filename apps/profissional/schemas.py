@@ -250,4 +250,31 @@ PROFISSIONAL_SCHEMA = extend_schema_view(
         ],
     ),
     partial_update=extend_schema(exclude=True),
+    destroy=extend_schema(
+        tags=[_TAG_PROFISSIONAL],
+        summary="Exclui um profissional",
+        description=(
+            "Realiza a exclusão lógica de um profissional identificado pelo "
+            "UUID, incluindo suas funções vinculadas."
+        ),
+        operation_id="excluirProfissional",
+        request=None,
+        responses={
+            204: OpenApiResponse(
+                description="Profissional excluído com sucesso",
+            ),
+            400: OpenApiResponse(
+                description="Não foi possível excluir o profissional",
+            ),
+            401: OpenApiResponse(
+                description=_CREDENCIAIS_INVALIDAS,
+            ),
+            404: OpenApiResponse(
+                description="Profissional não encontrado",
+            ),
+            500: OpenApiResponse(
+                description=_ERRO_SERVIDOR,
+            ),
+        },
+    ),
 )

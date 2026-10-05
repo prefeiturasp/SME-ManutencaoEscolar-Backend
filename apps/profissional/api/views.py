@@ -8,6 +8,7 @@ from rest_framework.serializers import BaseSerializer
 from rest_framework.serializers import ValidationError as DRFValidationError
 from rest_framework.viewsets import ModelViewSet
 
+from apps.core.exceptions import AnexoArquivoError
 from apps.profissional.filters import ProfissionalFilter
 from apps.profissional.models import Profissional
 from apps.profissional.schemas import PROFISSIONAL_SCHEMA
@@ -30,7 +31,7 @@ class ProfissionalViewSet(ModelViewSet):
         "funcoes__cargo", "funcoes__documentos"
     )
     lookup_field = "uuid"
-    http_method_names = ["get", "post", "put", "options"]
+    http_method_names = ["get", "post", "put", "delete", "options"]
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProfissionalFilter
 
@@ -57,6 +58,10 @@ class ProfissionalViewSet(ModelViewSet):
             serializer.instance = self.service.criar(
                 serializer.validated_data, self._usuario_logado()
             )
+        except AnexoArquivoError as exc:
+            raise DRFValidationError(
+                {"title": exc.title, "detail": exc.detail}
+            ) from exc
         except DjangoValidationError as exc:
             raise DRFValidationError(exc.message_dict) from exc
 
@@ -75,7 +80,28 @@ class ProfissionalViewSet(ModelViewSet):
                 serializer.validated_data,
                 self._usuario_logado(),
             )
+        except AnexoArquivoError as exc:
+            raise DRFValidationError(
+                {"title": exc.title, "detail": exc.detail}
+            ) from exc
         except DjangoValidationError as exc:
             raise DRFValidationError(exc.message_dict) from exc
 
         serializer.instance = profissional
+
+    def perform_destroy(self, instance: Profissional) -> None:
+        """Exclui logicamente um profissional.
+
+        Args:
+            instance (Profissional): Instância do profissional a ser deletado.
+
+        Raises:
+            DRFValidationError: Se ocorrer algum erro de validação.
+        """
+        try:
+            self.service.deletar(
+                profissional=instance,
+                usuario=self._usuario_logado(),
+            )
+        except DjangoValidationError as exc:
+            raise DRFValidationError(exc.message_dict) from exc
