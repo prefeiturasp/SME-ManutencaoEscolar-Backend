@@ -72,7 +72,7 @@ class FuncaoProfissionalSerializer(serializers.ModelSerializer):
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
     )
     registro_funcional: serializers.CharField = serializers.CharField(
-        source="criado_por.registro_funcional",
+        source="criado_por.username",
         read_only=True,
     )
     atualizado_por: serializers.SlugRelatedField[Usuario] = (

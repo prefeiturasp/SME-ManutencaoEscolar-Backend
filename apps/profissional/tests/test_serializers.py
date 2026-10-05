@@ -157,10 +157,7 @@ def test_serializer_de_leitura_inclui_funcao_e_documento(
     assert dados["criado_por"] == usuario_ativo.nome
     assert dados["funcoes"][0]["nome_cargo"] == cargo_profissional.nome
     assert dados["funcoes"][0]["criado_por"] == usuario_ativo.nome
-    assert (
-        dados["funcoes"][0]["registro_funcional"]
-        == usuario_ativo.registro_funcional
-    )
+    assert dados["funcoes"][0]["registro_funcional"] == usuario_ativo.username
     documento = dados["funcoes"][0]["documentos"][0]
     assert documento["nome_original"] == "NR10.pdf"
     assert documento["tipo"] == TipoArquivo.DOCUMENTO
