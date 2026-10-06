@@ -86,6 +86,7 @@ APPS_PROJETO = [
     "apps.lote",
     "apps.cargo",
     "apps.profissional",
+    "apps.equipe",
 ]
 
 # ==========================================
