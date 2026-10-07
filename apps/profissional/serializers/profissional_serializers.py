@@ -59,7 +59,7 @@ class ProfissionalListSerializer(serializers.ModelSerializer):
 
     funcoes = serializers.SerializerMethodField()
 
-    def get_funcoes(self, profissional: Profissional) -> list[str]:
+    def get_funcoes(self, profissional: Profissional) -> list[dict[str, str]]:
         """Retorna os nomes dos cargos exercidos pelo profissional.
 
         Args:
@@ -68,7 +68,10 @@ class ProfissionalListSerializer(serializers.ModelSerializer):
         Returns:
             Nomes dos cargos vinculados ao profissional.
         """
-        return [funcao.cargo.nome for funcao in profissional.funcoes.all()]
+        return [
+            {"nome": funcao.cargo.nome, "uuid": str(funcao.cargo.uuid)}
+            for funcao in profissional.funcoes.all()
+        ]
 
     class Meta:
         """Configuração do serializer de profissional."""
