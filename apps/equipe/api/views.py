@@ -15,11 +15,13 @@ from apps.equipe.exceptions import (
     ProfissionalVinculadoError,
 )
 from apps.equipe.models import Equipe
+from apps.equipe.schemas import EQUIPE_SCHEMA
 from apps.equipe.serializers import EquipeCriarSerializer
 from apps.equipe.services import EquipeService
 from apps.usuarios.models import Usuario
 
 
+@EQUIPE_SCHEMA
 class EquipeViewSet(CreateModelMixin, GenericViewSet):
     """Disponibiliza exclusivamente o cadastro de equipes."""
 
