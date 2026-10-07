@@ -27,7 +27,7 @@ def test_view_rejeita_usuario_nao_identificado():
 
 
 def test_cria_equipe_com_profissional(
-    api_cliente, equipe_payload, usuario_ativo
+    api_cliente, equipe_payload, usuario_ativo, funcao_profissional
 ):
     """Cria equipe e vínculo em uma mesma operação."""
     resposta = api_cliente.post(
@@ -39,6 +39,10 @@ def test_cria_equipe_com_profissional(
     assert equipe.criado_por == usuario_ativo
     assert equipe.profissionais.count() == 1
     assert equipe.profissionais.get().criado_por == usuario_ativo
+    assert equipe.profissionais.get().funcao == funcao_profissional
+    assert resposta.json()["profissionais"][0]["funcao"] == str(
+        funcao_profissional.uuid
+    )
 
 
 def test_endpoint_disponibiliza_apenas_criacao(api_cliente):
@@ -198,9 +202,21 @@ def test_rejeita_varios_profissionais_vinculados(
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
     assert resposta.json() == {
         "title": "Profissionais já vinculados a uma ou mais equipes!",
-        "detail": (
-            "Mais de um profissional já possui vínculo com uma ou mais "
-            "equipes. Para incluir esse registro, primeiro remova os "
-            "vínculos atuais."
-        ),
+        "detail": {
+            "message": (
+                "Mais de um profissional já possui vínculo com uma ou mais "
+                "equipes. Para incluir esse registro, primeiro remova os "
+                "vínculos atuais."
+            ),
+            "vinculados": [
+                {
+                    "profissional": outro_profissional.nome,
+                    "equipe": equipe_existente.nome,
+                },
+                {
+                    "profissional": profissional_ativo.nome,
+                    "equipe": equipe_existente.nome,
+                },
+            ],
+        },
     }

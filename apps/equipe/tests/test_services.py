@@ -44,9 +44,11 @@ def test_rejeita_profissional_inativo(
     """Não permite vincular profissional inativo."""
     profissional_ativo.status = False
     profissional_ativo.save(update_fields=["status"])
+    dados_validados = _validar_payload(equipe_payload)
+    service = EquipeService()
 
     with pytest.raises(ValidationError, match="profissional inativo"):
-        EquipeService().criar(_validar_payload(equipe_payload), usuario_ativo)
+        service.criar(dados_validados, usuario_ativo)
 
     assert not Equipe.objects.exists()
 
@@ -71,9 +73,11 @@ def test_rejeita_profissional_de_outra_equipe_ativa(
         profissional=profissional_ativo,
         funcao=funcao_profissional,
     )
+    dados_validados = _validar_payload(equipe_payload)
+    service = EquipeService()
 
     with pytest.raises(ProfissionalVinculadoError) as exc_info:
-        EquipeService().criar(_validar_payload(equipe_payload), usuario_ativo)
+        service.criar(dados_validados, usuario_ativo)
 
     assert exc_info.value.title == "Profissional já vinculado a uma equipe!"
     assert exc_info.value.detail == (
@@ -128,17 +132,32 @@ def test_rejeita_varios_profissionais_vinculados_a_equipes_ativas(
             "funcao": str(outra_funcao.uuid),
         }
     )
+    dados_validados = _validar_payload(equipe_payload)
+    service = EquipeService()
 
     with pytest.raises(ProfissionaisVinculadosError) as exc_info:
-        EquipeService().criar(_validar_payload(equipe_payload), usuario_ativo)
+        service.criar(dados_validados, usuario_ativo)
 
     assert exc_info.value.title == (
         "Profissionais já vinculados a uma ou mais equipes!"
     )
-    assert exc_info.value.detail == (
-        "Mais de um profissional já possui vínculo com uma ou mais equipes. "
-        "Para incluir esse registro, primeiro remova os vínculos atuais."
-    )
+    assert exc_info.value.detail == {
+        "message": (
+            "Mais de um profissional já possui vínculo com uma ou mais "
+            "equipes. Para incluir esse registro, primeiro remova os "
+            "vínculos atuais."
+        ),
+        "vinculados": [
+            {
+                "profissional": outro_profissional.nome,
+                "equipe": equipe_existente.nome,
+            },
+            {
+                "profissional": profissional_ativo.nome,
+                "equipe": equipe_existente.nome,
+            },
+        ],
+    }
 
 
 def test_permite_profissional_de_outra_equipe_inativa(
@@ -182,9 +201,11 @@ def test_rejeita_nome_repetido_na_mesma_empresa(
         empresa=empresa,
         lote=lote_centro,
     )
+    dados_validados = _validar_payload(equipe_payload)
+    service = EquipeService()
 
     with pytest.raises(EquipeJaCadastradaError) as exc_info:
-        EquipeService().criar(_validar_payload(equipe_payload), usuario_ativo)
+        service.criar(dados_validados, usuario_ativo)
 
     assert exc_info.value.title == "Já existe uma equipe com este nome!"
     assert exc_info.value.detail == (

@@ -96,11 +96,17 @@ class EquipeService:
             )
 
         vinculos = self.repository.obter_vinculos_com_equipes_ativas(uuids)
-        profissionais_vinculados = {vinculo[0] for vinculo in vinculos}
+        profissionais_vinculados = [
+            {"profissional": vinculo[1], "equipe": vinculo[2]}
+            for vinculo in vinculos
+        ]
         if len(profissionais_vinculados) > 1:
             raise ProfissionaisVinculadosError(
                 title=EquipeErrorMessages.PROFISSIONAIS_OUTRA_EQUIPE_TITULO,
-                detail=EquipeErrorMessages.PROFISSIONAIS_OUTRA_EQUIPE,
+                detail={
+                    "message": EquipeErrorMessages.PROFISSIONAIS_OUTRA_EQUIPE,
+                    "vinculados": profissionais_vinculados,
+                },
             )
         if vinculos:
             _, nome_profissional, nome_equipe = vinculos[0]
