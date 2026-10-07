@@ -202,7 +202,7 @@ def test_lista_profissionais_com_funcoes(
         rg="123456789",
         criado_por=usuario_ativo,
     )
-    FuncaoProfissional.objects.create(
+    funcao_profissional = FuncaoProfissional.objects.create(
         profissional=profissional,
         cargo=cargo_profissional,
         criado_por=usuario_ativo,
@@ -211,7 +211,6 @@ def test_lista_profissionais_com_funcoes(
     resposta = api_cliente.get("/api/v1/profissionais/")
 
     assert resposta.status_code == status.HTTP_200_OK
-    funcao_uuid = str(cargo_profissional.uuid)
     assert resposta.json() == {
         "count": 1,
         "next": None,
@@ -223,7 +222,12 @@ def test_lista_profissionais_com_funcoes(
                 "cpf": "12345678901",
                 "rg": "123456789",
                 "status": True,
-                "funcoes": [{"nome": "Eletricista", "uuid": funcao_uuid}],
+                "funcoes": [
+                    {
+                        "nome": "Eletricista",
+                        "uuid": str(funcao_profissional.uuid),
+                    }
+                ],
             }
         ],
     }

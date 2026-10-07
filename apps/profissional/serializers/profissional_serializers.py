@@ -69,7 +69,7 @@ class ProfissionalListSerializer(serializers.ModelSerializer):
             Nomes dos cargos vinculados ao profissional.
         """
         return [
-            {"nome": funcao.cargo.nome, "uuid": str(funcao.cargo.uuid)}
+            {"nome": funcao.cargo.nome, "uuid": str(funcao.uuid)}
             for funcao in profissional.funcoes.all()
         ]
 
