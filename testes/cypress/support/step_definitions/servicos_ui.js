@@ -25,14 +25,36 @@ Então('o sistema não cadastra o serviço sem campos obrigatórios', function (
 })
 
 Quando('cancelo preenchimento o cadastro de serviço {string}', function () {
-  cy.clicar_cancelar_cadastro() 
+  cy.clicar_cancelar_cadastro_servico() 
 })
 
 Então('o sistema não cadastra o serviço retornando para listagem', function () { 
-  cy.validar_cancelar_cadastro()
+  cy.validar_cancelar_cadastro_servico()
 })
 
 Então('o sistema informa serviço já cadastrado', function () { 
   cy.validar_cadastro_servico_duplicado()
 })
 
+Quando('cancelo a exclusão do cadastro de serviço {string}', function () {
+  cy.cancelar_exclusao_servico()
+})
+
+Então('o sistema não exclui o serviço retornando para os detalhes', function () { 
+  cy.validar_editar_servico()
+})
+
+Quando('aciono a exclusão do cadastro de serviço {string}', function () {
+})
+
+Quando('fecho o modal de exclusão do serviço', function () {
+  cy.acionar_exclusao_servico()
+})
+
+Quando('clico para excluir o cadastro de serviço {string}', function () {
+  cy.excluir_servico()
+})
+
+Então('o sistema exclui o serviço', function () { 
+  cy.validar_exclusao_servico()
+})

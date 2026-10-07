@@ -55,7 +55,7 @@ Cypress.Commands.add('validar_campos_preenchidos_servico', () => {
     .should('be.disabled')
 })
 
-Cypress.Commands.add('clicar_cancelar_cadastro', () => {
+Cypress.Commands.add('clicar_cancelar_cadastro_servico', () => {
   cy.get(servicos_localizadores.btn_cadastrar_servicos())
     .should('be.visible')
     .click() 
@@ -65,11 +65,85 @@ Cypress.Commands.add('clicar_cancelar_cadastro', () => {
     .click() 
 })
 
-Cypress.Commands.add('validar_cancelar_cadastro', () => {
+Cypress.Commands.add('validar_cancelar_cadastro_servico', () => {
   cy.get(servicos_localizadores.btn_cadastrar_servicos())
     .should('be.visible')
 })
 
 Cypress.Commands.add('validar_cadastro_servico_duplicado', () => {
   cy.contains('Já existe um serviço com este nome cadastrado no sistema.')
+})
+
+Cypress.Commands.add('cancelar_exclusao_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_editar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_excluir_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_cancelar_exclusao())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_editar_servico', () => {
+  cy.url({ timeout: 10000 }).should('include', '/editar')
+})
+
+Cypress.Commands.add('acionar_exclusao_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_editar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_excluir_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_cancelar_exclusao())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('excluir_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_editar_servico())
+    .should('be.visible') 
+    .click()
+
+  cy.get(servicos_localizadores.btn_excluir_servico())
+    .should('be.visible')
+    .click()
+  
+  cy.get(servicos_localizadores.btn_confirmar_exclusao())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_exclusao_servico', () => {
+  cy.contains('O serviço foi excluído.')  
 })
