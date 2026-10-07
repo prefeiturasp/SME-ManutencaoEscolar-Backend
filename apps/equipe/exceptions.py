@@ -1,5 +1,7 @@
 """Exceções do domínio Equipe."""
 
+from typing import Any
+
 
 class EquipeJaCadastradaError(Exception):
     """Indica que já existe uma equipe com o nome informado na empresa."""
@@ -24,7 +26,7 @@ class ProfissionalVinculadoError(Exception):
 class ProfissionaisVinculadosError(Exception):
     """Indica que vários profissionais já estão vinculados a equipes."""
 
-    def __init__(self, title: str, detail: str) -> None:
+    def __init__(self, title: str, detail: dict[str, Any]) -> None:
         """Inicializa a exceção com título e descrição."""
         self.title = title
         self.detail = detail
