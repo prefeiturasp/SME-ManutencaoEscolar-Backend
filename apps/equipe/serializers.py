@@ -171,6 +171,7 @@ class EquipeListSerializer(serializers.ModelSerializer):
 
         model = Equipe
         fields = (
+            "uuid",
             "nome",
             "nome_empresa",
             "lote",

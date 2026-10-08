@@ -65,6 +65,7 @@ def test_lista_equipes_com_filtro_por_situacao(
     assert resposta.json()["count"] == 1
     assert resposta.json()["results"] == [
         {
+            "uuid": str(equipe_existente_ativa.uuid),
             "nome": equipe_existente_ativa.nome,
             "nome_empresa": empresa.nome,
             "lote": {

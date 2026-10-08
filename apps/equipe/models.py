@@ -32,7 +32,7 @@ class Equipe(BaseModel):
 
         verbose_name = "Equipe"
         verbose_name_plural = "Equipes"
-        ordering = ["nome"]
+        ordering = ["-situacao", "-id"]
         constraints = [
             models.UniqueConstraint(
                 Lower("nome"),
