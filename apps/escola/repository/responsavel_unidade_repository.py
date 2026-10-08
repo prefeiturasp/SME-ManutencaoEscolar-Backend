@@ -155,3 +155,31 @@ class ResponsavelUnidadeRepository:
                 "cargo",
             )
         )
+
+    def inativar_vinculos_ausentes(
+        self,
+        unidade: Unidadeeducacional,
+        responsaveis_uuids: set[str],
+        usuario: Usuario | None,
+    ) -> None:
+        """Inativa e realiza soft-delete dos vínculos não enviados.
+
+        Args:
+            unidade: Unidade educacional que está sendo atualizada.
+            responsaveis_uuids: UUIDs dos responsáveis que permanecem
+                vinculados à unidade.
+            usuario: Usuário responsável pela operação.
+        """
+        vinculos_ativos = self.listar_vinculos_ativos(
+            unidade=unidade,
+        )
+
+        for historico in vinculos_ativos:
+            if str(historico.responsavel.uuid) in responsaveis_uuids:
+                continue
+
+            historico.ativo = False
+            historico.save(
+                update_fields=["ativo"],
+            )
+            historico.soft_delete(usuario)

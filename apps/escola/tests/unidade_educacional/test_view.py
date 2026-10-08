@@ -8,6 +8,10 @@ from rest_framework import status
 from apps.escola.models import (
     Unidadeeducacional,
 )
+from apps.escola.models.responsavel_unidade import (
+    HistoricoResponsavel,
+    ResponsavelUnidade,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -593,3 +597,67 @@ class TestUnidadeEducacionalViewSet:
 
         assert resposta.status_code == status.HTTP_400_BAD_REQUEST
         assert "telefone" in resposta.data
+
+    def test_deve_inativar_responsavel_removido_da_lista(
+        self,
+        api_cliente,
+        unidade_educacional_emef,
+        dados_unidade_emef,
+        historico_responsavel,
+        cargo_perfil_diretor,
+        usuario_ativo,
+    ):
+        """Deve inativar o responsável removido da lista."""
+        responsavel_mantido = historico_responsavel.responsavel
+        responsavel_removido = ResponsavelUnidade.objects.create(
+            registro_funcional="7654321",
+            nome="Responsável Removido",
+            email="removido@email.com",
+            telefone="11999999999",
+            celular="11988888888",
+            criado_por=usuario_ativo,
+            atualizado_por=usuario_ativo,
+        )
+
+        historico_removido = HistoricoResponsavel.objects.create(
+            responsavel=responsavel_removido,
+            unidade_educacional=unidade_educacional_emef,
+            cargo=cargo_perfil_diretor,
+            ativo=True,
+        )
+
+        dados = {
+            "email": "atualizado@email.com",
+            "telefone": "1133334444",
+            "ativo": True,
+            "responsaveis": [
+                {
+                    "uuid": str(responsavel_mantido.uuid),
+                    "registro_funcional": (
+                        responsavel_mantido.registro_funcional
+                    ),
+                    "nome": responsavel_mantido.nome,
+                    "cargo": historico_responsavel.cargo.codigo,
+                    "email": responsavel_mantido.email,
+                    "telefone": responsavel_mantido.telefone,
+                    "celular": responsavel_mantido.celular,
+                },
+            ],
+        }
+        resposta = api_cliente.put(
+            f"{self.url}{unidade_educacional_emef.uuid}/",
+            data=dados,
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_200_OK, resposta.data
+
+        historico_removido = HistoricoResponsavel.dm_objects.get(
+            pk=historico_removido.pk,
+        )
+
+        assert historico_responsavel.ativo is True
+        assert historico_responsavel.deletado_em is None
+        assert historico_removido.ativo is False
+        assert historico_removido.deletado_em is not None
+        assert historico_removido.deletado_por == usuario_ativo
