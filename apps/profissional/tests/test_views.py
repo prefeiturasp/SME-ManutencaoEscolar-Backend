@@ -202,7 +202,7 @@ def test_lista_profissionais_com_funcoes(
         rg="123456789",
         criado_por=usuario_ativo,
     )
-    FuncaoProfissional.objects.create(
+    funcao_profissional = FuncaoProfissional.objects.create(
         profissional=profissional,
         cargo=cargo_profissional,
         criado_por=usuario_ativo,
@@ -222,7 +222,12 @@ def test_lista_profissionais_com_funcoes(
                 "cpf": "12345678901",
                 "rg": "123456789",
                 "status": True,
-                "funcoes": ["Eletricista"],
+                "funcoes": [
+                    {
+                        "nome": "Eletricista",
+                        "uuid": str(funcao_profissional.uuid),
+                    }
+                ],
             }
         ],
     }
