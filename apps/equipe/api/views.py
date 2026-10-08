@@ -44,7 +44,15 @@ class EquipeViewSet(CreateModelMixin, GenericViewSet):
         return usuario
 
     def perform_create(self, serializer: BaseSerializer) -> None:
-        """Cria uma equipe pela camada de serviço."""
+        """Cria uma equipe pela camada de serviço.
+
+        Args:
+            serializer: Serializer validado com os dados da nova equipe.
+
+        Raises:
+            DRFValidationError: Se a equipe já estiver cadastrada, houver
+                profissionais vinculados ou os dados forem inválidos.
+        """
         usuario = self._obter_usuario()
         try:
             serializer.instance = self.service.criar(

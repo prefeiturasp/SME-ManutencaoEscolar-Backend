@@ -41,7 +41,19 @@ class ProfissionalEquipeSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Valida se a função pertence ao profissional selecionado."""
+        """Valida o vínculo entre o profissional e a função informados.
+
+        Args:
+            attrs: Dados do vínculo, contendo o profissional e a função que
+                ele exercerá na equipe.
+
+        Returns:
+            Dados do vínculo validados.
+
+        Raises:
+            serializers.ValidationError: Se a função informada não estiver
+                vinculada ao profissional selecionado.
+        """
         if attrs["funcao"].profissional_id != attrs["profissional"].pk:
             raise serializers.ValidationError(
                 {"funcao": EquipeErrorMessages.FUNCAO_INVALIDA}
@@ -75,7 +87,18 @@ class EquipeCriarSerializer(serializers.ModelSerializer):
         read_only_fields = ("uuid",)
 
     def validate_nome(self, value: str) -> str:
-        """Rejeita nomes formados apenas por espaços."""
+        """Valida se o nome da equipe possui caracteres não brancos.
+
+        Args:
+            value: Nome informado para a equipe.
+
+        Returns:
+            Nome validado, preservando o valor originalmente informado.
+
+        Raises:
+            serializers.ValidationError: Se o nome for formado apenas por
+                espaços em branco.
+        """
         if not value.strip():
             raise serializers.ValidationError("Este campo não pode ser vazio.")
         return value
@@ -83,7 +106,19 @@ class EquipeCriarSerializer(serializers.ModelSerializer):
     def validate_profissionais(
         self, value: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
-        """Exige ao menos um profissional e rejeita repetições."""
+        """Valida os profissionais que compõem a equipe.
+
+        Args:
+            value: Lista de vínculos entre profissionais e suas respectivas
+                funções na equipe.
+
+        Returns:
+            Lista de vínculos profissionais validada.
+
+        Raises:
+            serializers.ValidationError: Se nenhum profissional for informado
+                ou se um mesmo profissional aparecer mais de uma vez.
+        """
         if not value:
             raise serializers.ValidationError(
                 EquipeErrorMessages.PROFISSIONAL_OBRIGATORIO
