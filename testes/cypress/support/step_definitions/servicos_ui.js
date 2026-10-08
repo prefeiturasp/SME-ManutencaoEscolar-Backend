@@ -58,3 +58,27 @@ Quando('clico para excluir o cadastro de serviço {string}', function () {
 Então('o sistema exclui o serviço', function () { 
   cy.validar_exclusao_servico()
 })
+
+Quando('edito o cadastro de serviço {string}', function () {
+  cy.editar_servico()   
+})
+
+Então('o sistema salva a edição do serviço', function () { 
+  cy.validar_edicao_servico() 
+})
+
+Quando('cancelo edição do cadastro de serviço {string}', function () {
+  cy.cancelar_edicao_servico()   
+})
+
+Então('o sistema não edita o serviço retornando para listagem', function () {
+  cy.validar_cancelar_cadastro_servico() 
+})
+
+Quando('insiro os mesmos dados do serviço {string}', function () { 
+  cy.editar_servico_existente 
+})
+
+Então('o sistema informa serviço ao tentar salvar o serviço', function () {
+  cy.validar_cadastro_servico_duplicado() 
+})

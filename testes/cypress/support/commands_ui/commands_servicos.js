@@ -147,3 +147,87 @@ Cypress.Commands.add('excluir_servico', () => {
 Cypress.Commands.add('validar_exclusao_servico', () => {
   cy.contains('O serviço foi excluído.')  
 })
+
+Cypress.Commands.add('editar_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_editar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.url().should('include', '/servicos/').and('include', '/editar')
+
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+
+  cy.get(servicos_localizadores.select_status())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.opcoes_status())
+    .contains('Inativo')
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_salvar_cadastro())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_edicao_servico', () => {
+  cy.contains('As alterações foram salvas.')  
+})
+
+Cypress.Commands.add('cancelar_edicao_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_editar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.url().should('include', '/servicos/').and('include', '/editar')
+
+  cy.get(servicos_localizadores.btn_cancelar())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('editar_servico_existente', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_editar_servico())
+    .should('be.visible') 
+    .click()
+
+  cy.url().should('include', '/servicos/').and('include', '/editar')
+
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .clear()
+	
+	cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste serviço')
+
+  cy.get(servicos_localizadores.btn_salvar_cadastro())
+    .should('be.visible')
+    .click()
+})
