@@ -8,9 +8,9 @@ from rest_framework.test import APIClient, APIRequestFactory
 
 from apps.empresa.models import Empresa
 from apps.equipe.api.views import EquipeViewSet
-from apps.equipe.models import Equipe, ProfissionalEquipe
+from apps.equipe.models import Equipe
 from apps.lote.models import Lote
-from apps.profissional.models import FuncaoProfissional, Profissional
+from apps.profissional.models import Profissional
 
 pytestmark = pytest.mark.django_db
 
@@ -114,109 +114,26 @@ def test_rejeita_profissional_inativo(
 def test_rejeita_profissional_vinculado_a_outra_equipe(
     api_cliente: APIClient,
     equipe_payload: dict[str, object],
-    empresa: Empresa,
-    lote_centro: Lote,
-    profissional_ativo: Profissional,
-    funcao_profissional: FuncaoProfissional,
+    erro_profissional_vinculado: dict[str, str],
 ) -> None:
     """Retorna erro singular para profissional já vinculado."""
-    equipe_existente = Equipe.objects.create(
-        nome="Equipe Existente",
-        situacao=True,
-        empresa=empresa,
-        lote=lote_centro,
-    )
-    ProfissionalEquipe.objects.create(
-        equipe=equipe_existente,
-        profissional=profissional_ativo,
-        funcao=funcao_profissional,
-    )
-
     resposta = api_cliente.post(
         "/api/v1/equipes/", equipe_payload, format="json"
     )
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
-    assert resposta.json() == {
-        "title": "Profissional já vinculado a uma equipe!",
-        "detail": (
-            f"O profissional {profissional_ativo.nome} já possui vínculo "
-            f"com a equipe {equipe_existente.nome}. Para incluir esse "
-            "registro, primeiro remova o vínculo atual com a equipe."
-        ),
-    }
+    assert resposta.json() == erro_profissional_vinculado
 
 
 def test_rejeita_varios_profissionais_vinculados(
     api_cliente: APIClient,
     equipe_payload: dict[str, object],
-    empresa: Empresa,
-    lote_centro: Lote,
-    profissional_ativo: Profissional,
-    funcao_profissional: FuncaoProfissional,
+    erro_varios_profissionais_vinculados: dict[str, object],
 ) -> None:
     """Retorna erro plural quando vários profissionais estão vinculados."""
-    outro_profissional = Profissional.objects.create(
-        nome="Maria Encanadora",
-        cpf="98765432101",
-        rg="987654321",
-        status=True,
-    )
-    outra_funcao = FuncaoProfissional.objects.create(
-        profissional=outro_profissional,
-        cargo=funcao_profissional.cargo,
-    )
-    equipe_existente = Equipe.objects.create(
-        nome="Equipe Existente",
-        situacao=True,
-        empresa=empresa,
-        lote=lote_centro,
-    )
-    ProfissionalEquipe.objects.bulk_create(
-        [
-            ProfissionalEquipe(
-                equipe=equipe_existente,
-                profissional=profissional_ativo,
-                funcao=funcao_profissional,
-            ),
-            ProfissionalEquipe(
-                equipe=equipe_existente,
-                profissional=outro_profissional,
-                funcao=outra_funcao,
-            ),
-        ]
-    )
-    profissionais = equipe_payload["profissionais"]
-    assert isinstance(profissionais, list)
-    profissionais.append(
-        {
-            "profissional": str(outro_profissional.uuid),
-            "funcao": str(outra_funcao.uuid),
-        }
-    )
-
     resposta = api_cliente.post(
         "/api/v1/equipes/", equipe_payload, format="json"
     )
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
-    assert resposta.json() == {
-        "title": "Profissionais já vinculados a uma ou mais equipes!",
-        "detail": {
-            "message": (
-                "Mais de um profissional já possui vínculo com uma ou mais "
-                "equipes. Para incluir esse registro, primeiro remova os "
-                "vínculos atuais."
-            ),
-            "vinculados": [
-                {
-                    "profissional": outro_profissional.nome,
-                    "equipe": equipe_existente.nome,
-                },
-                {
-                    "profissional": profissional_ativo.nome,
-                    "equipe": equipe_existente.nome,
-                },
-            ],
-        },
-    }
+    assert resposta.json() == erro_varios_profissionais_vinculados

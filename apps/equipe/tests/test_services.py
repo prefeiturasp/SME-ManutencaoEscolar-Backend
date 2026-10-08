@@ -13,7 +13,6 @@ from apps.equipe.exceptions import (
 from apps.equipe.models import Equipe, ProfissionalEquipe
 from apps.equipe.serializers import EquipeCriarSerializer
 from apps.equipe.services import EquipeService
-from apps.profissional.models import FuncaoProfissional, Profissional
 
 pytestmark = pytest.mark.django_db
 
@@ -55,109 +54,38 @@ def test_rejeita_profissional_inativo(
 
 def test_rejeita_profissional_de_outra_equipe_ativa(
     equipe_payload: dict[str, object],
-    empresa,
-    lote_centro,
-    profissional_ativo,
-    funcao_profissional,
+    erro_profissional_vinculado: dict[str, str],
     usuario_ativo,
 ) -> None:
     """Não permite profissional que já pertence a equipe ativa."""
-    equipe_existente = Equipe.objects.create(
-        nome="Equipe Existente",
-        situacao=True,
-        empresa=empresa,
-        lote=lote_centro,
-    )
-    ProfissionalEquipe.objects.create(
-        equipe=equipe_existente,
-        profissional=profissional_ativo,
-        funcao=funcao_profissional,
-    )
     dados_validados = _validar_payload(equipe_payload)
     service = EquipeService()
 
     with pytest.raises(ProfissionalVinculadoError) as exc_info:
         service.criar(dados_validados, usuario_ativo)
 
-    assert exc_info.value.title == "Profissional já vinculado a uma equipe!"
-    assert exc_info.value.detail == (
-        f"O profissional {profissional_ativo.nome} já possui vínculo "
-        f"com a equipe {equipe_existente.nome}. Para incluir esse "
-        "registro, primeiro remova o vínculo atual com a equipe."
-    )
+    assert exc_info.value.title == erro_profissional_vinculado["title"]
+    assert exc_info.value.detail == erro_profissional_vinculado["detail"]
 
 
 def test_rejeita_varios_profissionais_vinculados_a_equipes_ativas(
     equipe_payload: dict[str, object],
-    empresa,
-    lote_centro,
-    profissional_ativo,
-    funcao_profissional,
+    erro_varios_profissionais_vinculados: dict[str, object],
     usuario_ativo,
 ) -> None:
     """Retorna mensagem plural quando vários profissionais têm vínculo."""
-    outro_profissional = Profissional.objects.create(
-        nome="Maria Encanadora",
-        cpf="98765432101",
-        rg="987654321",
-        status=True,
-    )
-    outra_funcao = FuncaoProfissional.objects.create(
-        profissional=outro_profissional,
-        cargo=funcao_profissional.cargo,
-    )
-    equipe_existente = Equipe.objects.create(
-        nome="Equipe Existente",
-        situacao=True,
-        empresa=empresa,
-        lote=lote_centro,
-    )
-    ProfissionalEquipe.objects.bulk_create(
-        [
-            ProfissionalEquipe(
-                equipe=equipe_existente,
-                profissional=profissional_ativo,
-                funcao=funcao_profissional,
-            ),
-            ProfissionalEquipe(
-                equipe=equipe_existente,
-                profissional=outro_profissional,
-                funcao=outra_funcao,
-            ),
-        ]
-    )
-    equipe_payload["profissionais"].append(
-        {
-            "profissional": str(outro_profissional.uuid),
-            "funcao": str(outra_funcao.uuid),
-        }
-    )
     dados_validados = _validar_payload(equipe_payload)
     service = EquipeService()
 
     with pytest.raises(ProfissionaisVinculadosError) as exc_info:
         service.criar(dados_validados, usuario_ativo)
 
-    assert exc_info.value.title == (
-        "Profissionais já vinculados a uma ou mais equipes!"
+    assert (
+        exc_info.value.title == erro_varios_profissionais_vinculados["title"]
     )
-    assert exc_info.value.detail == {
-        "message": (
-            "Mais de um profissional já possui vínculo com uma ou mais "
-            "equipes. Para incluir esse registro, primeiro remova os "
-            "vínculos atuais."
-        ),
-        "vinculados": [
-            {
-                "profissional": outro_profissional.nome,
-                "equipe": equipe_existente.nome,
-            },
-            {
-                "profissional": profissional_ativo.nome,
-                "equipe": equipe_existente.nome,
-            },
-        ],
-    }
+    assert (
+        exc_info.value.detail == erro_varios_profissionais_vinculados["detail"]
+    )
 
 
 def test_permite_profissional_de_outra_equipe_inativa(
