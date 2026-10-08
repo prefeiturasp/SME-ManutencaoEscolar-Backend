@@ -607,6 +607,7 @@ class TestUnidadeEducacionalViewSet:
         cargo_perfil_diretor,
         usuario_ativo,
     ):
+        """Deve inativar o responsável removido da lista."""
         responsavel_mantido = historico_responsavel.responsavel
         responsavel_removido = ResponsavelUnidade.objects.create(
             registro_funcional="7654321",
