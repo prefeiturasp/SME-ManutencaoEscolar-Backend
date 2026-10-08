@@ -3,7 +3,9 @@
 import pytest
 from django.core.exceptions import ValidationError
 
+from apps.empresa.models import Empresa
 from apps.equipe.models import Equipe, ProfissionalEquipe
+from apps.profissional.models import Profissional
 
 pytestmark = pytest.mark.django_db
 
@@ -56,6 +58,23 @@ def test_nome_da_equipe_deve_ser_unico_na_empresa(empresa, lote_centro):
         repetida.full_clean()
 
 
+def test_empresa_da_equipe_deve_pertencer_ao_lote(lote_centro):
+    """Não permite empresa diferente da empresa do lote na equipe."""
+    outra_empresa = Empresa.objects.create(nome="Outra empresa")
+    equipe = Equipe(
+        nome="Equipe Elétrica",
+        empresa=outra_empresa,
+        lote=lote_centro,
+    )
+
+    with pytest.raises(ValidationError) as exc_info:
+        equipe.full_clean()
+
+    assert exc_info.value.message_dict["empresa"] == [
+        "A empresa informada não está associada ao lote selecionado."
+    ]
+
+
 def test_profissional_nao_pode_repetir_na_mesma_equipe(
     empresa, lote_centro, profissional_ativo, funcao_profissional
 ):
@@ -79,3 +98,31 @@ def test_profissional_nao_pode_repetir_na_mesma_equipe(
 
     with pytest.raises(ValidationError):
         repetido.full_clean()
+
+
+def test_funcao_deve_pertencer_ao_profissional(
+    empresa, lote_centro, funcao_profissional
+):
+    """Não permite vincular uma função pertencente a outro profissional."""
+    equipe = Equipe.objects.create(
+        nome="Equipe Elétrica",
+        empresa=empresa,
+        lote=lote_centro,
+    )
+    outro_profissional = Profissional.objects.create(
+        nome="Outro Profissional",
+        cpf="98765432101",
+        rg="987654321",
+    )
+    vinculo = ProfissionalEquipe(
+        equipe=equipe,
+        profissional=outro_profissional,
+        funcao=funcao_profissional,
+    )
+
+    with pytest.raises(ValidationError) as exc_info:
+        vinculo.full_clean()
+
+    assert exc_info.value.message_dict["funcao"] == [
+        "A função informada não pertence ao profissional selecionado."
+    ]

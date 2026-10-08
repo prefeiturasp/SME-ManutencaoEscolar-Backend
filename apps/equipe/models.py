@@ -1,5 +1,6 @@
 """Modelos do domínio Equipe."""
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.functions import Lower
 
@@ -48,6 +49,18 @@ class Equipe(BaseModel):
         """Retorna o nome da equipe."""
         return self.nome
 
+    def clean(self) -> None:
+        """Valida se a empresa informada está associada ao lote."""
+        super().clean()
+        if (
+            self.empresa_id
+            and self.lote_id
+            and self.empresa_id != self.lote.empresa_id
+        ):
+            raise ValidationError(
+                {"empresa": EquipeErrorMessages.EMPRESA_LOTE_INVALIDA}
+            )
+
 
 class ProfissionalEquipe(BaseModel):
     """Representa o vínculo de um profissional e sua função na equipe."""
@@ -88,3 +101,15 @@ class ProfissionalEquipe(BaseModel):
     def __str__(self) -> str:
         """Retorna profissional e equipe do vínculo."""
         return f"{self.profissional} - {self.equipe}"
+
+    def clean(self) -> None:
+        """Valida se a função informada pertence ao profissional."""
+        super().clean()
+        if (
+            self.profissional_id
+            and self.funcao_id
+            and self.profissional_id != self.funcao.profissional_id
+        ):
+            raise ValidationError(
+                {"funcao": EquipeErrorMessages.FUNCAO_INVALIDA}
+            )

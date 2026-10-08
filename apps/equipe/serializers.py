@@ -103,6 +103,24 @@ class EquipeCriarSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Este campo não pode ser vazio.")
         return value
 
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Valida se a empresa informada está associada ao lote.
+
+        Args:
+            attrs: Dados da equipe, contendo empresa e lote.
+
+        Returns:
+            Dados validados da equipe.
+
+        Raises:
+            serializers.ValidationError: Se o lote pertencer a outra empresa.
+        """
+        if attrs["empresa"].pk != attrs["lote"].empresa_id:
+            raise serializers.ValidationError(
+                {"empresa": EquipeErrorMessages.EMPRESA_LOTE_INVALIDA}
+            )
+        return attrs
+
     def validate_profissionais(
         self, value: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:

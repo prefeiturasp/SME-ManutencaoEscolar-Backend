@@ -37,3 +37,6 @@ class EquipeErrorMessages:
     FUNCAO_INVALIDA = (
         "A função informada não pertence ao profissional selecionado."
     )
+    EMPRESA_LOTE_INVALIDA = (
+        "A empresa informada não está associada ao lote selecionado."
+    )

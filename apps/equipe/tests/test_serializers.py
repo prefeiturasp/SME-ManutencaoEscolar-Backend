@@ -3,6 +3,7 @@
 import pytest
 from rest_framework.serializers import ValidationError
 
+from apps.empresa.models import Empresa
 from apps.equipe.serializers import EquipeCriarSerializer
 from apps.profissional.models import Profissional
 
@@ -51,3 +52,15 @@ def test_rejeita_funcao_de_outro_profissional(
 
     assert serializer.is_valid() is False
     assert "funcao" in str(serializer.errors["profissionais"])
+
+
+def test_rejeita_empresa_nao_associada_ao_lote(equipe_payload) -> None:
+    """Exige que a empresa informada seja a empresa do lote selecionado."""
+    outra_empresa = Empresa.objects.create(nome="Outra empresa")
+    equipe_payload["empresa"] = str(outra_empresa.uuid)
+    serializer = EquipeCriarSerializer(data=equipe_payload)
+
+    assert serializer.is_valid() is False
+    assert serializer.errors["empresa"] == [
+        "A empresa informada não está associada ao lote selecionado."
+    ]
