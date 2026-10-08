@@ -45,11 +45,36 @@ def test_cria_equipe_com_profissional(
     )
 
 
-def test_endpoint_disponibiliza_apenas_criacao(api_cliente):
-    """Não expõe listagem enquanto apenas criação foi solicitada."""
-    resposta = api_cliente.get("/api/v1/equipes/")
+def test_lista_equipes_com_filtro_por_situacao(
+    api_cliente: APIClient,
+    equipe_existente_ativa: Equipe,
+    empresa: Empresa,
+    lote_centro: Lote,
+) -> None:
+    """Lista somente equipes que correspondem aos filtros informados."""
+    Equipe.objects.create(
+        nome="Equipe inativa",
+        situacao=False,
+        empresa=empresa,
+        lote=lote_centro,
+    )
 
-    assert resposta.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+    resposta = api_cliente.get("/api/v1/equipes/", {"situacao": "true"})
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json()["count"] == 1
+    assert resposta.json()["results"] == [
+        {
+            "nome": equipe_existente_ativa.nome,
+            "nome_empresa": empresa.nome,
+            "lote": {
+                "nome": lote_centro.nome,
+                "periodo_inicial": None,
+                "periodo_final": None,
+            },
+            "situacao": True,
+        }
+    ]
 
 
 def test_requisicao_sem_autenticacao_retorna_401(equipe_payload):
