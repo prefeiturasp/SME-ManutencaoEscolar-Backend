@@ -17,6 +17,15 @@ Funcionalidade: Edição de serviço
 
   Esquema do Cenário: Validar: <caso>
     E acesso a tela Serviços
+    Quando apago o preenchimento no cadastro de serviço "<status>"
+    Então o sistema campos obrigatórios salva a edição do serviço
+
+    Exemplos:
+      | status | caso                          |
+      | ativo  | Campos obrigatórios ao salvar |
+
+  Esquema do Cenário: Validar: <caso>
+    E acesso a tela Serviços
     Quando cancelo edição do cadastro de serviço "<status>"
     Então o sistema não edita o serviço retornando para listagem
 

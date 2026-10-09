@@ -7,7 +7,7 @@ class Servicos_Localizadores {
   campo_nome = () => '#nome'  
   select_status = () => '#status' 
   opcoes_status = () => '[role="option"]' 
-  btn_cancelar = () => 'button:contains("Cancelar")'
+  btn_cancelar = () => 'a[href="/servicos"]:contains("Cancelar")'
   btn_salvar_cadastro = () => 'div.justify-between > .flex > .bg-primary'
 
   // editar

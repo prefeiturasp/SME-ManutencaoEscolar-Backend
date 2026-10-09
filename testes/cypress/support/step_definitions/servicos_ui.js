@@ -67,6 +67,14 @@ Então('o sistema salva a edição do serviço', function () {
   cy.validar_edicao_servico() 
 })
 
+Quando('apago o preenchimento no cadastro de serviço {string}', function () {
+  cy.editar_campos_servico()  
+})
+
+Então('o sistema campos obrigatórios salva a edição do serviço', function () {
+  cy.validar_campos_obrigatorios_servico() 
+})
+
 Quando('cancelo edição do cadastro de serviço {string}', function () {
   cy.cancelar_edicao_servico()   
 })
@@ -76,7 +84,7 @@ Então('o sistema não edita o serviço retornando para listagem', function () {
 })
 
 Quando('insiro os mesmos dados do serviço {string}', function () { 
-  cy.editar_servico_existente 
+  cy.editar_servico_existente()
 })
 
 Então('o sistema informa serviço ao tentar salvar o serviço', function () {

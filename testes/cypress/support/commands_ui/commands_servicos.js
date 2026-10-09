@@ -52,7 +52,7 @@ Cypress.Commands.add('clicar_cadastrar_servico', () => {
 
 Cypress.Commands.add('validar_campos_preenchidos_servico', () => {
   cy.get(servicos_localizadores.btn_salvar_cadastro())
-    .should('be.disabled')
+    .should('not.exist')
 })
 
 Cypress.Commands.add('clicar_cancelar_cadastro_servico', () => {
@@ -163,9 +163,6 @@ Cypress.Commands.add('editar_servico', () => {
 
   cy.url().should('include', '/servicos/').and('include', '/editar')
 
-  cy.get(servicos_localizadores.campo_nome())
-    .should('be.visible')
-
   cy.get(servicos_localizadores.select_status())
     .should('be.visible')
     .click()
@@ -230,4 +227,28 @@ Cypress.Commands.add('editar_servico_existente', () => {
   cy.get(servicos_localizadores.btn_salvar_cadastro())
     .should('be.visible')
     .click()
+})
+
+Cypress.Commands.add('editar_campos_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_editar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.url().should('include', '/servicos/').and('include', '/editar')
+
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .clear()
+})
+
+Cypress.Commands.add('validar_campos_obrigatorios_servico', () => {
+  cy.contains('Campo obrigatório')  
 })
