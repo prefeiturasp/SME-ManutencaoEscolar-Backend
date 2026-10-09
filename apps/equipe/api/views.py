@@ -3,9 +3,10 @@
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import GenericViewSet
 
@@ -14,25 +15,35 @@ from apps.equipe.exceptions import (
     ProfissionaisVinculadosError,
     ProfissionalVinculadoError,
 )
+from apps.equipe.filters import EquipeFilter
 from apps.equipe.models import Equipe
 from apps.equipe.schemas import EQUIPE_SCHEMA
-from apps.equipe.serializers import EquipeCriarSerializer
+from apps.equipe.serializers import EquipeCriarSerializer, EquipeListSerializer
 from apps.equipe.services import EquipeService
 from apps.usuarios.models import Usuario
 
 
 @EQUIPE_SCHEMA
-class EquipeViewSet(CreateModelMixin, GenericViewSet):
-    """Disponibiliza exclusivamente o cadastro de equipes."""
+class EquipeViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+    """Disponibiliza o cadastro e a listagem de equipes."""
 
-    queryset = Equipe.objects.all()
+    queryset = Equipe.objects.select_related("empresa", "lote")
     serializer_class = EquipeCriarSerializer
-    http_method_names = ["post", "options"]
+    http_method_names = ["post", "options", "get"]
+    lookup_field = "uuid"
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = EquipeFilter
 
     def __init__(self, **kwargs: Any) -> None:
         """Inicializa a view com o serviço de equipes."""
         super().__init__(**kwargs)
         self.service = EquipeService()
+
+    def get_serializer_class(self) -> type[BaseSerializer]:
+        """Retorna o serializer apropriado para a ação atual."""
+        if self.action == "create":
+            return EquipeCriarSerializer
+        return EquipeListSerializer
 
     def _obter_usuario(self) -> Usuario:
         """Retorna o usuário autenticado."""

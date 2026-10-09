@@ -1,13 +1,34 @@
 """Testes dos serializers do domínio Equipe."""
 
+from datetime import date
+
 import pytest
 from rest_framework.serializers import ValidationError
 
 from apps.empresa.models import Empresa
-from apps.equipe.serializers import EquipeCriarSerializer
+from apps.equipe.serializers import EquipeCriarSerializer, EquipeListSerializer
 from apps.profissional.models import Profissional
 
 pytestmark = pytest.mark.django_db
+
+
+def test_lista_equipe_com_dados_resumidos_do_lote(
+    equipe_existente_ativa,
+) -> None:
+    """Retorna nome e período do lote na listagem de equipes."""
+    equipe_existente_ativa.lote.periodo_inicial = date(2026, 1, 1)
+    equipe_existente_ativa.lote.periodo_final = date(2026, 12, 31)
+    equipe_existente_ativa.lote.save(
+        update_fields=["periodo_inicial", "periodo_final"]
+    )
+
+    resultado = EquipeListSerializer(equipe_existente_ativa).data
+
+    assert resultado["lote"] == {
+        "nome": equipe_existente_ativa.lote.nome,
+        "periodo_inicial": "2026-01-01",
+        "periodo_final": "2026-12-31",
+    }
 
 
 def test_rejeita_equipe_sem_profissionais(equipe_payload) -> None:

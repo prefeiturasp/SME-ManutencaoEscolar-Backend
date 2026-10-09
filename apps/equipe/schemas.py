@@ -2,12 +2,14 @@
 
 from drf_spectacular.utils import (
     OpenApiExample,
+    OpenApiParameter,
     OpenApiResponse,
+    OpenApiTypes,
     extend_schema,
     extend_schema_view,
 )
 
-from apps.equipe.serializers import EquipeCriarSerializer
+from apps.equipe.serializers import EquipeCriarSerializer, EquipeListSerializer
 
 _TAG_EQUIPE = "Equipe"
 
@@ -47,8 +49,82 @@ _EQUIPE_EXEMPLO_ERRO: dict[str, object] = {
     ),
 }
 
+_EQUIPES_EXEMPLO_LISTAGEM: dict[str, object] = {
+    "count": 1,
+    "next": None,
+    "previous": None,
+    "results": [
+        {
+            "nome": "Equipe Elétrica",
+            "nome_empresa": "Empresa Exemplo",
+            "lote": {
+                "nome": "Lote Centro",
+                "periodo_inicial": "2026-01-01",
+                "periodo_final": "2026-12-31",
+            },
+            "situacao": True,
+        }
+    ],
+}
+
 
 EQUIPE_SCHEMA = extend_schema_view(
+    list=extend_schema(
+        tags=[_TAG_EQUIPE],
+        summary="Lista as equipes",
+        description=(
+            "Retorna a lista paginada de equipes cadastradas, com dados "
+            "resumidos da empresa e do lote."
+        ),
+        operation_id="listarEquipes",
+        parameters=[
+            OpenApiParameter(
+                name="nome",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description=(
+                    "Filtra equipes cujo nome contenha o valor informado."
+                ),
+            ),
+            OpenApiParameter(
+                name="empresa",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description=(
+                    "Filtra equipes cujo nome da empresa contenha o valor "
+                    "informado."
+                ),
+            ),
+            OpenApiParameter(
+                name="lote",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description=(
+                    "Filtra equipes cujo nome do lote contenha o valor "
+                    "informado."
+                ),
+            ),
+            OpenApiParameter(
+                name="situacao",
+                type=OpenApiTypes.BOOL,
+                location=OpenApiParameter.QUERY,
+                description="Filtra equipes pela situação ativa ou inativa.",
+            ),
+        ],
+        responses={
+            200: EquipeListSerializer(many=True),
+            401: OpenApiResponse(description="Credenciais inválidas"),
+            500: OpenApiResponse(description="Erro no servidor"),
+        },
+        examples=[
+            OpenApiExample(
+                name="Lista paginada de equipes",
+                response_only=True,
+                status_codes=["200"],
+                value=_EQUIPES_EXEMPLO_LISTAGEM,
+            )
+        ],
+    ),
     create=extend_schema(
         tags=[_TAG_EQUIPE],
         summary="Cria uma nova equipe",
@@ -88,5 +164,5 @@ EQUIPE_SCHEMA = extend_schema_view(
                 value=_EQUIPE_EXEMPLO_ERRO,
             ),
         ],
-    )
+    ),
 )

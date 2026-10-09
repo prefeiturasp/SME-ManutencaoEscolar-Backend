@@ -147,3 +147,33 @@ class EquipeCriarSerializer(serializers.ModelSerializer):
                 EquipeErrorMessages.PROFISSIONAL_DUPLICADO
             )
         return value
+
+
+class LoteEquipeSerializer(serializers.ModelSerializer):
+    """Serializa os dados do lote exibidos em uma equipe."""
+
+    class Meta:
+        """Configura os campos resumidos do lote."""
+
+        model = Lote
+        fields = ("nome", "periodo_inicial", "periodo_final")
+        read_only_fields = fields
+
+
+class EquipeListSerializer(serializers.ModelSerializer):
+    """Serializa os dados resumidos de uma equipe."""
+
+    nome_empresa = serializers.CharField(source="empresa.nome", read_only=True)
+    lote = LoteEquipeSerializer(read_only=True)
+
+    class Meta:
+        """Configura os campos usados na serialização da equipe."""
+
+        model = Equipe
+        fields = (
+            "uuid",
+            "nome",
+            "nome_empresa",
+            "lote",
+            "situacao",
+        )
