@@ -12,6 +12,10 @@ Cypress.Commands.add('acessar_empresas', () => {
     .should('be.visible')
     .click()
 
+  cy.get(empresas_localizadores.opcao_empresas())
+    .should('be.visible')
+    .click()
+
   cy.url({ timeout: 10000 }).should('include', 'empresas')
 })
 
