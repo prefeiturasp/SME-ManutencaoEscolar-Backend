@@ -61,8 +61,8 @@ class ProfissionalEquipeSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class EquipeCriarSerializer(serializers.ModelSerializer):
-    """Valida e serializa o cadastro de uma equipe."""
+class EquipeCriarEditarSerializer(serializers.ModelSerializer):
+    """Valida e serializa o cadastro e edição de uma equipe."""
 
     empresa = serializers.SlugRelatedField(
         slug_field="uuid", queryset=Empresa.objects.all()
@@ -115,7 +115,13 @@ class EquipeCriarSerializer(serializers.ModelSerializer):
         Raises:
             serializers.ValidationError: Se o lote pertencer a outra empresa.
         """
-        if attrs["empresa"].pk != attrs["lote"].empresa_id:
+        empresa = attrs.get("empresa", getattr(self.instance, "empresa", None))
+        lote = attrs.get("lote", getattr(self.instance, "lote", None))
+        if (
+            empresa is not None
+            and lote is not None
+            and empresa.pk != lote.empresa_id
+        ):
             raise serializers.ValidationError(
                 {"empresa": EquipeErrorMessages.EMPRESA_LOTE_INVALIDA}
             )

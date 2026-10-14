@@ -6,7 +6,10 @@ import pytest
 from rest_framework.serializers import ValidationError
 
 from apps.empresa.models import Empresa
-from apps.equipe.serializers import EquipeCriarSerializer, EquipeListSerializer
+from apps.equipe.serializers import (
+    EquipeCriarEditarSerializer,
+    EquipeListSerializer,
+)
 from apps.profissional.models import Profissional
 
 pytestmark = pytest.mark.django_db
@@ -34,7 +37,7 @@ def test_lista_equipe_com_dados_resumidos_do_lote(
 def test_rejeita_equipe_sem_profissionais(equipe_payload) -> None:
     """Exige ao menos um profissional no cadastro."""
     equipe_payload["profissionais"] = []
-    serializer = EquipeCriarSerializer(data=equipe_payload)
+    serializer = EquipeCriarEditarSerializer(data=equipe_payload)
 
     assert serializer.is_valid() is False
     assert "profissionais" in serializer.errors
@@ -42,7 +45,7 @@ def test_rejeita_equipe_sem_profissionais(equipe_payload) -> None:
 
 def test_rejeita_nome_formado_apenas_por_espacos() -> None:
     """Não permite nome de equipe formado apenas por espaços."""
-    serializer = EquipeCriarSerializer()
+    serializer = EquipeCriarEditarSerializer()
 
     with pytest.raises(ValidationError, match="não pode ser vazio"):
         serializer.validate_nome("   ")
@@ -53,7 +56,7 @@ def test_rejeita_profissional_repetido(equipe_payload) -> None:
     equipe_payload["profissionais"].append(
         equipe_payload["profissionais"][0].copy()
     )
-    serializer = EquipeCriarSerializer(data=equipe_payload)
+    serializer = EquipeCriarEditarSerializer(data=equipe_payload)
 
     assert serializer.is_valid() is False
     assert "profissionais" in serializer.errors
@@ -69,7 +72,7 @@ def test_rejeita_funcao_de_outro_profissional(
         rg="987654321",
     )
     equipe_payload["profissionais"][0]["profissional"] = str(outro.uuid)
-    serializer = EquipeCriarSerializer(data=equipe_payload)
+    serializer = EquipeCriarEditarSerializer(data=equipe_payload)
 
     assert serializer.is_valid() is False
     assert "funcao" in str(serializer.errors["profissionais"])
@@ -79,9 +82,22 @@ def test_rejeita_empresa_nao_associada_ao_lote(equipe_payload) -> None:
     """Exige que a empresa informada seja a empresa do lote selecionado."""
     outra_empresa = Empresa.objects.create(nome="Outra empresa")
     equipe_payload["empresa"] = str(outra_empresa.uuid)
-    serializer = EquipeCriarSerializer(data=equipe_payload)
+    serializer = EquipeCriarEditarSerializer(data=equipe_payload)
 
     assert serializer.is_valid() is False
     assert serializer.errors["empresa"] == [
         "A empresa informada não está associada ao lote selecionado."
     ]
+
+
+def test_valida_atualizacao_parcial_sem_empresa_e_lote(
+    equipe_existente_ativa,
+) -> None:
+    """Permite omitir empresa e lote em uma atualização parcial."""
+    serializer = EquipeCriarEditarSerializer(
+        equipe_existente_ativa,
+        data={"nome": "Equipe Atualizada"},
+        partial=True,
+    )
+
+    assert serializer.is_valid(), serializer.errors
