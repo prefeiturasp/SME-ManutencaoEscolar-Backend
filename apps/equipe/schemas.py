@@ -17,6 +17,7 @@ from apps.equipe.serializers import (
 _TAG_EQUIPE = "Equipe"
 _CREDENCIAIS_INVALIDAS = "Credenciais inválidas"
 _ERRO_SERVIDOR = "Erro no servidor"
+_EQUIPE_NAO_ENCONTRADA = "Equipe não encontrada"
 _EQUIPE_ATUALIZADA_SUCESSO = "Equipe atualizada com sucesso"
 
 _EQUIPE_EXEMPLO_ENTRADA: dict[str, object] = {
@@ -131,6 +132,29 @@ EQUIPE_SCHEMA = extend_schema_view(
             )
         ],
     ),
+    retrieve=extend_schema(
+        tags=[_TAG_EQUIPE],
+        summary="Consulta uma equipe pelo UUID",
+        description=(
+            "Retorna os dados de uma equipe cadastrada e os profissionais "
+            "vinculados a ela."
+        ),
+        operation_id="buscarEquipePorUuid",
+        responses={
+            200: EquipeCriarEditarSerializer,
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            404: OpenApiResponse(description=_EQUIPE_NAO_ENCONTRADA),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+        examples=[
+            OpenApiExample(
+                name="Equipe encontrada",
+                response_only=True,
+                status_codes=["200"],
+                value=_EQUIPE_EXEMPLO_SAIDA,
+            )
+        ],
+    ),
     create=extend_schema(
         tags=[_TAG_EQUIPE],
         summary="Cria uma nova equipe",
@@ -193,7 +217,7 @@ EQUIPE_SCHEMA = extend_schema_view(
                 )
             ),
             401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
-            404: OpenApiResponse(description="Equipe não encontrada"),
+            404: OpenApiResponse(description=_EQUIPE_NAO_ENCONTRADA),
             500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
@@ -239,7 +263,7 @@ EQUIPE_SCHEMA = extend_schema_view(
             ),
             400: OpenApiResponse(description="Dados inválidos"),
             401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
-            404: OpenApiResponse(description="Equipe não encontrada"),
+            404: OpenApiResponse(description=_EQUIPE_NAO_ENCONTRADA),
             500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
