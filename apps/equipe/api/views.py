@@ -7,13 +7,8 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.mixins import (
-    CreateModelMixin,
-    ListModelMixin,
-    UpdateModelMixin,
-)
 from rest_framework.serializers import BaseSerializer
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from apps.equipe.exceptions import (
     EquipeJaCadastradaError,
@@ -32,13 +27,10 @@ from apps.usuarios.models import Usuario
 
 
 @EQUIPE_SCHEMA
-class EquipeViewSet(
-    CreateModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet
-):
+class EquipeViewSet(ModelViewSet):
     """Disponibiliza o cadastro e a listagem de equipes."""
 
     queryset = Equipe.objects.all()
-    serializer_class = EquipeCriarEditarSerializer
     http_method_names = ["post", "options", "get", "put", "patch"]
     lookup_field = "uuid"
     filter_backends = [DjangoFilterBackend]
@@ -51,7 +43,7 @@ class EquipeViewSet(
 
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer apropriado para a ação atual."""
-        if self.action in {"create", "update", "partial_update"}:
+        if self.action in {"create", "retrieve", "update", "partial_update"}:
             return EquipeCriarEditarSerializer
         return EquipeListSerializer
 

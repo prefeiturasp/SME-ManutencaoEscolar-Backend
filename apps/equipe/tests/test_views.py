@@ -78,6 +78,42 @@ def test_lista_equipes_com_filtro_por_situacao(
     ]
 
 
+def test_consulta_equipe_pelo_uuid_com_profissionais(
+    api_cliente: APIClient,
+    equipe_existente_ativa: Equipe,
+    profissional_ativo: Profissional,
+    funcao_profissional: FuncaoProfissional,
+) -> None:
+    """Consulta os dados completos da equipe pelo UUID."""
+    ProfissionalEquipe.objects.create(
+        equipe=equipe_existente_ativa,
+        profissional=profissional_ativo,
+        funcao=funcao_profissional,
+    )
+
+    resposta = api_cliente.get(
+        f"/api/v1/equipes/{equipe_existente_ativa.uuid}/"
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json() == {
+        "uuid": str(equipe_existente_ativa.uuid),
+        "nome": equipe_existente_ativa.nome,
+        "situacao": equipe_existente_ativa.situacao,
+        "empresa": str(equipe_existente_ativa.empresa.uuid),
+        "lote": str(equipe_existente_ativa.lote.uuid),
+        "profissionais": [
+            {
+                "profissional": str(profissional_ativo.uuid),
+                "cpf": profissional_ativo.cpf,
+                "nome": profissional_ativo.nome,
+                "funcao": str(funcao_profissional.uuid),
+                "nome_funcao": funcao_profissional.cargo.nome,
+            }
+        ],
+    }
+
+
 def test_requisicao_sem_autenticacao_retorna_401(equipe_payload):
     """Protege o cadastro contra acesso não autenticado."""
     resposta = APIClient().post(
