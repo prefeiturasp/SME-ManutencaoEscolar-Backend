@@ -162,7 +162,18 @@ class LoteEquipeSerializer(serializers.ModelSerializer):
         """Configura os campos resumidos do lote."""
 
         model = Lote
-        fields = ("nome", "periodo_inicial", "periodo_final")
+        fields = ("uuid", "nome", "periodo_inicial", "periodo_final")
+        read_only_fields = fields
+
+
+class EmpresaEquipeSerializer(serializers.ModelSerializer):
+    """Serializa os dados da empresa exibidos em uma equipe."""
+
+    class Meta:
+        """Configura os campos resumidos da empresa."""
+
+        model = Empresa
+        fields = ("uuid", "nome", "cnpj")
         read_only_fields = fields
 
 
@@ -182,4 +193,25 @@ class EquipeListSerializer(serializers.ModelSerializer):
             "nome_empresa",
             "lote",
             "situacao",
+        )
+
+
+class EquipeSerializer(serializers.ModelSerializer):
+    """Serializa os dados detalhados de uma equipe."""
+
+    empresa = EmpresaEquipeSerializer(read_only=True)
+    lote = LoteEquipeSerializer(read_only=True)
+    profissionais = ProfissionalEquipeSerializer(many=True, read_only=True)
+
+    class Meta:
+        """Configura os campos usados na serialização da equipe."""
+
+        model = Equipe
+        fields = (
+            "uuid",
+            "nome",
+            "empresa",
+            "lote",
+            "situacao",
+            "profissionais",
         )

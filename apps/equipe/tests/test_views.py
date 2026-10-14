@@ -69,6 +69,7 @@ def test_lista_equipes_com_filtro_por_situacao(
             "nome": equipe_existente_ativa.nome,
             "nome_empresa": empresa.nome,
             "lote": {
+                "uuid": str(lote_centro.uuid),
                 "nome": lote_centro.nome,
                 "periodo_inicial": None,
                 "periodo_final": None,
@@ -100,8 +101,17 @@ def test_consulta_equipe_pelo_uuid_com_profissionais(
         "uuid": str(equipe_existente_ativa.uuid),
         "nome": equipe_existente_ativa.nome,
         "situacao": equipe_existente_ativa.situacao,
-        "empresa": str(equipe_existente_ativa.empresa.uuid),
-        "lote": str(equipe_existente_ativa.lote.uuid),
+        "empresa": {
+            "uuid": str(equipe_existente_ativa.empresa.uuid),
+            "nome": equipe_existente_ativa.empresa.nome,
+            "cnpj": equipe_existente_ativa.empresa.cnpj,
+        },
+        "lote": {
+            "uuid": str(equipe_existente_ativa.lote.uuid),
+            "nome": equipe_existente_ativa.lote.nome,
+            "periodo_inicial": None,
+            "periodo_final": None,
+        },
         "profissionais": [
             {
                 "profissional": str(profissional_ativo.uuid),

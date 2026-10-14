@@ -21,6 +21,7 @@ from apps.equipe.schemas import EQUIPE_SCHEMA
 from apps.equipe.serializers import (
     EquipeCriarEditarSerializer,
     EquipeListSerializer,
+    EquipeSerializer,
 )
 from apps.equipe.services import EquipeService
 from apps.usuarios.models import Usuario
@@ -43,9 +44,11 @@ class EquipeViewSet(ModelViewSet):
 
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer apropriado para a ação atual."""
-        if self.action in {"create", "retrieve", "update", "partial_update"}:
+        if self.action in {"create", "update", "partial_update"}:
             return EquipeCriarEditarSerializer
-        return EquipeListSerializer
+        if self.action == "list":
+            return EquipeListSerializer
+        return EquipeSerializer
 
     def _obter_usuario(self) -> Usuario:
         """Retorna o usuário autenticado."""

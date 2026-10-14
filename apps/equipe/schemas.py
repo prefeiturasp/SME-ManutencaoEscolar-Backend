@@ -12,6 +12,7 @@ from drf_spectacular.utils import (
 from apps.equipe.serializers import (
     EquipeCriarEditarSerializer,
     EquipeListSerializer,
+    EquipeSerializer,
 )
 
 _TAG_EQUIPE = "Equipe"
@@ -47,6 +48,24 @@ _EQUIPE_EXEMPLO_SAIDA: dict[str, object] = {
     ],
 }
 
+_EQUIPE_EXEMPLO_DETALHE: dict[str, object] = {
+    "uuid": "5b0a0a0a-2e1e-4fc5-ce6e-456789012def",
+    "nome": "Equipe Elétrica 2",
+    "empresa": {
+        "uuid": "1d7c7c7c-8a7a-4b81-8a2a-0123456789ab",
+        "nome": "Empresa Exemplo",
+        "cnpj": "12345678000199",
+    },
+    "lote": {
+        "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
+        "nome": "Lote Centro",
+        "periodo_inicial": "2026-01-01",
+        "periodo_final": "2026-12-31",
+    },
+    "situacao": True,
+    "profissionais": _EQUIPE_EXEMPLO_SAIDA["profissionais"],
+}
+
 _EQUIPE_EXEMPLO_ERRO: dict[str, object] = {
     "title": "Já existe uma equipe com este nome!",
     "detail": (
@@ -62,9 +81,11 @@ _EQUIPES_EXEMPLO_LISTAGEM: dict[str, object] = {
     "previous": None,
     "results": [
         {
+            "uuid": "5b0a0a0a-2e1e-4fc5-ce6e-456789012def",
             "nome": "Equipe Elétrica",
             "nome_empresa": "Empresa Exemplo",
             "lote": {
+                "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
                 "nome": "Lote Centro",
                 "periodo_inicial": "2026-01-01",
                 "periodo_final": "2026-12-31",
@@ -141,7 +162,7 @@ EQUIPE_SCHEMA = extend_schema_view(
         ),
         operation_id="buscarEquipePorUuid",
         responses={
-            200: EquipeCriarEditarSerializer,
+            200: EquipeSerializer,
             401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
             404: OpenApiResponse(description=_EQUIPE_NAO_ENCONTRADA),
             500: OpenApiResponse(description=_ERRO_SERVIDOR),
@@ -151,7 +172,7 @@ EQUIPE_SCHEMA = extend_schema_view(
                 name="Equipe encontrada",
                 response_only=True,
                 status_codes=["200"],
-                value=_EQUIPE_EXEMPLO_SAIDA,
+                value=_EQUIPE_EXEMPLO_DETALHE,
             )
         ],
     ),
