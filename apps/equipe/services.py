@@ -13,23 +13,33 @@ from apps.equipe.exceptions import (
     ProfissionalVinculadoError,
 )
 from apps.equipe.models import Equipe
-from apps.equipe.repository import EquipeRepository
+from apps.equipe.repository import (
+    EquipeRepository,
+    ProfissionalEquipeRepository,
+)
 from apps.usuarios.models import Usuario
 
 
 class EquipeService:
     """Orquestra as regras de negócio relacionadas à criação de equipes."""
 
-    def __init__(self, repository: EquipeRepository | None = None) -> None:
-        """Inicializa o serviço com o repositório informado ou o padrão."""
+    def __init__(
+        self,
+        repository: EquipeRepository | None = None,
+        profissional_repository: ProfissionalEquipeRepository | None = None,
+    ) -> None:
+        """Inicializa o serviço com os repositórios informados."""
         self.repository = repository or EquipeRepository()
+        self.profissional_repository = (
+            profissional_repository or ProfissionalEquipeRepository()
+        )
 
     @transaction.atomic
     def criar(
         self,
         dados: dict[str, Any],
         usuario: Usuario,
-    ) -> Equipe:
+    ) -> dict[str, Any]:
         """Valida e cria uma equipe com seus profissionais.
 
         Args:
@@ -37,7 +47,7 @@ class EquipeService:
             usuario: Usuário responsável pelo cadastro.
 
         Returns:
-            Equipe criada.
+            Dicionário com os dados da equipe criada.
 
         Raises:
             ValidationError: Se um profissional estiver inativo ou já
@@ -49,12 +59,106 @@ class EquipeService:
         ]
         nome_equipe = dados.get("nome", "").strip()
         empresa = dados["empresa"]
-        self.validar_equipe(nome_equipe, empresa.uuid, empresa.nome)
-        self.validar_profissionais(uuids_profissionais)
+        self._validar_equipe(nome_equipe, empresa.uuid, empresa.nome)
+        self._validar_profissionais_equipe(uuids_profissionais)
 
-        return self.repository.criar(dados, profissionais, usuario)
+        equipe = self.repository.criar(dados, profissionais, usuario)
+        return {
+            **equipe,
+            "profissionais": profissionais,
+        }
 
-    def validar_equipe(
+    def atualizar(
+        self,
+        equipe: Equipe,
+        dados: dict[str, Any],
+        usuario: Usuario,
+    ) -> dict[str, Any]:
+        """Atualiza uma equipe com seus profissionais.
+
+        Args:
+            equipe: Instância da equipe a ser atualizada.
+            dados: Dados validados da equipe e seus vínculos.
+            usuario: Usuário responsável pela atualização.
+
+        Returns:
+            Dicionário com os dados da equipe criada.
+
+        Raises:
+            ValidationError: Se um profissional estiver inativo ou já
+                pertencer a outra equipe ativa.
+        """
+        profissionais = dados.pop("profissionais", None)
+        nome_equipe = dados.get("nome", equipe.nome).strip()
+        empresa = dados.get("empresa", equipe.empresa)
+
+        # Valida se o nome da equipe ou a empresa foram alterados, e se sim,
+        # valida se já existe uma equipe com o mesmo nome na empresa.
+        if nome_equipe.casefold() != equipe.nome.casefold() or (
+            empresa.uuid != equipe.empresa.uuid
+        ):
+            self._validar_equipe(nome_equipe, empresa.uuid, empresa.nome)
+
+        if profissionais is not None:
+            uuids_profissionais = [
+                item["profissional"].uuid for item in profissionais
+            ]
+            self._validar_profissionais_equipe(uuids_profissionais, equipe)
+
+        with transaction.atomic():
+            equipe_atualizada = self.repository.atualizar(
+                equipe, dados, usuario
+            )
+            if profissionais is not None:
+                vinculos_existentes = (
+                    self.profissional_repository.listar_por_equipe(equipe)
+                )
+                profissionais_existentes = {
+                    vinculo.profissional.uuid: vinculo
+                    for vinculo in vinculos_existentes
+                }
+                ids_profissionais_informados = {
+                    item["profissional"].uuid for item in profissionais
+                }
+
+                # Remove os vínculos de profissionais não informados no form.
+                for (
+                    profissional_uuid,
+                    vinculo,
+                ) in profissionais_existentes.items():
+                    if profissional_uuid not in ids_profissionais_informados:
+                        self.profissional_repository.remover(vinculo, usuario)
+
+                # Cria ou atualiza os vínculos informados no form.
+                for dados_profissional in profissionais:
+                    vinculo_existente = profissionais_existentes.get(
+                        dados_profissional["profissional"].uuid
+                    )
+                    if vinculo_existente is None:
+                        self.profissional_repository.criar(
+                            equipe, dados_profissional, usuario
+                        )
+                    elif (
+                        vinculo_existente.funcao.uuid
+                        != dados_profissional["funcao"].uuid
+                    ):
+                        self.profissional_repository.atualizar(
+                            vinculo_existente, dados_profissional, usuario
+                        )
+
+        vinculos = self.profissional_repository.listar_por_equipe(equipe)
+        return {
+            **equipe_atualizada,
+            "profissionais": [
+                {
+                    "profissional": vinculo.profissional,
+                    "funcao": vinculo.funcao,
+                }
+                for vinculo in vinculos
+            ],
+        }
+
+    def _validar_equipe(
         self, nome: str, empresa_uuid: UUID, nome_empresa: str
     ) -> None:
         """Valida se a equipe já existe para a empresa.
@@ -67,7 +171,7 @@ class EquipeService:
         Raises:
             EquipeJaCadastradaError: Se a equipe já existir para a empresa.
         """
-        if self.repository.existe_equipe(nome, empresa_uuid):
+        if self.repository.existe_equipe_empresa(nome, empresa_uuid):
             raise EquipeJaCadastradaError(
                 title=EquipeErrorMessages.NOME_EQUIPE_DUPLICADO_TITULO,
                 detail=(
@@ -78,11 +182,15 @@ class EquipeService:
                 ),
             )
 
-    def validar_profissionais(self, uuids: list[UUID]) -> None:
+    def _validar_profissionais_equipe(
+        self, uuids: list[UUID], equipe: Equipe | None = None
+    ) -> None:
         """Valida se os profissionais podem ser vinculados à equipe.
 
         Args:
             uuids: Lista de UUIDs dos profissionais a serem validados.
+            equipe: Equipe atual, desconsiderada ao buscar outros vínculos.
+
         Raises:
             ValidationError: Se algum profissional estiver inativo.
             ProfissionalVinculadoError: Se um profissional já estiver em uma
@@ -90,12 +198,16 @@ class EquipeService:
             ProfissionaisVinculadosError: Se mais de um profissional já
                 estiver em equipes ativas.
         """
-        if self.repository.existem_profissionais_inativos(uuids):
+        if self.profissional_repository.existem_profissionais_inativos(uuids):
             raise ValidationError(
                 {"profissionais": (EquipeErrorMessages.PROFISSIONAL_INATIVO)}
             )
 
-        vinculos = self.repository.obter_vinculos_com_equipes_ativas(uuids)
+        vinculos = (
+            self.profissional_repository.obter_vinculos_com_equipes_ativas(
+                uuids, equipe
+            )
+        )
         profissionais_vinculados = [
             {"profissional": vinculo[1], "equipe": vinculo[2]}
             for vinculo in vinculos

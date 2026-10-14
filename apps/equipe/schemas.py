@@ -9,9 +9,15 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 
-from apps.equipe.serializers import EquipeCriarSerializer, EquipeListSerializer
+from apps.equipe.serializers import (
+    EquipeCriarEditarSerializer,
+    EquipeListSerializer,
+)
 
 _TAG_EQUIPE = "Equipe"
+_CREDENCIAIS_INVALIDAS = "Credenciais inválidas"
+_ERRO_SERVIDOR = "Erro no servidor"
+_EQUIPE_ATUALIZADA_SUCESSO = "Equipe atualizada com sucesso"
 
 _EQUIPE_EXEMPLO_ENTRADA: dict[str, object] = {
     "nome": "Equipe Elétrica",
@@ -113,8 +119,8 @@ EQUIPE_SCHEMA = extend_schema_view(
         ],
         responses={
             200: EquipeListSerializer(many=True),
-            401: OpenApiResponse(description="Credenciais inválidas"),
-            500: OpenApiResponse(description="Erro no servidor"),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
             OpenApiExample(
@@ -133,17 +139,17 @@ EQUIPE_SCHEMA = extend_schema_view(
             "menos um profissional e sua respectiva função."
         ),
         operation_id="cadastrarEquipe",
-        request=EquipeCriarSerializer,
+        request=EquipeCriarEditarSerializer,
         responses={
-            201: EquipeCriarSerializer,
+            201: EquipeCriarEditarSerializer,
             400: OpenApiResponse(
                 description=(
                     "Dados inválidos, nome de equipe já cadastrado ou "
                     "profissional indisponível para vínculo."
                 )
             ),
-            401: OpenApiResponse(description="Credenciais inválidas"),
-            500: OpenApiResponse(description="Erro no servidor"),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
             OpenApiExample(
@@ -162,6 +168,85 @@ EQUIPE_SCHEMA = extend_schema_view(
                 response_only=True,
                 status_codes=["400"],
                 value=_EQUIPE_EXEMPLO_ERRO,
+            ),
+        ],
+    ),
+    update=extend_schema(
+        tags=[_TAG_EQUIPE],
+        summary="Atualiza uma equipe",
+        description=(
+            "Atualiza integralmente uma equipe identificada pelo UUID e "
+            "sincroniza seus profissionais. Os profissionais informados são "
+            "mantidos ou vinculados, e os omitidos são removidos da equipe."
+        ),
+        operation_id="atualizarEquipe",
+        request=EquipeCriarEditarSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=EquipeCriarEditarSerializer,
+                description=_EQUIPE_ATUALIZADA_SUCESSO,
+            ),
+            400: OpenApiResponse(
+                description=(
+                    "Dados inválidos, nome de equipe já cadastrado ou "
+                    "profissional indisponível para vínculo."
+                )
+            ),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            404: OpenApiResponse(description="Equipe não encontrada"),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+        examples=[
+            OpenApiExample(
+                name="Exemplo de atualização de equipe",
+                request_only=True,
+                value={
+                    **_EQUIPE_EXEMPLO_ENTRADA,
+                    "nome": "Equipe Elétrica Atualizada",
+                },
+            ),
+            OpenApiExample(
+                name=_EQUIPE_ATUALIZADA_SUCESSO,
+                response_only=True,
+                status_codes=["200"],
+                value={
+                    **_EQUIPE_EXEMPLO_SAIDA,
+                    "nome": "Equipe Elétrica Atualizada 2",
+                },
+            ),
+            OpenApiExample(
+                name="Nome de equipe já cadastrado",
+                response_only=True,
+                status_codes=["400"],
+                value=_EQUIPE_EXEMPLO_ERRO,
+            ),
+        ],
+    ),
+    partial_update=extend_schema(
+        tags=[_TAG_EQUIPE],
+        summary="Atualiza parcialmente uma equipe",
+        description=(
+            "Atualiza apenas os campos informados de uma equipe identificada "
+            "pelo UUID. Os profissionais são sincronizados somente quando o "
+            "campo profissionais é enviado."
+        ),
+        operation_id="atualizarParcialmenteEquipe",
+        request=EquipeCriarEditarSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=EquipeCriarEditarSerializer,
+                description=_EQUIPE_ATUALIZADA_SUCESSO,
+            ),
+            400: OpenApiResponse(description="Dados inválidos"),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            404: OpenApiResponse(description="Equipe não encontrada"),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+        examples=[
+            OpenApiExample(
+                name="Exemplo de atualização parcial de equipe",
+                request_only=True,
+                value={"nome": "Equipe Elétrica Atualizada"},
             ),
         ],
     ),
