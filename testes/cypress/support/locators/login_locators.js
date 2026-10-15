@@ -2,7 +2,7 @@ class Login_ME_Localizadores {
 	campo_usuario = () => { return '[id="login"]'}
 	campo_senha = () => { return '[id="password"]' }
 	botao_acessar = () => 'button[type="submit"]'
-	logo_me = () => { return '.h-auto' }
+	logo_me = () => { return '.mt-12' }
 	texto_obrigatorio = () => { return '.mt-24 > .w-full > .flex-col > .text-sm' }
 }
 

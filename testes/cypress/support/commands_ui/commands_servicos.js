@@ -247,6 +247,10 @@ Cypress.Commands.add('editar_campos_servico', () => {
   cy.get(servicos_localizadores.campo_nome())
     .should('be.visible')
     .clear()
+
+  cy.get(servicos_localizadores.select_status())
+    .should('be.visible')
+    .click()
 })
 
 Cypress.Commands.add('validar_campos_obrigatorios_servico', () => {
