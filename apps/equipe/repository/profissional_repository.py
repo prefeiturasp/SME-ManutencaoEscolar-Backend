@@ -72,7 +72,15 @@ class ProfissionalEquipeRepository:
         return list(self.model.objects.filter(equipe=equipe))
 
     def existem_profissionais_inativos(self, uuids: list[UUID]) -> bool:
-        """Verifica se há profissionais inativos entre os informados."""
+        """Verifica se algum dos profissionais informados está inativo.
+
+        Args:
+            uuids: UUIDs dos profissionais que serão consultados.
+
+        Returns:
+            ``True`` se existir um profissional com um dos UUIDs informados e
+            status inativo; caso contrário, ``False``.
+        """
         return Profissional.objects.filter(
             uuid__in=uuids, status=False
         ).exists()
@@ -80,7 +88,17 @@ class ProfissionalEquipeRepository:
     def obter_vinculos_com_equipes_ativas(
         self, uuids: list[UUID], equipe: Equipe | None = None
     ) -> list[tuple[UUID, str, str]]:
-        """Obtém vínculos dos profissionais com outras equipes ativas."""
+        """Lista vínculos dos profissionais informados com equipes ativas.
+
+        Args:
+            uuids: UUIDs dos profissionais cujos vínculos serão consultados.
+            equipe: Equipe que será excluída da consulta. Quando não informada,
+                considera os vínculos com todas as equipes ativas.
+
+        Returns:
+            Lista de tuplas no formato ``(uuid_profissional,
+            nome_profissional, nome_equipe)`` para cada vínculo encontrado.
+        """
         vinculos = self.model.objects.filter(
             profissional__uuid__in=uuids, equipe__situacao=True
         )

@@ -64,6 +64,7 @@ class EquipeRepository:
         Args:
             equipe: Equipe que será atualizada.
             dados: Campos que devem ser aplicados à equipe.
+            usuario: Usuário responsável pela atualização.
 
         Returns:
             Dados da equipe atualizada.

@@ -62,7 +62,18 @@ class EquipeViewSet(ModelViewSet):
     def _executar_operacao(
         self, operacao: Callable[[], dict[str, Any]]
     ) -> dict[str, Any]:
-        """Execute uma operação convertendo seus erros em erros da API."""
+        """Execute uma operação convertendo seus erros em erros da API.
+
+        Args:
+            operacao: Função que realiza a operação desejada.
+
+        Returns:
+            Resultado da operação, caso seja bem-sucedida.
+
+        Raises:
+            DRFValidationError: Se a operação falhar devido
+                a erros de validação.
+        """
         try:
             return operacao()
         except (
