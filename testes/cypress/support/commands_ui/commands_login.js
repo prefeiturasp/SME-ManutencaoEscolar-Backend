@@ -22,10 +22,16 @@ Cypress.Commands.add('realizar_login', (perfil) => {
 		case "Diretor":
 			cy.get(login_ME_Localizadores.campo_usuario())
 			  .type(Cypress.env('LOGIN_DIRETOR'))
+
 			cy.get(login_ME_Localizadores.campo_senha())
 			  .type(Cypress.env('SENHA'))
+
+      cy.get(login_ME_Localizadores.logo_me())
+        .click()
+        
 			cy.get(login_ME_Localizadores.botao_acessar())
-			  .should('be.visible').click()
+			  .should('be.visible')
+        .click()
 
 			cy.url().should('include', 'manutencao-escolar')
 			break
@@ -50,22 +56,31 @@ Cypress.Commands.add('validar_campos_obrigatorios_acesso', (campo) => {
   if (campo === 'login') {    
     cy.get(login_ME_Localizadores.campo_senha())
       .type(Cypress.env('SENHA'))
+
+    cy.get(login_ME_Localizadores.logo_me())
+      .click()
   
-  cy.get(login_ME_Localizadores.botao_acessar())
+   cy.get(login_ME_Localizadores.botao_acessar())
 	  .should('be.visible')
-  }
+   }
 
   if (campo === 'senha') {    
     cy.get(login_ME_Localizadores.campo_usuario())
       .type(Cypress.env('LOGIN_DIRETOR'))
 
-  cy.get(login_ME_Localizadores.botao_acessar())
-	  .should('be.visible')
+    cy.get(login_ME_Localizadores.botao_acessar())
+	    .should('be.visible')
+
+    cy.get(login_ME_Localizadores.logo_me())
+      .click()
   }
 
-  if (campo === 'ambos') {    
-  cy.get(login_ME_Localizadores.botao_acessar())
-	  .should('be.disabled')
+  if (campo === 'ambos') {      
+    cy.get(login_ME_Localizadores.logo_me())
+      .click()
+
+    cy.get(login_ME_Localizadores.botao_acessar())
+	    .should('be.disabled')
   }  
 })
 
@@ -75,10 +90,12 @@ Cypress.Commands.add('validar_caracteres_acesso', (campo, dado) => {
     cy.get(login_ME_Localizadores.campo_usuario())
       .clear()
       .type(dado)
-
     cy.get(login_ME_Localizadores.campo_senha())
       .clear()
       .type(Cypress.env('SENHA'))
+
+    cy.get(login_ME_Localizadores.logo_me())
+      .click()
   }
 
   if (campo === 'senha') {
@@ -89,6 +106,9 @@ Cypress.Commands.add('validar_caracteres_acesso', (campo, dado) => {
     cy.get(login_ME_Localizadores.campo_senha())
       .clear()
       .type(dado)
+
+    cy.get(login_ME_Localizadores.logo_me())
+      .click()
   }
 
   cy.get(login_ME_Localizadores.botao_acessar())
@@ -119,16 +139,22 @@ Cypress.Commands.add('validar_acesso_invalido', (campo, dado) => {
     cy.get(login_ME_Localizadores.campo_senha())
       .clear()
       .type(Cypress.env('SENHA'))
+
+    cy.get(login_ME_Localizadores.logo_me())
+      .click()
   }
 
   if (campo === 'senha') {
     cy.get(login_ME_Localizadores.campo_usuario())
       .clear()
-      .type(Cypress.env('LOGIN_DIRETOR'))
+      .type(Cypress.env('LOGIN_DIRETOR'))    
 
     cy.get(login_ME_Localizadores.campo_senha())
       .clear()
       .type(dado)
+
+    cy.get(login_ME_Localizadores.logo_me())
+      .click()
   }
 
   cy.get(login_ME_Localizadores.botao_acessar())
