@@ -95,6 +95,18 @@ class UnidadeEducacionalRepository:
             dados=dados,
         )
 
+        responsaveis_uuids = {
+            str(responsavel["uuid"])
+            for responsavel in responsaveis
+            if responsavel.get("uuid")
+        }
+
+        self.responsavel_repository.inativar_vinculos_ausentes(
+            unidade=unidade,
+            responsaveis_uuids=responsaveis_uuids,
+            usuario=usuario,
+        )
+
         for dados_responsavel in responsaveis:
             if dados_responsavel.get("uuid"):
                 self._atualizar_responsavel(

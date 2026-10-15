@@ -186,4 +186,12 @@ class CargoViewSet(viewsets.ModelViewSet):
         Raises:
             DRFValidationError: Se ocorrer algum erro de validação.
         """
-        self.service.deletar(instance, self._obter_usuario())
+        try:
+            self.service.deletar(instance, self._obter_usuario())
+        except CargoOuDocumentoJaVinculadaError as exc:
+            raise DRFValidationError(
+                {
+                    "title": exc.title,
+                    "detail": exc.detail,
+                }
+            ) from exc

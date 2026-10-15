@@ -3,6 +3,7 @@
 from typing import Any
 
 from apps.profissional.models import Profissional
+from apps.usuarios.models import Usuario
 
 
 class ProfissionalRepository:
@@ -42,6 +43,19 @@ class ProfissionalRepository:
         profissional.full_clean()
         profissional.save()
         return self._serializar(profissional)
+
+    def deletar(
+        self, profissional: Profissional, usuario: Usuario | None = None
+    ) -> None:
+        """
+        Marca um profissional como deletado e registra o usuário.
+
+        Args:
+            profissional (Profissional): Instância do profissional a ser
+                deletado.
+            usuario (Usuario | None): Usuário que está realizando a deleção.
+        """
+        profissional.soft_delete(usuario=usuario)
 
     @staticmethod
     def _serializar(profissional: Profissional) -> dict[str, Any]:

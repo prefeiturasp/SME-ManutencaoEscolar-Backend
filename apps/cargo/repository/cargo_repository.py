@@ -191,3 +191,25 @@ class CargoRepository:
         )
 
         return model_cargo.soft_delete(usuario=usuario)
+
+    def profissionais_vinculados_ao_cargo(
+        self,
+        cargo: Cargo,
+    ) -> list[dict[str, str]]:
+        """Obtém CPF e nome dos profissionais vinculados ao cargo.
+
+        Args:
+            cargo: Cargo cujos vínculos serão consultados.
+
+        Returns:
+            Lista de dicionários contendo CPF e nome dos profissionais
+            não excluídos com vínculos não excluídos, ordenada pelo
+            nome e CPF. Retorna uma lista vazia quando não houver vínculos.
+        """
+        return [
+            {
+                "cpf": vinculo.profissional.cpf,
+                "nome": vinculo.profissional.nome,
+            }
+            for vinculo in cargo.funcoes.all()
+        ]

@@ -15,6 +15,7 @@ from apps.escola.serializers.tipo_unidade_serializers import (
     TipoEscolaSerializer,
 )
 from apps.escola.serializers.unidade_educacional_serializers import (
+    UnidadeEducacionalAtualizarSerializer,
     UnidadeEducacionalListSerializer,
     UnidadeEducacionalSerializer,
 )
@@ -253,6 +254,95 @@ UNIDADE_EDUCACIONAL = extend_schema_view(
                 description="Unidade educacional não encontrada",
             ),
         },
+    ),
+    update=extend_schema(
+        tags=[TAG_ESCOLA],
+        summary="Atualiza uma unidade educacional",
+        description=(
+            "Atualiza integralmente os dados de uma unidade educacional "
+            "identificada pelo UUID. Os responsáveis informados com UUID "
+            "existente são atualizados. Responsáveis sem UUID são criados "
+            "e vinculados à unidade. Os responsáveis que possuíam vínculo "
+            "ativo com a unidade, mas não forem enviados na requisição, "
+            "terão o vínculo inativado e sofrerão soft-delete."
+        ),
+        operation_id="atualizarUnidadeEducacional",
+        request=UnidadeEducacionalAtualizarSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=UnidadeEducacionalSerializer,
+                description="Unidade educacional atualizada com sucesso",
+            ),
+            400: OpenApiResponse(
+                description="Dados inválidos",
+            ),
+            401: OpenApiResponse(
+                description="Credenciais inválidas",
+            ),
+            404: OpenApiResponse(
+                description="Unidade educacional não encontrada",
+            ),
+            500: OpenApiResponse(
+                description="Erro no servidor",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                name="Exemplo de atualização de unidade educacional",
+                request_only=True,
+                value={
+                    "email": "escola@educacao.sp.gov.br",
+                    "telefone": "1133334444",
+                    "ativo": True,
+                    "responsaveis": [
+                        {
+                            "uuid": ("123e4567-e89b-12d3-a456-426614174000"),
+                            "registro_funcional": "1234567",
+                            "nome": "JOÃO DA SILVA",
+                            "cargo": "1",
+                            "email": "joao.silva@email.com",
+                            "telefone": "",
+                            "celular": "11999999999",
+                        },
+                        {
+                            "registro_funcional": "7654321",
+                            "nome": "MARIA DA SILVA",
+                            "cargo": "1",
+                            "email": "maria.silva@email.com",
+                            "telefone": "",
+                            "celular": "11988888888",
+                        },
+                    ],
+                },
+            ),
+            OpenApiExample(
+                name="Unidade educacional atualizada com sucesso",
+                response_only=True,
+                value={
+                    "id": 1,
+                    "uuid": ("987e6543-e21b-45d3-a456-426614174000"),
+                    "codigo_eol": "123456",
+                    "nome": "EMEF EXEMPLO",
+                    "status": True,
+                    "responsaveis": [
+                        {
+                            "uuid": ("123e4567-e89b-12d3-a456-426614174000"),
+                            "registro_funcional": "1234567",
+                            "nome": "JOÃO DA SILVA",
+                            "email": "joao.silva@email.com",
+                            "telefone": "",
+                            "celular": "11999999999",
+                            "cargo": {
+                                "codigo": "1",
+                                "nome": "DIRETOR",
+                            },
+                            "ativo": True,
+                            "criado_pelo_sincronizador": True,
+                        },
+                    ],
+                },
+            ),
+        ],
     ),
 )
 

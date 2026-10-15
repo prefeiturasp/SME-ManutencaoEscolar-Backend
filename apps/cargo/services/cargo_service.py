@@ -205,16 +205,37 @@ class CargoService:
         model_cargo: Cargo,
         usuario: Usuario,
     ) -> tuple[int, dict[str, int]]:
-        """Realiza a exclusão lógica de um cargo.
+        """Exclui logicamente um cargo sem profissionais vinculados.
 
-        Registra o usuário logado como responsável pela exclusão.
+        Registra o usuário como responsável pela exclusão.
 
         Args:
-            model_cargo: Instância do cargo a ser deletada.
-            usuario: Usuário logado responsável pela exclusão.
+            model_cargo: Instância do cargo a ser excluída.
+            usuario: Usuário responsável pela exclusão.
 
         Returns:
-            Tupla contendo a quantidade de registros deletados e um dicionário
-            com a quantidade de exclusões por tipo de objeto.
+            Tupla com a quantidade total de registros excluídos logicamente
+            e um dicionário com a quantidade por tipo de objeto.
+
+        Raises:
+            CargoOuDocumentoJaVinculadaError: Se houver profissionais
+                vinculados ao cargo.
         """
+        profissionais_vinculados = (
+            self.repository.profissionais_vinculados_ao_cargo(model_cargo)
+        )
+
+        if profissionais_vinculados:
+            raise CargoOuDocumentoJaVinculadaError(
+                title=CargoErrorMessages.CARGO_VINCULADO_AO_PROFISSIONAL_TITLE,
+                detail={
+                    "message": (
+                        CargoErrorMessages.CARGO_VINCULADO_AO_PROFISSIONAL.format(
+                            nome_cargo=model_cargo.nome,
+                        )
+                    ),
+                    "vinculados": profissionais_vinculados,
+                },
+            )
+
         return self.repository.deletar(usuario, model_cargo)

@@ -15,7 +15,10 @@ from rest_framework.test import APIClient
 
 from apps.cargo.api.views import CargoViewSet
 from apps.cargo.constants import CargoErrorMessages
-from apps.cargo.exceptions import CargoInstabilidadeError
+from apps.cargo.exceptions import (
+    CargoInstabilidadeError,
+    CargoOuDocumentoJaVinculadaError,
+)
 from apps.cargo.filters import CargoFilter
 from apps.cargo.models import Cargo, DocumentoCargo
 from apps.cargo.serializers import (
@@ -699,3 +702,53 @@ def test_remocao_sem_autenticacao_retorna_401(
     assert Cargo.objects.filter(
         uuid=cargo.uuid,
     ).exists()
+
+
+def test_remocao_retorna_400_quando_cargo_possui_vinculos(
+    api_cliente: APIClient,
+    cargo: Cargo,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Retorna os profissionais vinculados quando a exclusão é impedida."""
+    titulo = "Não é possível excluir o cargo"
+    detalhe = {
+        "message": (
+            f"O cargo {cargo.nome} não pode ser excluído "
+            "pois possui profissionais vinculados."
+        ),
+        "vinculados": [
+            {
+                "cpf": "12345678901",
+                "nome": "Ana Silva",
+            },
+        ],
+    }
+    erro = CargoOuDocumentoJaVinculadaError(
+        title=titulo,
+        detail=detalhe,
+    )
+
+    def deletar_com_vinculo(
+        _service: CargoService,
+        _cargo: Cargo,
+        _usuario: Usuario,
+    ) -> tuple[int, dict[str, int]]:
+        """Simula o impedimento da exclusão por vínculos."""
+        raise erro
+
+    monkeypatch.setattr(
+        CargoService,
+        "deletar",
+        deletar_com_vinculo,
+    )
+
+    resposta = api_cliente.delete(
+        f"{CARGOS_URL}{cargo.uuid}/",
+    )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json() == {
+        "title": titulo,
+        "detail": detalhe,
+    }
+    assert Cargo.objects.filter(uuid=cargo.uuid).exists()
