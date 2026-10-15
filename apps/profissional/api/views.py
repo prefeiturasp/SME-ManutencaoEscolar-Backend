@@ -9,6 +9,7 @@ from rest_framework.serializers import ValidationError as DRFValidationError
 from rest_framework.viewsets import ModelViewSet
 
 from apps.core.exceptions import AnexoArquivoError
+from apps.profissional.exceptions import ProfissionalJaCadastradoError
 from apps.profissional.filters import ProfissionalFilter
 from apps.profissional.models import Profissional
 from apps.profissional.schemas import PROFISSIONAL_SCHEMA
@@ -58,7 +59,7 @@ class ProfissionalViewSet(ModelViewSet):
             serializer.instance = self.service.criar(
                 serializer.validated_data, self._usuario_logado()
             )
-        except AnexoArquivoError as exc:
+        except (AnexoArquivoError, ProfissionalJaCadastradoError) as exc:
             raise DRFValidationError(
                 {"title": exc.title, "detail": exc.detail}
             ) from exc
@@ -80,7 +81,7 @@ class ProfissionalViewSet(ModelViewSet):
                 serializer.validated_data,
                 self._usuario_logado(),
             )
-        except AnexoArquivoError as exc:
+        except (AnexoArquivoError, ProfissionalJaCadastradoError) as exc:
             raise DRFValidationError(
                 {"title": exc.title, "detail": exc.detail}
             ) from exc

@@ -12,6 +12,7 @@ from apps.core.constants import TipoArquivo
 from apps.core.exceptions import AnexoArquivoError
 from apps.core.pagination import PaginacaoPadrao
 from apps.profissional.api.views import ProfissionalViewSet
+from apps.profissional.constants import ProfissionalErrorMessages
 from apps.profissional.models import FuncaoProfissional, Profissional
 from apps.profissional.serializers.profissional_serializers import (
     ProfissionalCriarAtualizarSerializer,
@@ -40,23 +41,77 @@ def test_cria_profissional_com_funcao(
     assert not funcao.documentos.exists()
 
 
-def test_rejeita_cpf_duplicado(
-    api_cliente, profissional_payload, cargo_profissional
+@pytest.mark.parametrize(
+    ("cpf", "rg", "mensagem"),
+    [
+        (
+            "12345678901",
+            "987654321",
+            ProfissionalErrorMessages.PROFISSIONAL_CPF_JA_CADASTRADO,
+        ),
+        (
+            "10987654321",
+            "123456789",
+            ProfissionalErrorMessages.PROFISSIONAL_RG_JA_CADASTRADO,
+        ),
+        (
+            "12345678901",
+            "123456789",
+            ProfissionalErrorMessages.PROFISSIONAL_CPF_E_RG_JA_CADASTRADOS,
+        ),
+    ],
+    ids=["cpf", "rg", "cpf_e_rg"],
+)
+def test_cadastro_rejeita_cpf_e_rg_duplicados_com_titulo_e_mensagem(
+    api_cliente, profissional_payload, cargo_profissional, cpf, rg, mensagem
 ):
-    """Não permite dois profissionais ativos com o mesmo CPF."""
+    """Retorna título e mensagem conforme o que está duplicado."""
     cargo_profissional.exige_documento = False
     cargo_profissional.save(update_fields=["exige_documento"])
     profissional_payload["funcoes"][0]["documentos"] = []
-    api_cliente.post(
-        "/api/v1/profissionais/", profissional_payload, format="json"
+    Profissional.objects.create(
+        nome="Existente", cpf="12345678901", rg="123456789"
     )
-    payload = {**profissional_payload, "rg": "987654321"}
+    payload = {**profissional_payload, "cpf": cpf, "rg": rg}
 
     resposta = api_cliente.post(
         "/api/v1/profissionais/", payload, format="json"
     )
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json() == {
+        "title": ProfissionalErrorMessages.PROFISSIONAL_DUPLICADO_TITULO_CRIAR,
+        "detail": mensagem,
+    }
+    assert Profissional.objects.count() == 1
+
+
+def test_atualizacao_rejeita_cpf_de_outro_profissional(
+    api_cliente, profissional_payload, cargo_profissional
+):
+    """Retorna título de edição e mensagem ao usar CPF de outro registro."""
+    cargo_profissional.exige_documento = False
+    cargo_profissional.save(update_fields=["exige_documento"])
+    profissional_payload["funcoes"][0]["documentos"] = []
+    Profissional.objects.create(
+        nome="Existente", cpf="12345678901", rg="123456789"
+    )
+    editado = Profissional.objects.create(
+        nome="Outro", cpf="10987654321", rg="987654321"
+    )
+    payload = {**profissional_payload, "rg": editado.rg}
+
+    resposta = api_cliente.put(
+        f"/api/v1/profissionais/{editado.uuid}/", payload, format="json"
+    )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json() == {
+        "title": (
+            ProfissionalErrorMessages.PROFISSIONAL_DUPLICADO_TITULO_EDITAR
+        ),
+        "detail": ProfissionalErrorMessages.PROFISSIONAL_CPF_JA_CADASTRADO,
+    }
 
 
 def test_requisicao_sem_autenticacao_retorna_401(profissional_payload):

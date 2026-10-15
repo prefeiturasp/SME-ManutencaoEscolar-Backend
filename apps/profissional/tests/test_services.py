@@ -7,6 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.cargo.models import Cargo
 from apps.core.constants import TipoArquivo
 from apps.profissional.constants import ProfissionalErrorMessages
+from apps.profissional.exceptions import ProfissionalJaCadastradoError
 from apps.profissional.models import (
     DocumentoFuncaoProfissional,
     FuncaoProfissional,
@@ -368,3 +369,88 @@ def test_profissional_service_deleta_agregado(
     ).exists()
     profissional_excluido = Profissional.dm_objects.get(pk=profissional.pk)
     assert profissional_excluido.deletado_por == usuario_ativo
+
+
+@pytest.mark.parametrize(
+    ("cpf", "rg", "mensagem"),
+    [
+        (
+            "12345678901",
+            "000",
+            ProfissionalErrorMessages.PROFISSIONAL_CPF_JA_CADASTRADO,
+        ),
+        (
+            "000",
+            "123456789",
+            ProfissionalErrorMessages.PROFISSIONAL_RG_JA_CADASTRADO,
+        ),
+        (
+            "12345678901",
+            "123456789",
+            ProfissionalErrorMessages.PROFISSIONAL_CPF_E_RG_JA_CADASTRADOS,
+        ),
+    ],
+    ids=["cpf", "rg", "cpf_e_rg"],
+)
+def test_service_criar_rejeita_duplicidade_com_mensagem_especifica(
+    cargo_profissional, cpf, rg, mensagem
+):
+    """Escolhe a mensagem conforme CPF, RG ou ambos duplicados."""
+    Profissional.objects.create(
+        nome="Existente", cpf="12345678901", rg="123456789"
+    )
+    dados = {"nome": "Novo", "cpf": cpf, "rg": rg, "funcoes": []}
+
+    with pytest.raises(ProfissionalJaCadastradoError) as exc_info:
+        ProfissionalService().criar(dados)
+
+    assert exc_info.value.title == (
+        ProfissionalErrorMessages.PROFISSIONAL_DUPLICADO_TITULO_CRIAR
+    )
+    assert exc_info.value.detail == mensagem
+    assert Profissional.objects.count() == 1
+
+
+def test_service_atualizar_permite_manter_cpf_e_rg_proprios(
+    cargo_profissional,
+):
+    """Não acusa duplicidade contra o próprio profissional."""
+    profissional = Profissional.objects.create(
+        nome="José", cpf="12345678901", rg="123456789"
+    )
+
+    resultado = ProfissionalService().atualizar(
+        profissional,
+        {
+            "nome": "José Atualizado",
+            "cpf": profissional.cpf,
+            "rg": profissional.rg,
+            "funcoes": [],
+        },
+    )
+
+    assert resultado["nome"] == "José Atualizado"
+
+
+def test_service_atualizar_rejeita_rg_de_outro_profissional(
+    cargo_profissional,
+):
+    """Usa o título de edição ao duplicar o RG de outro profissional."""
+    Profissional.objects.create(
+        nome="Existente", cpf="12345678901", rg="123456789"
+    )
+    profissional = Profissional.objects.create(
+        nome="Outro", cpf="10987654321", rg="987654321"
+    )
+
+    with pytest.raises(ProfissionalJaCadastradoError) as exc_info:
+        ProfissionalService().atualizar(
+            profissional, {"rg": "123456789", "funcoes": []}
+        )
+
+    assert exc_info.value.title == (
+        ProfissionalErrorMessages.PROFISSIONAL_DUPLICADO_TITULO_EDITAR
+    )
+    assert exc_info.value.detail == (
+        ProfissionalErrorMessages.PROFISSIONAL_RG_JA_CADASTRADO
+    )

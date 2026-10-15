@@ -9,11 +9,26 @@ class ProfissionalErrorMessages:
     PROFISSIONAL_INVALIDO = (
         "Profissional inválido. Certifique-se de que o profissional existe."
     )
+    PROFISSIONAL_DUPLICADO_TITULO_CRIAR = (
+        "Não é possível cadastrar o profissional"
+    )
+    PROFISSIONAL_DUPLICADO_TITULO_EDITAR = (
+        "Não é possível editar o profissional"
+    )
     PROFISSIONAL_CPF_JA_CADASTRADO = (
-        "Já existe um profissional cadastrado com este CPF."
+        "Já existe um profissional cadastrado com este CPF. "
+        "Verifique os dados informados ou consulte o cadastro existente "
+        "antes de continuar."
     )
     PROFISSIONAL_RG_JA_CADASTRADO = (
-        "Já existe um profissional cadastrado com este RG."
+        "Já existe um profissional cadastrado com este RG. "
+        "Verifique os dados informados ou consulte o cadastro existente "
+        "antes de continuar."
+    )
+    PROFISSIONAL_CPF_E_RG_JA_CADASTRADOS = (
+        "Já existe um profissional cadastrado com o CPF e o RG informados. "
+        "Verifique os dados ou consulte o cadastro existente antes de "
+        "continuar."
     )
     FUNCAO_PROFISSIONAL_JA_CADASTRADA = (
         "Esta função já está cadastrada neste profissional."
