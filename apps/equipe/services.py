@@ -6,6 +6,7 @@ from uuid import UUID
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
+from apps.empresa.models import Empresa
 from apps.equipe.constants import EquipeErrorMessages
 from apps.equipe.exceptions import (
     EquipeJaCadastradaError,
@@ -93,65 +94,16 @@ class EquipeService:
         empresa = dados.get("empresa", equipe.empresa)
         situacao = dados.get("situacao", equipe.situacao)
 
-        # Valida se o nome da equipe ou a empresa foram alterados, e se sim,
-        # valida se já existe uma equipe com o mesmo nome na empresa.
-        if nome_equipe.casefold() != equipe.nome.casefold() or (
-            empresa.uuid != equipe.empresa.uuid
-        ):
-            self._validar_equipe(nome_equipe, empresa.uuid, empresa.nome)
-
-        if profissionais is not None:
-            uuids_profissionais = [
-                item["profissional"].uuid for item in profissionais
-            ]
-            self._validar_profissionais_equipe(uuids_profissionais, equipe)
-        elif situacao and not equipe.situacao:
-            vinculos = self.profissional_repository.listar_por_equipe(equipe)
-            uuids_profissionais = [
-                vinculo.profissional.uuid for vinculo in vinculos
-            ]
-            self._validar_profissionais_equipe(uuids_profissionais, equipe)
+        self._validar_atualizacao(
+            equipe, nome_equipe, empresa, situacao, profissionais
+        )
 
         with transaction.atomic():
             equipe_atualizada = self.repository.atualizar(
                 equipe, dados, usuario
             )
             if profissionais is not None:
-                vinculos_existentes = (
-                    self.profissional_repository.listar_por_equipe(equipe)
-                )
-                profissionais_existentes = {
-                    vinculo.profissional.uuid: vinculo
-                    for vinculo in vinculos_existentes
-                }
-                ids_profissionais_informados = {
-                    item["profissional"].uuid for item in profissionais
-                }
-
-                # Remove os vínculos de profissionais não informados no form.
-                for (
-                    profissional_uuid,
-                    vinculo,
-                ) in profissionais_existentes.items():
-                    if profissional_uuid not in ids_profissionais_informados:
-                        self.profissional_repository.remover(vinculo, usuario)
-
-                # Cria ou atualiza os vínculos informados no form.
-                for dados_profissional in profissionais:
-                    vinculo_existente = profissionais_existentes.get(
-                        dados_profissional["profissional"].uuid
-                    )
-                    if vinculo_existente is None:
-                        self.profissional_repository.criar(
-                            equipe, dados_profissional, usuario
-                        )
-                    elif (
-                        vinculo_existente.funcao.uuid
-                        != dados_profissional["funcao"].uuid
-                    ):
-                        self.profissional_repository.atualizar(
-                            vinculo_existente, dados_profissional, usuario
-                        )
+                self._sincronizar_profissionais(equipe, profissionais, usuario)
 
         vinculos = self.profissional_repository.listar_por_equipe(equipe)
         return {
@@ -164,6 +116,94 @@ class EquipeService:
                 for vinculo in vinculos
             ],
         }
+
+    def _validar_atualizacao(
+        self,
+        equipe: Equipe,
+        nome: str,
+        empresa: Empresa,
+        situacao: bool,
+        profissionais: list[dict[str, Any]] | None,
+    ) -> None:
+        """Valida os dados alterados de uma equipe.
+
+        Args:
+            equipe: Instância da equipe a ser atualizada.
+            nome: Novo nome da equipe.
+            empresa: Nova empresa da equipe.
+            situacao: Nova situação da equipe.
+            profissionais: Lista de novos vínculos profissionais, se houver.
+
+        Raises:
+            ValidationError: Se um profissional estiver inativo ou já
+                pertencer a outra equipe ativa.
+            EquipeJaCadastradaError: Se o nome da equipe já existir para a
+                empresa.
+            ProfissionalVinculadoError: Se um profissional já estiver em uma
+                equipe ativa.
+            ProfissionaisVinculadosError: Se mais de um profissional já
+                estiver em equipes ativas.
+        """
+        nome_ou_empresa_alterados = (
+            nome.casefold() != equipe.nome.casefold()
+            or empresa.uuid != equipe.empresa.uuid
+        )
+        if nome_ou_empresa_alterados:
+            self._validar_equipe(nome, empresa.uuid, empresa.nome)
+
+        if profissionais is not None:
+            uuids = [item["profissional"].uuid for item in profissionais]
+        elif situacao and not equipe.situacao:
+            vinculos = self.profissional_repository.listar_por_equipe(equipe)
+            uuids = [vinculo.profissional.uuid for vinculo in vinculos]
+        else:
+            return
+
+        self._validar_profissionais_equipe(uuids, equipe)
+
+    def _sincronizar_profissionais(
+        self,
+        equipe: Equipe,
+        profissionais: list[dict[str, Any]],
+        usuario: Usuario,
+    ) -> None:
+        """Sincroniza os vínculos de profissionais de uma equipe.
+
+        Remove vínculos não informados, cria os novos e atualiza a função dos
+        profissionais que permanecem na equipe.
+
+        Args:
+            equipe: Equipe cujos vínculos serão sincronizados.
+            profissionais: Dados dos profissionais e de suas funções.
+            usuario: Usuário responsável pela sincronização.
+        """
+        vinculos = self.profissional_repository.listar_por_equipe(equipe)
+        profissionais_existentes = {
+            vinculo.profissional.uuid: vinculo for vinculo in vinculos
+        }
+        uuids_informados = {
+            item["profissional"].uuid for item in profissionais
+        }
+
+        for profissional_uuid, vinculo in profissionais_existentes.items():
+            if profissional_uuid not in uuids_informados:
+                self.profissional_repository.remover(vinculo, usuario)
+
+        for dados_profissional in profissionais:
+            vinculo_existente = profissionais_existentes.get(
+                dados_profissional["profissional"].uuid
+            )
+            if vinculo_existente is None:
+                self.profissional_repository.criar(
+                    equipe, dados_profissional, usuario
+                )
+            elif (
+                vinculo_existente.funcao.uuid
+                != dados_profissional["funcao"].uuid
+            ):
+                self.profissional_repository.atualizar(
+                    vinculo_existente, dados_profissional, usuario
+                )
 
     def _validar_equipe(
         self, nome: str, empresa_uuid: UUID, nome_empresa: str
