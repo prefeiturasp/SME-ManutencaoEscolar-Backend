@@ -6,6 +6,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from apps.cargo.models import Cargo
+from apps.empresa.models import Empresa
 from apps.equipe.exceptions import (
     EquipeJaCadastradaError,
     ProfissionaisVinculadosError,
@@ -14,7 +15,9 @@ from apps.equipe.exceptions import (
 from apps.equipe.models import Equipe, ProfissionalEquipe
 from apps.equipe.serializers import EquipeCriarEditarSerializer
 from apps.equipe.services import EquipeService
+from apps.lote.models import Lote
 from apps.profissional.models import FuncaoProfissional, Profissional
+from apps.usuarios.models import Usuario
 
 pytestmark = pytest.mark.django_db
 
@@ -262,3 +265,34 @@ def test_nao_atualiza_vinculo_do_profissional_sem_alteracoes(
     vinculo.refresh_from_db()
     assert vinculo.atualizado_por is None
     assert vinculo.atualizado_em == atualizado_em
+
+
+def test_rejeita_ativacao_com_profissional_em_outra_equipe_ativa(
+    empresa: Empresa,
+    lote_centro: Lote,
+    profissional_vinculado: ProfissionalEquipe,
+    funcao_profissional: FuncaoProfissional,
+    usuario_ativo: Usuario,
+) -> None:
+    """Não ativa equipe com profissional vinculado a outra equipe ativa."""
+    equipe = Equipe.objects.create(
+        nome="Equipe Inativa",
+        situacao=False,
+        empresa=empresa,
+        lote=lote_centro,
+    )
+    ProfissionalEquipe.objects.create(
+        equipe=equipe,
+        profissional=profissional_vinculado.profissional,
+        funcao=funcao_profissional,
+    )
+
+    with pytest.raises(ProfissionalVinculadoError):
+        EquipeService().atualizar(
+            equipe,
+            {"situacao": True},
+            usuario_ativo,
+        )
+
+    equipe.refresh_from_db()
+    assert equipe.situacao is False

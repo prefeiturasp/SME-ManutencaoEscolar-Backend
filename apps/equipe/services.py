@@ -91,6 +91,7 @@ class EquipeService:
         profissionais = dados.pop("profissionais", None)
         nome_equipe = dados.get("nome", equipe.nome).strip()
         empresa = dados.get("empresa", equipe.empresa)
+        situacao = dados.get("situacao", equipe.situacao)
 
         # Valida se o nome da equipe ou a empresa foram alterados, e se sim,
         # valida se já existe uma equipe com o mesmo nome na empresa.
@@ -102,6 +103,12 @@ class EquipeService:
         if profissionais is not None:
             uuids_profissionais = [
                 item["profissional"].uuid for item in profissionais
+            ]
+            self._validar_profissionais_equipe(uuids_profissionais, equipe)
+        elif situacao and not equipe.situacao:
+            vinculos = self.profissional_repository.listar_por_equipe(equipe)
+            uuids_profissionais = [
+                vinculo.profissional.uuid for vinculo in vinculos
             ]
             self._validar_profissionais_equipe(uuids_profissionais, equipe)
 
