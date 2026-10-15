@@ -1,14 +1,14 @@
 """Views da API do domínio Equipe."""
 
-from typing import Any
+from collections.abc import Callable
+from typing import Any, cast
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.serializers import BaseSerializer
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from apps.equipe.exceptions import (
     EquipeJaCadastradaError,
@@ -18,18 +18,21 @@ from apps.equipe.exceptions import (
 from apps.equipe.filters import EquipeFilter
 from apps.equipe.models import Equipe
 from apps.equipe.schemas import EQUIPE_SCHEMA
-from apps.equipe.serializers import EquipeCriarSerializer, EquipeListSerializer
+from apps.equipe.serializers import (
+    EquipeCriarEditarSerializer,
+    EquipeListSerializer,
+    EquipeSerializer,
+)
 from apps.equipe.services import EquipeService
 from apps.usuarios.models import Usuario
 
 
 @EQUIPE_SCHEMA
-class EquipeViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+class EquipeViewSet(ModelViewSet):
     """Disponibiliza o cadastro e a listagem de equipes."""
 
-    queryset = Equipe.objects.select_related("empresa", "lote")
-    serializer_class = EquipeCriarSerializer
-    http_method_names = ["post", "options", "get"]
+    queryset = Equipe.objects.all()
+    http_method_names = ["post", "options", "get", "put", "patch"]
     lookup_field = "uuid"
     filter_backends = [DjangoFilterBackend]
     filterset_class = EquipeFilter
@@ -41,9 +44,11 @@ class EquipeViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
 
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer apropriado para a ação atual."""
-        if self.action == "create":
-            return EquipeCriarSerializer
-        return EquipeListSerializer
+        if self.action in {"create", "update", "partial_update"}:
+            return EquipeCriarEditarSerializer
+        if self.action == "list":
+            return EquipeListSerializer
+        return EquipeSerializer
 
     def _obter_usuario(self) -> Usuario:
         """Retorna o usuário autenticado."""
@@ -53,6 +58,35 @@ class EquipeViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
             raise NotAuthenticated("Usuário não identificado.")
 
         return usuario
+
+    def _executar_operacao(
+        self, operacao: Callable[[], dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Execute uma operação convertendo seus erros em erros da API.
+
+        Args:
+            operacao: Função que realiza a operação desejada.
+
+        Returns:
+            Resultado da operação, caso seja bem-sucedida.
+
+        Raises:
+            DRFValidationError: Se a operação falhar devido
+                a erros de validação.
+        """
+        try:
+            return operacao()
+        except (
+            EquipeJaCadastradaError,
+            ProfissionaisVinculadosError,
+            ProfissionalVinculadoError,
+        ) as exc:
+            raise DRFValidationError(
+                {"title": exc.title, "detail": exc.detail}
+            ) from exc
+        except DjangoValidationError as exc:
+            detalhes = getattr(exc, "message_dict", exc.messages)
+            raise DRFValidationError(detalhes) from exc
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         """Cria uma equipe pela camada de serviço.
@@ -65,22 +99,25 @@ class EquipeViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
                 profissionais vinculados ou os dados forem inválidos.
         """
         usuario = self._obter_usuario()
-        try:
-            serializer.instance = self.service.criar(
-                serializer.validated_data, usuario
+        serializer.instance = self._executar_operacao(
+            lambda: self.service.criar(serializer.validated_data, usuario)
+        )
+
+    def perform_update(self, serializer: BaseSerializer) -> None:
+        """Atualiza uma equipe pela camada de serviço.
+
+        Args:
+            serializer: Serializer validado com os dados da equipe a ser
+                atualizada.
+
+        Raises:
+            DRFValidationError: Se houver profissionais vinculados ou os
+                dados forem inválidos.
+        """
+        usuario = self._obter_usuario()
+        equipe = cast(Equipe, serializer.instance)
+        serializer.instance = self._executar_operacao(
+            lambda: self.service.atualizar(
+                equipe, serializer.validated_data, usuario
             )
-        except EquipeJaCadastradaError as exc:
-            raise DRFValidationError(
-                {"title": exc.title, "detail": exc.detail}
-            ) from exc
-        except ProfissionaisVinculadosError as exc:
-            raise DRFValidationError(
-                {"title": exc.title, "detail": exc.detail}
-            ) from exc
-        except ProfissionalVinculadoError as exc:
-            raise DRFValidationError(
-                {"title": exc.title, "detail": exc.detail}
-            ) from exc
-        except DjangoValidationError as exc:
-            detalhes = getattr(exc, "message_dict", exc.messages)
-            raise DRFValidationError(detalhes) from exc
+        )

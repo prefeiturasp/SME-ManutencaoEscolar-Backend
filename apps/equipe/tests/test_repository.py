@@ -3,7 +3,10 @@
 import pytest
 
 from apps.equipe.models import Equipe, ProfissionalEquipe
-from apps.equipe.repository import EquipeRepository
+from apps.equipe.repository import (
+    EquipeRepository,
+    ProfissionalEquipeRepository,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -17,7 +20,9 @@ def test_identifica_equipe_com_mesmo_nome(empresa, lote_centro) -> None:
         lote=lote_centro,
     )
 
-    existe = EquipeRepository().existe_equipe("equipe elétrica", empresa.uuid)
+    existe = EquipeRepository().existe_equipe_empresa(
+        "equipe elétrica", empresa.uuid
+    )
 
     assert existe is True
 
@@ -27,7 +32,7 @@ def test_identifica_profissional_inativo(profissional_ativo) -> None:
     profissional_ativo.status = False
     profissional_ativo.save(update_fields=["status"])
 
-    existem = EquipeRepository().existem_profissionais_inativos(
+    existem = ProfissionalEquipeRepository().existem_profissionais_inativos(
         [profissional_ativo.uuid]
     )
 
@@ -53,7 +58,8 @@ def test_identifica_vinculo_com_equipe_ativa(
         funcao=funcao_profissional,
     )
 
-    vinculos = EquipeRepository().obter_vinculos_com_equipes_ativas(
+    repository = ProfissionalEquipeRepository()
+    vinculos = repository.obter_vinculos_com_equipes_ativas(
         [profissional_ativo.uuid]
     )
 
@@ -64,3 +70,32 @@ def test_identifica_vinculo_com_equipe_ativa(
             equipe.nome,
         )
     ]
+
+
+def test_nao_persiste_vinculo_sem_alteracoes(
+    equipe_existente_ativa,
+    profissional_ativo,
+    funcao_profissional,
+    usuario_ativo,
+) -> None:
+    """Não altera o vínculo quando os dados permanecem iguais."""
+    vinculo = ProfissionalEquipe.objects.create(
+        equipe=equipe_existente_ativa,
+        profissional=profissional_ativo,
+        funcao=funcao_profissional,
+        atualizado_por=usuario_ativo,
+    )
+    atualizado_em = vinculo.atualizado_em
+
+    resultado = ProfissionalEquipeRepository().atualizar(
+        vinculo,
+        {
+            "profissional": profissional_ativo,
+            "funcao": funcao_profissional,
+        },
+        usuario_ativo,
+    )
+
+    assert resultado["uuid"] == vinculo.uuid
+    vinculo.refresh_from_db()
+    assert vinculo.atualizado_em == atualizado_em

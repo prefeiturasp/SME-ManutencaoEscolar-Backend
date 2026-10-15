@@ -8,9 +8,9 @@ from rest_framework.test import APIClient, APIRequestFactory
 
 from apps.empresa.models import Empresa
 from apps.equipe.api.views import EquipeViewSet
-from apps.equipe.models import Equipe
+from apps.equipe.models import Equipe, ProfissionalEquipe
 from apps.lote.models import Lote
-from apps.profissional.models import Profissional
+from apps.profissional.models import FuncaoProfissional, Profissional
 
 pytestmark = pytest.mark.django_db
 
@@ -69,6 +69,7 @@ def test_lista_equipes_com_filtro_por_situacao(
             "nome": equipe_existente_ativa.nome,
             "nome_empresa": empresa.nome,
             "lote": {
+                "uuid": str(lote_centro.uuid),
                 "nome": lote_centro.nome,
                 "periodo_inicial": None,
                 "periodo_final": None,
@@ -76,6 +77,51 @@ def test_lista_equipes_com_filtro_por_situacao(
             "situacao": True,
         }
     ]
+
+
+def test_consulta_equipe_pelo_uuid_com_profissionais(
+    api_cliente: APIClient,
+    equipe_existente_ativa: Equipe,
+    profissional_ativo: Profissional,
+    funcao_profissional: FuncaoProfissional,
+) -> None:
+    """Consulta os dados completos da equipe pelo UUID."""
+    ProfissionalEquipe.objects.create(
+        equipe=equipe_existente_ativa,
+        profissional=profissional_ativo,
+        funcao=funcao_profissional,
+    )
+
+    resposta = api_cliente.get(
+        f"/api/v1/equipes/{equipe_existente_ativa.uuid}/"
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json() == {
+        "uuid": str(equipe_existente_ativa.uuid),
+        "nome": equipe_existente_ativa.nome,
+        "situacao": equipe_existente_ativa.situacao,
+        "empresa": {
+            "uuid": str(equipe_existente_ativa.empresa.uuid),
+            "nome": equipe_existente_ativa.empresa.nome,
+            "cnpj": equipe_existente_ativa.empresa.cnpj,
+        },
+        "lote": {
+            "uuid": str(equipe_existente_ativa.lote.uuid),
+            "nome": equipe_existente_ativa.lote.nome,
+            "periodo_inicial": None,
+            "periodo_final": None,
+        },
+        "profissionais": [
+            {
+                "profissional": str(profissional_ativo.uuid),
+                "cpf": profissional_ativo.cpf,
+                "nome": profissional_ativo.nome,
+                "funcao": str(funcao_profissional.uuid),
+                "nome_funcao": funcao_profissional.cargo.nome,
+            }
+        ],
+    }
 
 
 def test_requisicao_sem_autenticacao_retorna_401(equipe_payload):
@@ -163,3 +209,50 @@ def test_rejeita_varios_profissionais_vinculados(
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
     assert resposta.json() == erro_varios_profissionais_vinculados
+
+
+def test_atualiza_equipe_com_profissionais(
+    api_cliente: APIClient,
+    equipe_payload: dict[str, object],
+) -> None:
+    """Atualiza a equipe e seus profissionais pelo endpoint."""
+    resposta_criacao = api_cliente.post(
+        "/api/v1/equipes/", equipe_payload, format="json"
+    )
+    equipe = Equipe.objects.get(uuid=resposta_criacao.json()["uuid"])
+    payload = {**equipe_payload, "nome": "Equipe Atualizada"}
+
+    resposta = api_cliente.put(
+        f"/api/v1/equipes/{equipe.uuid}/", payload, format="json"
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK, resposta.json()
+    equipe.refresh_from_db()
+    assert equipe.nome == "Equipe Atualizada"
+    assert resposta.json()["nome"] == "Equipe Atualizada"
+
+
+def test_atualiza_parcialmente_equipe_sem_alterar_profissionais(
+    api_cliente: APIClient,
+    equipe_existente_ativa: Equipe,
+    profissional_ativo: Profissional,
+    funcao_profissional: FuncaoProfissional,
+) -> None:
+    """Atualiza somente os campos enviados e preserva os vínculos."""
+    vinculo = ProfissionalEquipe.objects.create(
+        equipe=equipe_existente_ativa,
+        profissional=profissional_ativo,
+        funcao=funcao_profissional,
+    )
+
+    resposta = api_cliente.patch(
+        f"/api/v1/equipes/{equipe_existente_ativa.uuid}/",
+        {"nome": "Equipe Atualizada"},
+        format="json",
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK, resposta.json()
+    equipe_existente_ativa.refresh_from_db()
+    assert equipe_existente_ativa.nome == "Equipe Atualizada"
+    assert equipe_existente_ativa.profissionais.get() == vinculo
+    assert resposta.json()["nome"] == "Equipe Atualizada"
