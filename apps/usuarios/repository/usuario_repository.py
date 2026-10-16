@@ -9,7 +9,7 @@ from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.exceptions import (
     UsuarioNaoEncontradoError,
 )
-from apps.usuarios.models import CargoEOL, Usuario
+from apps.usuarios.models import Usuario
 
 
 class UsuarioRepository:
@@ -20,7 +20,7 @@ class UsuarioRepository:
     def atualizar_ou_criar(
         cls,
         dados_usuario: dict[str, Any],
-        codigo_cargo: str,
+        # codigo_cargo: str,
     ) -> dict[str, Any]:
         """Atualiza ou cria um usuário utilizando RF ou CPF."""
         filtros: dict[str, Any] = {}
@@ -37,12 +37,12 @@ class UsuarioRepository:
         else:
             filtros["cpf"] = registro_funcional or cpf
 
-        cargo = CargoEOL.objects.get(codigo=codigo_cargo)
+        # cargo = CargoEOL.objects.get(codigo=codigo_cargo)
         usuario, criado = Usuario.objects.get_or_create(
             defaults={
                 "nome": nome,
                 "email": email,
-                "cargo": cargo,
+                # "cargo": cargo,
                 "username": username,
             },
             **filtros,
@@ -51,13 +51,13 @@ class UsuarioRepository:
         if not criado:
             usuario.nome = nome
             usuario.email = email
-            usuario.cargo = cargo
+            # usuario.cargo = cargo
 
             usuario.save(
                 update_fields=[
                     "nome",
                     "email",
-                    "cargo",
+                    # "cargo",
                 ]
             )
 

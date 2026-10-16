@@ -183,3 +183,27 @@ class ResponsavelUnidadeRepository:
                 update_fields=["ativo"],
             )
             historico.soft_delete(usuario)
+
+    @staticmethod
+    def buscar_unidade_educacional_ativa(
+        registro_funcional: str,
+    ) -> dict | None:
+        """Busca a escola associada ao registro funcional."""
+        vinculo = HistoricoResponsavel.objects.filter(
+            responsavel__registro_funcional=registro_funcional,
+            ativo=True,
+        ).first()
+
+        if vinculo is None:
+            return None
+
+        escola = vinculo.unidade_educacional
+
+        return {
+            "unidade_educacional": escola,
+            "diretoria_regional": (
+                escola.diretoria_regional.nome
+                if escola.diretoria_regional
+                else None
+            ),
+        }
