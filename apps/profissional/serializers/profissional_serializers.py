@@ -105,6 +105,8 @@ class ProfissionalCriarAtualizarSerializer(serializers.ModelSerializer):
             "status",
             "funcoes",
         )
+        # A duplicidade de CPF/RG é validada no service, que devolve título e
+        # mensagem conforme o que está duplicado (CPF, RG ou ambos).
         extra_kwargs: dict[str, dict[str, Any]] = {
             "cpf": {"validators": []},
             "rg": {"validators": []},
@@ -133,47 +135,5 @@ class ProfissionalCriarAtualizarSerializer(serializers.ModelSerializer):
         if len(cargos) != len(set(cargos)):
             raise serializers.ValidationError(
                 ProfissionalErrorMessages.FUNCAO_PROFISSIONAL_DUPLICADA
-            )
-        return value
-
-    def validate_cpf(self, value: str) -> str:
-        """Valida se o CPF já está cadastrado para outro profissional.
-
-        Args:
-            value: CPF a ser validado.
-
-        Returns:
-            O CPF validado.
-
-        Raises:
-            serializers.ValidationError: Se o CPF já estiver cadastrado.
-        """
-        profissionais = Profissional.objects.filter(cpf=value)
-        if self.instance is not None:
-            profissionais = profissionais.exclude(pk=self.instance.pk)
-        if profissionais.exists():
-            raise serializers.ValidationError(
-                ProfissionalErrorMessages.PROFISSIONAL_CPF_JA_CADASTRADO
-            )
-        return value
-
-    def validate_rg(self, value: str) -> str:
-        """Valida se o RG já está cadastrado para outro profissional.
-
-        Args:
-            value: RG a ser validado.
-
-        Returns:
-            O RG validado.
-
-        Raises:
-            serializers.ValidationError: Se o RG já estiver cadastrado.
-        """
-        profissionais = Profissional.objects.filter(rg=value)
-        if self.instance is not None:
-            profissionais = profissionais.exclude(pk=self.instance.pk)
-        if profissionais.exists():
-            raise serializers.ValidationError(
-                ProfissionalErrorMessages.PROFISSIONAL_RG_JA_CADASTRADO
             )
         return value

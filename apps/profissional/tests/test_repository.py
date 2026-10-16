@@ -217,3 +217,47 @@ def test_documento_repository_exclui_arquivo_apos_commit(
         pk=documento.pk
     ).exists()
     assert not storage.exists(nome_arquivo)
+
+
+def test_profissional_repository_verifica_duplicidade(usuario_ativo):
+    """Informa se CPF e RG pertencem a outro profissional ativo."""
+    existente = Profissional.objects.create(
+        nome="Existente", cpf="12345678901", rg="123456789"
+    )
+    repository = ProfissionalRepository()
+
+    assert repository.verificar_duplicidade("12345678901", "000") == {
+        "cpf": True,
+        "rg": False,
+    }
+    assert repository.verificar_duplicidade("000", "123456789") == {
+        "cpf": False,
+        "rg": True,
+    }
+    assert repository.verificar_duplicidade("12345678901", "123456789") == {
+        "cpf": True,
+        "rg": True,
+    }
+    assert repository.verificar_duplicidade("000", "111") == {
+        "cpf": False,
+        "rg": False,
+    }
+    assert repository.verificar_duplicidade(
+        "12345678901", "123456789", profissional_ignorado=existente
+    ) == {"cpf": False, "rg": False}
+
+
+def test_profissional_repository_ignora_excluido_na_duplicidade(
+    usuario_ativo,
+):
+    """Permite reutilizar CPF e RG de profissional excluído logicamente."""
+    existente = Profissional.objects.create(
+        nome="Existente", cpf="12345678901", rg="123456789"
+    )
+    existente.soft_delete(usuario=usuario_ativo)
+
+    resultado = ProfissionalRepository().verificar_duplicidade(
+        "12345678901", "123456789"
+    )
+
+    assert resultado == {"cpf": False, "rg": False}
