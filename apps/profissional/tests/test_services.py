@@ -372,30 +372,18 @@ def test_profissional_service_deleta_agregado(
 
 
 @pytest.mark.parametrize(
-    ("cpf", "rg", "mensagem"),
+    ("cpf", "rg", "esperado"),
     [
-        (
-            "12345678901",
-            "000",
-            ProfissionalErrorMessages.PROFISSIONAL_CPF_JA_CADASTRADO,
-        ),
-        (
-            "000",
-            "123456789",
-            ProfissionalErrorMessages.PROFISSIONAL_RG_JA_CADASTRADO,
-        ),
-        (
-            "12345678901",
-            "123456789",
-            ProfissionalErrorMessages.PROFISSIONAL_CPF_E_RG_JA_CADASTRADOS,
-        ),
+        ("12345678901", "000", {"cpf": True, "rg": False}),
+        ("000", "123456789", {"cpf": False, "rg": True}),
+        ("12345678901", "123456789", {"cpf": True, "rg": True}),
     ],
     ids=["cpf", "rg", "cpf_e_rg"],
 )
-def test_service_criar_rejeita_duplicidade_com_mensagem_especifica(
-    cargo_profissional, cpf, rg, mensagem
+def test_service_criar_rejeita_duplicidade_informando_quais(
+    cargo_profissional, cpf, rg, esperado
 ):
-    """Escolhe a mensagem conforme CPF, RG ou ambos duplicados."""
+    """Informa quais documentos (CPF, RG ou ambos) estão duplicados."""
     Profissional.objects.create(
         nome="Existente", cpf="12345678901", rg="123456789"
     )
@@ -404,10 +392,8 @@ def test_service_criar_rejeita_duplicidade_com_mensagem_especifica(
     with pytest.raises(ProfissionalJaCadastradoError) as exc_info:
         ProfissionalService().criar(dados)
 
-    assert exc_info.value.title == (
-        ProfissionalErrorMessages.PROFISSIONAL_DUPLICADO_TITULO_CRIAR
-    )
-    assert exc_info.value.detail == mensagem
+    assert exc_info.value.duplicidade == esperado
+    assert exc_info.value.detail == esperado
     assert Profissional.objects.count() == 1
 
 
@@ -435,7 +421,7 @@ def test_service_atualizar_permite_manter_cpf_e_rg_proprios(
 def test_service_atualizar_rejeita_rg_de_outro_profissional(
     cargo_profissional,
 ):
-    """Usa o título de edição ao duplicar o RG de outro profissional."""
+    """Informa o RG duplicado ao editar com o RG de outro profissional."""
     Profissional.objects.create(
         nome="Existente", cpf="12345678901", rg="123456789"
     )
@@ -448,9 +434,4 @@ def test_service_atualizar_rejeita_rg_de_outro_profissional(
             profissional, {"rg": "123456789", "funcoes": []}
         )
 
-    assert exc_info.value.title == (
-        ProfissionalErrorMessages.PROFISSIONAL_DUPLICADO_TITULO_EDITAR
-    )
-    assert exc_info.value.detail == (
-        ProfissionalErrorMessages.PROFISSIONAL_RG_JA_CADASTRADO
-    )
+    assert exc_info.value.duplicidade == {"cpf": False, "rg": True}

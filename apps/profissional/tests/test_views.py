@@ -12,7 +12,6 @@ from apps.core.constants import TipoArquivo
 from apps.core.exceptions import AnexoArquivoError
 from apps.core.pagination import PaginacaoPadrao
 from apps.profissional.api.views import ProfissionalViewSet
-from apps.profissional.constants import ProfissionalErrorMessages
 from apps.profissional.models import FuncaoProfissional, Profissional
 from apps.profissional.serializers.profissional_serializers import (
     ProfissionalCriarAtualizarSerializer,
@@ -42,30 +41,18 @@ def test_cria_profissional_com_funcao(
 
 
 @pytest.mark.parametrize(
-    ("cpf", "rg", "mensagem"),
+    ("cpf", "rg", "esperado"),
     [
-        (
-            "12345678901",
-            "987654321",
-            ProfissionalErrorMessages.PROFISSIONAL_CPF_JA_CADASTRADO,
-        ),
-        (
-            "10987654321",
-            "123456789",
-            ProfissionalErrorMessages.PROFISSIONAL_RG_JA_CADASTRADO,
-        ),
-        (
-            "12345678901",
-            "123456789",
-            ProfissionalErrorMessages.PROFISSIONAL_CPF_E_RG_JA_CADASTRADOS,
-        ),
+        ("12345678901", "987654321", {"cpf": True, "rg": False}),
+        ("10987654321", "123456789", {"cpf": False, "rg": True}),
+        ("12345678901", "123456789", {"cpf": True, "rg": True}),
     ],
     ids=["cpf", "rg", "cpf_e_rg"],
 )
-def test_cadastro_rejeita_cpf_e_rg_duplicados_com_titulo_e_mensagem(
-    api_cliente, profissional_payload, cargo_profissional, cpf, rg, mensagem
+def test_cadastro_rejeita_cpf_e_rg_duplicados_informando_quais(
+    api_cliente, profissional_payload, cargo_profissional, cpf, rg, esperado
 ):
-    """Retorna título e mensagem conforme o que está duplicado."""
+    """Informa na resposta quais documentos estão duplicados."""
     cargo_profissional.exige_documento = False
     cargo_profissional.save(update_fields=["exige_documento"])
     profissional_payload["funcoes"][0]["documentos"] = []
@@ -79,17 +66,14 @@ def test_cadastro_rejeita_cpf_e_rg_duplicados_com_titulo_e_mensagem(
     )
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
-    assert resposta.json() == {
-        "title": ProfissionalErrorMessages.PROFISSIONAL_DUPLICADO_TITULO_CRIAR,
-        "detail": mensagem,
-    }
+    assert resposta.json() == esperado
     assert Profissional.objects.count() == 1
 
 
 def test_atualizacao_rejeita_cpf_de_outro_profissional(
     api_cliente, profissional_payload, cargo_profissional
 ):
-    """Retorna título de edição e mensagem ao usar CPF de outro registro."""
+    """Informa o CPF duplicado ao editar com o CPF de outro registro."""
     cargo_profissional.exige_documento = False
     cargo_profissional.save(update_fields=["exige_documento"])
     profissional_payload["funcoes"][0]["documentos"] = []
@@ -106,12 +90,7 @@ def test_atualizacao_rejeita_cpf_de_outro_profissional(
     )
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
-    assert resposta.json() == {
-        "title": (
-            ProfissionalErrorMessages.PROFISSIONAL_DUPLICADO_TITULO_EDITAR
-        ),
-        "detail": ProfissionalErrorMessages.PROFISSIONAL_CPF_JA_CADASTRADO,
-    }
+    assert resposta.json() == {"cpf": True, "rg": False}
 
 
 def test_requisicao_sem_autenticacao_retorna_401(profissional_payload):

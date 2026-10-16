@@ -4,7 +4,6 @@ from typing import Any
 
 from django.db import transaction
 
-from apps.profissional.constants import ProfissionalErrorMessages
 from apps.profissional.exceptions import ProfissionalJaCadastradoError
 from apps.profissional.models import Profissional
 from apps.profissional.repository.profissional_repository import (
@@ -14,8 +13,6 @@ from apps.profissional.services.funcao_profissional_services import (
     FuncaoProfissionalService,
 )
 from apps.usuarios.models import Usuario
-
-MENSAGENS = ProfissionalErrorMessages
 
 
 class ProfissionalService:
@@ -61,7 +58,6 @@ class ProfissionalService:
         self._validar_duplicidade(
             profissionais.get("cpf"),
             profissionais.get("rg"),
-            titulo=MENSAGENS.PROFISSIONAL_DUPLICADO_TITULO_CRIAR,
         )
         dados = {**profissionais}
         funcoes = dados.pop("funcoes")
@@ -99,7 +95,6 @@ class ProfissionalService:
         self._validar_duplicidade(
             dados.get("cpf", profissional.cpf),
             dados.get("rg", profissional.rg),
-            titulo=MENSAGENS.PROFISSIONAL_DUPLICADO_TITULO_EDITAR,
             profissional_ignorado=profissional,
         )
         dados = {**dados, "atualizado_por": usuario}
@@ -140,37 +135,23 @@ class ProfissionalService:
         self,
         cpf: str | None,
         rg: str | None,
-        *,
-        titulo: str,
         profissional_ignorado: Profissional | None = None,
     ) -> None:
         """Valida se CPF e/ou RG já pertencem a outro profissional.
 
-        A mensagem varia conforme o que está duplicado: apenas o CPF,
-        apenas o RG ou ambos.
-
         Args:
             cpf: CPF informado.
             rg: RG informado.
-            titulo: Título exibido quando houver duplicidade.
             profissional_ignorado: Profissional desconsiderado na consulta
                 durante a edição.
 
         Raises:
             ProfissionalJaCadastradoError: Se CPF e/ou RG já estiverem em uso
-                por outro profissional ativo.
+                por outro profissional ativo. O erro informa qual dos dois
+                está duplicado.
         """
-        cpf_duplicado, rg_duplicado = (
-            self.profissional_repository.verificar_duplicidade(
-                cpf, rg, profissional_ignorado
-            )
+        duplicidade = self.profissional_repository.verificar_duplicidade(
+            cpf, rg, profissional_ignorado
         )
-        if not (cpf_duplicado or rg_duplicado):
-            return
-        if cpf_duplicado and rg_duplicado:
-            mensagem = MENSAGENS.PROFISSIONAL_CPF_E_RG_JA_CADASTRADOS
-        elif cpf_duplicado:
-            mensagem = MENSAGENS.PROFISSIONAL_CPF_JA_CADASTRADO
-        else:
-            mensagem = MENSAGENS.PROFISSIONAL_RG_JA_CADASTRADO
-        raise ProfissionalJaCadastradoError(title=titulo, detail=mensagem)
+        if any(duplicidade.values()):
+            raise ProfissionalJaCadastradoError(duplicidade)

@@ -226,22 +226,25 @@ def test_profissional_repository_verifica_duplicidade(usuario_ativo):
     )
     repository = ProfissionalRepository()
 
-    assert repository.verificar_duplicidade("12345678901", "000") == (
-        True,
-        False,
-    )
-    assert repository.verificar_duplicidade("000", "123456789") == (
-        False,
-        True,
-    )
-    assert repository.verificar_duplicidade("12345678901", "123456789") == (
-        True,
-        True,
-    )
-    assert repository.verificar_duplicidade("000", "111") == (False, False)
+    assert repository.verificar_duplicidade("12345678901", "000") == {
+        "cpf": True,
+        "rg": False,
+    }
+    assert repository.verificar_duplicidade("000", "123456789") == {
+        "cpf": False,
+        "rg": True,
+    }
+    assert repository.verificar_duplicidade("12345678901", "123456789") == {
+        "cpf": True,
+        "rg": True,
+    }
+    assert repository.verificar_duplicidade("000", "111") == {
+        "cpf": False,
+        "rg": False,
+    }
     assert repository.verificar_duplicidade(
         "12345678901", "123456789", profissional_ignorado=existente
-    ) == (False, False)
+    ) == {"cpf": False, "rg": False}
 
 
 def test_profissional_repository_ignora_excluido_na_duplicidade(
@@ -257,4 +260,4 @@ def test_profissional_repository_ignora_excluido_na_duplicidade(
         "12345678901", "123456789"
     )
 
-    assert resultado == (False, False)
+    assert resultado == {"cpf": False, "rg": False}
