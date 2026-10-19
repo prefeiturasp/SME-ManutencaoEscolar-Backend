@@ -333,12 +333,10 @@ class AutenticacaoEOLService:
             senha=senha,
         )
         codigo_rf = dados_autenticacao["codigoRf"]
-        # informaoes_cargo = cls.buscar_cargos(registro_funcional=codigo_rf)
         dados_usuario = cls.dados_usuario(codigo_rf)
         dados_usuario["codigo_rf"] = codigo_rf
         usuario = UsuarioService.sincronizar_usuario(
-            dados_usuario=dados_usuario,
-            # dados_cargo=informaoes_cargo,
+            dados_usuario=dados_usuario
         )
         token = TokenService.gerar_tokens(usuario["id"])
         unidade_vinculada = cls.buscar_escola_dre_responsavel(
@@ -391,6 +389,23 @@ class AutenticacaoEOLService:
 
     @classmethod
     def buscar_escola_dre_responsavel(cls, username: str) -> dict[str, Any]:
+        """Busca os dados da escola e da DRE vinculadas ao usuário.
+
+        Consulta o repository para localizar a unidade educacional associada
+        ao registro funcional do usuário por meio de um vínculo ativo de
+        responsável. Retorna os dados da escola e o nome da diretoria regional.
+
+        Args:
+            username (str): Registro funcional ou CPF do usuário autenticado.
+
+        Returns:
+            dict[str, Any]: Dicionário contendo:
+            - unidade_educacional: Dados da unidade educacional encontrada,
+              ou None caso não exista vínculo ativo.
+            - diretoria_regional: Nome da diretoria regional ou o valor
+              padrão definido em DADO_NAO_INFORMADO quando não houver
+              vínculo ativo.
+        """
         informacoes = (
             ResponsavelUnidadeRepository.buscar_unidade_educacional_ativa(
                 username

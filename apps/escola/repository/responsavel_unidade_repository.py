@@ -188,7 +188,25 @@ class ResponsavelUnidadeRepository:
     def buscar_unidade_educacional_ativa(
         registro_funcional: str,
     ) -> dict | None:
-        """Busca a escola associada ao registro funcional."""
+        """Busca a escola associada ao registro funcional.
+
+        Consulta os históricos de responsáveis para localizar um vínculo ativo
+        associado ao registro funcional informado. Quando encontra o vínculo,
+        retorna a unidade educacional e o nome da diretoria regional
+        relacionada.
+
+        Args:
+            registro_funcional (str):  Registro funcional do responsável
+                utilizado para localizar o vínculo com a unidade educacional.
+
+        Returns:
+            dict | None: Dicionário contendo:
+            - unidade_educacional: Instância da unidade educacional vinculada.
+            - diretoria_regional: Nome da diretoria regional, ou None caso
+              a escola não possua uma diretoria regional associada.
+            Retorna None quando não existe vínculo ativo para o registro
+            funcional informado.
+        """
         vinculo = HistoricoResponsavel.objects.filter(
             responsavel__registro_funcional=registro_funcional,
             ativo=True,

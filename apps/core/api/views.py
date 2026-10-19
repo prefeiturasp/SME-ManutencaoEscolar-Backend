@@ -125,17 +125,9 @@ class LoginView(TokenObtainPairView):
                 login=login,
                 senha=senha,
             )
-            # escola = dados_autenticacao["usuario"]["unidade_educacional"]
-            # dados_autenticacao["usuario"]["unidade_educacional"] = (
-            #     UnidadeEducacionalSerializer(escola).data
-            #     if escola is not None
-            #     else None
-            # )
-
             response_serializer = LoginResponseSerializer(
                 instance=dados_autenticacao
             )
-            # response_serializer.is_valid(raise_exception=True)
 
             return Response(
                 response_serializer.data, status=status.HTTP_200_OK
