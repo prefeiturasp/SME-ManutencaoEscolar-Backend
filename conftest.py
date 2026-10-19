@@ -5,6 +5,13 @@ from rest_framework.test import APIClient, APIRequestFactory
 
 from apps.empresa.models import Empresa
 from apps.escola.models.diretoria_regional import DiretoriaRegional
+from apps.escola.models.responsavel_unidade import (
+    HistoricoResponsavel,
+    ResponsavelUnidade,
+)
+from apps.escola.models.subprefeitura import Subprefeitura
+from apps.escola.models.tipos_escola import TipoEscola
+from apps.escola.models.unidade_educacional import Unidadeeducacional
 from apps.lote.models import Lote, LoteDiretoriaRegional
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.cargo_eol import CargoEOL
@@ -23,6 +30,16 @@ def api_cliente(usuario_ativo: Usuario) -> APIClient:
     cliente = APIClient()
     cliente.force_authenticate(user=usuario_ativo)
     return cliente
+
+
+@pytest.fixture
+def cargo_perfil_diretor() -> CargoEOL:
+    """Fixture do cargo de diretor de unidade escolar."""
+    return CargoEOL.objects.create(
+        codigo="9999",
+        nome="Diretor",
+        perfil=PerfilAcesso.UE,
+    )
 
 
 @pytest.fixture
@@ -80,12 +97,15 @@ def usuario_ativo_dict(usuario_ativo: Usuario) -> dict[str, object]:
 
 
 @pytest.fixture
-def cargo_perfil_diretor() -> CargoEOL:
-    """Fixture do cargo de diretor de unidade escolar."""
-    return CargoEOL.objects.create(
-        codigo="9999",
-        nome="Diretor",
-        perfil=PerfilAcesso.UE,
+def usuario_sincronizacao(cargo_perfil_diretor: CargoEOL) -> Usuario:
+    """Configura o usuário global como responsável pela sincronização."""
+    return Usuario.objects.create(
+        username="sincronizacao_eol",
+        nome="Sincronizador Dados do EOL",
+        registro_funcional=None,
+        cpf=None,
+        cargo=cargo_perfil_diretor,
+        is_active=False,
     )
 
 
@@ -167,3 +187,71 @@ def lote_centro(
         diretoria_regional=diretoria_regional_centro,
     )
     return lote
+
+
+@pytest.fixture
+def tipo_escola_emef() -> TipoEscola:
+    """Cria um tipo de escola EMEF."""
+    return TipoEscola.objects.create(
+        codigo_eol=1,
+        sigla="EMEF",
+    )
+
+
+@pytest.fixture
+def subprefeitura_se(
+    diretoria_regional_centro: DiretoriaRegional,
+) -> Subprefeitura:
+    """Cria uma Subprefeitura para os testes."""
+    subprefeitura = Subprefeitura.objects.create(
+        codigo_eol="SP01",
+        nome="Subprefeitura Sé",
+    )
+    subprefeitura.diretorias_regionais.add(diretoria_regional_centro)
+    return subprefeitura
+
+
+@pytest.fixture
+def unidade_educacional_emef(
+    diretoria_regional_centro: DiretoriaRegional,
+    tipo_escola_emef: TipoEscola,
+    subprefeitura_se: Subprefeitura,
+    usuario_sincronizacao: Usuario,
+) -> Unidadeeducacional:
+    """Cria uma unidade educacional do tipo EMEF para testes."""
+    return Unidadeeducacional.objects.create(
+        codigo_eol="100001",
+        nome="EMEF ESCOLA TESTE",
+        diretoria_regional=diretoria_regional_centro,
+        tipo_escola=tipo_escola_emef,
+        subprefeitura=subprefeitura_se,
+        status=True,
+        atualizado_por=usuario_sincronizacao,
+    )
+
+
+@pytest.fixture
+def responsavel_unidade() -> ResponsavelUnidade:
+    """Cria um responsável de unidade para os testes."""
+    return ResponsavelUnidade.objects.create(
+        registro_funcional="0000011",
+        nome="DIRETOR TESTE",
+        email="responsavel.emef@teste.com",
+        telefone="11999999999",
+        esta_afastado=False,
+    )
+
+
+@pytest.fixture
+def historico_responsavel(
+    responsavel_unidade: ResponsavelUnidade,
+    unidade_educacional_emef: Unidadeeducacional,
+    cargo_perfil_diretor: CargoEOL,
+) -> HistoricoResponsavel:
+    """Cria um histórico de responsável de unidade para os testes."""
+    return HistoricoResponsavel.objects.create(
+        responsavel=responsavel_unidade,
+        unidade_educacional=unidade_educacional_emef,
+        cargo=cargo_perfil_diretor,
+        ativo=True,
+    )

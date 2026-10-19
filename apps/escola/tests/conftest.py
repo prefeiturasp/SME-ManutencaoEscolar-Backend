@@ -4,17 +4,12 @@ import pytest
 
 from apps.escola.models import TipoEscola
 from apps.escola.models.diretoria_regional import DiretoriaRegional
-from apps.escola.models.responsavel_unidade import (
-    HistoricoResponsavel,
-    ResponsavelUnidade,
-)
 from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import (
     DadosUnidadeEducacional,
     Unidadeeducacional,
 )
 from apps.usuarios.models.cargo_eol import CargoEOL
-from apps.usuarios.models.usuario import Usuario
 
 
 @pytest.fixture
@@ -22,15 +17,6 @@ def obter_cargo_diretor():
     """Retorna o cargo EOL de Diretor de Escola."""
     return CargoEOL.objects.get(
         nome="DIRETOR DE ESCOLA",
-    )
-
-
-@pytest.fixture
-def tipo_escola_emef():
-    """Cria um tipo de escola EMEF."""
-    return TipoEscola.objects.create(
-        codigo_eol=1,
-        sigla="EMEF",
     )
 
 
@@ -96,17 +82,6 @@ def resposta_api_subprefeituras():
 
 
 @pytest.fixture
-def subprefeitura_se(diretoria_regional_centro):
-    """Cria uma Subprefeitura para os testes."""
-    subprefeitura = Subprefeitura.objects.create(
-        codigo_eol="SP01",
-        nome="Subprefeitura Sé",
-    )
-    subprefeitura.diretorias_regionais.add(diretoria_regional_centro)
-    return subprefeitura
-
-
-@pytest.fixture
 def subprefeitura_pirituba(diretoria_regional_ipiranga):
     """Cria uma Subprefeitura para os testes."""
     subprefeitura = Subprefeitura.objects.create(
@@ -146,25 +121,6 @@ def respostas_api(
         resposta_api_escolas,
         resposta_api_subprefeituras,
     ]
-
-
-@pytest.fixture
-def unidade_educacional_emef(
-    diretoria_regional_centro,
-    tipo_escola_emef,
-    subprefeitura_se,
-    usuario_sincronizacao,
-):
-    """Cria uma unidade educacional do tipo EMEF para testes."""
-    return Unidadeeducacional.objects.create(
-        codigo_eol="100001",
-        nome="EMEF ESCOLA TESTE",
-        diretoria_regional=diretoria_regional_centro,
-        tipo_escola=tipo_escola_emef,
-        subprefeitura=subprefeitura_se,
-        status=True,
-        atualizado_por=usuario_sincronizacao,
-    )
 
 
 @pytest.fixture
@@ -242,44 +198,6 @@ def resposta_dados_complementares():
     }
 
     return resposta
-
-
-@pytest.fixture
-def usuario_sincronizacao(cargo_perfil_diretor):
-    """Configura o usuário global como responsável pela sincronização."""
-    return Usuario.objects.create(
-        username="sincronizacao_eol",
-        nome="Sincronizador Dados do EOL",
-        registro_funcional=None,
-        cpf=None,
-        cargo=cargo_perfil_diretor,
-        is_active=False,
-    )
-
-
-@pytest.fixture
-def responsavel_unidade() -> ResponsavelUnidade:
-    """Cria um responsável de unidade para os testes."""
-    return ResponsavelUnidade.objects.create(
-        registro_funcional="0000011",
-        nome="DIRETOR TESTE",
-        email="responsavel.emef@teste.com",
-        telefone="11999999999",
-        esta_afastado=False,
-    )
-
-
-@pytest.fixture
-def historico_responsavel(
-    responsavel_unidade, unidade_educacional_emef, obter_cargo_diretor
-) -> HistoricoResponsavel:
-    """Cria um histórico de responsável de unidade para os testes."""
-    return HistoricoResponsavel.objects.create(
-        responsavel=responsavel_unidade,
-        unidade_educacional=unidade_educacional_emef,
-        cargo=obter_cargo_diretor,
-        ativo=True,
-    )
 
 
 @pytest.fixture
