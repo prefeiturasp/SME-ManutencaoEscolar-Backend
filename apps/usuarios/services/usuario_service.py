@@ -28,7 +28,16 @@ class UsuarioService:
         cls,
         dados_usuario: dict[str, Any],
     ) -> dict[str, Any]:
-        """Sincroniza um usuário retornado pelo EOL."""
+        """Sincroniza um usuário retornado pelo EOL.
+
+        Args:
+            dados_usuario (dict[str, Any]): Dicionário contendo os dados
+                do usuário obtidos durante o processo de autenticação.
+
+        Returns:
+            dict[str, Any]: Dicionário com os dados do usuário retornados
+            pelo repositório após a sincronização.
+        """
         return UsuarioRepository.atualizar_ou_criar(
             dados_usuario=dados_usuario
         )
