@@ -34,6 +34,8 @@ class Usuario(AbstractUser):
         CargoEOL,
         on_delete=models.PROTECT,
         related_name="usuarios",
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -46,4 +48,6 @@ class Usuario(AbstractUser):
     @property
     def perfil(self) -> str | None:
         """Retorna o perfil de acesso através do cargo."""
+        if self.cargo is None:
+            return None
         return self.cargo.perfil

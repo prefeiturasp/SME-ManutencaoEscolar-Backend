@@ -6,6 +6,15 @@ do usuário autenticado nas respostas da API.
 
 from rest_framework import serializers
 
+from apps.escola.models.unidade_educacional import Unidadeeducacional
+from apps.escola.serializers.unidade_educacional_serializers import (
+    DadosUnidadeEducacionalSerializer,
+    DiretoriaRegionalUnidadeEducacionalSerializer,
+    LoteUnidadeEducacionalSerializer,
+    SubprefeituraUnidadeEducacionalSerializer,
+    TipoEscolaUnidadeEducacionalSerializer,
+)
+
 
 class PerfilSerializer(serializers.Serializer):
     """Representa um perfil de acesso."""
@@ -25,6 +34,36 @@ class PerfilAcessoSerializer(serializers.Serializer):
         help_text="Nome do cargo do usuário.",
     )
     perfil = PerfilSerializer()
+
+
+class UnidadeEducacionalLoginSerializer(serializers.ModelSerializer):
+    """Representa os dados da escola na resposta do login."""
+
+    diretoria_regional = DiretoriaRegionalUnidadeEducacionalSerializer(
+        read_only=True,
+    )
+    tipo_escola = TipoEscolaUnidadeEducacionalSerializer(read_only=True)
+    subprefeitura = SubprefeituraUnidadeEducacionalSerializer(
+        read_only=True,
+    )
+    lote = LoteUnidadeEducacionalSerializer(read_only=True)
+    dados = DadosUnidadeEducacionalSerializer(read_only=True)
+
+    class Meta:
+        model = Unidadeeducacional
+        fields = (
+            "id",
+            "uuid",
+            "codigo_eol",
+            "nome",
+            "diretoria_regional",
+            "tipo_escola",
+            "subprefeitura",
+            "lote",
+            "status",
+            "dados",
+        )
+        read_only_fields = fields
 
 
 class UsuarioResponseSerializer(serializers.Serializer):
@@ -54,9 +93,7 @@ class UsuarioResponseSerializer(serializers.Serializer):
         required=False,
         help_text="Diretoria Regional de Educação do usuário.",
     )
-    unidade_educacional = serializers.CharField(
-        allow_blank=True,
+    unidade_educacional = UnidadeEducacionalLoginSerializer(
         allow_null=True,
-        required=False,
-        help_text="Unidade Educacional do usuário.",
+        read_only=True,
     )

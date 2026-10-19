@@ -116,7 +116,7 @@ class TestUnidadeEducacionalSerializer:
         self,
         unidade_educacional_emef,
         responsavel_unidade,
-        obter_cargo_diretor,
+        cargo_perfil_diretor,
         historico_responsavel,
     ):
         """Deve serializar o responsável atualmente vinculado à unidade."""
@@ -133,8 +133,8 @@ class TestUnidadeEducacionalSerializer:
         assert responsavel["telefone"] == responsavel_unidade.telefone
         assert responsavel["celular"] == responsavel_unidade.celular
 
-        assert responsavel["cargo"]["codigo"] == obter_cargo_diretor.codigo
-        assert responsavel["cargo"]["nome"] == obter_cargo_diretor.nome
+        assert responsavel["cargo"]["codigo"] == cargo_perfil_diretor.codigo
+        assert responsavel["cargo"]["nome"] == cargo_perfil_diretor.nome
 
         assert responsavel["ativo"] is True
 

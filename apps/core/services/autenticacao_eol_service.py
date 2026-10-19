@@ -26,6 +26,9 @@ from apps.core.exceptions import (
 )
 from apps.core.repository.autenticacao_eol_repository import ApiEOLRepository
 from apps.core.services.token_service import TokenService
+from apps.escola.repository.responsavel_unidade_repository import (
+    ResponsavelUnidadeRepository,
+)
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
 from apps.usuarios.services.usuario_service import UsuarioService
 from config.settings import SME_API_EOL_TOKEN, SME_API_EOL_URL
@@ -330,28 +333,21 @@ class AutenticacaoEOLService:
             senha=senha,
         )
         codigo_rf = dados_autenticacao["codigoRf"]
-        informaoes_cargo = cls.buscar_cargos(registro_funcional=codigo_rf)
         dados_usuario = cls.dados_usuario(codigo_rf)
         dados_usuario["codigo_rf"] = codigo_rf
         usuario = UsuarioService.sincronizar_usuario(
-            dados_usuario=dados_usuario,
-            dados_cargo=informaoes_cargo,
+            dados_usuario=dados_usuario
         )
         token = TokenService.gerar_tokens(usuario["id"])
+        unidade_vinculada = cls.buscar_escola_dre_responsavel(
+            username=usuario["username"],
+        )
         return {
             "refresh": token["refresh"],
             "access": token["access"],
             "access_expires_in": token["access_expires_in"],
             "refresh_expires_in": token["refresh_expires_in"],
-            "usuario": {
-                **usuario,
-                "diretoria_regional": dados_usuario.get(
-                    "dre", DADO_NAO_INFORMADO
-                ),
-                "unidade_educacional": dados_usuario.get(
-                    "nomeUe", DADO_NAO_INFORMADO
-                ),
-            },
+            "usuario": {**usuario, **unidade_vinculada},
         }
 
     @classmethod
@@ -390,3 +386,39 @@ class AutenticacaoEOLService:
             raise FalhaAutenticacaoError(exc) from exc
         except SmeIntegracaoError as exc:
             raise SmeIntegracaoError(exc) from exc
+
+    @classmethod
+    def buscar_escola_dre_responsavel(cls, username: str) -> dict[str, Any]:
+        """Busca os dados da escola e da DRE vinculadas ao usuário.
+
+        Consulta o repository para localizar a unidade educacional associada
+        ao registro funcional do usuário por meio de um vínculo ativo de
+        responsável. Retorna os dados da escola e o nome da diretoria regional.
+
+        Args:
+            username (str): Registro funcional ou CPF do usuário autenticado.
+
+        Returns:
+            dict[str, Any]: Dicionário contendo:
+            - unidade_educacional: Dados da unidade educacional encontrada,
+              ou None caso não exista vínculo ativo.
+            - diretoria_regional: Nome da diretoria regional ou o valor
+              padrão definido em DADO_NAO_INFORMADO quando não houver
+              vínculo ativo.
+        """
+        informacoes = (
+            ResponsavelUnidadeRepository.buscar_unidade_educacional_ativa(
+                username
+            )
+        )
+
+        if informacoes is None:
+            return {
+                "unidade_educacional": None,
+                "diretoria_regional": DADO_NAO_INFORMADO,
+            }
+
+        return {
+            "unidade_educacional": informacoes["unidade_educacional"],
+            "diretoria_regional": informacoes["diretoria_regional"],
+        }

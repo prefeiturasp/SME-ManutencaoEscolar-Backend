@@ -164,7 +164,6 @@ class LoteRepository:
         lote = self.model(
             **dados_lote,
             criado_por=usuario,
-            atualizado_por=usuario,
         )
         lote.full_clean()
         lote.save()
@@ -174,6 +173,7 @@ class LoteRepository:
                 self.vinculo_model(
                     lote=lote,
                     diretoria_regional=diretoria_regional,
+                    criado_por=usuario,
                 )
                 for diretoria_regional in diretorias_regionais
             ]
