@@ -1,6 +1,5 @@
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
-from uuid import UUID
 
 import pytest
 from rest_framework import status
@@ -54,7 +53,7 @@ def test_login_retorna_payload_autenticado(
         "refresh_expires_in": 604800,
         "usuario": {
             "id": 1,
-            "uuid": UUID("2e7d7d7d-9b8b-4c92-9b3b-123456789abc"),
+            "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
             "nome": "João da Silva",
             "email": "joao.silva@sme.prefeitura.sp.gov.br",
             "registro_funcional": "1234567",
@@ -67,6 +66,8 @@ def test_login_retorna_payload_autenticado(
                     "descricao": "Diretor Unidade Educacional",
                 },
             },
+            "diretoria_regional": None,
+            "unidade_educacional": None,
         },
     }
 

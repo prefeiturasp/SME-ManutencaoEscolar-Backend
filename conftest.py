@@ -56,6 +56,7 @@ def usuario_inativo(cargo_perfil_diretor: CargoEOL) -> Usuario:
 @pytest.fixture
 def usuario_ativo_dict(usuario_ativo: Usuario) -> dict[str, object]:
     """Retorna os dados esperados para a serialização do usuário ativo."""
+    assert usuario_ativo.cargo is not None
     return {
         "id": usuario_ativo.id,
         "uuid": usuario_ativo.uuid,
