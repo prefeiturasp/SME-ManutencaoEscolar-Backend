@@ -4,6 +4,7 @@ from typing import Any
 
 from django.db import transaction
 
+from apps.profissional.exceptions import ProfissionalJaCadastradoError
 from apps.profissional.models import Profissional
 from apps.profissional.repository.profissional_repository import (
     ProfissionalRepository,
@@ -54,6 +55,10 @@ class ProfissionalService:
         Returns:
             Dados do profissional criado, incluindo funções e documentos.
         """
+        self._validar_duplicidade(
+            profissionais.get("cpf"),
+            profissionais.get("rg"),
+        )
         dados = {**profissionais}
         funcoes = dados.pop("funcoes")
         profissional = self.profissional_repository.criar(
@@ -87,6 +92,11 @@ class ProfissionalService:
         Returns:
             Dados serializados do profissional atualizado.
         """
+        self._validar_duplicidade(
+            dados.get("cpf", profissional.cpf),
+            dados.get("rg", profissional.rg),
+            profissional_ignorado=profissional,
+        )
         dados = {**dados, "atualizado_por": usuario}
         funcoes_dados = dados.pop("funcoes", None)
 
@@ -120,3 +130,28 @@ class ProfissionalService:
             profissional.id, usuario
         )
         self.profissional_repository.deletar(profissional, usuario)
+
+    def _validar_duplicidade(
+        self,
+        cpf: str | None,
+        rg: str | None,
+        profissional_ignorado: Profissional | None = None,
+    ) -> None:
+        """Valida se CPF e/ou RG já pertencem a outro profissional.
+
+        Args:
+            cpf: CPF informado.
+            rg: RG informado.
+            profissional_ignorado: Profissional desconsiderado na consulta
+                durante a edição.
+
+        Raises:
+            ProfissionalJaCadastradoError: Se CPF e/ou RG já estiverem em uso
+                por outro profissional ativo. O erro informa qual dos dois
+                está duplicado.
+        """
+        duplicidade = self.profissional_repository.verificar_duplicidade(
+            cpf, rg, profissional_ignorado
+        )
+        if any(duplicidade.values()):
+            raise ProfissionalJaCadastradoError(duplicidade)

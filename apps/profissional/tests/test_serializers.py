@@ -61,38 +61,20 @@ def test_serializer_rejeita_funcoes_duplicadas(profissional_payload):
     )
 
 
-def test_serializer_rejeita_cpf_duplicado(profissional_payload):
-    """Impede CPF em uso por outro profissional ativo."""
+def test_serializer_nao_valida_duplicidade_de_cpf_e_rg(
+    profissional_payload,
+):
+    """Delega ao service a validação de CPF e RG duplicados."""
     Profissional.objects.create(
         nome="Existente",
         cpf=profissional_payload["cpf"],
-        rg="outro-rg",
-    )
-    serializer = ProfissionalCriarAtualizarSerializer(
-        data=profissional_payload
-    )
-
-    assert not serializer.is_valid()
-    assert str(serializer.errors["cpf"][0]) == (
-        ProfissionalErrorMessages.PROFISSIONAL_CPF_JA_CADASTRADO
-    )
-
-
-def test_serializer_rejeita_rg_duplicado(profissional_payload):
-    """Impede RG em uso por outro profissional ativo."""
-    Profissional.objects.create(
-        nome="Existente",
-        cpf="10987654321",
         rg=profissional_payload["rg"],
     )
     serializer = ProfissionalCriarAtualizarSerializer(
         data=profissional_payload
     )
 
-    assert not serializer.is_valid()
-    assert str(serializer.errors["rg"][0]) == (
-        ProfissionalErrorMessages.PROFISSIONAL_RG_JA_CADASTRADO
-    )
+    assert serializer.is_valid(), serializer.errors
 
 
 def test_serializer_atualizacao_ignora_cpf_e_rg_da_propria_instancia(
