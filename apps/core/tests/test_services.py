@@ -840,16 +840,11 @@ class TestLogin:
     )
     @patch(
         "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
-        "buscar_cargos",
-    )
-    @patch(
-        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
         "autentica",
     )
     def test_login_sucesso(
         self,
         mock_autentica: Mock,
-        mock_buscar_cargos: Mock,
         mock_dados_usuario: Mock,
         mock_sincronizar_usuario: Mock,
         mock_gerar_token: Mock,
@@ -860,7 +855,6 @@ class TestLogin:
             "codigoRf": "1234567",
             "cpf": "12345678901",
         }
-        mock_buscar_cargos.return_value = []
         mock_dados_usuario.return_value = {
             "id": 1,
             "nome": "João",
@@ -871,6 +865,7 @@ class TestLogin:
             "id": 1,
             "nome": "João",
             "email": "joao@email.com",
+            "username": "12345678901",
         }
         mock_gerar_token.return_value = {
             "refresh": "refresh",
@@ -894,9 +889,7 @@ class TestLogin:
             login=self.LOGIN_VALIDO,
             senha=self.SENHA_VALIDA,
         )
-        mock_buscar_cargos.assert_called_once_with(
-            registro_funcional="1234567",
-        )
+
         mock_dados_usuario.assert_called_once_with("1234567")
         mock_gerar_token.assert_called_once_with(1)
 
@@ -923,3 +916,52 @@ class TestLogin:
                 self.LOGIN_VALIDO,
                 self.SENHA_VALIDA,
             )
+
+    @pytest.mark.django_db
+    def test_deve_buscar_escola_e_dre_do_responsavel(
+        self,
+        historico_responsavel,
+    ):
+        """Deve retornar a escola e a DRE do responsável."""
+        resultado = AutenticacaoEOLService.buscar_escola_dre_responsavel(
+            historico_responsavel.responsavel.registro_funcional,
+        )
+
+        escola = historico_responsavel.unidade_educacional
+
+        assert resultado == {
+            "unidade_educacional": escola,
+            "diretoria_regional": escola.diretoria_regional.nome,
+        }
+
+    @pytest.mark.django_db
+    def test_deve_retornar_valores_padrao_sem_vinculo_ativo(
+        self,
+        historico_responsavel,
+    ):
+        """Deve retornar valores padrão quando não houver vínculo ativo."""
+        historico_responsavel.ativo = False
+        historico_responsavel.save(update_fields=["ativo"])
+
+        resultado = AutenticacaoEOLService.buscar_escola_dre_responsavel(
+            historico_responsavel.responsavel.registro_funcional,
+        )
+
+        assert resultado == {
+            "unidade_educacional": None,
+            "diretoria_regional": "Não informado",
+        }
+
+    @pytest.mark.django_db
+    def test_deve_retornar_valores_padrao_para_responsavel_inexistente(
+        self,
+    ):
+        """Deve retornar valores padrão para registro não cadastrado."""
+        resultado = AutenticacaoEOLService.buscar_escola_dre_responsavel(
+            "9999999",
+        )
+
+        assert resultado == {
+            "unidade_educacional": None,
+            "diretoria_regional": "Não informado",
+        }
