@@ -3,10 +3,18 @@
 from typing import Any
 
 import pytest
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
-from rest_framework.test import APIClient
+from rest_framework.exceptions import NotAuthenticated
+from rest_framework.test import APIClient, APIRequestFactory
 
+from apps.solicitacao_manutencao.api.views import (
+    SolicitacaoManutencaoViewSet,
+)
 from apps.solicitacao_manutencao.models import SolicitacaoManutencao
+from apps.solicitacao_manutencao.serializers import (
+    SolicitacaoManutencaoCriarSerializer,
+)
 from apps.usuarios.models import Usuario
 
 pytestmark = pytest.mark.django_db
@@ -48,6 +56,18 @@ def test_requisicao_nao_autenticada_retorna_401(
     )
 
     assert resposta.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_perform_create_rejeita_usuario_nao_identificado() -> None:
+    """Impede a criação quando a requisição não identifica um usuário."""
+    requisicao = APIRequestFactory().post("/")
+    requisicao.user = AnonymousUser()
+    view = SolicitacaoManutencaoViewSet()
+    view.request = requisicao
+    serializer = SolicitacaoManutencaoCriarSerializer()
+
+    with pytest.raises(NotAuthenticated, match="Usuário não identificado"):
+        view.perform_create(serializer)
 
 
 def test_documenta_criacao_da_solicitacao_no_schema() -> None:
