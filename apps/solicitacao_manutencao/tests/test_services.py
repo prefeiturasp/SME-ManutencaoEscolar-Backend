@@ -40,7 +40,7 @@ def test_inicializar_com_dependencias_informadas() -> None:
 
 
 def test_criar_servico_com_arquivo(
-    unidade_educacional: Unidadeeducacional,
+    unidade_educacional_emef: Unidadeeducacional,
     usuario_ativo: Usuario,
 ) -> None:
     """Cria e associa um arquivo validado ao serviço de manutenção."""
@@ -51,7 +51,7 @@ def test_criar_servico_com_arquivo(
     )
     dados: dict[str, Any] = {
         "tipo_atendimento": "comum",
-        "unidade_educacional": unidade_educacional,
+        "unidade_educacional": unidade_educacional_emef,
         "servicos": [
             {
                 "servico_especifico": "Reparo hidráulico",
@@ -72,7 +72,7 @@ def test_criar_servico_com_arquivo(
 
 
 def test_criar_solicitacoes_com_codigos_crescentes_de_sete_digitos(
-    unidade_educacional: Unidadeeducacional,
+    unidade_educacional_emef: Unidadeeducacional,
     usuario_ativo: Usuario,
 ) -> None:
     """Gera códigos sequenciais com sete dígitos."""
@@ -83,7 +83,7 @@ def test_criar_solicitacoes_com_codigos_crescentes_de_sete_digitos(
         return service.criar(
             {
                 "tipo_atendimento": "comum",
-                "unidade_educacional": unidade_educacional,
+                "unidade_educacional": unidade_educacional_emef,
                 "servicos": [
                     {
                         "servico_especifico": "Reparo hidráulico",

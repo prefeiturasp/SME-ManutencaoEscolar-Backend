@@ -10,26 +10,26 @@ pytestmark = pytest.mark.django_db
 
 
 def test_data_envio_permanece_vazia_antes_do_envio(
-    unidade_educacional: Unidadeeducacional,
+    unidade_educacional_emef: Unidadeeducacional,
 ) -> None:
     """Mantém a data vazia enquanto a solicitação não foi enviada."""
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="SOL-001",
         tipo_atendimento="comum",
-        unidade_educacional=unidade_educacional,
+        unidade_educacional=unidade_educacional_emef,
     )
 
     assert solicitacao.data_envio is None
 
 
 def test_nao_preenche_data_envio_ao_alterar_situacao_diretamente(
-    unidade_educacional: Unidadeeducacional,
+    unidade_educacional_emef: Unidadeeducacional,
 ) -> None:
     """Delega à camada de serviço o preenchimento da data de envio."""
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="SOL-001",
         tipo_atendimento="comum",
-        unidade_educacional=unidade_educacional,
+        unidade_educacional=unidade_educacional_emef,
     )
 
     solicitacao.situacao = SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE

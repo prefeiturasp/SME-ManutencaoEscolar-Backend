@@ -15,7 +15,7 @@ pytestmark = pytest.mark.django_db
 
 
 def test_cria_solicitacao(
-    unidade_educacional: Unidadeeducacional,
+    unidade_educacional_emef: Unidadeeducacional,
     usuario_ativo: Usuario,
 ) -> None:
     """Persiste uma solicitação de manutenção."""
@@ -23,7 +23,7 @@ def test_cria_solicitacao(
         dados={
             "codigo": "0000001",
             "tipo_atendimento": "comum",
-            "unidade_educacional": unidade_educacional,
+            "unidade_educacional": unidade_educacional_emef,
         },
         usuario=usuario_ativo,
     )
@@ -33,18 +33,18 @@ def test_cria_solicitacao(
     solicitacao_criada = SolicitacaoManutencao.objects.get(
         id=solicitacao["id"]
     )
-    assert str(solicitacao_criada) == (f"0000001 - {unidade_educacional}")
+    assert str(solicitacao_criada) == (f"0000001 - {unidade_educacional_emef}")
 
 
 def test_cria_servico_da_solicitacao(
-    unidade_educacional: Unidadeeducacional,
+    unidade_educacional_emef: Unidadeeducacional,
     usuario_ativo: Usuario,
 ) -> None:
     """Persiste um serviço vinculado à solicitação."""
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="comum",
-        unidade_educacional=unidade_educacional,
+        unidade_educacional=unidade_educacional_emef,
     )
     servico = ServicoManutencaoRepository().criar(
         dados={
@@ -65,14 +65,14 @@ def test_cria_servico_da_solicitacao(
 
 
 def test_cria_arquivo_do_servico(
-    unidade_educacional: Unidadeeducacional,
+    unidade_educacional_emef: Unidadeeducacional,
     usuario_ativo: Usuario,
 ) -> None:
     """Persiste um arquivo vinculado ao serviço."""
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="comum",
-        unidade_educacional=unidade_educacional,
+        unidade_educacional=unidade_educacional_emef,
     )
     servico = ServicoManutencaoRepository().criar(
         dados={
@@ -100,18 +100,18 @@ def test_cria_arquivo_do_servico(
 
 
 def test_obtem_ultimo_codigo_incluindo_solicitacao_excluida(
-    unidade_educacional: Unidadeeducacional,
+    unidade_educacional_emef: Unidadeeducacional,
 ) -> None:
     """Consulta o maior código mesmo quando o registro foi excluído."""
     SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="comum",
-        unidade_educacional=unidade_educacional,
+        unidade_educacional=unidade_educacional_emef,
     )
     ultima_solicitacao = SolicitacaoManutencao.objects.create(
         codigo="0000002",
         tipo_atendimento="comum",
-        unidade_educacional=unidade_educacional,
+        unidade_educacional=unidade_educacional_emef,
     )
     ultima_solicitacao.soft_delete()
 
