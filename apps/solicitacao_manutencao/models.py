@@ -6,6 +6,7 @@ from apps.core.models.anexo import Anexo
 from apps.core.models.mixins import BaseModel
 from apps.solicitacao_manutencao.constants import (
     FaseSolicitacao,
+    PerfisSolicitacao,
     SituacaoSolicitacao,
     TipoAtendimento,
 )
@@ -29,6 +30,11 @@ class SolicitacaoManutencao(BaseModel):
         max_length=30,
         choices=SituacaoSolicitacao.choices,
         default=SituacaoSolicitacao.NAO_ENVIADO_DRE,
+    )
+    solicitante = models.CharField(
+        max_length=20,
+        choices=PerfisSolicitacao.choices,
+        default=PerfisSolicitacao.UE,
     )
     data_envio = models.DateTimeField(null=True, blank=True, editable=False)
     fase = models.CharField(

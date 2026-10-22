@@ -36,6 +36,7 @@ _SOLICITACAO_EXEMPLO_SAIDA: dict[str, Any] = {
     "situacao": "aguardando_analise_dre",
     "data_envio": "2026-10-20T14:30:00-03:00",
     "fase": "solicitacao",
+    "solicitante": "ue",
     "servicos": [
         {
             **_SOLICITACAO_EXEMPLO_ENTRADA["servicos"][0],
@@ -43,8 +44,7 @@ _SOLICITACAO_EXEMPLO_SAIDA: dict[str, Any] = {
                 {
                     "uuid": "5b0a0a0a-2e1e-4fc5-ae6e-456789abcdef",
                     "arquivo": (
-                        "http://localhost:9000/arquivos/2026/10/20/"
-                        "reparo.jpg"
+                        "http://localhost:9000/arquivos/2026/10/20/reparo.jpg"
                     ),
                 }
             ],
@@ -53,7 +53,7 @@ _SOLICITACAO_EXEMPLO_SAIDA: dict[str, Any] = {
 }
 
 SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
-    create=extend_schema(
+    solicitacao_ue=extend_schema(
         tags=["Solicitação de manutenção"],
         summary="Cria uma solicitação de manutenção",
         description=(
