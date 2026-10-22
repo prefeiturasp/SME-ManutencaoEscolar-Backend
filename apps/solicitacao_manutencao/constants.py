@@ -10,6 +10,12 @@ class TipoAtendimento(models.TextChoices):
     URGENTE = "urgente", "Urgente"
 
 
+class PerfisSolicitacao(models.TextChoices):
+    """Define os perfis de usuários solicitantes."""
+
+    UE = "ue", "UE"
+
+
 class SituacaoSolicitacao(models.TextChoices):
     """Define as situações de uma solicitação."""
 
