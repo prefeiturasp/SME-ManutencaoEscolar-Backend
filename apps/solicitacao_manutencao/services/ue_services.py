@@ -6,6 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.core.services.anexo_service import AnexoService
+from apps.solicitacao_manutencao.constants import PerfisSolicitacao
 from apps.solicitacao_manutencao.models import (
     SituacaoSolicitacao,
 )
@@ -17,7 +18,7 @@ from apps.solicitacao_manutencao.repository import (
 from apps.usuarios.models import Usuario
 
 
-class SolicitacaoManutencaoService:
+class SolicitacaoManutencaoUeService:
     """Orquestra a criação de solicitações de manutenção."""
 
     def __init__(
@@ -80,6 +81,7 @@ class SolicitacaoManutencaoService:
         else:
             dados["situacao"] = SituacaoSolicitacao.NAO_ENVIADO_DRE
         dados["codigo"] = self.gerar_codigo()
+        dados["solicitante"] = PerfisSolicitacao.UE
 
         solicitacao = self.repository.criar(
             dados=dados,

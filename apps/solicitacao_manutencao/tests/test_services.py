@@ -13,7 +13,9 @@ from apps.solicitacao_manutencao.repository import (
     ServicoManutencaoRepository,
     SolicitacaoManutencaoRepository,
 )
-from apps.solicitacao_manutencao.services import SolicitacaoManutencaoService
+from apps.solicitacao_manutencao.services.ue_services import (
+    SolicitacaoManutencaoUeService,
+)
 from apps.usuarios.models import Usuario
 
 pytestmark = pytest.mark.django_db
@@ -26,7 +28,7 @@ def test_inicializar_com_dependencias_informadas() -> None:
     arquivo_repository = ArquivoServicoManutencaoRepository()
     anexo_service = AnexoService()
 
-    service = SolicitacaoManutencaoService(
+    service = SolicitacaoManutencaoUeService(
         repository=repository,
         servico_repository=servico_repository,
         arquivo_repository=arquivo_repository,
@@ -62,7 +64,7 @@ def test_criar_servico_com_arquivo(
         ],
     }
 
-    resultado = SolicitacaoManutencaoService().criar(dados, usuario_ativo)
+    resultado = SolicitacaoManutencaoUeService().criar(dados, usuario_ativo)
 
     arquivo_criado = resultado["servicos"][0]["arquivos"][0]
     assert arquivo_criado["nome_original"] == "reparo.jpg"
@@ -76,7 +78,7 @@ def test_criar_solicitacoes_com_codigos_crescentes_de_sete_digitos(
     usuario_ativo: Usuario,
 ) -> None:
     """Gera códigos sequenciais com sete dígitos."""
-    service = SolicitacaoManutencaoService()
+    service = SolicitacaoManutencaoUeService()
 
     def criar_solicitacao() -> dict[str, Any]:
         """Cria uma solicitação com os dados mínimos necessários."""
