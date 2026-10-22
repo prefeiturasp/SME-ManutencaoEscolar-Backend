@@ -47,7 +47,6 @@ def solicitacao_payload(
         "servicos": [
             {
                 "servico": str(servico.uuid),
-                "servico_especifico": "Troca de disjuntor",
                 "local_reparo": "Cozinha",
                 "descricao": "Disjuntor desarmando constantemente.",
                 "arquivos": [

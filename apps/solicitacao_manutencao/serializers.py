@@ -68,6 +68,30 @@ class ServicoManutencaoCriarSerializer(serializers.ModelSerializer):
             "arquivos",
         )
 
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Impede o envio conjunto de serviço e serviço específico.
+
+        Args:
+            attrs: Dados do serviço de manutenção.
+
+        Returns:
+            Dados validados do serviço de manutenção.
+
+        Raises:
+            serializers.ValidationError: Se um serviço catalogado e um
+                serviço específico forem informados simultaneamente.
+        """
+        if attrs.get("servico") and attrs.get("servico_especifico"):
+            raise serializers.ValidationError(
+                {
+                    "servico_especifico": (
+                        "Não informe um serviço específico quando um serviço "
+                        "catalogado for selecionado."
+                    )
+                }
+            )
+        return attrs
+
 
 class SolicitacaoManutencaoCriarSerializer(serializers.ModelSerializer):
     """Valida e serializa a criação de uma solicitação."""

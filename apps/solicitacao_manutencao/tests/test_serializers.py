@@ -58,3 +58,27 @@ def test_exige_ao_menos_um_arquivo_em_cada_servico(
 
     assert not serializer.is_valid()
     assert "arquivos" in serializer.errors["servicos"][0]
+
+
+def test_rejeita_servico_catalogado_com_servico_especifico(
+    solicitacao_payload: dict[str, Any],
+) -> None:
+    """Rejeita o envio simultâneo das duas formas de informar o serviço."""
+    dados_servico = solicitacao_payload["servicos"][0]
+    dados_servico["servico_especifico"] = "Troca de disjuntor"
+    serializer = SolicitacaoManutencaoCriarSerializer(data=solicitacao_payload)
+
+    assert not serializer.is_valid()
+    assert "servico_especifico" in serializer.errors["servicos"][0]
+
+
+def test_valida_servico_especifico_sem_servico_catalogado(
+    solicitacao_payload: dict[str, Any],
+) -> None:
+    """Aceita um serviço específico sem serviço catalogado."""
+    dados_servico = solicitacao_payload["servicos"][0]
+    dados_servico.pop("servico")
+    dados_servico["servico_especifico"] = "Troca de disjuntor"
+    serializer = SolicitacaoManutencaoCriarSerializer(data=solicitacao_payload)
+
+    assert serializer.is_valid(), serializer.errors
