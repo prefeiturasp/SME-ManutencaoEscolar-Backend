@@ -66,6 +66,7 @@ def test_login_retorna_payload_autenticado(
                     "descricao": "Diretor Unidade Educacional",
                 },
             },
+            "funcionalidades": ["RELATORIOS", "SOLICITACAO_MANUTENCAO"],
             "diretoria_regional": None,
             "unidade_educacional": None,
         },

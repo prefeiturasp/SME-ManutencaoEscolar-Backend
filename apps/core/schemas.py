@@ -65,6 +65,10 @@ LOGIN = extend_schema(
                             "descricao": "Diretor Unidade Educacional",
                         },
                     },
+                    "funcionalidades": [
+                        "RELATORIOS",
+                        "SOLICITACAO_MANUTENCAO",
+                    ],
                     "diretoria_regional": "DRE Exemplo",
                     "unidade_educacional": "EMEF Exemplo",
                 },

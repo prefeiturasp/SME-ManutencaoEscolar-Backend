@@ -14,6 +14,7 @@ from apps.escola.serializers.unidade_educacional_serializers import (
     SubprefeituraUnidadeEducacionalSerializer,
     TipoEscolaUnidadeEducacionalSerializer,
 )
+from apps.usuarios.constants import Funcionalidade
 
 
 class PerfilSerializer(serializers.Serializer):
@@ -28,12 +29,16 @@ class PerfilSerializer(serializers.Serializer):
 
 
 class PerfilAcessoSerializer(serializers.Serializer):
-    """Representa o cargo e o perfil de acesso do usuário."""
+    """Representa o cargo e o perfil de acesso do usuário.
+
+    Usuários sem cargo vinculado possuem o perfil de acesso vazio.
+    """
 
     cargo = serializers.CharField(
-        help_text="Nome do cargo do usuário.",
+        required=False,
+        help_text="Nome do cargo do usuário. Ausente quando não há cargo.",
     )
-    perfil = PerfilSerializer()
+    perfil = PerfilSerializer(required=False)
 
 
 class UnidadeEducacionalLoginSerializer(serializers.ModelSerializer):
@@ -87,6 +92,10 @@ class UsuarioResponseSerializer(serializers.Serializer):
         help_text="Nome de usuário utilizado na autenticação."
     )
     perfil_acesso = PerfilAcessoSerializer()
+    funcionalidades = serializers.ListField(
+        child=serializers.ChoiceField(choices=Funcionalidade.choices),
+        help_text="Funcionalidades liberadas para o perfil do usuário.",
+    )
     diretoria_regional = serializers.CharField(
         allow_blank=True,
         allow_null=True,
