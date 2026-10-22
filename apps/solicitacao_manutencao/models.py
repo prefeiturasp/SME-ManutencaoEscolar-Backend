@@ -2,8 +2,7 @@
 
 from django.db import models
 
-from apps.core.models.anexo import Anexo
-from apps.core.models.mixins import BaseModel
+from apps.core.models.mixins import AnexoMixin, BaseModel
 from apps.solicitacao_manutencao.constants import (
     FaseSolicitacao,
     PerfisSolicitacao,
@@ -90,7 +89,7 @@ class ServicoManutencao(BaseModel):
         return f"{self.servico_especifico} - {self.local_reparo}"
 
 
-class FotoLocalReparo(Anexo):
+class FotoLocalReparo(AnexoMixin):
     """Representa uma foto associada a um serviço de manutenção."""
 
     servico_manutencao = models.ForeignKey(
@@ -98,6 +97,7 @@ class FotoLocalReparo(Anexo):
         on_delete=models.CASCADE,
         related_name="fotos",
     )
+    arquivo = models.FileField(upload_to="solicitacao_manutencao/anexos/")
 
     class Meta:
         """Configura os metadados da foto do local do reparo."""
