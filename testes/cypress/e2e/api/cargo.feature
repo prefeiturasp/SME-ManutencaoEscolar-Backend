@@ -8,7 +8,7 @@ Funcionalidade: API - Cargo
     Então retorna o status 201 criando um novo cargo
 
   Cenário: Não criar cargo sem dados obrigatórios
-    Dado que possuo um token de acesso
+    Dado que possuo um token de acesso a cargo
     Quando envio uma requisição POST no endpoint de cargo sem dados obrigatórios
     Então retorna o status 400 sem criar cargo
   
@@ -18,7 +18,7 @@ Funcionalidade: API - Cargo
     Então retorna o status 401 sem criar um novo cargo
 
   Cenário: Atualizar cadastro de cargo
-    Dado que possuo um token de acesso a servicos
+    Dado que possuo um token de acesso a cargo
     Quando envio uma requisição PUT no endpoint de cargo
     Então retorna o status 200 atualizando um cargo
 

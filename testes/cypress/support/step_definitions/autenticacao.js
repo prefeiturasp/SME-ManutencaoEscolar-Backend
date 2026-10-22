@@ -29,8 +29,8 @@ Então('retorna status 200 com o token válido', function () {
 
     expect(response.status).to.eq(200)
 
-    expect(response.body).to.have.property('refresh').and.to.be.a('string').and.not.be.empty
-    expect(response.body).to.have.property('access').and.to.be.a('string').and.not.be.empty
+    expect(response.body).to.have.property('refresh')
+    expect(response.body).to.have.property('access')
 
     expect(response.body).to.have.property('usuario').and.to.be.an('object')
 

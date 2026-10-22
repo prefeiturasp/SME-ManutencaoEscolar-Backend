@@ -17,7 +17,7 @@ Cypress.Commands.add('gerar_token', () => {
   const tokenExistente = Cypress.env('TOKEN')
 
   if (tokenExistente) {
-    return cy.wrap(tokenExistente)
+    return cy.wrap(tokenExistente, { log: false })
   }
 
   return cy.request({
@@ -32,13 +32,16 @@ Cypress.Commands.add('gerar_token', () => {
     },
     timeout: 60000,
     failOnStatusCode: false,
+    log: false
   }).then((response) => {
 
     expect(response.status).to.eq(200)
 
     const token = response.body.access
 
-    expect(token).to.exist
+    if (!token) {
+       throw new Error('Token não gerado')
+   }
 
     Cypress.env('TOKEN', token)
 
