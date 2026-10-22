@@ -10,6 +10,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     initial = True
+    deletado_em = "Deletado em"
+    reletad_name_atualizado = "%(app_label)s_%(class)s_atualizado"
+    reletad_name_criado = "%(app_label)s_%(class)s_criado"
+    reletad_name_deletado = "%(app_label)s_%(class)s_deletado"
 
     dependencies = [
         ("escola", "0014_dadosunidadeeducacional_atualizado_em_and_more"),
@@ -42,7 +46,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         default=None,
                         null=True,
-                        verbose_name="Deletado em",
+                        verbose_name=deletado_em,
                     ),
                 ),
                 (
@@ -57,7 +61,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="%(app_label)s_%(class)s_atualizado",
+                        related_name=reletad_name_atualizado,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
@@ -67,7 +71,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="%(app_label)s_%(class)s_criado",
+                        related_name=reletad_name_criado,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
@@ -77,7 +81,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="%(app_label)s_%(class)s_deletado",
+                        related_name=reletad_name_deletado,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
@@ -119,7 +123,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         default=None,
                         null=True,
-                        verbose_name="Deletado em",
+                        verbose_name=deletado_em,
                     ),
                 ),
                 ("nome_original", models.CharField(max_length=255)),
@@ -148,7 +152,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="%(app_label)s_%(class)s_atualizado",
+                        related_name=reletad_name_atualizado,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
@@ -158,7 +162,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="%(app_label)s_%(class)s_criado",
+                        related_name=reletad_name_criado,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
@@ -168,7 +172,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="%(app_label)s_%(class)s_deletado",
+                        related_name=reletad_name_deletado,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
@@ -208,7 +212,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         default=None,
                         null=True,
-                        verbose_name="Deletado em",
+                        verbose_name=deletado_em,
                     ),
                 ),
                 ("codigo", models.CharField(max_length=255, unique=True)),
@@ -263,7 +267,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="%(app_label)s_%(class)s_atualizado",
+                        related_name=reletad_name_atualizado,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
@@ -273,7 +277,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="%(app_label)s_%(class)s_criado",
+                        related_name=reletad_name_criado,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
@@ -283,7 +287,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="%(app_label)s_%(class)s_deletado",
+                        related_name=reletad_name_deletado,
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
