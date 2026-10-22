@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "servico_especifico",
-                    models.CharField(blank=True, max_length=255, null=True),
+                    models.CharField(blank=True, max_length=255),
                 ),
                 ("local_reparo", models.CharField(max_length=255)),
                 ("descricao", models.TextField()),
