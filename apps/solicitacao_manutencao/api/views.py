@@ -1,16 +1,21 @@
 """Views da API de solicitações de manutenção."""
 
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotAuthenticated
+from rest_framework.mixins import ListModelMixin
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import GenericViewSet
 
+from apps.solicitacao_manutencao.filters import SolicitacaoManutencaoFilter
 from apps.solicitacao_manutencao.models import SolicitacaoManutencao
 from apps.solicitacao_manutencao.schemas import SOLICITACAO_MANUTENCAO_SCHEMA
 from apps.solicitacao_manutencao.serializers import (
     SolicitacaoManutencaoCriarSerializer,
+    SolicitacaoManutencaoListSerializer,
 )
 from apps.solicitacao_manutencao.services.ue_services import (
     SolicitacaoManutencaoUeService,
@@ -19,12 +24,19 @@ from apps.usuarios.models import Usuario
 
 
 @SOLICITACAO_MANUTENCAO_SCHEMA
-class SolicitacaoManutencaoViewSet(GenericViewSet):
-    """Disponibiliza a criação de solicitações de manutenção."""
+class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
+    """Disponibiliza a criação e listagem de solicitações."""
 
     queryset = SolicitacaoManutencao.objects.all()
-    serializer_class = SolicitacaoManutencaoCriarSerializer
-    http_method_names = ["post", "options"]
+    http_method_names = ["get", "post", "options"]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SolicitacaoManutencaoFilter
+
+    def get_serializer_class(self) -> type[BaseSerializer]:
+        """Retorna o serializer apropriado para a ação atual."""
+        if self.action == "list":
+            return SolicitacaoManutencaoListSerializer
+        return SolicitacaoManutencaoCriarSerializer
 
     @action(detail=False, methods=["post"], url_path="solicitacao-ue")
     def solicitacao_ue(self, request: Request) -> Response:
