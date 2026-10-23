@@ -11,7 +11,7 @@ from rest_framework.viewsets import ViewSet
 
 from apps.usuarios.schemas import ME
 from apps.usuarios.serializers.usuario_serializer import (
-    UsuarioMeResponseSerializer,
+    UsuarioResponseSerializer,
 )
 from apps.usuarios.services.usuario_service import UsuarioService
 
@@ -42,7 +42,7 @@ class UsuarioViewSet(ViewSet):
         usuario = UsuarioService.obter_usuario_autenticado(
             request.user.username,
         )
-        response = UsuarioMeResponseSerializer(usuario).data
+        response = UsuarioResponseSerializer(usuario).data
 
         return Response(
             response,

@@ -12,7 +12,7 @@ from apps.usuarios.serializers.cargo_eol_serializer import (
     CargoEOLSerializer,
 )
 from apps.usuarios.serializers.usuario_serializer import (
-    UsuarioMeResponseSerializer,
+    UsuarioResponseSerializer,
 )
 
 TAG_USUARIOS = "Usuários"
@@ -28,7 +28,7 @@ ME = extend_schema(
     ),
     operation_id="obterUsuarioAutenticado",
     responses={
-        200: UsuarioMeResponseSerializer,
+        200: UsuarioResponseSerializer,
         401: OpenApiResponse(
             description="Usuário não autenticado ou token inválido."
         ),
@@ -54,7 +54,13 @@ ME = extend_schema(
                 },
                 "funcionalidades": ["RELATORIOS", "SOLICITACAO_MANUTENCAO"],
                 "diretoria_regional": "DRE Exemplo",
-                "unidade_educacional": "EMEF Exemplo",
+                "unidade_educacional": {
+                    "id": 1,
+                    "uuid": "5d6b0a0e-3f0b-4b53-8a55-0d7c1f3a9e21",
+                    "codigo_eol": "123456",
+                    "nome": "EMEF Exemplo",
+                    "diretoria_regional": {"nome": "DRE Exemplo"},
+                },
             },
         ),
     ],

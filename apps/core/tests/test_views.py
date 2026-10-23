@@ -51,25 +51,6 @@ def test_login_retorna_payload_autenticado(
         "access": "access-token",
         "access_expires_in": 60,
         "refresh_expires_in": 604800,
-        "usuario": {
-            "id": 1,
-            "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
-            "nome": "João da Silva",
-            "email": "joao.silva@sme.prefeitura.sp.gov.br",
-            "registro_funcional": "1234567",
-            "cpf": "12345678901",
-            "username": "1234567",
-            "perfil_acesso": {
-                "cargo": "DIRETOR DE ESCOLA",
-                "perfil": {
-                    "codigo": "UE",
-                    "descricao": "Diretor Unidade Educacional",
-                },
-            },
-            "funcionalidades": ["RELATORIOS", "SOLICITACAO_MANUTENCAO"],
-            "diretoria_regional": None,
-            "unidade_educacional": None,
-        },
     }
 
     monkeypatch.setattr(

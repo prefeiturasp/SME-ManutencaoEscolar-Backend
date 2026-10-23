@@ -88,7 +88,7 @@ class UsuarioService:
         Complementa os dados do usuário com a unidade educacional e a
         diretoria regional, conforme o perfil de acesso:
 
-        - ``UE``: nome da unidade educacional e da diretoria regional;
+        - ``UE``: dados completos da unidade educacional e nome da DRE;
         - ``DRE``: nome da diretoria regional, sem unidade educacional;
         - ``SME`` e ``EMPRESA`` (ou sem perfil): ambos ``None``.
 
@@ -106,7 +106,7 @@ class UsuarioService:
         usuario = cls.obter_usuario_por_rf_cpf(rf_ou_cpf)
         perfil = usuario["perfil_acesso"].get("perfil", {}).get("codigo")
 
-        vinculo: dict[str, str | None] = {
+        vinculo: dict[str, Any] = {
             "unidade_educacional": None,
             "diretoria_regional": None,
         }
@@ -119,8 +119,8 @@ class UsuarioService:
         return {**usuario, **vinculo}
 
     @staticmethod
-    def _vinculo_unidade_educacional(username: str) -> dict[str, str | None]:
-        """Retorna os nomes da unidade educacional e da DRE do diretor."""
+    def _vinculo_unidade_educacional(username: str) -> dict[str, Any]:
+        """Retorna a unidade educacional e o nome da DRE do diretor."""
         informacoes = (
             ResponsavelUnidadeRepository.buscar_unidade_educacional_ativa(
                 username
@@ -129,7 +129,7 @@ class UsuarioService:
         if informacoes is None:
             return {"unidade_educacional": None, "diretoria_regional": None}
         return {
-            "unidade_educacional": informacoes["unidade_educacional"].nome,
+            "unidade_educacional": informacoes["unidade_educacional"],
             "diretoria_regional": informacoes["diretoria_regional"],
         }
 

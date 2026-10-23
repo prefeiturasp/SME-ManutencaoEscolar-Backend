@@ -72,7 +72,11 @@ class UnidadeEducacionalLoginSerializer(serializers.ModelSerializer):
 
 
 class UsuarioResponseSerializer(serializers.Serializer):
-    """Representa os dados do usuário autenticado."""
+    """Representa os dados do usuário autenticado (``/usuarios/me``).
+
+    Unidade educacional e diretoria regional são retornadas somente para os
+    perfis ``UE`` e ``DRE``; para os demais, vêm como ``None``.
+    """
 
     id = serializers.IntegerField(help_text="Identificador do usuário.")
     uuid = serializers.UUIDField(help_text="Identificador único do usuário.")
@@ -97,29 +101,11 @@ class UsuarioResponseSerializer(serializers.Serializer):
         help_text="Funcionalidades liberadas para o perfil do usuário.",
     )
     diretoria_regional = serializers.CharField(
-        allow_blank=True,
         allow_null=True,
-        required=False,
-        help_text="Diretoria Regional de Educação do usuário.",
+        help_text="Nome da DRE. Preenchido para os perfis UE e DRE.",
     )
     unidade_educacional = UnidadeEducacionalLoginSerializer(
         allow_null=True,
         read_only=True,
-    )
-
-
-class UsuarioMeResponseSerializer(UsuarioResponseSerializer):
-    """Representa os dados do usuário no endpoint ``/usuarios/me``.
-
-    Unidade educacional e diretoria regional são retornadas apenas pelo
-    nome e somente para os perfis ``UE`` e ``DRE``.
-    """
-
-    diretoria_regional = serializers.CharField(
-        allow_null=True,
-        help_text="Nome da DRE. Preenchido para os perfis UE e DRE.",
-    )
-    unidade_educacional = serializers.CharField(  # type: ignore[assignment]
-        allow_null=True,
-        help_text="Nome da unidade educacional. Preenchido para o perfil UE.",
+        help_text="Dados completos da unidade. Preenchido para o perfil UE.",
     )

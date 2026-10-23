@@ -38,9 +38,7 @@ class TestObterUsuarioAutenticado:
 
         resultado = UsuarioService.obter_usuario_autenticado(rf)
 
-        assert (
-            resultado["unidade_educacional"] == unidade_educacional_emef.nome
-        )
+        assert resultado["unidade_educacional"] == unidade_educacional_emef
         assert (
             resultado["diretoria_regional"]
             == unidade_educacional_emef.diretoria_regional.nome
@@ -106,9 +104,10 @@ class TestMeView:
         response = UsuarioViewSet.as_view({"get": "me"})(request)
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["unidade_educacional"] == (
-            unidade_educacional_emef.nome
-        )
+        unidade = response.data["unidade_educacional"]
+        assert unidade["uuid"] == str(unidade_educacional_emef.uuid)
+        assert unidade["nome"] == unidade_educacional_emef.nome
+        assert unidade["codigo_eol"] == unidade_educacional_emef.codigo_eol
         assert response.data["diretoria_regional"] == (
             unidade_educacional_emef.diretoria_regional.nome
         )
