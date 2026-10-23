@@ -9,9 +9,89 @@ from apps.solicitacao_manutencao.repository import (
     ServicoManutencaoRepository,
     SolicitacaoManutencaoRepository,
 )
+from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models import Usuario
+from apps.usuarios.models.cargo_eol import CargoEOL
 
 pytestmark = pytest.mark.django_db
+
+
+def test_lista_solicitacoes_por_usuario(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+    usuario_inativo: Usuario,
+) -> None:
+    """Lista somente as solicitações criadas pelo usuário informado."""
+    solicitacao_usuario = SolicitacaoManutencao.objects.create(
+        codigo="0000001",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ativo,
+    )
+    SolicitacaoManutencao.objects.create(
+        codigo="0000002",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_inativo,
+    )
+
+    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
+        usuario_ativo
+    )
+
+    assert list(solicitacoes) == [
+        {
+            "uuid": solicitacao_usuario.uuid,
+            "codigo": "0000001",
+            "tipo_atendimento": "comum",
+            "situacao": "nao_enviado_dre",
+            "data_envio": None,
+            "fase": "solicitacao",
+        }
+    ]
+
+
+def test_lista_solicitacoes_vazia_sem_usuario() -> None:
+    """Retorna uma lista vazia quando nenhum usuário for informado."""
+    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(None)
+
+    assert not solicitacoes.exists()
+
+
+def test_lista_todas_solicitacoes_para_usuario_que_nao_e_ue(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+) -> None:
+    """Lista todas as solicitações para perfis diferentes de UE."""
+    cargo_dre = CargoEOL.objects.create(
+        codigo="8888",
+        nome="Diretor regional",
+        perfil=PerfilAcesso.DRE,
+    )
+    usuario_dre = Usuario.objects.create(
+        username="12345678901",
+        nome="Usuário DRE",
+        cpf="12345678901",
+        email="dre@email.com",
+        cargo=cargo_dre,
+        is_active=True,
+    )
+    for codigo in ("0000001", "0000002"):
+        SolicitacaoManutencao.objects.create(
+            codigo=codigo,
+            tipo_atendimento="comum",
+            unidade_educacional=unidade_educacional_emef,
+            criado_por=usuario_ativo,
+        )
+
+    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
+        usuario_dre
+    )
+
+    assert {solicitacao["codigo"] for solicitacao in solicitacoes} == {
+        "0000001",
+        "0000002",
+    }
 
 
 def test_cria_solicitacao(

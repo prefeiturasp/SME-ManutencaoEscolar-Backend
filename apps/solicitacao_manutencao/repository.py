@@ -1,12 +1,15 @@
 """Repositórios do domínio de solicitações de manutenção."""
 
-from typing import Any
+from typing import Any, cast
+
+from django.db.models import QuerySet
 
 from apps.solicitacao_manutencao.models import (
     FotoLocalReparo,
     ServicoManutencao,
     SolicitacaoManutencao,
 )
+from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models import Usuario
 
 
@@ -14,6 +17,38 @@ class SolicitacaoManutencaoRepository:
     """Gerencia a persistência de solicitações de manutenção."""
 
     model = SolicitacaoManutencao
+    campos_listagem = (
+        "uuid",
+        "codigo",
+        "tipo_atendimento",
+        "situacao",
+        "data_envio",
+        "fase",
+    )
+
+    def listar_por_usuario(
+        self,
+        usuario: Usuario | None,
+    ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
+        """Lista as solicitações visíveis para o usuário informado.
+
+        Args:
+            usuario: Usuário responsável pelas solicitações.
+
+        Returns:
+            Queryset de dicionários com todas as solicitações, limitado às de
+            autoria do usuário quando seu perfil for UE, ou vazio quando não
+            houver usuário.
+        """
+        queryset = self.model.objects.all()
+        if usuario is None:
+            queryset = queryset.none()
+        elif usuario.perfil == PerfilAcesso.UE:
+            queryset = queryset.filter(criado_por=usuario)
+        return cast(
+            QuerySet[SolicitacaoManutencao, dict[str, Any]],
+            queryset.values(*self.campos_listagem),
+        )
 
     def criar(self, dados: dict[str, Any], usuario: Usuario) -> dict[str, Any]:
         """Cria uma solicitação de manutenção.
