@@ -46,3 +46,5 @@ class FaseSolicitacao(models.TextChoices):
     """Define as fases de uma solicitação."""
 
     SOLICITACAO = "solicitacao", "Solicitação"
+    VISTORIA = "vistoria", "Vistoria"
+    EXECUCAO = "execucao", "Execução"

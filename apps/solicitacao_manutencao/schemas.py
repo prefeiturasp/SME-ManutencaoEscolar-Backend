@@ -19,6 +19,8 @@ from apps.solicitacao_manutencao.serializers import (
 )
 
 _TAG_SOLICITACAO = "Solicitação de manutenção"
+_CREDENCIAIS_INVALIDAS = "Credenciais inválidas."
+_ERRO_SERVIDOR = "Erro no servidor."
 
 _SOLICITACOES_LISTAGEM_SERIALIZER = inline_serializer(
     name="SolicitacoesManutencaoListagemPaginada",
@@ -31,6 +33,14 @@ _SOLICITACOES_LISTAGEM_SERIALIZER = inline_serializer(
 )
 _SOLICITACOES_LISTAGEM_RESPONSE = forced_singular_serializer(
     _SOLICITACOES_LISTAGEM_SERIALIZER.__class__
+)
+
+_CHOICE_SERIALIZER = inline_serializer(
+    name="SolicitacaoManutencaoChoice",
+    fields={
+        "value": serializers.CharField(),
+        "label": serializers.CharField(),
+    },
 )
 
 _SOLICITACAO_EXEMPLO_ENTRADA: dict[str, Any] = {
@@ -72,6 +82,36 @@ _SOLICITACAO_EXEMPLO_SAIDA: dict[str, Any] = {
 }
 
 SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
+    situacoes=extend_schema(
+        tags=[_TAG_SOLICITACAO],
+        summary="Lista as situações das solicitações de manutenção",
+        operation_id="listarSituacoesSolicitacaoManutencao",
+        responses={
+            200: _CHOICE_SERIALIZER.__class__(many=True),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+    ),
+    fases=extend_schema(
+        tags=[_TAG_SOLICITACAO],
+        summary="Lista as fases das solicitações de manutenção",
+        operation_id="listarFasesSolicitacaoManutencao",
+        responses={
+            200: _CHOICE_SERIALIZER.__class__(many=True),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+    ),
+    tipos_atendimento=extend_schema(
+        tags=[_TAG_SOLICITACAO],
+        summary="Lista os tipos de atendimento",
+        operation_id="listarTiposAtendimentoSolicitacaoManutencao",
+        responses={
+            200: _CHOICE_SERIALIZER.__class__(many=True),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+    ),
     list=extend_schema(
         tags=[_TAG_SOLICITACAO],
         summary="Lista as solicitações de manutenção",
@@ -89,8 +129,8 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
         ],
         responses={
             200: _SOLICITACOES_LISTAGEM_RESPONSE,
-            401: OpenApiResponse(description="Credenciais inválidas."),
-            500: OpenApiResponse(description="Erro no servidor."),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
     ),
     solicitacao_ue=extend_schema(
@@ -118,8 +158,8 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
         responses={
             201: SolicitacaoManutencaoCriarSerializer,
             400: OpenApiResponse(description="Dados inválidos."),
-            401: OpenApiResponse(description="Credenciais inválidas."),
-            500: OpenApiResponse(description="Erro no servidor."),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
             OpenApiExample(

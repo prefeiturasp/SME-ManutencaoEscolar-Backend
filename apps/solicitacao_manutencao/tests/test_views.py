@@ -23,6 +23,9 @@ pytestmark = pytest.mark.django_db
 
 URL_SOLICITACAO_UE = "/api/v1/solicitacoes-manutencao/solicitacao-ue/"
 URL_SOLICITACOES = "/api/v1/solicitacoes-manutencao/"
+URL_SITUACOES = "/api/v1/solicitacoes-manutencao/situacoes/"
+URL_FASES = "/api/v1/solicitacoes-manutencao/fases/"
+URL_TIPOS_ATENDIMENTO = "/api/v1/solicitacoes-manutencao/tipos-atendimento/"
 
 
 def _postar_solicitacao(
@@ -60,21 +63,88 @@ def test_seleciona_serializer_conforme_acao() -> None:
     assert view.get_serializer_class() is SolicitacaoManutencaoCriarSerializer
 
 
+def test_lista_situacoes_da_solicitacao(api_cliente: APIClient) -> None:
+    """Retorna os valores e rótulos das situações da solicitação."""
+    resposta = api_cliente.get(URL_SITUACOES)
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json()[0] == {
+        "value": "nao_enviado_dre",
+        "label": "Não enviada para a DRE",
+    }
+    assert len(resposta.json()) == 9
+
+
+def test_lista_fases_da_solicitacao(api_cliente: APIClient) -> None:
+    """Retorna os valores e rótulos das fases da solicitação."""
+    resposta = api_cliente.get(URL_FASES)
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json() == [
+        {"value": "solicitacao", "label": "Solicitação"},
+        {"value": "vistoria", "label": "Vistoria"},
+        {"value": "execucao", "label": "Execução"},
+    ]
+
+
+def test_lista_tipos_atendimento(api_cliente: APIClient) -> None:
+    """Retorna os valores e rótulos dos tipos de atendimento."""
+    resposta = api_cliente.get(URL_TIPOS_ATENDIMENTO)
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json() == [
+        {"value": "comum", "label": "Comum"},
+        {"value": "urgente", "label": "Urgente"},
+    ]
+
+
+def test_documenta_choices_da_solicitacao_no_schema() -> None:
+    """Expõe no OpenAPI a consulta de cada escolha da solicitação."""
+    resposta = APIClient().get("/api/v1/schema/?format=json")
+
+    assert resposta.status_code == status.HTTP_200_OK
+    operacoes = {
+        url: resposta.json()["paths"][url]["get"]
+        for url in (URL_SITUACOES, URL_FASES, URL_TIPOS_ATENDIMENTO)
+    }
+    assert operacoes[URL_SITUACOES]["operationId"] == (
+        "listarSituacoesSolicitacaoManutencao"
+    )
+    assert operacoes[URL_FASES]["operationId"] == (
+        "listarFasesSolicitacaoManutencao"
+    )
+    assert operacoes[URL_TIPOS_ATENDIMENTO]["operationId"] == (
+        "listarTiposAtendimentoSolicitacaoManutencao"
+    )
+    assert all(
+        set(operacao["responses"]) == {"200", "401", "500"}
+        for operacao in operacoes.values()
+    )
+
+
 def test_lista_solicitacoes_paginadas(
     api_cliente: APIClient,
     unidade_educacional_emef: Any,
+    usuario_ativo: Usuario,
+    usuario_inativo: Usuario,
 ) -> None:
-    """Lista solicitações com os dados resumidos da unidade escolar."""
+    """Lista somente solicitações criadas pelo usuário autenticado."""
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="urgente",
         unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ativo,
+    )
+    SolicitacaoManutencao.objects.create(
+        codigo="0000002",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_inativo,
     )
 
     resposta = api_cliente.get(URL_SOLICITACOES)
 
     assert resposta.status_code == status.HTTP_200_OK
-    print(resposta.json())
     assert resposta.json() == {
         "count": 1,
         "next": None,
@@ -103,6 +173,7 @@ def test_lista_solicitacoes_paginadas(
 def test_filtra_listagem_de_solicitacoes(
     api_cliente: APIClient,
     unidade_educacional_emef: Any,
+    usuario_ativo: Usuario,
     parametros: dict[str, str],
     codigo_esperado: str,
 ) -> None:
@@ -111,12 +182,14 @@ def test_filtra_listagem_de_solicitacoes(
         codigo="0000001",
         tipo_atendimento="urgente",
         unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ativo,
     )
     SolicitacaoManutencao.objects.create(
         codigo="0000002",
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
         situacao="aguardando_analise_dre",
+        criado_por=usuario_ativo,
     )
 
     resposta = api_cliente.get(URL_SOLICITACOES, parametros)
@@ -129,6 +202,7 @@ def test_filtra_listagem_de_solicitacoes(
 def test_filtra_listagem_por_intervalo_de_data_envio(
     api_cliente: APIClient,
     unidade_educacional_emef: Any,
+    usuario_ativo: Usuario,
 ) -> None:
     """Filtra solicitações cuja data de envio esteja no intervalo."""
     for codigo, data_envio in (
@@ -142,6 +216,7 @@ def test_filtra_listagem_por_intervalo_de_data_envio(
             tipo_atendimento="comum",
             unidade_educacional=unidade_educacional_emef,
             data_envio=timezone.make_aware(data_envio),
+            criado_por=usuario_ativo,
         )
 
     resposta = api_cliente.get(
