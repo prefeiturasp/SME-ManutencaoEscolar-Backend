@@ -2,16 +2,35 @@
 
 from typing import Any
 
+from drf_spectacular.helpers import forced_singular_serializer
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiParameter,
     OpenApiResponse,
     extend_schema,
     extend_schema_view,
+    inline_serializer,
 )
+from rest_framework import serializers
 
 from apps.solicitacao_manutencao.serializers import (
     SolicitacaoManutencaoCriarSerializer,
+    SolicitacaoManutencaoListSerializer,
+)
+
+_TAG_SOLICITACAO = "Solicitação de manutenção"
+
+_SOLICITACOES_LISTAGEM_SERIALIZER = inline_serializer(
+    name="SolicitacoesManutencaoListagemPaginada",
+    fields={
+        "count": serializers.IntegerField(),
+        "next": serializers.URLField(allow_null=True),
+        "previous": serializers.URLField(allow_null=True),
+        "results": SolicitacaoManutencaoListSerializer(many=True),
+    },
+)
+_SOLICITACOES_LISTAGEM_RESPONSE = forced_singular_serializer(
+    _SOLICITACOES_LISTAGEM_SERIALIZER.__class__
 )
 
 _SOLICITACAO_EXEMPLO_ENTRADA: dict[str, Any] = {
@@ -53,8 +72,29 @@ _SOLICITACAO_EXEMPLO_SAIDA: dict[str, Any] = {
 }
 
 SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
+    list=extend_schema(
+        tags=[_TAG_SOLICITACAO],
+        summary="Lista as solicitações de manutenção",
+        description=(
+            "Retorna a lista paginada de solicitações de manutenção "
+            "cadastradas."
+        ),
+        operation_id="listarSolicitacoesManutencao",
+        parameters=[
+            OpenApiParameter(name="codigo", type=str),
+            OpenApiParameter(name="tipo_atendimento", type=str),
+            OpenApiParameter(name="data_envio", type=str),
+            OpenApiParameter(name="fase", type=str),
+            OpenApiParameter(name="situacao", type=str),
+        ],
+        responses={
+            200: _SOLICITACOES_LISTAGEM_RESPONSE,
+            401: OpenApiResponse(description="Credenciais inválidas."),
+            500: OpenApiResponse(description="Erro no servidor."),
+        },
+    ),
     solicitacao_ue=extend_schema(
-        tags=["Solicitação de manutenção"],
+        tags=[_TAG_SOLICITACAO],
         summary="Cria uma solicitação de manutenção",
         description=(
             "Cadastra uma solicitação com ao menos um serviço de "
@@ -94,5 +134,5 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
                 value=_SOLICITACAO_EXEMPLO_SAIDA,
             ),
         ],
-    )
+    ),
 )
