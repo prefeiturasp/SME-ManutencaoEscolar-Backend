@@ -13,6 +13,23 @@ from apps.solicitacao_manutencao.models import (
 )
 
 
+class SolicitacaoManutencaoListSerializer(serializers.ModelSerializer):
+    """Serializa uma solicitação de manutenção para listagem."""
+
+    class Meta:
+        """Configura os campos exibidos na listagem de solicitações."""
+
+        model = SolicitacaoManutencao
+        fields = (
+            "uuid",
+            "codigo",
+            "tipo_atendimento",
+            "situacao",
+            "data_envio",
+            "fase",
+        )
+
+
 class FotoLocalReparoSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de documentos de funções profissionais."""
 
