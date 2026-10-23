@@ -10,6 +10,10 @@ from apps.core.exceptions import (
 )
 from apps.core.repository.token_repository import TokenRepository
 from apps.core.services.email_service import EmailService
+from apps.escola.repository.responsavel_unidade_repository import (
+    ResponsavelUnidadeRepository,
+)
+from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.exceptions import (
     EmailUsuarioNaoEncontradoError,
     UsuarioNaoEncontradoError,
@@ -76,6 +80,67 @@ class UsuarioService:
                 detail="Verifique se o RF ou CPF digitados estão corretos e "
                 "tente novamente",
             ) from None
+
+    @classmethod
+    def obter_usuario_autenticado(cls, rf_ou_cpf: str) -> dict[str, Any]:
+        """Obtém os dados do usuário autenticado para o endpoint ``/me``.
+
+        Complementa os dados do usuário com a unidade educacional e a
+        diretoria regional, conforme o perfil de acesso:
+
+        - ``UE``: nome da unidade educacional e da diretoria regional;
+        - ``DRE``: nome da diretoria regional, sem unidade educacional;
+        - ``SME`` e ``EMPRESA`` (ou sem perfil): ambos ``None``.
+
+        Args:
+            rf_ou_cpf (str): Registro funcional ou CPF do usuário.
+
+        Returns:
+            dict[str, Any]: Dados do usuário acrescidos de
+            ``unidade_educacional`` e ``diretoria_regional``.
+
+        Raises:
+            UsuarioNaoEncontradoError: Se o usuário não for encontrado.
+            EmailUsuarioNaoEncontradoError: Se o usuário não tiver e-mail.
+        """
+        usuario = cls.obter_usuario_por_rf_cpf(rf_ou_cpf)
+        perfil = usuario["perfil_acesso"].get("perfil", {}).get("codigo")
+
+        vinculo: dict[str, str | None] = {
+            "unidade_educacional": None,
+            "diretoria_regional": None,
+        }
+        if perfil == PerfilAcesso.UE:
+            vinculo = cls._vinculo_unidade_educacional(usuario["username"])
+        elif perfil == PerfilAcesso.DRE:
+            vinculo["diretoria_regional"] = cls._obter_dre_do_usuario(
+                usuario["username"]
+            )
+        return {**usuario, **vinculo}
+
+    @staticmethod
+    def _vinculo_unidade_educacional(username: str) -> dict[str, str | None]:
+        """Retorna os nomes da unidade educacional e da DRE do diretor."""
+        informacoes = (
+            ResponsavelUnidadeRepository.buscar_unidade_educacional_ativa(
+                username
+            )
+        )
+        if informacoes is None:
+            return {"unidade_educacional": None, "diretoria_regional": None}
+        return {
+            "unidade_educacional": informacoes["unidade_educacional"].nome,
+            "diretoria_regional": informacoes["diretoria_regional"],
+        }
+
+    @staticmethod
+    def _obter_dre_do_usuario(username: str) -> str | None:
+        """Retorna o nome da DRE do usuário com perfil DRE.
+
+        Ainda não há vínculo entre o usuário com perfil DRE e a diretoria
+        regional (definição pendente), por isso retorna ``None``.
+        """
+        return None
 
     @staticmethod
     def enviar_email_recuperacao_senha(usuario: dict) -> None:

@@ -12,7 +12,7 @@ from apps.usuarios.serializers.cargo_eol_serializer import (
     CargoEOLSerializer,
 )
 from apps.usuarios.serializers.usuario_serializer import (
-    UsuarioResponseSerializer,
+    UsuarioMeResponseSerializer,
 )
 
 TAG_USUARIOS = "Usuários"
@@ -22,11 +22,13 @@ ME = extend_schema(
     summary="Obter usuário autenticado",
     description=(
         "Retorna os dados do usuário autenticado a partir das "
-        "informações presentes no token de autenticação."
+        "informações presentes no token de autenticação. Para o perfil UE "
+        "retorna a unidade educacional e a DRE; para o perfil DRE, a DRE; "
+        "para SME e Empresa, ambas são nulas."
     ),
     operation_id="obterUsuarioAutenticado",
     responses={
-        200: UsuarioResponseSerializer,
+        200: UsuarioMeResponseSerializer,
         401: OpenApiResponse(
             description="Usuário não autenticado ou token inválido."
         ),
