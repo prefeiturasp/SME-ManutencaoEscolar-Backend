@@ -27,6 +27,7 @@ from apps.empresa.serializers.empresa_serializers import (
 )
 from apps.empresa.services.empresa_service import EmpresaService
 from apps.usuarios.models import Usuario
+from apps.usuarios.permissions import PermissaoCadastros
 
 
 @EMPRESA_SCHEMA
@@ -35,6 +36,8 @@ class EmpresaViewSet(ModelViewSet):
 
     Delegando regras de negócio ao EmpresaService.
     """
+
+    permission_classes = [PermissaoCadastros]
 
     queryset = Empresa.objects.all()
     lookup_field = "uuid"

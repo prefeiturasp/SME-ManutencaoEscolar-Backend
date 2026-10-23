@@ -883,7 +883,7 @@ class TestLogin:
         assert resultado["access"] == "access_token"
         assert resultado["access_expires_in"] == 3600
         assert resultado["refresh_expires_in"] == 604800
-        assert resultado["usuario"]["id"] == 1
+        assert "usuario" not in resultado
 
         mock_autentica.assert_called_once_with(
             login=self.LOGIN_VALIDO,
@@ -916,52 +916,3 @@ class TestLogin:
                 self.LOGIN_VALIDO,
                 self.SENHA_VALIDA,
             )
-
-    @pytest.mark.django_db
-    def test_deve_buscar_escola_e_dre_do_responsavel(
-        self,
-        historico_responsavel,
-    ):
-        """Deve retornar a escola e a DRE do responsável."""
-        resultado = AutenticacaoEOLService.buscar_escola_dre_responsavel(
-            historico_responsavel.responsavel.registro_funcional,
-        )
-
-        escola = historico_responsavel.unidade_educacional
-
-        assert resultado == {
-            "unidade_educacional": escola,
-            "diretoria_regional": escola.diretoria_regional.nome,
-        }
-
-    @pytest.mark.django_db
-    def test_deve_retornar_valores_padrao_sem_vinculo_ativo(
-        self,
-        historico_responsavel,
-    ):
-        """Deve retornar valores padrão quando não houver vínculo ativo."""
-        historico_responsavel.ativo = False
-        historico_responsavel.save(update_fields=["ativo"])
-
-        resultado = AutenticacaoEOLService.buscar_escola_dre_responsavel(
-            historico_responsavel.responsavel.registro_funcional,
-        )
-
-        assert resultado == {
-            "unidade_educacional": None,
-            "diretoria_regional": "Não informado",
-        }
-
-    @pytest.mark.django_db
-    def test_deve_retornar_valores_padrao_para_responsavel_inexistente(
-        self,
-    ):
-        """Deve retornar valores padrão para registro não cadastrado."""
-        resultado = AutenticacaoEOLService.buscar_escola_dre_responsavel(
-            "9999999",
-        )
-
-        assert resultado == {
-            "unidade_educacional": None,
-            "diretoria_regional": "Não informado",
-        }
