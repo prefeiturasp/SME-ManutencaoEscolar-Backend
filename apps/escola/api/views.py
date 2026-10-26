@@ -45,6 +45,7 @@ from apps.escola.services.unidade_educacional_service import (
     UnidadeEducacionalService,
 )
 from apps.usuarios.models.usuario import Usuario
+from apps.usuarios.permissions import PermissaoCadastros
 
 
 @TIPO_ESCOLA
@@ -97,6 +98,8 @@ class SubprefeituraViewSet(viewsets.ReadOnlyModelViewSet):
 @UNIDADE_EDUCACIONAL
 class UnidadeEducacionalViewSet(viewsets.ModelViewSet):
     """Disponibiliza operações de leitura para unidades educacionais."""
+
+    permission_classes = [PermissaoCadastros]
 
     http_method_names = ["get", "put", "options"]
     queryset = Unidadeeducacional.objects.select_related(

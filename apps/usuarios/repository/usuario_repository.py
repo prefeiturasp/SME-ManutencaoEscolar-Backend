@@ -163,6 +163,7 @@ class UsuarioRepository:
             - ``cpf``: CPF do usuário.
             - ``username``: Nome de usuário.
             - ``perfil_acesso``: Informações do cargo e perfil de acesso.
+            - ``funcionalidades``: Funcionalidades liberadas ao perfil.
         """
         perfil = {}
         if usuario.cargo:
@@ -187,6 +188,7 @@ class UsuarioRepository:
             "cpf": usuario.cpf,
             "username": usuario.username,
             "perfil_acesso": perfil,
+            "funcionalidades": usuario.funcionalidades,
         }
 
     @classmethod

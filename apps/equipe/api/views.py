@@ -25,11 +25,14 @@ from apps.equipe.serializers import (
 )
 from apps.equipe.services import EquipeService
 from apps.usuarios.models import Usuario
+from apps.usuarios.permissions import PermissaoCadastros
 
 
 @EQUIPE_SCHEMA
 class EquipeViewSet(ModelViewSet):
     """Disponibiliza o cadastro e a listagem de equipes."""
+
+    permission_classes = [PermissaoCadastros]
 
     queryset = Equipe.objects.all()
     http_method_names = ["post", "options", "get", "put", "patch"]
