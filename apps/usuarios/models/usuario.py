@@ -6,7 +6,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinLengthValidator
 from django.db import models
 
-from apps.usuarios.constants import FUNCIONALIDADES_POR_PERFIL
 from apps.usuarios.models.cargo_eol import CargoEOL
 
 
@@ -51,20 +50,4 @@ class Usuario(AbstractUser):
         """Retorna o perfil de acesso através do cargo."""
         if self.cargo is None:
             return None
-        return self.cargo.perfil or None
-
-    @property
-    def funcionalidades(self) -> list[str]:
-        """Retorna as funcionalidades liberadas para o perfil do usuário.
-
-        Usuários sem cargo, ou com cargo sem perfil de acesso, não têm
-        nenhuma funcionalidade liberada.
-        """
-        liberadas: frozenset[str] = FUNCIONALIDADES_POR_PERFIL.get(
-            self.perfil or "", frozenset()
-        )
-        return sorted(str(funcionalidade) for funcionalidade in liberadas)
-
-    def tem_acesso(self, funcionalidade: str) -> bool:
-        """Indica se o perfil do usuário permite usar a funcionalidade."""
-        return funcionalidade in self.funcionalidades
+        return self.cargo.perfil

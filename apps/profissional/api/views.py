@@ -21,14 +21,11 @@ from apps.profissional.services.profissional_services import (
     ProfissionalService,
 )
 from apps.usuarios.models import Usuario
-from apps.usuarios.permissions import PermissaoCadastros
 
 
 @PROFISSIONAL_SCHEMA
 class ProfissionalViewSet(ModelViewSet):
     """Disponibiliza o cadastro e listagem de profissionais."""
-
-    permission_classes = [PermissaoCadastros]
 
     queryset = Profissional.objects.prefetch_related(
         "funcoes__cargo", "funcoes__documentos"

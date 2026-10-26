@@ -26,7 +26,6 @@ from apps.lote.serializers import (
 )
 from apps.lote.services.lote_service import LoteService
 from apps.usuarios.models.usuario import Usuario
-from apps.usuarios.permissions import PermissaoCadastros
 
 
 class LoteInstabilidadeError(APIException):
@@ -43,8 +42,6 @@ class LoteViewSet(viewsets.ModelViewSet):
 
     Delegando regras de negócio ao LotesService.
     """
-
-    permission_classes = [PermissaoCadastros]
 
     http_method_names = ["get", "post", "patch", "options", "delete"]
     queryset = Lote.objects.all()

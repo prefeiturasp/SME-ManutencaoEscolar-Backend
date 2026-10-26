@@ -1,7 +1,5 @@
 """Fixtures globais utilizadas pelos testes do projeto."""
 
-from collections.abc import Callable
-
 import pytest
 from rest_framework.test import APIClient, APIRequestFactory
 
@@ -35,34 +33,6 @@ def api_cliente(usuario_ativo: Usuario) -> APIClient:
 
 
 @pytest.fixture
-def api_cliente_perfil(db) -> Callable[[str | None], APIClient]:
-    """Retorna uma fábrica de clientes autenticados com o perfil informado.
-
-    Com ``None`` cria um usuário sem cargo vinculado.
-    """
-
-    def _criar(perfil: str | None) -> APIClient:
-        cargo = None
-        if perfil is not None:
-            cargo = CargoEOL.objects.create(
-                codigo=f"perfil-{perfil}",
-                nome=f"Cargo {perfil}",
-                perfil=perfil,
-            )
-        usuario = Usuario.objects.create(
-            username=f"usuario-{perfil}",
-            nome=f"Usuário {perfil}",
-            cargo=cargo,
-            is_active=True,
-        )
-        cliente = APIClient()
-        cliente.force_authenticate(user=usuario)
-        return cliente
-
-    return _criar
-
-
-@pytest.fixture
 def cargo_perfil_diretor() -> CargoEOL:
     """Fixture do cargo de diretor de unidade escolar."""
     return CargoEOL.objects.create(
@@ -73,25 +43,15 @@ def cargo_perfil_diretor() -> CargoEOL:
 
 
 @pytest.fixture
-def cargo_perfil_sme() -> CargoEOL:
-    """Fixture de um cargo com perfil GME/SME."""
-    return CargoEOL.objects.create(
-        codigo="8888",
-        nome="Gestor SME",
-        perfil=PerfilAcesso.SME,
-    )
-
-
-@pytest.fixture
-def usuario_ativo(cargo_perfil_sme: CargoEOL) -> Usuario:
-    """Fixture de usuario ativo, com perfil GME/SME."""
+def usuario_ativo(cargo_perfil_diretor: CargoEOL) -> Usuario:
+    """Fixture de usuario ativo."""
     return Usuario.objects.create(
         username="9876543219",
         nome="João da Silva",
         registro_funcional=None,
         cpf="9876543219",
         email="joao@email.com",
-        cargo=cargo_perfil_sme,
+        cargo=cargo_perfil_diretor,
         is_active=True,
     )
 
@@ -133,19 +93,18 @@ def usuario_ativo_dict(usuario_ativo: Usuario) -> dict[str, object]:
                 ),
             },
         },
-        "funcionalidades": usuario_ativo.funcionalidades,
     }
 
 
 @pytest.fixture
-def usuario_sincronizacao(cargo_perfil_sme: CargoEOL) -> Usuario:
+def usuario_sincronizacao(cargo_perfil_diretor: CargoEOL) -> Usuario:
     """Configura o usuário global como responsável pela sincronização."""
     return Usuario.objects.create(
         username="sincronizacao_eol",
         nome="Sincronizador Dados do EOL",
         registro_funcional=None,
         cpf=None,
-        cargo=cargo_perfil_sme,
+        cargo=cargo_perfil_diretor,
         is_active=False,
     )
 
