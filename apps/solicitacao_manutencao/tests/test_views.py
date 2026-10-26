@@ -199,6 +199,43 @@ def test_filtra_listagem_de_solicitacoes(
     assert resposta.json()["results"][0]["codigo"] == codigo_esperado
 
 
+@pytest.mark.parametrize(
+    ("campo", "valores"),
+    [
+        ("tipo_atendimento", "comum,urgente"),
+        ("situacao", "nao_enviado_dre,aguardando_analise_dre"),
+        ("fase", "solicitacao,vistoria"),
+    ],
+)
+def test_filtra_listagem_de_solicitacoes_por_multiplos_valores(
+    api_cliente: APIClient,
+    unidade_educacional_emef: Any,
+    usuario_ativo: Usuario,
+    campo: str,
+    valores: str,
+) -> None:
+    """Filtra a listagem por múltiplos valores do mesmo campo."""
+    SolicitacaoManutencao.objects.create(
+        codigo="0000001",
+        tipo_atendimento="urgente",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ativo,
+    )
+    SolicitacaoManutencao.objects.create(
+        codigo="0000002",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        situacao="aguardando_analise_dre",
+        fase="vistoria",
+        criado_por=usuario_ativo,
+    )
+
+    resposta = api_cliente.get(URL_SOLICITACOES, {campo: valores})
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json()["count"] == 2
+
+
 def test_filtra_listagem_por_intervalo_de_data_envio(
     api_cliente: APIClient,
     unidade_educacional_emef: Any,
