@@ -66,5 +66,5 @@ class Usuario(AbstractUser):
         return sorted(str(funcionalidade) for funcionalidade in liberadas)
 
     def tem_acesso(self, funcionalidade: str) -> bool:
-        """Indica se o perfil do usuário permite usar a funcionalidade."""
+        """Indica se o perfil do usuário permite usar uma ou mais funcionalidades."""
         return funcionalidade in self.funcionalidades
