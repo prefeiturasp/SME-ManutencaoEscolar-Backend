@@ -20,13 +20,13 @@ from apps.solicitacao_manutencao.constants import (
 )
 from apps.solicitacao_manutencao.filters import SolicitacaoManutencaoFilter
 from apps.solicitacao_manutencao.models import SolicitacaoManutencao
-from apps.solicitacao_manutencao.repository import (
-    SolicitacaoManutencaoRepository,
-)
 from apps.solicitacao_manutencao.schemas import SOLICITACAO_MANUTENCAO_SCHEMA
 from apps.solicitacao_manutencao.serializers import (
     SolicitacaoManutencaoCriarSerializer,
     SolicitacaoManutencaoListSerializer,
+)
+from apps.solicitacao_manutencao.services.solicitacao_service import (
+    SolicitacaoManutencaoService,
 )
 from apps.solicitacao_manutencao.services.ue_services import (
     SolicitacaoManutencaoUeService,
@@ -58,7 +58,7 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         self,
     ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
         """Retorna as solicitações visíveis para o usuário autenticado."""
-        return SolicitacaoManutencaoRepository().listar_por_usuario(
+        return SolicitacaoManutencaoService().listar_por_usuario(
             self._usuario_logado()
         )
 
