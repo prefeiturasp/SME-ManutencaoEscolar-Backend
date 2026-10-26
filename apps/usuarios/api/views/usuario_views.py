@@ -39,7 +39,7 @@ class UsuarioViewSet(ViewSet):
         Returns:
             Response: Resposta HTTP contendo os dados do usuário autenticado.
         """
-        usuario = UsuarioService.obter_usuario_autenticado(
+        usuario = UsuarioService.obter_usuario_por_rf_cpf(
             request.user.username,
         )
         response = UsuarioResponseSerializer(usuario).data

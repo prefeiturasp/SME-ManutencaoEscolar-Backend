@@ -25,10 +25,7 @@ LOGIN = extend_schema(
     auth=[],
     tags=[TAG_AUTENTICACAO],
     summary="Login do usuário",
-    description=(
-        "Autentica o usuário via CoreSSO e retorna os tokens JWT. Os dados "
-        "do usuário são consultados em ``/usuarios/me``."
-    ),
+    description="Autentica o usuário via CoreSSO e retorna token JWT.",
     operation_id="autenticarUsuario",
     request=AutenticacaoSerializer,
     responses={
@@ -53,8 +50,24 @@ LOGIN = extend_schema(
             value={
                 "refresh": REFRESH_JWT,
                 "access": "<jwt-access>",
-                "access_expires_in": 3600,
-                "refresh_expires_in": 604800,
+                "dados_usuario": {
+                    "id": 1,
+                    "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
+                    "nome": "Fulano da Silva",
+                    "email": "fulano@emial.com",
+                    "registro_funcional": "1234567",
+                    "cpf": "12345678901",
+                    "username": "1234567",
+                    "perfil_acesso": {
+                        "cargo": "DIRETOR DE ESCOLA",
+                        "perfil": {
+                            "codigo": "UE",
+                            "descricao": "Diretor Unidade Educacional",
+                        },
+                    },
+                    "diretoria_regional": "DRE Exemplo",
+                    "unidade_educacional": "EMEF Exemplo",
+                },
             },
         ),
     ],

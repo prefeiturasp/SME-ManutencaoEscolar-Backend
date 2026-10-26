@@ -25,7 +25,6 @@ from apps.cargo.serializers import (
 from apps.cargo.services.cargo_service import CargoService
 from apps.core.pagination import PaginacaoPadrao
 from apps.usuarios.models.usuario import Usuario
-from apps.usuarios.permissions import PermissaoCadastros
 
 
 @CARGO_SCHEMA
@@ -34,8 +33,6 @@ class CargoViewSet(viewsets.ModelViewSet):
 
     Delegando regras de negócio ao CargosService.
     """
-
-    permission_classes = [PermissaoCadastros]
 
     http_method_names = ["get", "post", "patch", "options", "delete"]
     queryset = Cargo.objects.all()

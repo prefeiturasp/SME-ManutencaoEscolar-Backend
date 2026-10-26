@@ -22,7 +22,6 @@ from apps.servico.serializers import (
 )
 from apps.servico.services.servico_service import ServicoService
 from apps.usuarios.models.usuario import Usuario
-from apps.usuarios.permissions import PermissaoCadastros
 
 
 class ServicoInstabilidadeError(APIException):
@@ -39,8 +38,6 @@ class ServicoViewSet(viewsets.ModelViewSet):
 
     Delegando regras de negócio ao ServicoService.
     """
-
-    permission_classes = [PermissaoCadastros]
 
     http_method_names = ["get", "post", "patch", "options", "delete"]
     queryset = Servico.objects.all()
