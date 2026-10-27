@@ -18,15 +18,15 @@ pytestmark = pytest.mark.django_db
 
 def test_lista_solicitacoes_por_usuario(
     unidade_educacional_emef: Unidadeeducacional,
-    usuario_ativo: Usuario,
+    usuario_ue: Usuario,
     usuario_inativo: Usuario,
 ) -> None:
-    """Lista somente as solicitações criadas pelo usuário informado."""
+    """Lista somente as solicitações criadas pelo usuário UE informado."""
     solicitacao_usuario = SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
-        criado_por=usuario_ativo,
+        criado_por=usuario_ue,
     )
     SolicitacaoManutencao.objects.create(
         codigo="0000002",
@@ -36,7 +36,7 @@ def test_lista_solicitacoes_por_usuario(
     )
 
     solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
-        usuario_ativo
+        usuario_ue
     )
 
     assert list(solicitacoes) == [
@@ -64,7 +64,7 @@ def test_lista_todas_solicitacoes_para_usuario_que_nao_e_ue(
 ) -> None:
     """Lista todas as solicitações para perfis diferentes de UE."""
     cargo_dre = CargoEOL.objects.create(
-        codigo="8888",
+        codigo="7777",
         nome="Diretor regional",
         perfil=PerfilAcesso.DRE,
     )

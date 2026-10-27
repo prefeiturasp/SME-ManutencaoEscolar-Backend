@@ -41,23 +41,46 @@ PERFIS_SEM_CADASTROS = [
 
 
 class TestFuncionalidadesPorPerfil:
-    """Testa a matriz de funcionalidades de cada perfil (CA01 a CA04)."""
-
-    def test_sme_acessa_cadastros_solicitacao_e_relatorios(self):
-        assert FUNCIONALIDADES_POR_PERFIL[PerfilAcesso.SME] == {
-            Funcionalidade.CADASTROS,
-            Funcionalidade.SOLICITACAO_MANUTENCAO,
-            Funcionalidade.RELATORIOS,
-        }
+    """Testa a matriz de funcionalidades de cada perfil."""
 
     @pytest.mark.parametrize(
-        "perfil", [PerfilAcesso.DRE, PerfilAcesso.UE, PerfilAcesso.EMPRESA]
+        ("perfil", "esperadas"),
+        [
+            (
+                PerfilAcesso.SME,
+                {
+                    Funcionalidade.CADASTROS,
+                    Funcionalidade.SOLICITACAO_MANUTENCAO,
+                    Funcionalidade.RELATORIOS,
+                },
+            ),
+            (PerfilAcesso.DRE, {Funcionalidade.RELATORIOS}),
+            (
+                PerfilAcesso.UE,
+                {
+                    Funcionalidade.SOLICITACAO_MANUTENCAO,
+                    Funcionalidade.RELATORIOS,
+                },
+            ),
+            (PerfilAcesso.EMPRESA, {Funcionalidade.RELATORIOS}),
+        ],
     )
-    def test_demais_perfis_acessam_solicitacao_e_relatorios(self, perfil):
-        assert FUNCIONALIDADES_POR_PERFIL[perfil] == {
-            Funcionalidade.SOLICITACAO_MANUTENCAO,
-            Funcionalidade.RELATORIOS,
+    def test_funcionalidades_de_cada_perfil(self, perfil, esperadas):
+        assert FUNCIONALIDADES_POR_PERFIL[perfil] == esperadas
+
+    def test_somente_sme_acessa_cadastros(self):
+        perfis_com_cadastros = {
+            perfil
+            for perfil, funcionalidades in FUNCIONALIDADES_POR_PERFIL.items()
+            if Funcionalidade.CADASTROS in funcionalidades
         }
+        assert perfis_com_cadastros == {PerfilAcesso.SME}
+
+    def test_todos_os_perfis_acessam_relatorios(self):
+        assert all(
+            Funcionalidade.RELATORIOS in funcionalidades
+            for funcionalidades in FUNCIONALIDADES_POR_PERFIL.values()
+        )
 
     def test_todos_os_perfis_possuem_regra_definida(self):
         assert set(FUNCIONALIDADES_POR_PERFIL) == set(PerfilAcesso.values)

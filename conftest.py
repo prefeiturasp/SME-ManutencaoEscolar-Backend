@@ -97,6 +97,28 @@ def usuario_ativo(cargo_perfil_sme: CargoEOL) -> Usuario:
 
 
 @pytest.fixture
+def usuario_ue(cargo_perfil_diretor: CargoEOL) -> Usuario:
+    """Fixture de usuario ativo com perfil de Unidade Educacional (UE)."""
+    return Usuario.objects.create(
+        username="11122233344",
+        nome="Maria Diretora",
+        registro_funcional=None,
+        cpf="11122233344",
+        email="maria@email.com",
+        cargo=cargo_perfil_diretor,
+        is_active=True,
+    )
+
+
+@pytest.fixture
+def api_cliente_ue(usuario_ue: Usuario) -> APIClient:
+    """Retorna um cliente para requisições à API autenticado como UE."""
+    cliente = APIClient()
+    cliente.force_authenticate(user=usuario_ue)
+    return cliente
+
+
+@pytest.fixture
 def usuario_inativo(cargo_perfil_diretor: CargoEOL) -> Usuario:
     """Fixture de usuario inativo."""
     return Usuario.objects.create(
@@ -173,7 +195,7 @@ def empresa(empresa_payload_valido: dict[str, str], db: None) -> Empresa:
     return Empresa.objects.create(**empresa_payload_valido)
 
 
-@pytest.fixture()
+@pytest.fixture
 def configurar_api_eol(monkeypatch: pytest.MonkeyPatch) -> None:
     """Configura as variáveis da API EOL para os testes."""
     comandos = []
