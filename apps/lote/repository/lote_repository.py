@@ -268,3 +268,17 @@ class LoteRepository:
         for vinculo in vinculos:
             vinculo.soft_delete(usuario=usuario)
         return model_lote.soft_delete(usuario=usuario)
+
+    def buscar_equipes_vinculadas(
+        self,
+        lote: Lote,
+    ) -> list[dict[str, Any]]:
+        """Busca as equipes vinculadas ao lote.
+
+        Args:
+            lote: Lote usado na busca.
+
+        Returns:
+            Lista com os dados básicos das equipes encontradas.
+        """
+        return [dict(equipe) for equipe in lote.equipes.values("uuid", "nome")]

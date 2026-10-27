@@ -4,27 +4,11 @@ from typing import Any
 from uuid import UUID
 
 from apps.equipe.models import Equipe, ProfissionalEquipe
-from apps.lote.models import Lote
 from apps.usuarios.models import Usuario
 
 
 class EquipeRepository:
     """Encapsula a persistência de equipes e seus profissionais."""
-
-    def buscar_por_lote(self, lote: Lote) -> list[dict[str, Any]]:
-        """Busca todas as equipes vinculadas ao lote.
-
-        Args:
-            lote: Lote usado na busca.
-
-        Returns:
-            Lista com os dados básicos das equipes encontradas.
-        """
-        equipes = Equipe.objects.filter(lote=lote).values(
-            "uuid",
-            "nome",
-        )
-        return [dict(equipe) for equipe in equipes]
 
     def existe_equipe_empresa(self, nome: str, empresa_uuid: UUID) -> bool:
         """Verifica se existe uma equipe com o mesmo nome na empresa.

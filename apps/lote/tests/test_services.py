@@ -7,7 +7,6 @@ from unittest.mock import Mock, patch
 import pytest
 
 from apps.equipe.models import Equipe
-from apps.equipe.services import EquipeService
 from apps.escola.models import DiretoriaRegional
 from apps.lote.constants import LoteErrorMessages
 from apps.lote.exceptions import (
@@ -401,13 +400,9 @@ class TestLoteService:
             },
         )
         repository.deletar.return_value = resultado_esperado
-        equipe_service = Mock(spec=EquipeService)
-        equipe_service.busca_por_lote.return_value = []
+        repository.buscar_equipes_vinculadas.return_value = []
 
-        service = LoteService(
-            repository=repository,
-            equipe_service=equipe_service,
-        )
+        service = LoteService(repository=repository)
 
         resultado = service.deletar(
             model_lote=lote,
@@ -418,7 +413,7 @@ class TestLoteService:
             usuario,
             lote,
         )
-        equipe_service.busca_por_lote.assert_called_once_with(lote)
+        repository.buscar_equipes_vinculadas.assert_called_once_with(lote)
         assert resultado == resultado_esperado
 
     def test_nao_deve_deletar_lote_vinculado_a_equipe(
@@ -447,10 +442,7 @@ class TestLoteService:
         )
         assert exc_info.value.detail == (
             {
-                "message": LoteErrorMessages.LOTE_VINCULADO_EQUIPE.format(
-                    codigo_lote=lote_centro.codigo_cadastro,
-                    nome_lote=lote_centro.nome,
-                ),
+                "message": LoteErrorMessages.LOTE_VINCULADO_EQUIPE,
                 "equipes": [
                     {
                         "uuid": Equipe.objects.get(

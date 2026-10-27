@@ -2,7 +2,6 @@
 
 from typing import Any, cast
 
-from apps.equipe.services import EquipeService
 from apps.escola.models import DiretoriaRegional
 from apps.lote.constants import LoteErrorMessages
 from apps.lote.exceptions import (
@@ -20,11 +19,9 @@ class LoteService:
     def __init__(
         self,
         repository: LoteRepository | None = None,
-        equipe_service: EquipeService | None = None,
     ) -> None:
         """Inicializa o serviço com as dependências informadas ou padrão."""
         self.repository = repository or LoteRepository()
-        self.equipe_service = equipe_service or EquipeService()
 
     def criar(
         self,
@@ -115,7 +112,9 @@ class LoteService:
             LoteVinculadoEquipeError: Quando o lote está vinculado a uma
                 equipe.
         """
-        equipes_vinculadas = self.equipe_service.busca_por_lote(model_lote)
+        equipes_vinculadas = self.repository.buscar_equipes_vinculadas(
+            model_lote
+        )
         if equipes_vinculadas:
             raise LoteVinculadoEquipeError(
                 title=LoteErrorMessages.LOTE_VINCULADO_EQUIPE_TITULO,

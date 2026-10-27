@@ -43,28 +43,6 @@ def test_cria_equipe_com_profissional(
     assert equipe_criada.profissionais.get().criado_por == usuario_ativo
 
 
-def test_busca_equipes_por_lote(equipe_existente_ativa: Equipe) -> None:
-    """Retorna os dados de todas as equipes vinculadas ao lote."""
-    outra_equipe = Equipe.objects.create(
-        nome="Outra equipe",
-        empresa=equipe_existente_ativa.empresa,
-        lote=equipe_existente_ativa.lote,
-    )
-
-    equipes = EquipeService().busca_por_lote(equipe_existente_ativa.lote)
-
-    assert equipes == [
-        {
-            "uuid": outra_equipe.uuid,
-            "nome": outra_equipe.nome,
-        },
-        {
-            "uuid": equipe_existente_ativa.uuid,
-            "nome": equipe_existente_ativa.nome,
-        },
-    ]
-
-
 def test_rejeita_profissional_inativo(
     equipe_payload: dict[str, object], profissional_ativo, usuario_ativo
 ) -> None:
@@ -308,9 +286,10 @@ def test_rejeita_ativacao_com_profissional_em_outra_equipe_ativa(
         profissional=profissional_vinculado.profissional,
         funcao=funcao_profissional,
     )
+    service = EquipeService()
 
     with pytest.raises(ProfissionalVinculadoError):
-        EquipeService().atualizar(
+        service.atualizar(
             equipe,
             {"situacao": True},
             usuario_ativo,
