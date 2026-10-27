@@ -64,6 +64,24 @@ _LOTE_EXEMPLO_DIRETORIA_REGIONAL_VINCULADA: dict[str, object] = {
     ),
 }
 
+_LOTE_EXEMPLO_VINCULADO_EQUIPE: dict[str, object] = {
+    "title": "Excluir Lote",
+    "detail": {
+        "message": (
+            "Não é possível excluir este registro. O Lote LOTE-00123 - "
+            "Lote de manutenção 2026 está vinculado as equipes a baixo. "
+            "Remova o vinculo do lote com as equipes caso queira prosseguir "
+            "com a exclusão."
+        ),
+        "equipes": [
+            {
+                "uuid": "f882ef71-1705-46cb-850b-c404650d95e5",
+                "nome": "Equipe de manutenção",
+            },
+        ],
+    },
+}
+
 _LOTES_EXEMPLO_LISTAGEM: dict[str, object] = {
     "count": 4,
     "next": None,
@@ -314,9 +332,20 @@ LOTE_SCHEMA = extend_schema_view(
             404: OpenApiResponse(
                 description=_LOTE_NAO_ENCONTRADO,
             ),
+            400: OpenApiResponse(
+                description="Lote vinculado a uma ou mais equipes.",
+            ),
             500: OpenApiResponse(
                 description=_ERRO_NO_SERVIDOR,
             ),
         },
+        examples=[
+            OpenApiExample(
+                name="Lote vinculado a equipes",
+                response_only=True,
+                status_codes=["400"],
+                value=_LOTE_EXEMPLO_VINCULADO_EQUIPE,
+            ),
+        ],
     ),
 )
