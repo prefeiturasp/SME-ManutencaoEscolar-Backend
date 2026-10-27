@@ -68,9 +68,8 @@ _LOTE_EXEMPLO_VINCULADO_EQUIPE: dict[str, object] = {
     "title": "Excluir Lote",
     "detail": {
         "message": (
-            "Não é possível excluir este registro. O Lote LOTE-00123 - "
-            "Lote de manutenção 2026 está vinculado as equipes a baixo. "
-            "Remova o vinculo do lote com as equipes caso queira prosseguir "
+            "Este lote está vinculado as equipes listadas e, por isso, "
+            "não pode ser excluído. Remova os vínculos para prosseguir "
             "com a exclusão."
         ),
         "equipes": [

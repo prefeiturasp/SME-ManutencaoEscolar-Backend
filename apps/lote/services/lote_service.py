@@ -120,10 +120,7 @@ class LoteService:
             raise LoteVinculadoEquipeError(
                 title=LoteErrorMessages.LOTE_VINCULADO_EQUIPE_TITULO,
                 detail={
-                    "message": LoteErrorMessages.LOTE_VINCULADO_EQUIPE.format(
-                        codigo_lote=model_lote.codigo_cadastro,
-                        nome_lote=model_lote.nome,
-                    ),
+                    "message": LoteErrorMessages.LOTE_VINCULADO_EQUIPE,
                     "equipes": equipes_vinculadas,
                 },
             )

@@ -12,11 +12,10 @@ class LoteErrorMessages:
         "respectivos lotes aos quais elas pertencem."
     )
 
-    LOTE_VINCULADO_EQUIPE_TITULO = "Excluir Lote"
+    LOTE_VINCULADO_EQUIPE_TITULO = "Não é possível excluir o lote"
     LOTE_VINCULADO_EQUIPE = (
-        "Não é possível excluir este registro. O Lote {codigo_lote} - "
-        "{nome_lote} está vinculado as equipes a baixo. Remova o vinculo do "
-        "lote com as equipes caso queira prosseguir com a exclusão."
+        "Este lote está vinculado as equipes listadas e, por isso, não pode "
+        "ser excluído. Remova os vínculos para prosseguir com a exclusão."
     )
 
     INSTABILIDADE = (
