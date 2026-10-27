@@ -18,6 +18,7 @@ from apps.equipe.repository import (
     EquipeRepository,
     ProfissionalEquipeRepository,
 )
+from apps.lote.models import Lote
 from apps.usuarios.models import Usuario
 
 
@@ -34,6 +35,17 @@ class EquipeService:
         self.profissional_repository = (
             profissional_repository or ProfissionalEquipeRepository()
         )
+
+    def busca_por_lote(self, lote: Lote) -> list[dict[str, Any]]:
+        """Busca todas as equipes vinculadas ao lote.
+
+        Args:
+            lote: Lote usado na busca.
+
+        Returns:
+            Lista com os dados básicos das equipes encontradas.
+        """
+        return self.repository.buscar_por_lote(lote)
 
     @transaction.atomic
     def criar(
