@@ -21,7 +21,10 @@ from apps.lote.api.views import (
     LoteViewSet,
 )
 from apps.lote.constants import LoteErrorMessages
-from apps.lote.exceptions import DiretoriaRegionalJaVinculadaError
+from apps.lote.exceptions import (
+    DiretoriaRegionalJaVinculadaError,
+    LoteVinculadoEquipeError,
+)
 from apps.lote.filters import LoteFilter
 from apps.lote.models import Lote
 from apps.lote.serializers import (
@@ -514,3 +517,30 @@ class TestLoteViewSet:
 
         assert str(exc_info.value.detail) == ("Usuário não identificado.")
         service.deletar.assert_not_called()
+
+    def test_deve_converter_erro_de_lote_vinculado_a_equipe(
+        self,
+    ) -> None:
+        """Deve converter vínculo com equipe em erro de validação."""
+        usuario = Usuario()
+        lote = self.criar_lote()
+        view, service = self.criar_view(usuario)
+        erro = LoteVinculadoEquipeError(
+            title=LoteErrorMessages.LOTE_VINCULADO_EQUIPE_TITULO,
+            detail={
+                "message": "Lote vinculado a equipes.",
+                "equipes": [
+                    {
+                        "uuid": "f882ef71-1705-46cb-850b-c404650d95e5",
+                        "nome": "Equipe vinculada",
+                    }
+                ],
+            },
+        )
+        service.deletar.side_effect = erro
+
+        with pytest.raises(DRFValidationError) as exc_info:
+            view.perform_destroy(lote)
+
+        assert str(exc_info.value.detail["title"]) == erro.title
+        assert exc_info.value.detail["detail"] == erro.detail

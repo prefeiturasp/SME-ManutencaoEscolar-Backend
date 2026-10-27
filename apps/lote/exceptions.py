@@ -9,3 +9,13 @@ class DiretoriaRegionalJaVinculadaError(Exception):
         self.title = title
         self.detail = detail
         super().__init__(detail)
+
+
+class LoteVinculadoEquipeError(Exception):
+    """Representa um erro quando um lote está vinculado a uma equipe."""
+
+    def __init__(self, title: str, detail: str | dict) -> None:
+        """Inicializa a exceção com título e detalhe."""
+        self.title = title
+        self.detail = detail
+        super().__init__(detail)

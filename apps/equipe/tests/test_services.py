@@ -286,9 +286,10 @@ def test_rejeita_ativacao_com_profissional_em_outra_equipe_ativa(
         profissional=profissional_vinculado.profissional,
         funcao=funcao_profissional,
     )
+    service = EquipeService()
 
     with pytest.raises(ProfissionalVinculadoError):
-        EquipeService().atualizar(
+        service.atualizar(
             equipe,
             {"situacao": True},
             usuario_ativo,

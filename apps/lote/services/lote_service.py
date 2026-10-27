@@ -4,7 +4,10 @@ from typing import Any, cast
 
 from apps.escola.models import DiretoriaRegional
 from apps.lote.constants import LoteErrorMessages
-from apps.lote.exceptions import DiretoriaRegionalJaVinculadaError
+from apps.lote.exceptions import (
+    DiretoriaRegionalJaVinculadaError,
+    LoteVinculadoEquipeError,
+)
 from apps.lote.models import Lote
 from apps.lote.repository.lote_repository import LoteRepository
 from apps.usuarios.models.usuario import Usuario
@@ -17,7 +20,7 @@ class LoteService:
         self,
         repository: LoteRepository | None = None,
     ) -> None:
-        """Inicializa o serviço com o repositório informado ou o padrão."""
+        """Inicializa o serviço com as dependências informadas ou padrão."""
         self.repository = repository or LoteRepository()
 
     def criar(
@@ -104,7 +107,23 @@ class LoteService:
         Returns:
             Tupla contendo a quantidade de registros deletados e um dicionário
             com a quantidade de exclusões por tipo de objeto.
+
+        Raises:
+            LoteVinculadoEquipeError: Quando o lote está vinculado a uma
+                equipe.
         """
+        equipes_vinculadas = self.repository.buscar_equipes_vinculadas(
+            model_lote
+        )
+        if equipes_vinculadas:
+            raise LoteVinculadoEquipeError(
+                title=LoteErrorMessages.LOTE_VINCULADO_EQUIPE_TITULO,
+                detail={
+                    "message": LoteErrorMessages.LOTE_VINCULADO_EQUIPE,
+                    "equipes": equipes_vinculadas,
+                },
+            )
+
         return self.repository.deletar(usuario, model_lote)
 
     def atualizar(

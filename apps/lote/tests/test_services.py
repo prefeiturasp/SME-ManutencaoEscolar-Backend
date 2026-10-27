@@ -6,9 +6,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.equipe.models import Equipe
 from apps.escola.models import DiretoriaRegional
 from apps.lote.constants import LoteErrorMessages
-from apps.lote.exceptions import DiretoriaRegionalJaVinculadaError
+from apps.lote.exceptions import (
+    DiretoriaRegionalJaVinculadaError,
+    LoteVinculadoEquipeError,
+)
 from apps.lote.models import Lote
 from apps.lote.repository.lote_repository import LoteRepository
 from apps.lote.services.lote_service import LoteService
@@ -396,6 +400,7 @@ class TestLoteService:
             },
         )
         repository.deletar.return_value = resultado_esperado
+        repository.buscar_equipes_vinculadas.return_value = []
 
         service = LoteService(repository=repository)
 
@@ -408,4 +413,45 @@ class TestLoteService:
             usuario,
             lote,
         )
+        repository.buscar_equipes_vinculadas.assert_called_once_with(lote)
         assert resultado == resultado_esperado
+
+    def test_nao_deve_deletar_lote_vinculado_a_equipe(
+        self,
+        db: None,
+        lote_centro: Lote,
+        usuario_ativo: Usuario,
+    ) -> None:
+        """Não deve excluir um lote que possui equipe vinculada."""
+        Equipe.objects.create(
+            nome="Equipe vinculada",
+            empresa=lote_centro.empresa,
+            lote=lote_centro,
+        )
+        service = LoteService()
+
+        with pytest.raises(LoteVinculadoEquipeError) as exc_info:
+            service.deletar(
+                model_lote=lote_centro,
+                usuario=usuario_ativo,
+            )
+
+        lote_centro.refresh_from_db()
+        assert exc_info.value.title == (
+            LoteErrorMessages.LOTE_VINCULADO_EQUIPE_TITULO
+        )
+        assert exc_info.value.detail == (
+            {
+                "message": LoteErrorMessages.LOTE_VINCULADO_EQUIPE,
+                "equipes": [
+                    {
+                        "uuid": Equipe.objects.get(
+                            nome="Equipe vinculada",
+                            lote=lote_centro,
+                        ).uuid,
+                        "nome": "Equipe vinculada",
+                    }
+                ],
+            }
+        )
+        assert lote_centro.deletado_em is None
