@@ -2,10 +2,6 @@
 
 from rest_framework import serializers
 
-from apps.usuarios.serializers.usuario_serializer import (
-    UsuarioResponseSerializer,
-)
-
 
 class AutenticacaoSerializer(serializers.Serializer):
     """
@@ -57,7 +53,7 @@ class LoginResponseSerializer(serializers.Serializer):
     """Serializa a resposta retornada após uma autenticação bem-sucedida.
 
     A resposta contém os tokens JWT, seus respectivos tempos de validade
-    e os dados do usuário autenticado.
+    sem os dados do usuário, disponíveis em ``/usuarios/me``.
     """
 
     refresh = serializers.CharField(help_text="Token JWT de atualização.")
@@ -68,7 +64,6 @@ class LoginResponseSerializer(serializers.Serializer):
     refresh_expires_in = serializers.IntegerField(
         help_text="Tempo de validade do token de atualização em segundos.",
     )
-    usuario = UsuarioResponseSerializer()
 
 
 class AtualizarTokenSerializer(serializers.Serializer):
