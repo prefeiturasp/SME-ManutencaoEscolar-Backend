@@ -152,12 +152,32 @@ class LoteService:
         Raises:
             DiretoriaRegionalJaVinculadaError: Quando uma ou mais diretorias
                 regionais informadas já estão vinculadas a outro lote.
+            LoteVinculadoEquipeError: Quando a empresa é alterada e o lote
+                possui equipes vinculadas.
             ValidationError: Quando os dados do lote não passam pelas
                 validações definidas no modelo.
             IntegrityError: Quando ocorre uma violação de integridade durante
                 a atualização do lote ou de seus vínculos.
         """
         dados_normalizados = dados.copy()
+
+        empresa = dados_normalizados.get("empresa")
+        if empresa is not None and empresa.pk != lote.empresa_id:
+            equipes_vinculadas = self.repository.buscar_equipes_vinculadas(
+                lote
+            )
+            if equipes_vinculadas:
+                titulo = (
+                    LoteErrorMessages.ALTERACAO_EMPRESA_LOTE_VINCULADO_TITULO
+                )
+                mensagem = LoteErrorMessages.ALTERACAO_EMPRESA_LOTE_VINCULADO
+                raise LoteVinculadoEquipeError(
+                    title=titulo,
+                    detail={
+                        "message": mensagem,
+                        "equipes": equipes_vinculadas,
+                    },
+                )
 
         diretorias_regionais = cast(
             list[DiretoriaRegional],
