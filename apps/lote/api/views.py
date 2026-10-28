@@ -141,7 +141,10 @@ class LoteViewSet(viewsets.ModelViewSet):
                 dados=serializer.validated_data,
                 usuario=usuario,
             )
-        except DiretoriaRegionalJaVinculadaError as exc:
+        except (
+            DiretoriaRegionalJaVinculadaError,
+            LoteVinculadoEquipeError,
+        ) as exc:
             raise DRFValidationError(
                 {
                     "title": exc.title,
