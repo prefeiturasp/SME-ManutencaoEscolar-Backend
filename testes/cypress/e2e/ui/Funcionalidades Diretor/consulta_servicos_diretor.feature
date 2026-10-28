@@ -4,7 +4,7 @@ Funcionalidade: Consulta de serviço
 
   Contexto:
     Dado eu acesso o sistema com a visualização "web"
-    E realizo login no sistema Manutenção Escolar com perfil "Diretor"    
+    E realizo login no sistema Manutenção Escolar com perfil "Admin"    
 
   Esquema do Cenário: Filtrar por: <caso>
     E acesso a tela Serviços

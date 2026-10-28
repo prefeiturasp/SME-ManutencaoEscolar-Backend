@@ -24,8 +24,8 @@ Cypress.Commands.add('gerar_token', () => {
     method: 'POST',
     url: `${Cypress.config('baseUrl')}/api/v1/login/`,
     body: {
-      login: Cypress.env('LOGIN_DIRETOR'),
-      senha: Cypress.env('SENHA'),
+      login: Cypress.env('LOGIN_ADMIN'),
+      senha: Cypress.env('SENHA_ADMIN'),
     },
     headers: {
       'Content-Type': 'application/json'

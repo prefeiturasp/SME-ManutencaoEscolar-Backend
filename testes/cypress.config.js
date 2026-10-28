@@ -64,8 +64,10 @@ export default defineConfig({
       // ENV
       // =====================
       const envKeys = [
+        'LOGIN_ADMIN',
         'LOGIN_DIRETOR',
         'LOGIN_INVALIDO',
+        'SENHA_ADMIN',
         'SENHA',
         'SENHA_INVALIDA',
         'CNPJ',
