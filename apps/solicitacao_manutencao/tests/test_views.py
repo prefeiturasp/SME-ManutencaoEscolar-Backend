@@ -123,9 +123,9 @@ def test_documenta_choices_da_solicitacao_no_schema() -> None:
 
 
 def test_lista_solicitacoes_paginadas(
-    api_cliente: APIClient,
+    api_cliente_ue: APIClient,
     unidade_educacional_emef: Any,
-    usuario_ativo: Usuario,
+    usuario_ue: Usuario,
     usuario_inativo: Usuario,
 ) -> None:
     """Lista somente solicitações criadas pelo usuário autenticado."""
@@ -133,7 +133,7 @@ def test_lista_solicitacoes_paginadas(
         codigo="0000001",
         tipo_atendimento="urgente",
         unidade_educacional=unidade_educacional_emef,
-        criado_por=usuario_ativo,
+        criado_por=usuario_ue,
     )
     SolicitacaoManutencao.objects.create(
         codigo="0000002",
@@ -142,7 +142,7 @@ def test_lista_solicitacoes_paginadas(
         criado_por=usuario_inativo,
     )
 
-    resposta = api_cliente.get(URL_SOLICITACOES)
+    resposta = api_cliente_ue.get(URL_SOLICITACOES)
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json() == {

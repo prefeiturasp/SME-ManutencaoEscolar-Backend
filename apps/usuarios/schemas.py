@@ -22,7 +22,9 @@ ME = extend_schema(
     summary="Obter usuário autenticado",
     description=(
         "Retorna os dados do usuário autenticado a partir das "
-        "informações presentes no token de autenticação."
+        "informações presentes no token de autenticação. Para o perfil UE "
+        "retorna a unidade educacional e a DRE; para o perfil DRE, a DRE; "
+        "para SME e Empresa, ambas são nulas."
     ),
     operation_id="obterUsuarioAutenticado",
     responses={
@@ -50,8 +52,15 @@ ME = extend_schema(
                         "descricao": "Diretor Unidade Educacional",
                     },
                 },
+                "funcionalidades": ["RELATORIOS", "SOLICITACAO_MANUTENCAO"],
                 "diretoria_regional": "DRE Exemplo",
-                "unidade_educacional": "EMEF Exemplo",
+                "unidade_educacional": {
+                    "id": 1,
+                    "uuid": "5d6b0a0e-3f0b-4b53-8a55-0d7c1f3a9e21",
+                    "codigo_eol": "123456",
+                    "nome": "EMEF Exemplo",
+                    "diretoria_regional": {"nome": "DRE Exemplo"},
+                },
             },
         ),
     ],

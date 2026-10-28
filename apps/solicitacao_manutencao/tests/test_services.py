@@ -29,7 +29,7 @@ pytestmark = pytest.mark.django_db
 
 def test_lista_solicitacoes_visiveis_para_usuario(
     unidade_educacional_emef: Unidadeeducacional,
-    usuario_ativo: Usuario,
+    usuario_ue: Usuario,
     usuario_inativo: Usuario,
 ) -> None:
     """Lista somente as solicitações visíveis para o usuário da UE."""
@@ -37,7 +37,7 @@ def test_lista_solicitacoes_visiveis_para_usuario(
         codigo="0000001",
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
-        criado_por=usuario_ativo,
+        criado_por=usuario_ue,
     )
     SolicitacaoManutencao.objects.create(
         codigo="0000002",
@@ -46,9 +46,7 @@ def test_lista_solicitacoes_visiveis_para_usuario(
         criado_por=usuario_inativo,
     )
 
-    resultado = SolicitacaoManutencaoService().listar_por_usuario(
-        usuario_ativo
-    )
+    resultado = SolicitacaoManutencaoService().listar_por_usuario(usuario_ue)
 
     assert list(resultado) == [
         {
