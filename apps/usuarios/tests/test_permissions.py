@@ -48,11 +48,7 @@ class TestFuncionalidadesPorPerfil:
         [
             (
                 PerfilAcesso.SME,
-                {
-                    Funcionalidade.CADASTROS,
-                    Funcionalidade.SOLICITACAO_MANUTENCAO,
-                    Funcionalidade.RELATORIOS,
-                },
+                {Funcionalidade.CADASTROS, Funcionalidade.RELATORIOS},
             ),
             (PerfilAcesso.DRE, {Funcionalidade.RELATORIOS}),
             (
@@ -76,6 +72,14 @@ class TestFuncionalidadesPorPerfil:
         }
         assert perfis_com_cadastros == {PerfilAcesso.SME}
 
+    def test_somente_ue_acessa_solicitacao_manutencao(self):
+        perfis_com_solicitacao = {
+            perfil
+            for perfil, funcionalidades in FUNCIONALIDADES_POR_PERFIL.items()
+            if Funcionalidade.SOLICITACAO_MANUTENCAO in funcionalidades
+        }
+        assert perfis_com_solicitacao == {PerfilAcesso.UE}
+
     def test_todos_os_perfis_acessam_relatorios(self):
         assert all(
             Funcionalidade.RELATORIOS in funcionalidades
@@ -94,8 +98,10 @@ class TestUsuarioFuncionalidades:
         assert usuario_ativo.funcionalidades == [
             "CADASTROS",
             "RELATORIOS",
-            "SOLICITACAO_MANUTENCAO",
         ]
+        assert not usuario_ativo.tem_acesso(
+            Funcionalidade.SOLICITACAO_MANUTENCAO
+        )
 
     def test_usuario_ue_nao_tem_acesso_a_cadastros(self, cargo_perfil_diretor):
         usuario = Usuario.objects.create(

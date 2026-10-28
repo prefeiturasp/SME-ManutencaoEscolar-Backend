@@ -29,7 +29,6 @@ FUNCIONALIDADES_POR_PERFIL: dict[str, frozenset[str]] = {
     PerfilAcesso.SME: frozenset(
         {
             Funcionalidade.CADASTROS,
-            Funcionalidade.SOLICITACAO_MANUTENCAO,
             Funcionalidade.RELATORIOS,
         }
     ),

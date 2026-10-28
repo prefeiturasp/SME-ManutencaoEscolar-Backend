@@ -38,7 +38,6 @@ class TestUsuarioView:
         assert response.data["funcionalidades"] == [
             "CADASTROS",
             "RELATORIOS",
-            "SOLICITACAO_MANUTENCAO",
         ]
 
     def test_me_sem_cargo_nao_retorna_funcionalidades(self, api_factory):
