@@ -7,8 +7,10 @@ from django.core.exceptions import ValidationError
 
 from apps.cargo.models import Cargo
 from apps.empresa.models import Empresa
+from apps.equipe.constants import EquipeErrorMessages
 from apps.equipe.exceptions import (
     EquipeJaCadastradaError,
+    EquipeVinculadaError,
     ProfissionaisVinculadosError,
     ProfissionalVinculadoError,
 )
@@ -297,3 +299,32 @@ def test_rejeita_ativacao_com_profissional_em_outra_equipe_ativa(
 
     equipe.refresh_from_db()
     assert equipe.situacao is False
+
+
+def test_exclui_equipe_sem_vinculos(
+    equipe_existente_ativa, profissional_vinculado, usuario_ativo
+) -> None:
+    """Exclui a equipe e libera o profissional para outras equipes."""
+    EquipeService().deletar(equipe_existente_ativa, usuario_ativo)
+
+    assert not Equipe.objects.filter(pk=equipe_existente_ativa.pk).exists()
+    assert not ProfissionalEquipe.objects.filter(
+        pk=profissional_vinculado.pk
+    ).exists()
+
+
+def test_rejeita_exclusao_de_equipe_vinculada(
+    monkeypatch, equipe_existente_ativa, usuario_ativo
+) -> None:
+    """Não exclui a equipe que possui vínculo com outros cadastros."""
+    service = EquipeService()
+    monkeypatch.setattr(
+        service.repository, "possui_vinculos_externos", lambda _: True
+    )
+
+    with pytest.raises(EquipeVinculadaError) as erro:
+        service.deletar(equipe_existente_ativa, usuario_ativo)
+
+    assert erro.value.title == EquipeErrorMessages.EQUIPE_VINCULADA_TITULO
+    assert erro.value.detail == EquipeErrorMessages.EQUIPE_VINCULADA
+    assert Equipe.objects.filter(pk=equipe_existente_ativa.pk).exists()

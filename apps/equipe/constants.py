@@ -37,6 +37,12 @@ class EquipeErrorMessages:
     FUNCAO_INVALIDA = (
         "A função informada não pertence ao profissional selecionado."
     )
+    EQUIPE_VINCULADA_TITULO = "Não é possível excluir a equipe"
+    EQUIPE_VINCULADA = (
+        "Esta equipe possui vínculo com outros registros do sistema e, por "
+        "isso, não pode ser excluída. Remova os vínculos para prosseguir "
+        "com a exclusão."
+    )
     EMPRESA_LOTE_INVALIDA = (
         "A empresa informada não está associada ao lote selecionado."
     )
