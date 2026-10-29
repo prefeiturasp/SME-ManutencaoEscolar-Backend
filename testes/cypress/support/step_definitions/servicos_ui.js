@@ -90,3 +90,43 @@ Quando('insiro os mesmos dados do serviço {string}', function () {
 Então('o sistema informa serviço ao tentar salvar o serviço', function () {
   cy.validar_cadastro_servico_duplicado() 
 })
+
+Quando('filtro o nome do serviço {string}', function () {
+  cy.filtrar_nome_servico()  
+})
+
+Então('o sistema retorna o serviço', function () {
+  cy.validar_filtro_nome_servico()  
+})
+
+Quando('filtro o status do serviço {string}', function () {
+  cy.filtrar_status_servico()  
+})
+
+Então('o sistema retorna o serviço ativo', function () {
+  cy.validar_filtro_status_servico()  
+})
+
+Quando('cancelo o filtro de serviço {string}', function () {
+  cy.limpar_filtro_servico()  
+})
+
+Então('o sistema retorna todos serviços na listagem', function () {
+  cy.validar_filtro_vazio_servico() 
+})
+
+Quando('clico no cadastro de serviço {string}', function () {
+  cy.consultar_detalhes_servico()  
+})
+
+Então('o sistema exibe os detalhes do serviço', function () {
+  cy.validar_editar_servico()  
+})
+
+Quando('filtro dados do serviço inexistente', function () {
+  cy.filtrar_servico_inexistente()  
+})
+
+Então('o sistema informa que serviço não foi encontrado', function () {
+  cy.validar_filtro_servico_inexistente()  
+})

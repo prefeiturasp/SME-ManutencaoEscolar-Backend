@@ -7,7 +7,7 @@ Funcionalidade: Acesso de usuário diretor
   
   Esquema do Cenário: Validar: <caso>
     Dado eu acesso o sistema com a visualização "web"
-    E realizo login no sistema Manutenção Escolar com perfil "Diretor"
+    E realizo login no sistema Manutenção Escolar com perfil "Admin"
     Então o sistema valida o "<campo>" no acesso
 
     Exemplos:

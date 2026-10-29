@@ -16,6 +16,7 @@ from apps.core.pagination import PaginacaoPadrao
 from apps.lote.constants import LoteErrorMessages
 from apps.lote.exceptions import (
     DiretoriaRegionalJaVinculadaError,
+    LoteVinculadoEquipeError,
 )
 from apps.lote.filters import LoteFilter
 from apps.lote.models import Lote
@@ -26,6 +27,7 @@ from apps.lote.serializers import (
 )
 from apps.lote.services.lote_service import LoteService
 from apps.usuarios.models.usuario import Usuario
+from apps.usuarios.permissions import PermissaoCadastros
 
 
 class LoteInstabilidadeError(APIException):
@@ -42,6 +44,8 @@ class LoteViewSet(viewsets.ModelViewSet):
 
     Delegando regras de negócio ao LotesService.
     """
+
+    permission_classes = [PermissaoCadastros]
 
     http_method_names = ["get", "post", "patch", "options", "delete"]
     queryset = Lote.objects.all()
@@ -140,7 +144,10 @@ class LoteViewSet(viewsets.ModelViewSet):
                 dados=serializer.validated_data,
                 usuario=usuario,
             )
-        except DiretoriaRegionalJaVinculadaError as exc:
+        except (
+            DiretoriaRegionalJaVinculadaError,
+            LoteVinculadoEquipeError,
+        ) as exc:
             raise DRFValidationError(
                 {
                     "title": exc.title,
@@ -177,7 +184,16 @@ class LoteViewSet(viewsets.ModelViewSet):
 
         Args:
             instance (Lote): Instância do lote a ser deletada.
+
         Raises:
             DRFValidationError: Se ocorrer algum erro de validação.
         """
-        self.service.deletar(instance, self._obter_usuario())
+        try:
+            self.service.deletar(instance, self._obter_usuario())
+        except LoteVinculadoEquipeError as exc:
+            raise DRFValidationError(
+                {
+                    "title": exc.title,
+                    "detail": exc.detail,
+                }
+            ) from exc

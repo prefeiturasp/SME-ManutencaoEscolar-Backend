@@ -6,9 +6,14 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.empresa.models import Empresa
+from apps.equipe.models import Equipe
 from apps.escola.models import DiretoriaRegional
 from apps.lote.constants import LoteErrorMessages
-from apps.lote.exceptions import DiretoriaRegionalJaVinculadaError
+from apps.lote.exceptions import (
+    DiretoriaRegionalJaVinculadaError,
+    LoteVinculadoEquipeError,
+)
 from apps.lote.models import Lote
 from apps.lote.repository.lote_repository import LoteRepository
 from apps.lote.services.lote_service import LoteService
@@ -381,6 +386,69 @@ class TestLoteService:
             "vinculados": vinculados,
         }
 
+    def test_nao_deve_alterar_empresa_de_lote_vinculado_a_equipe(
+        self,
+        db: None,
+        lote_centro: Lote,
+        usuario_ativo: Usuario,
+        empresa_payload_valido: dict[str, str],
+    ) -> None:
+        """Não deve alterar a empresa de lote que possui equipe vinculada."""
+        equipe = Equipe.objects.create(
+            nome="Equipe vinculada",
+            empresa=lote_centro.empresa,
+            lote=lote_centro,
+        )
+        dados_outra_empresa = {
+            **empresa_payload_valido,
+            "nome": "Outra empresa",
+            "cnpj": "98765432109876",
+        }
+        outra_empresa = Empresa.objects.create(**dados_outra_empresa)
+        lote_service = LoteService()
+
+        with pytest.raises(LoteVinculadoEquipeError) as exc_info:
+            lote_service.atualizar(
+                lote=lote_centro,
+                dados={"empresa": outra_empresa},
+                usuario=usuario_ativo,
+            )
+
+        lote_centro.refresh_from_db()
+        assert lote_centro.empresa_id != outra_empresa.id
+        titulo = LoteErrorMessages.ALTERACAO_EMPRESA_LOTE_VINCULADO_TITULO
+        mensagem = LoteErrorMessages.ALTERACAO_EMPRESA_LOTE_VINCULADO
+        assert exc_info.value.title == titulo
+        assert exc_info.value.detail == {
+            "message": mensagem,
+            "equipes": [{"uuid": equipe.uuid, "nome": equipe.nome}],
+        }
+
+    def test_deve_alterar_empresa_de_lote_sem_equipe_vinculada(
+        self,
+        db: None,
+        lote_centro: Lote,
+        usuario_ativo: Usuario,
+        empresa_payload_valido: dict[str, str],
+    ) -> None:
+        """Deve alterar a empresa quando o lote não possui equipe."""
+        dados_outra_empresa = {
+            **empresa_payload_valido,
+            "nome": "Outra empresa",
+            "cnpj": "98765432109876",
+        }
+        outra_empresa = Empresa.objects.create(**dados_outra_empresa)
+
+        resultado = LoteService().atualizar(
+            lote=lote_centro,
+            dados={"empresa": outra_empresa},
+            usuario=usuario_ativo,
+        )
+
+        lote_centro.refresh_from_db()
+        assert lote_centro.empresa == outra_empresa
+        assert resultado["empresa"] == outra_empresa.pk
+
     def test_deve_deletar_lote(
         self,
     ) -> None:
@@ -396,6 +464,7 @@ class TestLoteService:
             },
         )
         repository.deletar.return_value = resultado_esperado
+        repository.buscar_equipes_vinculadas.return_value = []
 
         service = LoteService(repository=repository)
 
@@ -408,4 +477,45 @@ class TestLoteService:
             usuario,
             lote,
         )
+        repository.buscar_equipes_vinculadas.assert_called_once_with(lote)
         assert resultado == resultado_esperado
+
+    def test_nao_deve_deletar_lote_vinculado_a_equipe(
+        self,
+        db: None,
+        lote_centro: Lote,
+        usuario_ativo: Usuario,
+    ) -> None:
+        """Não deve excluir um lote que possui equipe vinculada."""
+        Equipe.objects.create(
+            nome="Equipe vinculada",
+            empresa=lote_centro.empresa,
+            lote=lote_centro,
+        )
+        service = LoteService()
+
+        with pytest.raises(LoteVinculadoEquipeError) as exc_info:
+            service.deletar(
+                model_lote=lote_centro,
+                usuario=usuario_ativo,
+            )
+
+        lote_centro.refresh_from_db()
+        assert exc_info.value.title == (
+            LoteErrorMessages.LOTE_VINCULADO_EQUIPE_TITULO
+        )
+        assert exc_info.value.detail == (
+            {
+                "message": LoteErrorMessages.LOTE_VINCULADO_EQUIPE,
+                "equipes": [
+                    {
+                        "uuid": Equipe.objects.get(
+                            nome="Equipe vinculada",
+                            lote=lote_centro,
+                        ).uuid,
+                        "nome": "Equipe vinculada",
+                    }
+                ],
+            }
+        )
+        assert lote_centro.deletado_em is None

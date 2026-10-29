@@ -6,6 +6,16 @@ do usuário autenticado nas respostas da API.
 
 from rest_framework import serializers
 
+from apps.escola.models.unidade_educacional import Unidadeeducacional
+from apps.escola.serializers.unidade_educacional_serializers import (
+    DadosUnidadeEducacionalSerializer,
+    DiretoriaRegionalUnidadeEducacionalSerializer,
+    LoteUnidadeEducacionalSerializer,
+    SubprefeituraUnidadeEducacionalSerializer,
+    TipoEscolaUnidadeEducacionalSerializer,
+)
+from apps.usuarios.constants import Funcionalidade
+
 
 class PerfilSerializer(serializers.Serializer):
     """Representa um perfil de acesso."""
@@ -19,16 +29,54 @@ class PerfilSerializer(serializers.Serializer):
 
 
 class PerfilAcessoSerializer(serializers.Serializer):
-    """Representa o cargo e o perfil de acesso do usuário."""
+    """Representa o cargo e o perfil de acesso do usuário.
+
+    Usuários sem cargo vinculado possuem o perfil de acesso vazio.
+    """
 
     cargo = serializers.CharField(
-        help_text="Nome do cargo do usuário.",
+        required=False,
+        help_text="Nome do cargo do usuário. Ausente quando não há cargo.",
     )
-    perfil = PerfilSerializer()
+    perfil = PerfilSerializer(required=False)
+
+
+class UnidadeEducacionalLoginSerializer(serializers.ModelSerializer):
+    """Representa os dados da escola na resposta do login."""
+
+    diretoria_regional = DiretoriaRegionalUnidadeEducacionalSerializer(
+        read_only=True,
+    )
+    tipo_escola = TipoEscolaUnidadeEducacionalSerializer(read_only=True)
+    subprefeitura = SubprefeituraUnidadeEducacionalSerializer(
+        read_only=True,
+    )
+    lote = LoteUnidadeEducacionalSerializer(read_only=True)
+    dados = DadosUnidadeEducacionalSerializer(read_only=True)
+
+    class Meta:
+        model = Unidadeeducacional
+        fields = (
+            "id",
+            "uuid",
+            "codigo_eol",
+            "nome",
+            "diretoria_regional",
+            "tipo_escola",
+            "subprefeitura",
+            "lote",
+            "status",
+            "dados",
+        )
+        read_only_fields = fields
 
 
 class UsuarioResponseSerializer(serializers.Serializer):
-    """Representa os dados do usuário autenticado."""
+    """Representa os dados do usuário autenticado (``/usuarios/me``).
+
+    Unidade educacional e diretoria regional são retornadas somente para os
+    perfis ``UE`` e ``DRE``; para os demais, vêm como ``None``.
+    """
 
     id = serializers.IntegerField(help_text="Identificador do usuário.")
     uuid = serializers.UUIDField(help_text="Identificador único do usuário.")
@@ -48,15 +96,16 @@ class UsuarioResponseSerializer(serializers.Serializer):
         help_text="Nome de usuário utilizado na autenticação."
     )
     perfil_acesso = PerfilAcessoSerializer()
-    diretoria_regional = serializers.CharField(
-        allow_blank=True,
-        allow_null=True,
-        required=False,
-        help_text="Diretoria Regional de Educação do usuário.",
+    funcionalidades = serializers.ListField(
+        child=serializers.ChoiceField(choices=Funcionalidade.choices),
+        help_text="Funcionalidades liberadas para o perfil do usuário.",
     )
-    unidade_educacional = serializers.CharField(
-        allow_blank=True,
+    diretoria_regional = serializers.CharField(
         allow_null=True,
-        required=False,
-        help_text="Unidade Educacional do usuário.",
+        help_text="Nome da DRE. Preenchido para os perfis UE e DRE.",
+    )
+    unidade_educacional = UnidadeEducacionalLoginSerializer(
+        allow_null=True,
+        read_only=True,
+        help_text="Dados completos da unidade. Preenchido para o perfil UE.",
     )

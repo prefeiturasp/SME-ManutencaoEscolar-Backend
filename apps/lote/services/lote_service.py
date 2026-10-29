@@ -4,7 +4,10 @@ from typing import Any, cast
 
 from apps.escola.models import DiretoriaRegional
 from apps.lote.constants import LoteErrorMessages
-from apps.lote.exceptions import DiretoriaRegionalJaVinculadaError
+from apps.lote.exceptions import (
+    DiretoriaRegionalJaVinculadaError,
+    LoteVinculadoEquipeError,
+)
 from apps.lote.models import Lote
 from apps.lote.repository.lote_repository import LoteRepository
 from apps.usuarios.models.usuario import Usuario
@@ -17,7 +20,7 @@ class LoteService:
         self,
         repository: LoteRepository | None = None,
     ) -> None:
-        """Inicializa o serviço com o repositório informado ou o padrão."""
+        """Inicializa o serviço com as dependências informadas ou padrão."""
         self.repository = repository or LoteRepository()
 
     def criar(
@@ -104,7 +107,23 @@ class LoteService:
         Returns:
             Tupla contendo a quantidade de registros deletados e um dicionário
             com a quantidade de exclusões por tipo de objeto.
+
+        Raises:
+            LoteVinculadoEquipeError: Quando o lote está vinculado a uma
+                equipe.
         """
+        equipes_vinculadas = self.repository.buscar_equipes_vinculadas(
+            model_lote
+        )
+        if equipes_vinculadas:
+            raise LoteVinculadoEquipeError(
+                title=LoteErrorMessages.LOTE_VINCULADO_EQUIPE_TITULO,
+                detail={
+                    "message": LoteErrorMessages.LOTE_VINCULADO_EQUIPE,
+                    "equipes": equipes_vinculadas,
+                },
+            )
+
         return self.repository.deletar(usuario, model_lote)
 
     def atualizar(
@@ -133,12 +152,32 @@ class LoteService:
         Raises:
             DiretoriaRegionalJaVinculadaError: Quando uma ou mais diretorias
                 regionais informadas já estão vinculadas a outro lote.
+            LoteVinculadoEquipeError: Quando a empresa é alterada e o lote
+                possui equipes vinculadas.
             ValidationError: Quando os dados do lote não passam pelas
                 validações definidas no modelo.
             IntegrityError: Quando ocorre uma violação de integridade durante
                 a atualização do lote ou de seus vínculos.
         """
         dados_normalizados = dados.copy()
+
+        empresa = dados_normalizados.get("empresa")
+        if empresa is not None and empresa.pk != lote.empresa_id:
+            equipes_vinculadas = self.repository.buscar_equipes_vinculadas(
+                lote
+            )
+            if equipes_vinculadas:
+                titulo = (
+                    LoteErrorMessages.ALTERACAO_EMPRESA_LOTE_VINCULADO_TITULO
+                )
+                mensagem = LoteErrorMessages.ALTERACAO_EMPRESA_LOTE_VINCULADO
+                raise LoteVinculadoEquipeError(
+                    title=titulo,
+                    detail={
+                        "message": mensagem,
+                        "equipes": equipes_vinculadas,
+                    },
+                )
 
         diretorias_regionais = cast(
             list[DiretoriaRegional],

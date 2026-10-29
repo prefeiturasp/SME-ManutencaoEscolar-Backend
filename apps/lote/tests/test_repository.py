@@ -154,7 +154,7 @@ class TestLoteRepository:
         assert resultado["pk"] == lote.pk
 
         assert lote.criado_por == usuario_ativo
-        assert lote.atualizado_por == usuario_ativo
+        assert lote.atualizado_por is None
 
         vinculos = LoteDiretoriaRegional.objects.filter(lote=lote)
         assert set(

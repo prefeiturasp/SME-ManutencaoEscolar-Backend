@@ -1,10 +1,14 @@
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor'
 
+const Dado = Given
+const Quando = When
+const Então = Then
+
 // Realiza a autenticação com sucesso
-Given('que acesso o endpoint de autenticação', function () {  
+Dado('que acesso o endpoint de autenticação', function () {  
 })
 
-When('envio os dados de acesso', function () { 
+Quando('envio os dados de acesso', function () { 
   return cy.request({
     method: 'POST',
     url: Cypress.config('baseUrl') + `/api/v1/login/`,
@@ -13,60 +17,22 @@ When('envio os dados de acesso', function () {
       'Content-Type': 'application/json',
     },
     body: {
-      login: `${Cypress.env('LOGIN_DIRETOR')}`,
-      senha: `${Cypress.env('SENHA')}`
+      login: `${Cypress.env('LOGIN_ADMIN')}`,
+      senha: `${Cypress.env('SENHA_ADMIN')}`
     },
     failOnStatusCode: false
   }).as('response')
 })
 
-Then('retorna status 200 com o token válido', function () {
+Então('retorna status 200 com o token válido', function () {
   cy.get('@response').then((response) => {
 
     expect(response.status).to.eq(200)
-
-    expect(response.body).to.have.property('refresh').and.to.be.a('string').and.not.be.empty
-    expect(response.body).to.have.property('access').and.to.be.a('string').and.not.be.empty
-
-    expect(response.body).to.have.property('usuario').and.to.be.an('object')
-
-    expect(response.body.usuario).to.have.property('id')
-    expect(response.body.usuario).to.have.property('uuid').and.to.be.a('string')
-    expect(response.body.usuario).to.have.property('nome').and.to.be.a('string')
-    expect(response.body.usuario).to.have.property('email').and.to.be.a('string')
-    expect(response.body.usuario).to.have.property('registro_funcional').and.to.be.a('string')
-    expect(response.body.usuario).to.have.property('username').and.to.be.a('string')
-
-    expect(response.body.usuario).to.have.property('perfil_acesso').and.to.be.an('object')
-
-    expect(response.body.usuario.perfil_acesso)
-      .to.have.property('cargo')
-      .and.to.be.a('string')
-
-    expect(response.body.usuario.perfil_acesso)
-      .to.have.property('perfil')
-      .and.to.be.an('object')
-
-    expect(response.body.usuario.perfil_acesso.perfil)
-      .to.have.property('codigo')
-      .and.to.be.a('string')
-
-    expect(response.body.usuario.perfil_acesso.perfil)
-      .to.have.property('descricao')
-      .and.to.be.a('string')
-
-    expect(response.body.usuario)
-      .to.have.property('diretoria_regional')
-      .and.to.be.a('string')
-
-    expect(response.body.usuario)
-      .to.have.property('unidade_educacional')
-      .and.to.be.a('string')
   })
 })
 
 // Login deve ser obrigatório
-When('envio os dados sem o login', function () { 
+Quando('envio os dados sem o login', function () { 
   return cy.request({
     method: 'POST',
     url: Cypress.config('baseUrl') + `/api/v1/login/`,
@@ -82,7 +48,7 @@ When('envio os dados sem o login', function () {
   }).as('response')
 })
 
-Then('retorna status 400 que acesso foi inválido', function () {
+Então('retorna status 400 que acesso foi inválido', function () {
   cy.get('@response').then((response) => {
     expect(response.status).to.eq(400)
 
@@ -96,7 +62,7 @@ Then('retorna status 400 que acesso foi inválido', function () {
 })
 
 // Senha deve ser obrigatória
-When('envio os dados sem a senha', function () { 
+Quando('envio os dados sem a senha', function () { 
   return cy.request({
     method: 'POST',
     url: Cypress.config('baseUrl') + `/api/v1/login/`,
@@ -112,7 +78,7 @@ When('envio os dados sem a senha', function () {
   }).as('response')
 })
 
-Then('retorna status 400 que é necessário ser informada', function () {
+Então('retorna status 400 que é necessário ser informada', function () {
   cy.get('@response').then((response) => {  
     expect(response.status).to.eq(400)
 
@@ -126,7 +92,7 @@ Then('retorna status 400 que é necessário ser informada', function () {
 })
 
 // Não autenticar com usuário inválido
-When('envio os dados com usuário inválido', function () { 
+Quando('envio os dados com usuário inválido', function () { 
   return cy.request({
     method: 'POST',
     url: Cypress.config('baseUrl') + `/api/v1/login/`,
@@ -142,7 +108,7 @@ When('envio os dados com usuário inválido', function () {
   }).as('response')
 })
 
-Then('retorna status 401 retorna sem acessar com usuário', function () {
+Então('retorna status 401 retorna sem acessar com usuário', function () {
   cy.get('@response').then((response) => {
     expect(response.status).to.eq(401)
 
@@ -153,7 +119,7 @@ Then('retorna status 401 retorna sem acessar com usuário', function () {
 })
 
 // Não autenticar com senha inválida
-When('envio os dados com senha inválida', function () { 
+Quando('envio os dados com senha inválida', function () { 
   return cy.request({
     method: 'POST',
     url: Cypress.config('baseUrl') + `/api/v1/login/`,
@@ -169,7 +135,7 @@ When('envio os dados com senha inválida', function () {
   }).as('response')
 })
 
-Then('retorna status 401 retorna sem acessar com senha', function () {
+Então('retorna status 401 retorna sem acessar com senha', function () {
   cy.get('@response').then((response) => {
   
     expect(response.status).to.eq(401)

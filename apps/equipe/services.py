@@ -10,6 +10,7 @@ from apps.empresa.models import Empresa
 from apps.equipe.constants import EquipeErrorMessages
 from apps.equipe.exceptions import (
     EquipeJaCadastradaError,
+    EquipeVinculadaError,
     ProfissionaisVinculadosError,
     ProfissionalVinculadoError,
 )
@@ -116,6 +117,33 @@ class EquipeService:
                 for vinculo in vinculos
             ],
         }
+
+    @transaction.atomic
+    def deletar(
+        self, equipe: Equipe, usuario: Usuario
+    ) -> tuple[int, dict[str, int]]:
+        """Exclui logicamente uma equipe sem vínculos com outros cadastros.
+
+        Os vínculos com os profissionais são removidos junto com a equipe,
+        liberando-os para outras equipes.
+
+        Args:
+            equipe: Instância da equipe a ser excluída.
+            usuario: Usuário responsável pela exclusão.
+
+        Returns:
+            Quantidade de registros afetados e o total por modelo.
+
+        Raises:
+            EquipeVinculadaError: Se a equipe possuir vínculos que impeçam
+                a exclusão.
+        """
+        if self.repository.possui_vinculos_externos(equipe):
+            raise EquipeVinculadaError(
+                title=EquipeErrorMessages.EQUIPE_VINCULADA_TITULO,
+                detail=EquipeErrorMessages.EQUIPE_VINCULADA,
+            )
+        return self.repository.deletar(equipe, usuario)
 
     def _validar_atualizacao(
         self,

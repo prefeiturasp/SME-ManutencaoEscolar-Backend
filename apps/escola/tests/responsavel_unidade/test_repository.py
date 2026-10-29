@@ -243,3 +243,47 @@ class TestResponsavelUnidadeRepository:
 
         assert historico_responsavel.ativo is True
         assert historico_responsavel.deletado_em is None
+
+    def test_deve_buscar_unidade_educacional_ativa(
+        self,
+        historico_responsavel,
+    ):
+        """Deve retornar a escola e a DRE do vínculo ativo."""
+        resultado = (
+            ResponsavelUnidadeRepository.buscar_unidade_educacional_ativa(
+                historico_responsavel.responsavel.registro_funcional,
+            )
+        )
+
+        escola = historico_responsavel.unidade_educacional
+
+        assert resultado == {
+            "unidade_educacional": escola,
+            "diretoria_regional": escola.diretoria_regional.nome,
+        }
+
+    def test_deve_retornar_none_quando_nao_existir_vinculo_ativo(
+        self,
+        historico_responsavel,
+    ):
+        """Deve retornar None quando só houver vínculo inativo."""
+        historico_responsavel.ativo = False
+        historico_responsavel.save(update_fields=["ativo"])
+
+        resultado = (
+            ResponsavelUnidadeRepository.buscar_unidade_educacional_ativa(
+                historico_responsavel.responsavel.registro_funcional,
+            )
+        )
+
+        assert resultado is None
+
+    def test_deve_retornar_none_quando_responsavel_nao_existir(self):
+        """Deve retornar None para registro funcional inexistente."""
+        resultado = (
+            ResponsavelUnidadeRepository.buscar_unidade_educacional_ativa(
+                "9999999"
+            )
+        )
+
+        assert resultado is None

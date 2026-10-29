@@ -256,3 +256,82 @@ Cypress.Commands.add('editar_campos_servico', () => {
 Cypress.Commands.add('validar_campos_obrigatorios_servico', () => {
   cy.contains('Campo obrigatório')  
 })
+
+Cypress.Commands.add('filtrar_nome_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_filtro_nome_servico', () => {
+  cy.get(servicos_localizadores.tbl_nome())
+    .should('contain', 'Teste automação')  
+})
+
+Cypress.Commands.add('filtrar_status_servico', () => {
+  cy.get(servicos_localizadores.select_status())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.opcoes_status())
+    .should('be.visible')
+    .contains('Ativo')
+    .click()
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_filtro_status_servico', () => {
+  cy.get(servicos_localizadores.tbl_status())
+    .should('contain', 'Ativo')  
+})
+
+Cypress.Commands.add('filtrar_servico_inexistente', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Serviço inexistente')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_filtro_servico_inexistente', () => {
+  cy.contains('Não encontramos dados para esta busca')
+})
+
+Cypress.Commands.add('limpar_filtro_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Serviço inexistente')
+
+  cy.get(servicos_localizadores.btn_limpar_filtro())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_filtro_vazio_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .should('have.value', '')
+})
+
+Cypress.Commands.add('consultar_detalhes_servico', () => {
+  cy.get(servicos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(servicos_localizadores.btn_buscar_servico())
+    .should('be.visible')
+    .click()
+
+  cy.get(servicos_localizadores.btn_editar_servico())
+    .should('be.visible')
+    .click()
+})

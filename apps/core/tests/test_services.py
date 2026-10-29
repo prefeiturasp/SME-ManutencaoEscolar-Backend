@@ -840,16 +840,11 @@ class TestLogin:
     )
     @patch(
         "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
-        "buscar_cargos",
-    )
-    @patch(
-        "apps.core.services.autenticacao_eol_service.AutenticacaoEOLService."
         "autentica",
     )
     def test_login_sucesso(
         self,
         mock_autentica: Mock,
-        mock_buscar_cargos: Mock,
         mock_dados_usuario: Mock,
         mock_sincronizar_usuario: Mock,
         mock_gerar_token: Mock,
@@ -860,7 +855,6 @@ class TestLogin:
             "codigoRf": "1234567",
             "cpf": "12345678901",
         }
-        mock_buscar_cargos.return_value = []
         mock_dados_usuario.return_value = {
             "id": 1,
             "nome": "João",
@@ -871,6 +865,7 @@ class TestLogin:
             "id": 1,
             "nome": "João",
             "email": "joao@email.com",
+            "username": "12345678901",
         }
         mock_gerar_token.return_value = {
             "refresh": "refresh",
@@ -888,15 +883,13 @@ class TestLogin:
         assert resultado["access"] == "access_token"
         assert resultado["access_expires_in"] == 3600
         assert resultado["refresh_expires_in"] == 604800
-        assert resultado["usuario"]["id"] == 1
+        assert "usuario" not in resultado
 
         mock_autentica.assert_called_once_with(
             login=self.LOGIN_VALIDO,
             senha=self.SENHA_VALIDA,
         )
-        mock_buscar_cargos.assert_called_once_with(
-            registro_funcional="1234567",
-        )
+
         mock_dados_usuario.assert_called_once_with("1234567")
         mock_gerar_token.assert_called_once_with(1)
 

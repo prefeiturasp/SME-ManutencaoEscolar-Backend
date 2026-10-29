@@ -164,7 +164,6 @@ class LoteRepository:
         lote = self.model(
             **dados_lote,
             criado_por=usuario,
-            atualizado_por=usuario,
         )
         lote.full_clean()
         lote.save()
@@ -174,6 +173,7 @@ class LoteRepository:
                 self.vinculo_model(
                     lote=lote,
                     diretoria_regional=diretoria_regional,
+                    criado_por=usuario,
                 )
                 for diretoria_regional in diretorias_regionais
             ]
@@ -268,3 +268,17 @@ class LoteRepository:
         for vinculo in vinculos:
             vinculo.soft_delete(usuario=usuario)
         return model_lote.soft_delete(usuario=usuario)
+
+    def buscar_equipes_vinculadas(
+        self,
+        lote: Lote,
+    ) -> list[dict[str, Any]]:
+        """Busca as equipes vinculadas ao lote.
+
+        Args:
+            lote: Lote usado na busca.
+
+        Returns:
+            Lista com os dados básicos das equipes encontradas.
+        """
+        return [dict(equipe) for equipe in lote.equipes.values("uuid", "nome")]

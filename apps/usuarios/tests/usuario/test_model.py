@@ -22,3 +22,14 @@ class TestUsuarioModel:
         )
 
         assert str(usuario) == "João da Silva"
+
+    def test_str_retorna_usuario_sem_perfil(self):
+        """Retorna perfil igual a None."""
+        usuario = Usuario.objects.create(
+            username="1234567",
+            nome="João da Silva",
+            registro_funcional="1234567",
+            cpf="12345678901",
+        )
+
+        assert usuario.perfil is None

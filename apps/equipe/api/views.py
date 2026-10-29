@@ -12,6 +12,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.equipe.exceptions import (
     EquipeJaCadastradaError,
+    EquipeVinculadaError,
     ProfissionaisVinculadosError,
     ProfissionalVinculadoError,
 )
@@ -25,14 +26,17 @@ from apps.equipe.serializers import (
 )
 from apps.equipe.services import EquipeService
 from apps.usuarios.models import Usuario
+from apps.usuarios.permissions import PermissaoCadastros
 
 
 @EQUIPE_SCHEMA
 class EquipeViewSet(ModelViewSet):
     """Disponibiliza o cadastro e a listagem de equipes."""
 
+    permission_classes = [PermissaoCadastros]
+
     queryset = Equipe.objects.all()
-    http_method_names = ["post", "options", "get", "put", "patch"]
+    http_method_names = ["post", "options", "get", "put", "patch", "delete"]
     lookup_field = "uuid"
     filter_backends = [DjangoFilterBackend]
     filterset_class = EquipeFilter
@@ -121,3 +125,21 @@ class EquipeViewSet(ModelViewSet):
                 equipe, serializer.validated_data, usuario
             )
         )
+
+    def perform_destroy(self, instance: Equipe) -> None:
+        """Exclui logicamente uma equipe pela camada de serviço.
+
+        Args:
+            instance: Equipe a ser excluída.
+
+        Raises:
+            DRFValidationError: Se a equipe possuir vínculos que impeçam a
+                exclusão.
+        """
+        usuario = self._obter_usuario()
+        try:
+            self.service.deletar(instance, usuario)
+        except EquipeVinculadaError as exc:
+            raise DRFValidationError(
+                {"title": exc.title, "detail": exc.detail}
+            ) from exc

@@ -5,7 +5,6 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db.models import ObjectDoesNotExist
 
 from apps.usuarios.exceptions import UsuarioNaoEncontradoError
-from apps.usuarios.models.cargo_eol import CargoEOL
 from apps.usuarios.models.usuario import Usuario
 from apps.usuarios.repository.usuario_repository import UsuarioRepository
 
@@ -21,16 +20,13 @@ class TestUsuarioRepository:
                 "codigo_rf": "1234567",
                 "cpf": None,
             },
-            codigo_cargo="3360",
         )
 
         usuario = Usuario.objects.get(registro_funcional="1234567")
-        cargo = CargoEOL.objects.get(codigo="3360")
 
         assert resultado["id"] == usuario.id
         assert usuario.nome == "João"
         assert usuario.email == "joao@email.com"
-        assert usuario.cargo == cargo
 
     def test_atualizar_ou_criar_utiliza_cpf_quando_rf_invalido(self):
         resultado = UsuarioRepository.atualizar_ou_criar(
@@ -40,13 +36,12 @@ class TestUsuarioRepository:
                 "codigo_rf": None,
                 "cpf": "12345678901",
             },
-            codigo_cargo="3360",
         )
 
         usuario = Usuario.objects.get(cpf="12345678901")
 
         assert resultado["id"] == usuario.id
-        assert usuario.cargo.codigo == "3360"
+        assert usuario.cargo is None
 
     def test_atualizar_ou_criar_atualiza_usuario_existente(
         self,
@@ -64,8 +59,7 @@ class TestUsuarioRepository:
                 "email": "novo@email.com",
                 "codigo_rf": usuario_ativo.registro_funcional,
                 "cpf": None,
-            },
-            codigo_cargo=usuario_ativo.cargo.codigo,
+            }
         )
 
         usuario_ativo.refresh_from_db()
@@ -86,7 +80,6 @@ class TestUsuarioRepository:
                     "codigo_rf": None,
                     "cpf": None,
                 },
-                codigo_cargo="1",
             )
 
     def test_usuario_existe_por_id_retorna_true_para_usuario_ativo(

@@ -300,8 +300,10 @@ class AutenticacaoEOLService:
             #. consulta o cargo do servidor;
             #. consulta os dados funcionais do usuário;
             #. sincroniza o usuário com a base local;
-            #. gera os tokens JWT da aplicação;
-            #. combina os dados locais e funcionais na resposta final.
+            #. gera os tokens JWT da aplicação.
+
+        Os dados do usuário não fazem parte da resposta: devem ser obtidos
+        no endpoint ``/usuarios/me``.
 
         Args:
             login (object): Identificador(RF ou CPF) utilizado para
@@ -316,8 +318,6 @@ class AutenticacaoEOLService:
                     em segundos.
                 - ``refresh_expires_in``: Tempo de validade do refresh token,
                     em segundos.
-                - ``usuario``: Dados do usuário sincronizado, acrescidos das
-                    informações de diretoria regional e unidade educacional.
         Raises:
             FalhaAutenticacaoError: Se as credenciais forem inválidas.
             SmeIntegracaoError: Se ocorrer falha na comunicação ou na
@@ -330,12 +330,10 @@ class AutenticacaoEOLService:
             senha=senha,
         )
         codigo_rf = dados_autenticacao["codigoRf"]
-        informaoes_cargo = cls.buscar_cargos(registro_funcional=codigo_rf)
         dados_usuario = cls.dados_usuario(codigo_rf)
         dados_usuario["codigo_rf"] = codigo_rf
         usuario = UsuarioService.sincronizar_usuario(
-            dados_usuario=dados_usuario,
-            dados_cargo=informaoes_cargo,
+            dados_usuario=dados_usuario
         )
         token = TokenService.gerar_tokens(usuario["id"])
         return {
@@ -343,15 +341,6 @@ class AutenticacaoEOLService:
             "access": token["access"],
             "access_expires_in": token["access_expires_in"],
             "refresh_expires_in": token["refresh_expires_in"],
-            "usuario": {
-                **usuario,
-                "diretoria_regional": dados_usuario.get(
-                    "dre", DADO_NAO_INFORMADO
-                ),
-                "unidade_educacional": dados_usuario.get(
-                    "nomeUe", DADO_NAO_INFORMADO
-                ),
-            },
         }
 
     @classmethod

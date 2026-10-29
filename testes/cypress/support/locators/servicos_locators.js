@@ -10,6 +10,11 @@ class Servicos_Localizadores {
   btn_cancelar = () => 'a[href="/servicos"]:contains("Cancelar")'
   btn_salvar_cadastro = () => 'div.justify-between > .flex > .bg-primary'
 
+  // consultar
+  tbl_nome = () => 'tbody > tr > :nth-child(1)'
+  tbl_status = () => 'tbody > tr > :nth-child(2)'
+  btn_limpar_filtro = () => 'button:contains("Limpar filtro")'
+
   // editar
   btn_buscar_servico = () => 'button[class*="max-w-[165px]"]'
   btn_editar_servico = () => 'button[aria-label="Editar Teste automação"]'

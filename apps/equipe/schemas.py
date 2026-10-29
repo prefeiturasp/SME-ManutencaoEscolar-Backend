@@ -267,6 +267,41 @@ EQUIPE_SCHEMA = extend_schema_view(
             ),
         ],
     ),
+    destroy=extend_schema(
+        tags=[_TAG_EQUIPE],
+        summary="Exclui uma equipe",
+        description=(
+            "Realiza a exclusão lógica de uma equipe identificada pelo UUID "
+            "e libera os profissionais vinculados a ela. A exclusão é "
+            "bloqueada quando a equipe possui vínculo com outros cadastros."
+        ),
+        operation_id="excluirEquipe",
+        request=None,
+        responses={
+            204: OpenApiResponse(description="Equipe excluída com sucesso"),
+            400: OpenApiResponse(
+                description="Equipe com vínculos que impedem a exclusão."
+            ),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            404: OpenApiResponse(description=_EQUIPE_NAO_ENCONTRADA),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+        examples=[
+            OpenApiExample(
+                name="Equipe com vínculos",
+                response_only=True,
+                status_codes=["400"],
+                value={
+                    "title": "Não é possível excluir a equipe",
+                    "detail": (
+                        "Esta equipe possui vínculo com outros registros do "
+                        "sistema e, por isso, não pode ser excluída. Remova "
+                        "os vínculos para prosseguir com a exclusão."
+                    ),
+                },
+            ),
+        ],
+    ),
     partial_update=extend_schema(
         tags=[_TAG_EQUIPE],
         summary="Atualiza parcialmente uma equipe",
