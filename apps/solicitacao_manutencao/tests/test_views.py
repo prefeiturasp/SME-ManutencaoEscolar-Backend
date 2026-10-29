@@ -17,6 +17,7 @@ from apps.solicitacao_manutencao.serializers import (
     SolicitacaoManutencaoCriarSerializer,
     SolicitacaoManutencaoListSerializer,
 )
+from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models import Usuario
 
 pytestmark = pytest.mark.django_db
@@ -403,9 +404,11 @@ def test_exige_arquivos_em_cada_servico(
         URL_SOLICITACAO_UE,
         solicitacao_payload,
     )
+    print(resposta.json())
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
-    assert "arquivos" in resposta.json()["servicos"]["0"]
+    erro_arquivos = resposta.json()["servicos"][0]["arquivos"]
+    assert erro_arquivos == ["Este campo é obrigatório."]
     assert SolicitacaoManutencao.objects.count() == 0
 
 
@@ -427,3 +430,25 @@ def test_cria_solicitacao_sem_servico_catalogado(
     assert resposta.status_code == status.HTTP_201_CREATED
     solicitacao = SolicitacaoManutencao.objects.get(codigo="0000001")
     assert solicitacao.servicos_manutencao.get().servico is None
+
+
+def test_perfil_ue_pode_listar_servicos(api_cliente_perfil):
+    """Permite que usuários UE listem serviços."""
+    resposta = api_cliente_perfil(PerfilAcesso.UE).get("/api/v1/servicos/")
+
+    assert resposta.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.parametrize(
+    "perfil",
+    [
+        PerfilAcesso.DRE,
+        PerfilAcesso.EMPRESA,
+        None,
+    ],
+)
+def test_demais_perfis_nao_podem_listar_servicos(api_cliente_perfil, perfil):
+    """Bloqueia a listagem para perfis sem permissão de acesso."""
+    resposta = api_cliente_perfil(perfil).get("/api/v1/servicos/")
+
+    assert resposta.status_code == status.HTTP_403_FORBIDDEN
