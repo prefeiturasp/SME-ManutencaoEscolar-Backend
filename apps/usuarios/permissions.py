@@ -5,7 +5,7 @@ from typing import Any
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 
-from apps.usuarios.constants import Funcionalidade
+from apps.usuarios.constants import Funcionalidade, PerfilAcesso
 
 
 class PermissaoFuncionalidade(BasePermission):
@@ -32,3 +32,19 @@ class PermissaoCadastros(PermissaoFuncionalidade):
     """Libera o acesso aos cadastros (apenas perfil GME/SME)."""
 
     funcionalidade = Funcionalidade.CADASTROS
+
+
+class PermissaoPerfilUE(BasePermission):
+    """Libera o acesso exclusivamente a usuários do perfil UE."""
+
+    message = "Acesso permitido somente para usuários do perfil UE."
+
+    def has_permission(self, request: Request, view: Any) -> bool:
+        """Verifica se o usuário autenticado pertence ao perfil UE."""
+        usuario = request.user
+
+        return bool(
+            usuario
+            and usuario.is_authenticated
+            and usuario.perfil == PerfilAcesso.UE
+        )

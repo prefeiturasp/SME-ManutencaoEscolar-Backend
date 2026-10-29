@@ -14,6 +14,7 @@ from apps.servico.constants import ServicoErrorMessages
 from apps.servico.exceptions import ServicoJaCadastradoError
 from apps.servico.filters import ServicoFilter
 from apps.servico.models import Servico
+from apps.servico.permissions import PermissaoLeituraServico
 from apps.servico.schemas import SERVICO_SCHEMA
 from apps.servico.serializers import (
     ServicoAtualizarSerializer,
@@ -88,6 +89,12 @@ class ServicoViewSet(viewsets.ModelViewSet):
             return ServicoAtualizarSerializer
 
         return ServicoSerializer
+
+    def get_permissions(self) -> Any:
+        """Define as permissões de acordo com a ação executada."""
+        if self.action == "list":
+            return [PermissaoLeituraServico()]
+        return super().get_permissions()
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         """Cria um serviço delegando as regras ao service."""
