@@ -1,5 +1,8 @@
 """Testes do repositório do domínio Equipe."""
 
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
 import pytest
 
 from apps.equipe.models import Equipe, ProfissionalEquipe
@@ -99,3 +102,68 @@ def test_nao_persiste_vinculo_sem_alteracoes(
     assert resultado["uuid"] == vinculo.uuid
     vinculo.refresh_from_db()
     assert vinculo.atualizado_em == atualizado_em
+
+
+def test_equipe_sem_vinculos_externos_nao_bloqueia_exclusao(
+    equipe_existente_ativa, profissional_vinculado
+) -> None:
+    """Ignora os profissionais da própria equipe ao buscar vínculos."""
+    possui = EquipeRepository().possui_vinculos_externos(
+        equipe_existente_ativa
+    )
+
+    assert possui is False
+
+
+def test_identifica_vinculo_externo_ativo(
+    monkeypatch, equipe_existente_ativa
+) -> None:
+    """Identifica outro cadastro que referencia a equipe."""
+    gerenciador = MagicMock()
+    gerenciador.filter.return_value.exists.return_value = True
+    relacao = SimpleNamespace(
+        related_model=SimpleNamespace(_default_manager=gerenciador),
+        field=SimpleNamespace(name="equipe"),
+    )
+    monkeypatch.setattr(Equipe._meta, "related_objects", (relacao,))
+
+    possui = EquipeRepository().possui_vinculos_externos(
+        equipe_existente_ativa
+    )
+
+    assert possui is True
+    gerenciador.filter.assert_called_once_with(equipe=equipe_existente_ativa)
+
+
+def test_ignora_vinculo_externo_inexistente(
+    monkeypatch, equipe_existente_ativa
+) -> None:
+    """Não considera vinculada a equipe sem registros que a referenciem."""
+    gerenciador = MagicMock()
+    gerenciador.filter.return_value.exists.return_value = False
+    relacao = SimpleNamespace(
+        related_model=SimpleNamespace(_default_manager=gerenciador),
+        field=SimpleNamespace(name="equipe"),
+    )
+    monkeypatch.setattr(Equipe._meta, "related_objects", (relacao,))
+
+    possui = EquipeRepository().possui_vinculos_externos(
+        equipe_existente_ativa
+    )
+
+    assert possui is False
+
+
+def test_deleta_equipe_e_vinculos_dos_profissionais(
+    equipe_existente_ativa, profissional_vinculado, usuario_ativo
+) -> None:
+    """Exclui logicamente a equipe e os vínculos com seus profissionais."""
+    EquipeRepository().deletar(equipe_existente_ativa, usuario_ativo)
+
+    assert not Equipe.objects.filter(pk=equipe_existente_ativa.pk).exists()
+    equipe = Equipe.dm_objects.get(pk=equipe_existente_ativa.pk)
+    assert equipe.deletado_em is not None
+    assert equipe.deletado_por == usuario_ativo
+    vinculo = ProfissionalEquipe.dm_objects.get(pk=profissional_vinculado.pk)
+    assert vinculo.deletado_em is not None
+    assert vinculo.deletado_por == usuario_ativo

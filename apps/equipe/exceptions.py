@@ -31,3 +31,13 @@ class ProfissionaisVinculadosError(Exception):
         self.title = title
         self.detail = detail
         super().__init__(detail)
+
+
+class EquipeVinculadaError(Exception):
+    """Indica que a equipe possui vínculos que impedem sua exclusão."""
+
+    def __init__(self, title: str, detail: str) -> None:
+        """Inicializa a exceção com título e descrição."""
+        self.title = title
+        self.detail = detail
+        super().__init__(detail)

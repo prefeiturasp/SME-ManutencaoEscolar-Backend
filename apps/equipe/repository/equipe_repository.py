@@ -1,7 +1,9 @@
 """Repositório do domínio Equipe."""
 
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
+
+from django.db import models
 
 from apps.equipe.models import Equipe, ProfissionalEquipe
 from apps.usuarios.models import Usuario
@@ -24,6 +26,44 @@ class EquipeRepository:
             nome__iexact=nome,
             empresa__uuid=empresa_uuid,
         ).exists()
+
+    def possui_vinculos_externos(self, equipe: Equipe) -> bool:
+        """Verifica se a equipe é referenciada por outros cadastros.
+
+        Considera qualquer modelo que aponte para a equipe, exceto os
+        profissionais da própria equipe, que são removidos junto com ela.
+        Registros excluídos logicamente não contam como vínculo.
+
+        Args:
+            equipe: Equipe que será verificada.
+
+        Returns:
+            Verdadeiro quando existe ao menos um vínculo ativo.
+        """
+        for relacao in Equipe._meta.related_objects:
+            modelo = cast(type[models.Model], relacao.related_model)
+            if modelo is ProfissionalEquipe:
+                continue
+            filtro = {relacao.field.name: equipe}
+            if modelo._default_manager.filter(**filtro).exists():
+                return True
+        return False
+
+    def deletar(
+        self, equipe: Equipe, usuario: Usuario
+    ) -> tuple[int, dict[str, int]]:
+        """Exclui logicamente a equipe e os vínculos com seus profissionais.
+
+        Args:
+            equipe: Equipe que será excluída.
+            usuario: Usuário responsável pela exclusão.
+
+        Returns:
+            Quantidade de registros afetados e o total por modelo.
+        """
+        for vinculo in ProfissionalEquipe.objects.filter(equipe=equipe):
+            vinculo.soft_delete(usuario=usuario)
+        return equipe.soft_delete(usuario=usuario)
 
     def criar(
         self,

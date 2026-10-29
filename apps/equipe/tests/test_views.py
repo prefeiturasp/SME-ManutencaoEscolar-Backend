@@ -1,5 +1,7 @@
 """Testes da API de equipes."""
 
+from uuid import uuid4
+
 import pytest
 from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
@@ -8,9 +10,12 @@ from rest_framework.test import APIClient, APIRequestFactory
 
 from apps.empresa.models import Empresa
 from apps.equipe.api.views import EquipeViewSet
+from apps.equipe.constants import EquipeErrorMessages
 from apps.equipe.models import Equipe, ProfissionalEquipe
+from apps.equipe.repository import EquipeRepository
 from apps.lote.models import Lote
 from apps.profissional.models import FuncaoProfissional, Profissional
+from apps.usuarios.constants import PerfilAcesso
 
 pytestmark = pytest.mark.django_db
 
@@ -256,3 +261,83 @@ def test_atualiza_parcialmente_equipe_sem_alterar_profissionais(
     assert equipe_existente_ativa.nome == "Equipe Atualizada"
     assert equipe_existente_ativa.profissionais.get() == vinculo
     assert resposta.json()["nome"] == "Equipe Atualizada"
+
+
+def test_exclui_equipe_sem_vinculos(
+    api_cliente: APIClient,
+    equipe_existente_ativa: Equipe,
+    profissional_vinculado: ProfissionalEquipe,
+    usuario_ativo,
+) -> None:
+    """Exclui logicamente a equipe e libera seus profissionais."""
+    resposta = api_cliente.delete(
+        f"/api/v1/equipes/{equipe_existente_ativa.uuid}/"
+    )
+
+    assert resposta.status_code == status.HTTP_204_NO_CONTENT
+    assert not Equipe.objects.filter(pk=equipe_existente_ativa.pk).exists()
+    equipe = Equipe.dm_objects.get(pk=equipe_existente_ativa.pk)
+    assert equipe.deletado_por == usuario_ativo
+    assert not ProfissionalEquipe.objects.filter(
+        pk=profissional_vinculado.pk
+    ).exists()
+
+
+def test_rejeita_exclusao_de_equipe_com_vinculo(
+    monkeypatch,
+    api_cliente: APIClient,
+    equipe_existente_ativa: Equipe,
+) -> None:
+    """Retorna título e detalhe quando a equipe possui vínculos."""
+    monkeypatch.setattr(
+        EquipeRepository, "possui_vinculos_externos", lambda *_: True
+    )
+
+    resposta = api_cliente.delete(
+        f"/api/v1/equipes/{equipe_existente_ativa.uuid}/"
+    )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json() == {
+        "title": EquipeErrorMessages.EQUIPE_VINCULADA_TITULO,
+        "detail": EquipeErrorMessages.EQUIPE_VINCULADA,
+    }
+    assert Equipe.objects.filter(pk=equipe_existente_ativa.pk).exists()
+
+
+def test_exclusao_de_equipe_inexistente_retorna_404(
+    api_cliente: APIClient,
+) -> None:
+    """Retorna 404 ao excluir uma equipe que não existe."""
+    resposta = api_cliente.delete(f"/api/v1/equipes/{uuid4()}/")
+
+    assert resposta.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_exclusao_de_equipe_exige_autenticacao(
+    equipe_existente_ativa: Equipe,
+) -> None:
+    """Protege a exclusão contra acesso não autenticado."""
+    resposta = APIClient().delete(
+        f"/api/v1/equipes/{equipe_existente_ativa.uuid}/"
+    )
+
+    assert resposta.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.parametrize(
+    "perfil",
+    [PerfilAcesso.UE, PerfilAcesso.DRE, PerfilAcesso.EMPRESA],
+)
+def test_exclusao_de_equipe_restrita_ao_perfil_sme(
+    api_cliente_perfil,
+    equipe_existente_ativa: Equipe,
+    perfil: str,
+) -> None:
+    """Bloqueia a exclusão para perfis sem acesso aos cadastros."""
+    resposta = api_cliente_perfil(perfil).delete(
+        f"/api/v1/equipes/{equipe_existente_ativa.uuid}/"
+    )
+
+    assert resposta.status_code == status.HTTP_403_FORBIDDEN
+    assert Equipe.objects.filter(pk=equipe_existente_ativa.pk).exists()
