@@ -30,6 +30,7 @@ from apps.servico.serializers import (
     ServicoSerializer,
 )
 from apps.servico.services.servico_service import ServicoService
+from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models.usuario import Usuario
 
 
@@ -434,3 +435,64 @@ class TestServicoViewSet:
             servico,
             usuario,
         )
+
+    def test_deve_permitir_listagem_para_usuario_com_permissao_cadastros(
+        self,
+    ) -> None:
+        """Permite listar serviços a quem possui PermissaoCadastros."""
+        view, _service = self.criar_view_com_usuario()
+        view.action = "list"
+
+        usuario = view.request.user
+        usuario.is_authenticated = True
+        usuario.tem_acesso.return_value = True
+
+        permissao = view.get_permissions()[0]
+
+        assert permissao.has_permission(view.request, view) is True
+
+    def test_deve_permitir_listagem_para_perfil_ue(self) -> None:
+        """Permite listar serviços ao perfil UE sem acesso a cadastros."""
+        view, _service = self.criar_view_com_usuario()
+        view.action = "list"
+
+        usuario = view.request.user
+        usuario.is_authenticated = True
+        usuario.perfil = PerfilAcesso.UE
+        usuario.tem_acesso.return_value = False
+
+        permissao = view.get_permissions()[0]
+
+        assert permissao.has_permission(view.request, view) is True
+
+    def test_deve_negar_listagem_para_outro_perfil_sem_cadastros(
+        self,
+    ) -> None:
+        """Nega a listagem a outros perfis sem acesso a cadastros."""
+        view, _service = self.criar_view_com_usuario()
+        view.action = "list"
+
+        usuario = view.request.user
+        usuario.is_authenticated = True
+        usuario.perfil = PerfilAcesso.DRE
+        usuario.tem_acesso.return_value = False
+
+        permissao = view.get_permissions()[0]
+
+        assert permissao.has_permission(view.request, view) is False
+
+    def test_deve_exigir_permissao_cadastros_para_criar(
+        self,
+    ) -> None:
+        """Não permite criar serviços apenas por ser do perfil UE."""
+        view, _service = self.criar_view_com_usuario()
+        view.action = "create"
+
+        usuario = view.request.user
+        usuario.is_authenticated = True
+        usuario.perfil = PerfilAcesso.UE
+        usuario.tem_acesso.return_value = False
+
+        permissao = view.get_permissions()[0]
+
+        assert permissao.has_permission(view.request, view) is False
