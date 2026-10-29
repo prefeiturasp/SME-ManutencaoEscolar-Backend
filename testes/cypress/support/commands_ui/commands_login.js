@@ -19,12 +19,12 @@ Cypress.Commands.add('login_ME', (device) => {
 
 Cypress.Commands.add('realizar_login', (perfil) => {
 	switch (perfil) {
-		case "Diretor":
+		case "Admin":
 			cy.get(login_ME_Localizadores.campo_usuario())
-			  .type(Cypress.env('LOGIN_DIRETOR'))
+			  .type(Cypress.env('LOGIN_ADMIN'))
 
 			cy.get(login_ME_Localizadores.campo_senha())
-			  .type(Cypress.env('SENHA'))
+			  .type(Cypress.env('SENHA_ADMIN'))
 
       cy.get(login_ME_Localizadores.logo_me())
         .click()

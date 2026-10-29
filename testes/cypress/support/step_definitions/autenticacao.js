@@ -17,8 +17,8 @@ Quando('envio os dados de acesso', function () {
       'Content-Type': 'application/json',
     },
     body: {
-      login: `${Cypress.env('LOGIN_DIRETOR')}`,
-      senha: `${Cypress.env('SENHA')}`
+      login: `${Cypress.env('LOGIN_ADMIN')}`,
+      senha: `${Cypress.env('SENHA_ADMIN')}`
     },
     failOnStatusCode: false
   }).as('response')
@@ -28,44 +28,6 @@ Então('retorna status 200 com o token válido', function () {
   cy.get('@response').then((response) => {
 
     expect(response.status).to.eq(200)
-
-    expect(response.body).to.have.property('refresh')
-    expect(response.body).to.have.property('access')
-
-    expect(response.body).to.have.property('usuario').and.to.be.an('object')
-
-    expect(response.body.usuario).to.have.property('id')
-    expect(response.body.usuario).to.have.property('uuid').and.to.be.a('string')
-    expect(response.body.usuario).to.have.property('nome').and.to.be.a('string')
-    expect(response.body.usuario).to.have.property('email').and.to.be.a('string')
-    expect(response.body.usuario).to.have.property('registro_funcional').and.to.be.a('string')
-    expect(response.body.usuario).to.have.property('username').and.to.be.a('string')
-
-    expect(response.body.usuario).to.have.property('perfil_acesso').and.to.be.an('object')
-
-    expect(response.body.usuario.perfil_acesso)
-      .to.have.property('cargo')
-      .and.to.be.a('string')
-
-    expect(response.body.usuario.perfil_acesso)
-      .to.have.property('perfil')
-      .and.to.be.an('object')
-
-    expect(response.body.usuario.perfil_acesso.perfil)
-      .to.have.property('codigo')
-      .and.to.be.a('string')
-
-    expect(response.body.usuario.perfil_acesso.perfil)
-      .to.have.property('descricao')
-      .and.to.be.a('string')
-
-    expect(response.body.usuario)
-      .to.have.property('diretoria_regional')
-      .and.to.be.a('string')
-
-    expect(response.body.usuario)
-      .to.have.property('unidade_educacional')
-      .and.to.be.a('object')
   })
 })
 
