@@ -407,7 +407,7 @@ def test_exige_arquivos_em_cada_servico(
     print(resposta.json())
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
-    erro_arquivos = resposta.json()["servicos"][0]["arquivos"]
+    erro_arquivos = resposta.json()["servicos"]["0"]["arquivos"]
     assert erro_arquivos == ["Este campo é obrigatório."]
     assert SolicitacaoManutencao.objects.count() == 0
 
