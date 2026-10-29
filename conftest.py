@@ -1,6 +1,7 @@
 """Fixtures globais utilizadas pelos testes do projeto."""
 
 from collections.abc import Callable
+from typing import Any
 
 import pytest
 from rest_framework.test import APIClient, APIRequestFactory
@@ -35,7 +36,7 @@ def api_cliente(usuario_ativo: Usuario) -> APIClient:
 
 
 @pytest.fixture
-def api_cliente_perfil(db) -> Callable[[str | None], APIClient]:
+def api_cliente_perfil(db: Any) -> Callable[[str | None], APIClient]:
     """Retorna uma fábrica de clientes autenticados com o perfil informado.
 
     Com ``None`` cria um usuário sem cargo vinculado.

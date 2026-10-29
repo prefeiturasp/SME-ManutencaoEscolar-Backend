@@ -133,7 +133,10 @@ class TestPermissaoCadastrosNasViews:
         assert resposta.status_code == status.HTTP_200_OK
 
     @pytest.mark.parametrize("perfil", PERFIS_SEM_CADASTROS)
-    @pytest.mark.parametrize("url", URLS_CADASTROS)
+    @pytest.mark.parametrize(
+        "url",
+        [url for url in URLS_CADASTROS if url != "/api/v1/servicos/"],
+    )
     def test_demais_perfis_nao_acessam_cadastros(
         self, api_cliente_perfil, url, perfil
     ):

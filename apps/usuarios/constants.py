@@ -32,13 +32,9 @@ FUNCIONALIDADES_POR_PERFIL: dict[str, frozenset[str]] = {
             Funcionalidade.RELATORIOS,
         }
     ),
-    PerfilAcesso.DRE: frozenset(
-        {Funcionalidade.RELATORIOS}
-    ),
+    PerfilAcesso.DRE: frozenset({Funcionalidade.RELATORIOS}),
     PerfilAcesso.UE: frozenset(
         {Funcionalidade.SOLICITACAO_MANUTENCAO, Funcionalidade.RELATORIOS}
     ),
-    PerfilAcesso.EMPRESA: frozenset(
-        {Funcionalidade.RELATORIOS}
-    ),
+    PerfilAcesso.EMPRESA: frozenset({Funcionalidade.RELATORIOS}),
 }
