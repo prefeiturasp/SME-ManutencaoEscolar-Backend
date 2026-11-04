@@ -383,7 +383,8 @@ def test_documenta_listagem_de_solicitacoes_no_schema() -> None:
         "tipo_atendimento",
         "situacao",
         "fase",
-        "data_envio",
+        "data_envio_after",
+        "data_envio_before",
     }
     assert set(operacao["responses"]) == {"200", "401", "500"}
 
