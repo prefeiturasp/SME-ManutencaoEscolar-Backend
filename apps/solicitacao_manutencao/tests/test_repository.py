@@ -35,7 +35,7 @@ def test_lista_solicitacoes_por_usuario(
         criado_por=usuario_inativo,
     )
 
-    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
+    solicitacoes = SolicitacaoManutencaoRepository().buscar_por_usuario(
         usuario_ue
     )
 
@@ -53,9 +53,64 @@ def test_lista_solicitacoes_por_usuario(
 
 def test_lista_solicitacoes_vazia_sem_usuario() -> None:
     """Retorna uma lista vazia quando nenhum usuário for informado."""
-    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(None)
+    solicitacoes = SolicitacaoManutencaoRepository().buscar_por_usuario(None)
 
     assert not solicitacoes.exists()
+
+
+def test_consulta_solicitacoes_detalhadas_com_dicionarios(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ue: Usuario,
+) -> None:
+    """Retorna os dados da solicitação em um dicionário."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000003",
+        tipo_atendimento="urgente",
+        informacoes_adicionais="Reparo prioritário.",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ue,
+    )
+
+    resultados = list(
+        SolicitacaoManutencaoRepository().buscar_por_usuario(
+            usuario_ue, str(solicitacao.uuid)
+        )
+    )
+
+    assert resultados == [
+        {
+            "id": solicitacao.id,
+            "uuid": solicitacao.uuid,
+            "codigo": "0000003",
+            "tipo_atendimento": "urgente",
+            "informacoes_adicionais": "Reparo prioritário.",
+            "unidade_educacional_id": unidade_educacional_emef.id,
+            "situacao": "nao_enviado_dre",
+            "solicitante": "ue",
+            "data_envio": None,
+            "fase": "solicitacao",
+        }
+    ]
+
+
+def test_nao_consulta_solicitacoes_de_outra_ue(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ue: Usuario,
+    usuario_inativo: Usuario,
+) -> None:
+    """Retorna dicionário vazio quando a solicitação não estiver visível."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000004",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_inativo,
+    )
+
+    resultados = SolicitacaoManutencaoRepository().buscar_por_usuario(
+        usuario_ue, str(solicitacao.uuid)
+    )
+
+    assert not resultados.filter(uuid=solicitacao.uuid).exists()
 
 
 def test_lista_todas_solicitacoes_para_usuario_que_nao_e_ue(
@@ -84,7 +139,7 @@ def test_lista_todas_solicitacoes_para_usuario_que_nao_e_ue(
             criado_por=usuario_ativo,
         )
 
-    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
+    solicitacoes = SolicitacaoManutencaoRepository().buscar_por_usuario(
         usuario_dre
     )
 

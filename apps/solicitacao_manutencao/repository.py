@@ -26,28 +26,42 @@ class SolicitacaoManutencaoRepository:
         "fase",
     )
 
-    def listar_por_usuario(
+    def buscar_por_usuario(
         self,
         usuario: Usuario | None,
+        uuid: str | None = None,
     ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
-        """Lista as solicitações visíveis para o usuário informado.
+        """Lista solicitações visíveis ou consulta uma pelo UUID.
 
         Args:
             usuario: Usuário responsável pelas solicitações.
+            uuid: UUID opcional para limitar a consulta a uma solicitação.
 
         Returns:
-            Queryset de dicionários com todas as solicitações, limitado às de
-            autoria do usuário quando seu perfil for UE, ou vazio quando não
-            houver usuário.
+            Queryset de dicionários com campos resumidos ou detalhados quando
+            um UUID for informado.
         """
-        queryset = self.model.objects.all()
+        campos: tuple[str, ...]
+        if uuid is not None:
+            queryset = self.model.objects.filter(uuid=uuid)
+            campos = self.campos_listagem + (
+                "id",
+                "informacoes_adicionais",
+                "unidade_educacional_id",
+                "solicitante",
+            )
+        else:
+            queryset = self.model.objects.all()
+            campos = self.campos_listagem
+
         if usuario is None:
             queryset = queryset.none()
         elif usuario.perfil == PerfilAcesso.UE:
             queryset = queryset.filter(criado_por=usuario)
+
         return cast(
             QuerySet[SolicitacaoManutencao, dict[str, Any]],
-            queryset.values(*self.campos_listagem),
+            queryset.values(*campos),
         )
 
     def criar(self, dados: dict[str, Any], usuario: Usuario) -> dict[str, Any]:
