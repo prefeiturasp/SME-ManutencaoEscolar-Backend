@@ -7,7 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotAuthenticated
-from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
@@ -23,6 +23,7 @@ from apps.solicitacao_manutencao.models import SolicitacaoManutencao
 from apps.solicitacao_manutencao.schemas import SOLICITACAO_MANUTENCAO_SCHEMA
 from apps.solicitacao_manutencao.serializers import (
     SolicitacaoManutencaoCriarSerializer,
+    SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
 )
 from apps.solicitacao_manutencao.services.solicitacao_service import (
@@ -35,18 +36,22 @@ from apps.usuarios.models import Usuario
 
 
 @SOLICITACAO_MANUTENCAO_SCHEMA
-class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
+class SolicitacaoManutencaoViewSet(
+    ListModelMixin, RetrieveModelMixin, GenericViewSet
+):
     """Disponibiliza a criação e listagem de solicitações."""
 
-    queryset = SolicitacaoManutencao.objects.all()
     http_method_names = ["get", "post", "options"]
     filter_backends = [DjangoFilterBackend]
     filterset_class = SolicitacaoManutencaoFilter
+    lookup_field = "uuid"
 
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer apropriado para a ação atual."""
         if self.action == "list":
             return SolicitacaoManutencaoListSerializer
+        if self.action == "retrieve":
+            return SolicitacaoManutencaoDetalheSerializer
         return SolicitacaoManutencaoCriarSerializer
 
     def _usuario_logado(self) -> Usuario | None:
@@ -58,9 +63,13 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         self,
     ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
         """Retorna as solicitações visíveis para o usuário autenticado."""
-        return SolicitacaoManutencaoService().listar_por_usuario(
-            self._usuario_logado()
-        )
+        service = SolicitacaoManutencaoService()
+
+        uuid = None
+        if self.action == "retrieve":
+            uuid = self.kwargs[self.lookup_url_kwarg or self.lookup_field]
+
+        return service.buscar_por_usuario(self._usuario_logado(), uuid)
 
     @action(detail=False, methods=["get"], url_path="situacoes")
     def situacoes(self, request: Request) -> Response:

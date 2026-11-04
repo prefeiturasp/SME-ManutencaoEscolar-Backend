@@ -15,6 +15,7 @@ from apps.solicitacao_manutencao.api.views import SolicitacaoManutencaoViewSet
 from apps.solicitacao_manutencao.models import SolicitacaoManutencao
 from apps.solicitacao_manutencao.serializers import (
     SolicitacaoManutencaoCriarSerializer,
+    SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
 )
 from apps.usuarios.constants import PerfilAcesso
@@ -24,6 +25,7 @@ pytestmark = pytest.mark.django_db
 
 URL_SOLICITACAO_UE = "/api/v1/solicitacoes-manutencao/solicitacao-ue/"
 URL_SOLICITACOES = "/api/v1/solicitacoes-manutencao/"
+URL_SOLICITACAO = "/api/v1/solicitacoes-manutencao/{}/"
 URL_SITUACOES = "/api/v1/solicitacoes-manutencao/situacoes/"
 URL_FASES = "/api/v1/solicitacoes-manutencao/fases/"
 URL_TIPOS_ATENDIMENTO = "/api/v1/solicitacoes-manutencao/tipos-atendimento/"
@@ -62,6 +64,11 @@ def test_seleciona_serializer_conforme_acao() -> None:
 
     view.action = "solicitacao_ue"
     assert view.get_serializer_class() is SolicitacaoManutencaoCriarSerializer
+
+    view.action = "retrieve"
+    assert (
+        view.get_serializer_class() is SolicitacaoManutencaoDetalheSerializer
+    )
 
 
 def test_lista_situacoes_da_solicitacao(api_cliente: APIClient) -> None:
@@ -161,6 +168,89 @@ def test_lista_solicitacoes_paginadas(
             }
         ],
     }
+
+
+def test_busca_solicitacao_por_uuid(
+    api_cliente_ue: APIClient,
+    unidade_educacional_emef: Any,
+    usuario_ue: Usuario,
+) -> None:
+    """Retorna os dados completos da solicitação pelo UUID."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000003",
+        tipo_atendimento="urgente",
+        informacoes_adicionais="Reparo prioritário.",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ue,
+    )
+
+    resposta = api_cliente_ue.get(URL_SOLICITACAO.format(solicitacao.uuid))
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json() == {
+        "uuid": str(solicitacao.uuid),
+        "codigo": "0000003",
+        "tipo_atendimento": "urgente",
+        "informacoes_adicionais": "Reparo prioritário.",
+        "unidade_educacional": {
+            "id": unidade_educacional_emef.id,
+            "uuid": str(unidade_educacional_emef.uuid),
+            "codigo_eol": unidade_educacional_emef.codigo_eol,
+            "nome": unidade_educacional_emef.nome,
+            "diretoria_regional": {
+                "id": unidade_educacional_emef.diretoria_regional.id,
+                "nome_curto": (
+                    unidade_educacional_emef.diretoria_regional.nome_curto
+                ),
+            },
+            "tipo_escola": {
+                "uuid": str(unidade_educacional_emef.tipo_escola.uuid),
+                "sigla": unidade_educacional_emef.tipo_escola.sigla,
+            },
+            "subprefeitura": {
+                "uuid": str(unidade_educacional_emef.subprefeitura.uuid),
+                "nome": unidade_educacional_emef.subprefeitura.nome,
+            },
+            "lote": None,
+            "status": unidade_educacional_emef.status,
+            "dados": None,
+            "responsaveis": [],
+        },
+        "situacao": "nao_enviado_dre",
+        "solicitante": "ue",
+        "data_envio": None,
+        "fase": "solicitacao",
+        "servicos": [],
+    }
+
+
+def test_nao_busca_solicitacao_de_outra_ue(
+    api_cliente_ue: APIClient,
+    unidade_educacional_emef: Any,
+    usuario_inativo: Usuario,
+) -> None:
+    """Oculta solicitação que não pertence ao usuário da UE autenticado."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000004",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_inativo,
+    )
+
+    resposta = api_cliente_ue.get(URL_SOLICITACAO.format(solicitacao.uuid))
+
+    assert resposta.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_busca_solicitacao_inexistente_por_uuid(
+    api_cliente_ue: APIClient,
+) -> None:
+    """Retorna 404 quando não existe solicitação com o UUID informado."""
+    resposta = api_cliente_ue.get(
+        URL_SOLICITACAO.format("00000000-0000-0000-0000-000000000000")
+    )
+
+    assert resposta.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.parametrize(
