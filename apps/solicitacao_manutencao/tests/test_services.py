@@ -46,7 +46,7 @@ def test_lista_solicitacoes_visiveis_para_usuario(
         criado_por=usuario_inativo,
     )
 
-    resultado = SolicitacaoManutencaoService().listar_por_usuario(usuario_ue)
+    resultado = SolicitacaoManutencaoService().buscar_por_usuario(usuario_ue)
 
     assert list(resultado) == [
         {
