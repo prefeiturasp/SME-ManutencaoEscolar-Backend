@@ -62,7 +62,11 @@ class SolicitacaoManutencaoViewSet(
     def get_queryset(
         self,
     ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
-        """Retorna as solicitações visíveis para o usuário autenticado."""
+        """Consulta solicitações.
+
+        Retorna as solicitações visíveis para o usuário autenticado
+        ou uma específica pelo UUID.
+        """
         service = SolicitacaoManutencaoService()
 
         uuid = None
