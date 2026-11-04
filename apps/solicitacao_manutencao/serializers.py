@@ -1,10 +1,13 @@
 """Serializers do domínio de solicitações de manutenção."""
 
-from typing import Any
+from typing import Any, cast
 
 from rest_framework import serializers
 
 from apps.escola.models.unidade_educacional import Unidadeeducacional
+from apps.escola.serializers.unidade_educacional_serializers import (
+    UnidadeEducacionalSerializer,
+)
 from apps.servico.models import Servico
 from apps.solicitacao_manutencao.models import (
     FotoLocalReparo,
@@ -33,14 +36,15 @@ class SolicitacaoManutencaoListSerializer(serializers.ModelSerializer):
 class FotoLocalReparoSerializer(serializers.ModelSerializer):
     """Serializa o cadastro de documentos de funções profissionais."""
 
-    uuid: serializers.UUIDField = serializers.UUIDField(required=False)
-    arquivo: serializers.FileField = serializers.FileField(required=False)
-
     class Meta:
         """Configura os campos da foto do reparo."""
 
         model = FotoLocalReparo
         fields = ("uuid", "arquivo")
+        extra_kwargs = {
+            "uuid": {"required": False},
+            "arquivo": {"required": False},
+        }
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Exige arquivo apenas quando não há documento existente.
@@ -145,3 +149,69 @@ class SolicitacaoManutencaoCriarSerializer(serializers.ModelSerializer):
                 "Informe ao menos um serviço de manutenção."
             )
         return value
+
+
+class ServicoManutencaoDetalhesSerializer(serializers.ModelSerializer):
+    """Serializa os dados de leitura de um serviço da solicitação."""
+
+    arquivos = FotoLocalReparoSerializer(
+        source="fotos", many=True, read_only=True
+    )
+    servico_uuid: serializers.SlugRelatedField = serializers.SlugRelatedField(
+        source="servico", slug_field="uuid", read_only=True, allow_null=True
+    )
+    nome_servico = serializers.CharField(
+        source="servico.nome", read_only=True, allow_null=True
+    )
+
+    class Meta:
+        """Configura os campos exibidos do serviço de manutenção."""
+
+        model = ServicoManutencao
+        fields = (
+            "servico_uuid",
+            "nome_servico",
+            "servico_especifico",
+            "local_reparo",
+            "descricao",
+            "arquivos",
+        )
+        read_only_fields = fields
+
+
+class SolicitacaoManutencaoDetalheSerializer(serializers.Serializer):
+    """Serializa os dados completos de uma solicitação de manutenção."""
+
+    def get_unidade_educacional(self, obj: dict[str, Any]) -> dict[str, Any]:
+        """Serializa a unidade educacional associada à solicitação."""
+        unidade = (
+            Unidadeeducacional.objects.select_related(
+                "diretoria_regional", "tipo_escola", "subprefeitura"
+            )
+            .prefetch_related("diretoria_regional__vinculo_lote__lote")
+            .get(pk=obj["unidade_educacional_id"])
+        )
+        return UnidadeEducacionalSerializer(unidade).data
+
+    def get_servicos(self, obj: dict[str, Any]) -> list[dict[str, Any]]:
+        """Serializa os serviços associados à solicitação."""
+        servicos = (
+            ServicoManutencao.objects.select_related("servico")
+            .prefetch_related("fotos")
+            .filter(solicitacao_manutencao_id=obj["id"])
+        )
+        return cast(
+            list[dict[str, Any]],
+            ServicoManutencaoDetalhesSerializer(servicos, many=True).data,
+        )
+
+    uuid = serializers.UUIDField(read_only=True)
+    unidade_educacional = serializers.SerializerMethodField()
+    servicos = serializers.SerializerMethodField()
+    codigo = serializers.CharField(read_only=True)
+    tipo_atendimento = serializers.CharField(read_only=True)
+    informacoes_adicionais = serializers.CharField(read_only=True)
+    situacao = serializers.CharField(read_only=True)
+    solicitante = serializers.CharField(read_only=True)
+    data_envio = serializers.DateTimeField(read_only=True, allow_null=True)
+    fase = serializers.CharField(read_only=True)
