@@ -1,0 +1,19 @@
+estados:
+  nao_criada:
+    acoes:
+      salvar:
+        proximo_estado: nao_enviado_dre
+        terminal: false
+
+      enviar:
+        proximo_estado: aguardando_analise_dre
+        terminal: false
+
+  nao_enviado_dre:
+    acoes:
+      enviar:
+        proximo_estado: aguardando_analise_dre
+        terminal: false
+
+  aguardando_analise_dre:
+    acoes: null

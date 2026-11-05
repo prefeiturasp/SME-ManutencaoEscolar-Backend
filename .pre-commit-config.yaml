@@ -20,6 +20,7 @@ repos:
     rev: v1.20.2
     hooks:
       - id: mypy
+        args: [--show-traceback]
         exclude: (^|/)(tests|migrations)/
         additional_dependencies:
           - django-stubs
@@ -35,3 +36,4 @@ repos:
           - django-celery-beat
           - djangorestframework-simplejwt
           - django-minio-backend
+          - git+https://github.com/prefeiturasp/SME-Workflow-SDK.git@feature/159193-empacotamento-da-biblioteca

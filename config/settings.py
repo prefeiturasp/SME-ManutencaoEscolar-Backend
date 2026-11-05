@@ -46,6 +46,7 @@ CORS_ALLOWED_ORIGINS = [] if CORS_ALLOW_ALL_ORIGINS else ALLOWED_HOSTS
 SME_API_EOL_URL = os.environ.get("SME_API_EOL_URL", "")
 SME_API_EOL_TOKEN = os.environ.get("SME_API_EOL_TOKEN", "")
 
+WORKFLOW_CONFIG_PATH = BASE_DIR / "config" / "workflow.yaml"
 # Token de redefinição de senha expira em 6h
 PASSWORD_RESET_TIMEOUT = 21600
 

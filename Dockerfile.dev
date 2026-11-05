@@ -1,5 +1,5 @@
 # NOSONAR
-FROM --platform=linux/amd64 python:3.12-slim-bullseye
+FROM --platform=linux/amd64 python:3.12-slim-bookworm
 
 ARG UID=1000
 ARG GID=1000

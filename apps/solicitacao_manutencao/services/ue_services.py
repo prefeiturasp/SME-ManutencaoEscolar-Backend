@@ -4,8 +4,11 @@ from typing import Any
 
 from django.db import transaction
 from django.utils import timezone
+from sme_workflow_sdk import ContextoExecucao
 
+from apps.core.repository.workflow_repository import WorkflowRepository
 from apps.core.services.anexo_service import AnexoService
+from apps.core.workflow import workflow
 from apps.solicitacao_manutencao.constants import PerfisSolicitacao
 from apps.solicitacao_manutencao.models import (
     SituacaoSolicitacao,
@@ -75,14 +78,27 @@ class SolicitacaoManutencaoUeService:
             Dados da solicitação criada com seus serviços associados.
         """
         dados_servicos = dados.pop("servicos")
+        acao = "enviar" if enviar else "salvar"
+        execucao_validada = workflow.validar(
+            estado_atual="nao_criada",
+            acao=acao,
+        )
         if enviar:
-            dados["situacao"] = SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE
             dados["data_envio"] = timezone.now()
-        else:
-            dados["situacao"] = SituacaoSolicitacao.NAO_ENVIADO_DRE
         dados["codigo"] = self.gerar_codigo()
         dados["solicitante"] = PerfisSolicitacao.UE
 
+        resultado = workflow.executar(
+            execucao_validada,
+            contexto=ContextoExecucao(
+                autor=str(usuario.uuid),
+                dados={
+                    "origem": "aplicacao_consumidora",
+                },
+            ),
+        )
+        print(resultado)
+        dados["situacao"] = SituacaoSolicitacao(resultado["proximo_estado"])
         solicitacao = self.repository.criar(
             dados=dados,
             usuario=usuario,
@@ -90,7 +106,9 @@ class SolicitacaoManutencaoUeService:
         solicitacao["servicos"] = self._criar_servicos(
             solicitacao, dados_servicos, usuario
         )
-
+        WorkflowRepository().registrar_transicao(
+            entidade=solicitacao, resultado_workflow=resultado
+        )
         return solicitacao
 
     def _criar_servicos(
