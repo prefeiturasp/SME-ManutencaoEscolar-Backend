@@ -92,12 +92,9 @@ class SolicitacaoManutencaoUeService:
             execucao_validada,
             contexto=ContextoExecucao(
                 autor=str(usuario.uuid),
-                dados={
-                    "origem": "aplicacao_consumidora",
-                },
+                dados={},
             ),
         )
-        print(resultado)
         dados["situacao"] = SituacaoSolicitacao(resultado["proximo_estado"])
         solicitacao = self.repository.criar(
             dados=dados,
@@ -107,7 +104,10 @@ class SolicitacaoManutencaoUeService:
             solicitacao, dados_servicos, usuario
         )
         WorkflowRepository().registrar_transicao(
-            entidade=solicitacao, resultado_workflow=resultado
+            app_label="solicitacao_manutencao",
+            tipo_entidade="SolicitacaoManutencao",
+            entidade=solicitacao,
+            resultado_workflow=resultado,
         )
         return solicitacao
 

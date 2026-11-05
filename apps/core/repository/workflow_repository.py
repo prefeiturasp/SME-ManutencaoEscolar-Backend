@@ -2,8 +2,10 @@
 
 from typing import Any
 
+from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import QuerySet
 
 from apps.core.models import HistoricoWorkflow, ProcessoWorkflow
 from apps.usuarios.models import Usuario
@@ -15,23 +17,18 @@ class WorkflowRepository:
     @transaction.atomic
     def registrar_transicao(
         self,
-        entidade: Any,
+        app_label: str,
+        tipo_entidade: str,
+        entidade: dict[str, Any],
         resultado_workflow: dict[str, Any],
-    ) -> ProcessoWorkflow:
-        """Registra uma transição e atualiza o processo da entidade.
-
-        Args:
-            entidade: Instância da entidade controlada pelo workflow.
-            resultado_workflow: Resultado completo retornado pelo SDK.
-
-        Returns:
-            Processo de workflow atualizado.
-        """
-        content_type = ContentType.objects.get_for_model(entidade)
-
+    ) -> None:
+        """Registra uma transição e atualiza o processo da entidade."""
+        model = apps.get_model(app_label, tipo_entidade)
+        content_type = ContentType.objects.get_for_model(model)
+        entidade_id = entidade["id"]
         processo, _ = ProcessoWorkflow.objects.get_or_create(
             content_type=content_type,
-            entidade_referencia=str(entidade.pk),
+            entidade_referencia=str(entidade_id),
             defaults={
                 "estado_atual": resultado_workflow["proximo_estado"],
                 "terminal": resultado_workflow["terminal"],
@@ -65,18 +62,23 @@ class WorkflowRepository:
             fim=dados_historico["fim"],
             autor=dados_historico["autor"],
             contexto=dados_historico["contexto"],
-            resultado_completo={
-                **resultado_workflow,
-                "inicio": resultado_workflow["inicio"].isoformat(),
-                "fim": (
-                    resultado_workflow["fim"].isoformat()
-                    if resultado_workflow["fim"]
-                    else None
-                ),
-            },
         )
 
-        return processo
+    def obter_historico(
+        self,
+        app_label: str,
+        tipo_entidade: str,
+        entidade_id: str,
+    ) -> QuerySet[HistoricoWorkflow]:
+        content_type = ContentType.objects.get(
+            app_label=app_label,
+            model=tipo_entidade.lower(),
+        )
+
+        return HistoricoWorkflow.objects.filter(
+            processo__content_type=content_type,
+            processo__entidade_referencia=str(entidade_id),
+        )
 
 
 # {

@@ -1,19 +1,11 @@
 """Model responsável pelo histórico do workflow."""
 
-import uuid
-
 from django.conf import settings
 from django.db import models
 
 
 class HistoricoWorkflow(models.Model):
     """Registra as execuções e transições do workflow."""
-
-    id_historico = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
 
     processo = models.ForeignKey(
         "core.ProcessoWorkflow",
@@ -50,8 +42,6 @@ class HistoricoWorkflow(models.Model):
     )
 
     contexto = models.JSONField(default=dict)
-
-    resultado_completo = models.JSONField(default=dict)
 
     class Meta:
         ordering = ["-inicio"]

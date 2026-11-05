@@ -1,20 +1,14 @@
 """Model responsável pelo processo de workflow."""
 
-import uuid
-
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from apps.core.models.mixins import UUIDMixin
 
-class ProcessoWorkflow(models.Model):
+
+class ProcessoWorkflow(UUIDMixin):
     """Representa o processo de workflow de uma entidade."""
-
-    id_processo = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
 
     content_type = models.ForeignKey(
         ContentType,
@@ -42,4 +36,4 @@ class ProcessoWorkflow(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.id_processo} - {self.estado_atual}"
+        return f"{self.uuid} - {self.estado_atual}"
