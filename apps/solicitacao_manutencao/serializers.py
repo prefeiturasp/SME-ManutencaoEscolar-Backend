@@ -40,11 +40,12 @@ class FotoLocalReparoSerializer(serializers.ModelSerializer):
         """Configura os campos da foto do reparo."""
 
         model = FotoLocalReparo
-        fields = ("uuid", "arquivo")
+        fields = ("uuid", "arquivo", "nome_original")
         extra_kwargs = {
             "uuid": {"required": False},
             "arquivo": {"required": False},
         }
+        read_only_fields = ("nome_original",)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Exige arquivo apenas quando não há documento existente.
