@@ -9,7 +9,6 @@ from apps.solicitacao_manutencao.models import (
     ServicoManutencao,
     SolicitacaoManutencao,
 )
-from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models import Usuario
 
 
@@ -41,23 +40,28 @@ class SolicitacaoManutencaoRepository:
             Queryset de dicionários com campos resumidos ou detalhados quando
             um UUID for informado.
         """
-        campos: tuple[str, ...]
+        campos: tuple[str, ...] = self.campos_listagem
+        filtros: dict[str, Any] = {
+            "unidade_educacional__historico_responsaveis__ativo": True,
+        }
+        if usuario is None or not usuario.username:
+            queryset = self.model.objects.none()
+        else:
+            campo_registro_funcional = (
+                "unidade_educacional__historico_responsaveis__responsavel__"
+                "registro_funcional"
+            )
+            filtros[campo_registro_funcional] = usuario.username
+            queryset = self.model.objects.filter(**filtros)
+
         if uuid is not None:
-            queryset = self.model.objects.filter(uuid=uuid)
-            campos = self.campos_listagem + (
+            queryset = queryset.filter(uuid=uuid)
+            campos += (
                 "id",
                 "informacoes_adicionais",
                 "unidade_educacional_id",
                 "solicitante",
             )
-        else:
-            queryset = self.model.objects.all()
-            campos = self.campos_listagem
-
-        if usuario is None:
-            queryset = queryset.none()
-        elif usuario.perfil == PerfilAcesso.UE:
-            queryset = queryset.filter(criado_por=usuario)
 
         return cast(
             QuerySet[SolicitacaoManutencao, dict[str, Any]],
