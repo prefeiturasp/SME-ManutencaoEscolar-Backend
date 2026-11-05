@@ -15,6 +15,7 @@ from rest_framework import serializers
 
 from apps.solicitacao_manutencao.serializers import (
     SolicitacaoManutencaoCriarSerializer,
+    SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
 )
 
@@ -53,7 +54,9 @@ _SOLICITACAO_EXEMPLO_ENTRADA: dict[str, Any] = {
             "servico_especifico": "Troca de disjuntor",
             "local_reparo": "Cozinha",
             "descricao": "Disjuntor desarmando constantemente.",
-            "arquivos": [{"arquivo": "reparo.jpg"}],
+            "arquivos": [
+                {"arquivo": "<arquivo enviado como multipart/form-data>"}
+            ],
         }
     ],
 }
@@ -75,6 +78,63 @@ _SOLICITACAO_EXEMPLO_SAIDA: dict[str, Any] = {
                     "arquivo": (
                         "http://localhost:9000/arquivos/2026/10/20/reparo.jpg"
                     ),
+                }
+            ],
+        }
+    ],
+}
+
+_SOLICITACAO_DETALHE_EXEMPLO: dict[str, Any] = {
+    "uuid": "4a9f9f9f-1d0d-4eb4-bd5d-3456789abcde",
+    "codigo": "0000001",
+    "tipo_atendimento": "urgente",
+    "informacoes_adicionais": "Reparo prioritário.",
+    "unidade_educacional": {
+        "id": 1,
+        "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
+        "codigo_eol": "1234567",
+        "nome": "Antônia Barros Figueiroa",
+        "diretoria_regional": {"id": 1, "nome_curto": "Freguesia/Brasilândia"},
+        "tipo_escola": {
+            "uuid": "6c1b1b1b-4f4f-4a1a-8c8c-567890abcdef",
+            "sigla": "EMEF",
+        },
+        "subprefeitura": {
+            "uuid": "7d2c2c2c-5a5a-4b2b-9d9d-67890abcdef1",
+            "nome": "Freguesia/Brasilândia",
+        },
+        "lote": {
+            "uuid": "8e3d3d3d-6b6b-4c3c-aeae-7890abcdef12",
+            "nome": "002",
+        },
+        "status": True,
+        "dados": {
+            "email": "escola@educacao.sp.gov.br",
+            "telefone": "",
+            "logradouro": "Avenida João Pedroso Guimarães",
+            "numero": "5214",
+            "bairro": "Bela Vista",
+            "cep": "09652320",
+            "municipio": "São Paulo",
+            "uf": "SP",
+        },
+        "responsaveis": [],
+    },
+    "situacao": "aguardando_analise_dre",
+    "solicitante": "ue",
+    "data_envio": "2026-10-20T14:30:00-03:00",
+    "fase": "solicitacao",
+    "servicos": [
+        {
+            "servico_uuid": "3f8e8e8e-0c9c-4da3-ac4c-23456789abcd",
+            "nome_servico": "Elétrica",
+            "servico_especifico": "",
+            "local_reparo": "Cozinha",
+            "descricao": "Disjuntor desarmando constantemente.",
+            "arquivos": [
+                {
+                    "uuid": "5b0a0a0a-2e1e-4fc5-ae6e-456789abcdef",
+                    "arquivo": "http://localhost:9000/arquivos/reparo.jpg",
                 }
             ],
         }
@@ -123,7 +183,16 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
         parameters=[
             OpenApiParameter(name="codigo", type=str),
             OpenApiParameter(name="tipo_atendimento", type=str),
-            OpenApiParameter(name="data_envio", type=str),
+            OpenApiParameter(
+                name="data_envio_after",
+                type=str,
+                description="Data inicial do intervalo de envio (YYYY-MM-DD).",
+            ),
+            OpenApiParameter(
+                name="data_envio_before",
+                type=str,
+                description="Data final do intervalo de envio (YYYY-MM-DD).",
+            ),
             OpenApiParameter(name="fase", type=str),
             OpenApiParameter(name="situacao", type=str),
         ],
@@ -132,6 +201,26 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
             401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
             500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
+    ),
+    retrieve=extend_schema(
+        tags=[_TAG_SOLICITACAO],
+        summary="Busca uma solicitação de manutenção",
+        description="Retorna os dados de uma solicitação pelo UUID.",
+        operation_id="buscarSolicitacaoManutencao",
+        responses={
+            200: SolicitacaoManutencaoDetalheSerializer,
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            404: OpenApiResponse(description="Solicitação não encontrada."),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+        examples=[
+            OpenApiExample(
+                name="Detalhes da solicitação",
+                response_only=True,
+                status_codes=["200"],
+                value=_SOLICITACAO_DETALHE_EXEMPLO,
+            )
+        ],
     ),
     solicitacao_ue=extend_schema(
         tags=[_TAG_SOLICITACAO],

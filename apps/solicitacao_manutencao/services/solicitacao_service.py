@@ -25,16 +25,18 @@ class SolicitacaoManutencaoService:
         """
         self.repository = repository or SolicitacaoManutencaoRepository()
 
-    def listar_por_usuario(
+    def buscar_por_usuario(
         self,
         usuario: Usuario | None,
+        uuid: str | None = None,
     ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
-        """Lista as solicitações visíveis para o usuário informado.
+        """Lista solicitações visíveis ou consulta uma pelo UUID.
 
         Args:
             usuario: Usuário para o qual as solicitações serão listadas.
+            uuid: UUID opcional para consultar uma solicitação específica.
 
         Returns:
-            Solicitações visíveis para o usuário.
+            Queryset de dicionários com dados resumidos ou detalhados.
         """
-        return self.repository.listar_por_usuario(usuario)
+        return self.repository.buscar_por_usuario(usuario, uuid)

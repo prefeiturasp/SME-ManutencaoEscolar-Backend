@@ -9,7 +9,6 @@ from apps.solicitacao_manutencao.models import (
     ServicoManutencao,
     SolicitacaoManutencao,
 )
-from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models import Usuario
 
 
@@ -26,28 +25,47 @@ class SolicitacaoManutencaoRepository:
         "fase",
     )
 
-    def listar_por_usuario(
+    def buscar_por_usuario(
         self,
         usuario: Usuario | None,
+        uuid: str | None = None,
     ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
-        """Lista as solicitações visíveis para o usuário informado.
+        """Lista solicitações visíveis ou consulta uma pelo UUID.
 
         Args:
             usuario: Usuário responsável pelas solicitações.
+            uuid: UUID opcional para limitar a consulta a uma solicitação.
 
         Returns:
-            Queryset de dicionários com todas as solicitações, limitado às de
-            autoria do usuário quando seu perfil for UE, ou vazio quando não
-            houver usuário.
+            Queryset de dicionários com campos resumidos ou detalhados quando
+            um UUID for informado.
         """
-        queryset = self.model.objects.all()
-        if usuario is None:
-            queryset = queryset.none()
-        elif usuario.perfil == PerfilAcesso.UE:
-            queryset = queryset.filter(criado_por=usuario)
+        campos: tuple[str, ...] = self.campos_listagem
+        filtros: dict[str, Any] = {
+            "unidade_educacional__historico_responsaveis__ativo": True,
+        }
+        if usuario is None or not usuario.username:
+            queryset = self.model.objects.none()
+        else:
+            campo_registro_funcional = (
+                "unidade_educacional__historico_responsaveis__responsavel__"
+                "registro_funcional"
+            )
+            filtros[campo_registro_funcional] = usuario.username
+            queryset = self.model.objects.filter(**filtros)
+
+        if uuid is not None:
+            queryset = queryset.filter(uuid=uuid)
+            campos += (
+                "id",
+                "informacoes_adicionais",
+                "unidade_educacional_id",
+                "solicitante",
+            )
+
         return cast(
             QuerySet[SolicitacaoManutencao, dict[str, Any]],
-            queryset.values(*self.campos_listagem),
+            queryset.values(*campos),
         )
 
     def criar(self, dados: dict[str, Any], usuario: Usuario) -> dict[str, Any]:

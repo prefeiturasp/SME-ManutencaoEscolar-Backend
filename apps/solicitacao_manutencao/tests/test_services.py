@@ -6,7 +6,7 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.core.services.anexo_service import AnexoService
-from apps.escola.models import Unidadeeducacional
+from apps.escola.models import HistoricoResponsavel, Unidadeeducacional
 from apps.solicitacao_manutencao.models import (
     FotoLocalReparo,
     SolicitacaoManutencao,
@@ -31,8 +31,11 @@ def test_lista_solicitacoes_visiveis_para_usuario(
     unidade_educacional_emef: Unidadeeducacional,
     usuario_ue: Usuario,
     usuario_inativo: Usuario,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
-    """Lista somente as solicitações visíveis para o usuário da UE."""
+    """Lista as solicitações da unidade vinculada ao usuário da UE."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
     solicitacao_visivel = SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="comum",
@@ -46,9 +49,17 @@ def test_lista_solicitacoes_visiveis_para_usuario(
         criado_por=usuario_inativo,
     )
 
-    resultado = SolicitacaoManutencaoService().listar_por_usuario(usuario_ue)
+    resultado = SolicitacaoManutencaoService().buscar_por_usuario(usuario_ue)
 
     assert list(resultado) == [
+        {
+            "uuid": SolicitacaoManutencao.objects.get(codigo="0000002").uuid,
+            "codigo": "0000002",
+            "tipo_atendimento": "comum",
+            "situacao": "nao_enviado_dre",
+            "data_envio": None,
+            "fase": "solicitacao",
+        },
         {
             "uuid": solicitacao_visivel.uuid,
             "codigo": "0000001",
@@ -56,7 +67,7 @@ def test_lista_solicitacoes_visiveis_para_usuario(
             "situacao": "nao_enviado_dre",
             "data_envio": None,
             "fase": "solicitacao",
-        }
+        },
     ]
 
 

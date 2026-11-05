@@ -11,10 +11,12 @@ from rest_framework.exceptions import NotAuthenticated
 from rest_framework.request import Request
 from rest_framework.test import APIClient, APIRequestFactory
 
+from apps.escola.models import HistoricoResponsavel
 from apps.solicitacao_manutencao.api.views import SolicitacaoManutencaoViewSet
 from apps.solicitacao_manutencao.models import SolicitacaoManutencao
 from apps.solicitacao_manutencao.serializers import (
     SolicitacaoManutencaoCriarSerializer,
+    SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
 )
 from apps.usuarios.constants import PerfilAcesso
@@ -24,6 +26,7 @@ pytestmark = pytest.mark.django_db
 
 URL_SOLICITACAO_UE = "/api/v1/solicitacoes-manutencao/solicitacao-ue/"
 URL_SOLICITACOES = "/api/v1/solicitacoes-manutencao/"
+URL_SOLICITACAO = "/api/v1/solicitacoes-manutencao/{}/"
 URL_SITUACOES = "/api/v1/solicitacoes-manutencao/situacoes/"
 URL_FASES = "/api/v1/solicitacoes-manutencao/fases/"
 URL_TIPOS_ATENDIMENTO = "/api/v1/solicitacoes-manutencao/tipos-atendimento/"
@@ -62,6 +65,11 @@ def test_seleciona_serializer_conforme_acao() -> None:
 
     view.action = "solicitacao_ue"
     assert view.get_serializer_class() is SolicitacaoManutencaoCriarSerializer
+
+    view.action = "retrieve"
+    assert (
+        view.get_serializer_class() is SolicitacaoManutencaoDetalheSerializer
+    )
 
 
 def test_lista_situacoes_da_solicitacao(api_cliente: APIClient) -> None:
@@ -128,8 +136,11 @@ def test_lista_solicitacoes_paginadas(
     unidade_educacional_emef: Any,
     usuario_ue: Usuario,
     usuario_inativo: Usuario,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
-    """Lista somente solicitações criadas pelo usuário autenticado."""
+    """Lista solicitações da unidade vinculada ao usuário autenticado."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="urgente",
@@ -147,10 +158,20 @@ def test_lista_solicitacoes_paginadas(
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json() == {
-        "count": 1,
+        "count": 2,
         "next": None,
         "previous": None,
         "results": [
+            {
+                "uuid": str(
+                    SolicitacaoManutencao.objects.get(codigo="0000002").uuid
+                ),
+                "codigo": "0000002",
+                "tipo_atendimento": "comum",
+                "situacao": "nao_enviado_dre",
+                "data_envio": None,
+                "fase": "solicitacao",
+            },
             {
                 "uuid": str(solicitacao.uuid),
                 "codigo": "0000001",
@@ -158,9 +179,112 @@ def test_lista_solicitacoes_paginadas(
                 "situacao": "nao_enviado_dre",
                 "data_envio": None,
                 "fase": "solicitacao",
-            }
+            },
         ],
     }
+
+
+def test_busca_solicitacao_por_uuid(
+    api_cliente_ue: APIClient,
+    unidade_educacional_emef: Any,
+    usuario_ue: Usuario,
+    historico_responsavel: HistoricoResponsavel,
+) -> None:
+    """Retorna os dados completos da solicitação pelo UUID."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000003",
+        tipo_atendimento="urgente",
+        informacoes_adicionais="Reparo prioritário.",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ue,
+    )
+
+    resposta = api_cliente_ue.get(URL_SOLICITACAO.format(solicitacao.uuid))
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json() == {
+        "uuid": str(solicitacao.uuid),
+        "codigo": "0000003",
+        "tipo_atendimento": "urgente",
+        "informacoes_adicionais": "Reparo prioritário.",
+        "unidade_educacional": {
+            "id": unidade_educacional_emef.id,
+            "uuid": str(unidade_educacional_emef.uuid),
+            "codigo_eol": unidade_educacional_emef.codigo_eol,
+            "nome": unidade_educacional_emef.nome,
+            "diretoria_regional": {
+                "id": unidade_educacional_emef.diretoria_regional.id,
+                "nome_curto": (
+                    unidade_educacional_emef.diretoria_regional.nome_curto
+                ),
+            },
+            "tipo_escola": {
+                "uuid": str(unidade_educacional_emef.tipo_escola.uuid),
+                "sigla": unidade_educacional_emef.tipo_escola.sigla,
+            },
+            "subprefeitura": {
+                "uuid": str(unidade_educacional_emef.subprefeitura.uuid),
+                "nome": unidade_educacional_emef.subprefeitura.nome,
+            },
+            "lote": None,
+            "status": unidade_educacional_emef.status,
+            "dados": None,
+            "responsaveis": [
+                {
+                    "uuid": str(historico_responsavel.responsavel.uuid),
+                    "registro_funcional": (
+                        historico_responsavel.responsavel.registro_funcional
+                    ),
+                    "nome": historico_responsavel.responsavel.nome,
+                    "email": historico_responsavel.responsavel.email,
+                    "telefone": historico_responsavel.responsavel.telefone,
+                    "celular": historico_responsavel.responsavel.celular,
+                    "cargo": {
+                        "codigo": historico_responsavel.cargo.codigo,
+                        "nome": historico_responsavel.cargo.nome,
+                    },
+                    "ativo": True,
+                    "criado_pelo_sincronizador": False,
+                }
+            ],
+        },
+        "situacao": "nao_enviado_dre",
+        "solicitante": "ue",
+        "data_envio": None,
+        "fase": "solicitacao",
+        "servicos": [],
+    }
+
+
+def test_nao_busca_solicitacao_de_outra_ue(
+    api_cliente_ue: APIClient,
+    unidade_educacional_emef: Any,
+    usuario_inativo: Usuario,
+) -> None:
+    """Oculta solicitação que não pertence ao usuário da UE autenticado."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000004",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_inativo,
+    )
+
+    resposta = api_cliente_ue.get(URL_SOLICITACAO.format(solicitacao.uuid))
+
+    assert resposta.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_busca_solicitacao_inexistente_por_uuid(
+    api_cliente_ue: APIClient,
+) -> None:
+    """Retorna 404 quando não existe solicitação com o UUID informado."""
+    resposta = api_cliente_ue.get(
+        URL_SOLICITACAO.format("00000000-0000-0000-0000-000000000000")
+    )
+
+    assert resposta.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.parametrize(
@@ -177,8 +301,14 @@ def test_filtra_listagem_de_solicitacoes(
     usuario_ativo: Usuario,
     parametros: dict[str, str],
     codigo_esperado: str,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Filtra a listagem pelos dados da solicitação."""
+    usuario_ativo.username = (
+        historico_responsavel.responsavel.registro_funcional
+    )
+    usuario_ativo.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ativo)
     SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="urgente",
@@ -214,8 +344,14 @@ def test_filtra_listagem_de_solicitacoes_por_multiplos_valores(
     usuario_ativo: Usuario,
     campo: str,
     valores: str,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Filtra a listagem por múltiplos valores do mesmo campo."""
+    usuario_ativo.username = (
+        historico_responsavel.responsavel.registro_funcional
+    )
+    usuario_ativo.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ativo)
     SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="urgente",
@@ -241,8 +377,14 @@ def test_filtra_listagem_por_intervalo_de_data_envio(
     api_cliente: APIClient,
     unidade_educacional_emef: Any,
     usuario_ativo: Usuario,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Filtra solicitações cuja data de envio esteja no intervalo."""
+    usuario_ativo.username = (
+        historico_responsavel.responsavel.registro_funcional
+    )
+    usuario_ativo.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ativo)
     for codigo, data_envio in (
         ("0000001", datetime(2026, 10, 9, 23, 59)),
         ("0000002", datetime(2026, 10, 10, 12)),
@@ -293,7 +435,8 @@ def test_documenta_listagem_de_solicitacoes_no_schema() -> None:
         "tipo_atendimento",
         "situacao",
         "fase",
-        "data_envio",
+        "data_envio_after",
+        "data_envio_before",
     }
     assert set(operacao["responses"]) == {"200", "401", "500"}
 
