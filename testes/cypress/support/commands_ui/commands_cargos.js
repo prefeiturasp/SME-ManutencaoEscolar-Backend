@@ -55,6 +55,37 @@ Cypress.Commands.add('validar_campos_preenchidos_cargo', () => {
     .should('not.exist')
 })
 
+Cypress.Commands.add('inserir_documento', () => {  
+  cy.get(cargos_localizadores.btn_cadastrar_cargos())
+    .should('be.visible')
+    .click()
+
+  cy.url({ timeout: 30000 })
+    .should('include', '/cargos/cadastrar')
+
+  cy.get(cargos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(cargos_localizadores.select_documento())
+    .should('be.visible')
+    .click()
+
+  cy.get(cargos_localizadores.opcoes_documento())
+    .should('be.visible')
+    .contains('Sim')
+    .click()
+
+  cy.get(cargos_localizadores.campo_nome_documento())
+    .should('be.visible')
+    .type('Teste automação')
+})
+
+Cypress.Commands.add('validar_campos_preenchidos_documento', () => {
+  cy.contains('Informe ao menos um documento para este cargo.')
+    .should('not.exist')
+})
+
 Cypress.Commands.add('clicar_cancelar_cadastro_cargo', () => {
   cy.get(cargos_localizadores.btn_cadastrar_cargos())
     .should('be.visible')

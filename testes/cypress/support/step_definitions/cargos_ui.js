@@ -24,6 +24,14 @@ Então('o sistema não cadastra o cargo sem campos obrigatórios', function () {
   cy.validar_campos_preenchidos_cargo()
 })
 
+Quando('preencho sim em documento de cargo {string}', function () {
+  cy.inserir_documento()
+})
+
+Então('o sistema permite inserir no cargo documentos exigidos', function () {
+  cy.validar_campos_preenchidos_documento() 
+})
+
 Quando('cancelo preenchimento o cadastro de cargo {string}', function () {
   cy.clicar_cancelar_cadastro_cargo() 
 })

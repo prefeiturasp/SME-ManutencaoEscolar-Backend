@@ -26,6 +26,15 @@ Funcionalidade: Cadastro de cargo
 
   Esquema do Cenário: Validar: <caso>
     E acesso a tela Cargos
+    Quando preencho sim em documento de cargo "<status>"
+    Então o sistema permite inserir no cargo documentos exigidos
+
+    Exemplos:
+      | status | caso            |
+      | ativo  | Exige documento |
+
+  Esquema do Cenário: Validar: <caso>
+    E acesso a tela Cargos
     Quando cancelo preenchimento o cadastro de cargo "<status>"
     Então o sistema não cadastra o cargo retornando para listagem
 
