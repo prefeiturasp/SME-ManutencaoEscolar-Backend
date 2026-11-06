@@ -264,7 +264,6 @@ class ApiEOLRepository:
             )
             raise SmeIntegracaoError("Erro ao consultar dados do servidor")
         dados: dict = response.json()
-        print(f"Dados do usuário obtidos: {dados}")
         return dados
 
     @staticmethod
