@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova Solicitação de Manutenção Escolar</title>
+</head>
+<body>
+
+    <p>Prezado(a) {{ nome_responsavel }}{% if rf_responsavel %} - RF{{ rf_responsavel }}{% endif %},</p>
+
+    <p>Informamos que uma nova <strong>Solicitação de Manutenção Escolar</strong> foi criada e encaminhada para sua análise.</p>
+
+    <p><strong>Dados da solicitação:</strong></p>
+    <ul>
+        <li><strong>Número da Solicitação:</strong> {{ numero }}</li>
+        <li><strong>Grau de Urgência:</strong> {{ tipo }}</li>
+        <li><strong>Unidade Escolar (UE):</strong> {{ unidade }}</li>
+        <li><strong>Solicitante:</strong> {{ solicitante }}{% if rf_solicitante %} - RF {{ rf_solicitante }}{% endif %}</li>
+        <li><strong>Data de envio:</strong> {{ data }}</li>
+        <li><strong>Hora:</strong> {{ hora }}</li>
+    </ul>
+
+    <p>Para visualizar os detalhes e realizar a análise da solicitação, clique
+        <a
+            href="{{ url }}"
+            style="
+                background:#0d6efd;
+                color:#ffffff;
+                text-decoration:none;
+                padding:6px 14px;
+                border-radius:4px;
+                display:inline-block;
+                font-weight:bold;
+            "
+        >AQUI</a>.
+    </p>
+
+    <p>
+        Atenciosamente,<br>
+        Sistema Manutenção Escolar
+    </p>
+
+    <p style="color:#6c757d;font-size:12px;">Mensagem automática. Por favor, não responda a este e-mail.</p>
+
+</body>
+</html>

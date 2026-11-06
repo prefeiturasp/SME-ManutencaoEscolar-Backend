@@ -39,6 +39,15 @@ class Usuario(AbstractUser):
         blank=True,
     )
 
+    diretoria_regional = models.ForeignKey(
+        "escola.DiretoriaRegional",
+        on_delete=models.SET_NULL,
+        related_name="usuarios",
+        null=True,
+        blank=True,
+        help_text="Diretoria regional do usuário com perfil DRE.",
+    )
+
     class Meta:
         verbose_name = "Usuário"
         verbose_name_plural = "Usuários"
