@@ -137,10 +137,11 @@ class UsuarioService:
     def _obter_dre_do_usuario(username: str) -> str | None:
         """Retorna o nome da DRE do usuário com perfil DRE.
 
-        Ainda não há vínculo entre o usuário com perfil DRE e a diretoria
-        regional (definição pendente), por isso retorna ``None``.
+        Returns:
+            Nome da diretoria regional vinculada ao usuário ou ``None`` quando
+            o usuário ainda não possui vínculo.
         """
-        return None
+        return UsuarioRepository.obter_nome_diretoria_regional(username)
 
     @staticmethod
     def enviar_email_recuperacao_senha(usuario: dict) -> None:

@@ -15,6 +15,9 @@ from apps.solicitacao_manutencao.repository import (
     ServicoManutencaoRepository,
     SolicitacaoManutencaoRepository,
 )
+from apps.solicitacao_manutencao.services.notificacao_service import (
+    NotificacaoSolicitacaoService,
+)
 from apps.usuarios.models import Usuario
 
 
@@ -27,6 +30,7 @@ class SolicitacaoManutencaoUeService:
         servico_repository: ServicoManutencaoRepository | None = None,
         arquivo_repository: ArquivoServicoManutencaoRepository | None = None,
         anexo_service: AnexoService | None = None,
+        notificacao_service: NotificacaoSolicitacaoService | None = None,
     ) -> None:
         """Inicializa o serviço com suas dependências.
 
@@ -37,6 +41,7 @@ class SolicitacaoManutencaoUeService:
                 de manutenção.
             anexo_service: Serviço de anexos para validação e preparação
                 de arquivos.
+            notificacao_service: Serviço de notificações por e-mail.
         """
         self.repository = repository or SolicitacaoManutencaoRepository()
         self.servico_repository = (
@@ -46,6 +51,9 @@ class SolicitacaoManutencaoUeService:
             arquivo_repository or ArquivoServicoManutencaoRepository()
         )
         self.anexo_service = anexo_service or AnexoService()
+        self.notificacao_service = (
+            notificacao_service or NotificacaoSolicitacaoService()
+        )
 
     def gerar_codigo(self) -> str:
         """Gera o próximo código numérico com sete dígitos.
@@ -90,6 +98,12 @@ class SolicitacaoManutencaoUeService:
         solicitacao["servicos"] = self._criar_servicos(
             solicitacao, dados_servicos, usuario
         )
+        if enviar:
+            transaction.on_commit(
+                lambda: self.notificacao_service.notificar_envio_para_dre(
+                    solicitacao, usuario
+                )
+            )
 
         return solicitacao
 

@@ -2,6 +2,8 @@
 
 from django.db import models
 
+ROTA_VISUALIZAR_SOLICITACAO = "/solicitacao_manutencao/visualizar/{uuid}"
+
 
 class TipoAtendimento(models.TextChoices):
     """Define os tipos de atendimento de uma solicitação."""
