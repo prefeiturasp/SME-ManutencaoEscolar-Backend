@@ -5,17 +5,22 @@ from typing import Any
 
 import pytest
 from django.contrib.auth.models import AnonymousUser
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.exceptions import NotAuthenticated
+from rest_framework.exceptions import NotAuthenticated, ValidationError
 from rest_framework.request import Request
 from rest_framework.test import APIClient, APIRequestFactory
 
 from apps.escola.models import HistoricoResponsavel
 from apps.solicitacao_manutencao.api.views import SolicitacaoManutencaoViewSet
-from apps.solicitacao_manutencao.models import SolicitacaoManutencao
+from apps.solicitacao_manutencao.models import (
+    ServicoManutencao,
+    SolicitacaoManutencao,
+)
 from apps.solicitacao_manutencao.serializers import (
-    SolicitacaoManutencaoCriarSerializer,
+    ServicoManutencaoDetalhesSerializer,
+    SolicitacaoManutencaoCriarEditarSerializer,
     SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
 )
@@ -25,6 +30,9 @@ from apps.usuarios.models import Usuario
 pytestmark = pytest.mark.django_db
 
 URL_SOLICITACAO_UE = "/api/v1/solicitacoes-manutencao/solicitacao-ue/"
+URL_EDITAR_SOLICITACAO_UE = (
+    "/api/v1/solicitacoes-manutencao/editar-solicitacao-ue/{}/"
+)
 URL_SOLICITACOES = "/api/v1/solicitacoes-manutencao/"
 URL_SOLICITACAO = "/api/v1/solicitacoes-manutencao/{}/"
 URL_SITUACOES = "/api/v1/solicitacoes-manutencao/situacoes/"
@@ -36,6 +44,7 @@ def _postar_solicitacao(
     cliente: APIClient,
     url: str,
     payload: dict[str, Any],
+    metodo: str = "post",
 ) -> Any:
     """Envia uma solicitação com seus arquivos em formato multipart."""
     dados = {
@@ -54,7 +63,7 @@ def _postar_solicitacao(
                     f"[{indice_servico}]arquivos[{indice_arquivo}]{chave}"
                 ] = valor
 
-    return cliente.post(url, dados, format="multipart")
+    return getattr(cliente, metodo)(url, dados, format="multipart")
 
 
 def test_seleciona_serializer_conforme_acao() -> None:
@@ -64,11 +73,34 @@ def test_seleciona_serializer_conforme_acao() -> None:
     assert view.get_serializer_class() is SolicitacaoManutencaoListSerializer
 
     view.action = "solicitacao_ue"
-    assert view.get_serializer_class() is SolicitacaoManutencaoCriarSerializer
+    assert (
+        view.get_serializer_class()
+        is SolicitacaoManutencaoCriarEditarSerializer
+    )
+
+    view.action = "editar_solicitacao_ue"
+    assert (
+        view.get_serializer_class()
+        is SolicitacaoManutencaoCriarEditarSerializer
+    )
 
     view.action = "retrieve"
     assert (
         view.get_serializer_class() is SolicitacaoManutencaoDetalheSerializer
+    )
+
+
+def test_get_queryset_retorna_queryset_para_listagem(
+    api_cliente_ue: APIClient,
+) -> None:
+    """Mantém queryset no contrato usado pela listagem e seus filtros."""
+    requisicao = APIRequestFactory().get(URL_SOLICITACOES)
+    view = SolicitacaoManutencaoViewSet()
+    view.request = Request(requisicao)
+    view.action = "list"
+
+    assert isinstance(
+        view.get_queryset(), type(SolicitacaoManutencao.objects.all())
     )
 
 
@@ -251,7 +283,6 @@ def test_busca_solicitacao_por_uuid(
             ],
         },
         "situacao": "nao_enviado_dre",
-        "solicitante": "ue",
         "data_envio": None,
         "fase": "solicitacao",
         "servicos": [],
@@ -276,6 +307,33 @@ def test_nao_busca_solicitacao_de_outra_ue(
     assert resposta.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_edicao_retorna_404_para_solicitacao_invisivel(
+    api_cliente_ue: APIClient,
+) -> None:
+    """Retorna 404 ao editar uma solicitação fora do escopo do usuário."""
+    resposta = api_cliente_ue.put(
+        URL_EDITAR_SOLICITACAO_UE.format(
+            "00000000-0000-0000-0000-000000000000"
+        ),
+        {},
+        format="json",
+    )
+
+    assert resposta.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_edicao_rejeita_usuario_nao_identificado() -> None:
+    """Rejeita atualização direta sem usuário autenticado identificado."""
+    view = SolicitacaoManutencaoViewSet()
+    view.request = Request(APIRequestFactory().put(URL_EDITAR_SOLICITACAO_UE))
+    view.request.user = AnonymousUser()
+
+    with pytest.raises(NotAuthenticated, match="Usuário não identificado"):
+        view.editar_solicitacao_ue(
+            view.request, "00000000-0000-0000-0000-000000000000"
+        )
+
+
 def test_busca_solicitacao_inexistente_por_uuid(
     api_cliente_ue: APIClient,
 ) -> None:
@@ -285,6 +343,31 @@ def test_busca_solicitacao_inexistente_por_uuid(
     )
 
     assert resposta.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_detalhes_rejeitam_servico_sem_arquivo(
+    unidade_educacional_emef: Any,
+    usuario_ativo: Usuario,
+) -> None:
+    """Rejeita serviço sem anexos ao validar a saída de detalhes."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000022",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ativo,
+    )
+    ServicoManutencao.objects.create(
+        solicitacao_manutencao=solicitacao,
+        servico_especifico="Reparo",
+        local_reparo="Sala",
+        descricao="Descrição",
+    )
+    serializer_servico = ServicoManutencaoDetalhesSerializer()
+    with pytest.raises(ValidationError, match="Informe ao menos um arquivo"):
+        serializer_servico.validate_arquivos([])
+    assert serializer_servico.validate_arquivos([{"uuid": "arquivo"}]) == [
+        {"uuid": "arquivo"}
+    ]
 
 
 @pytest.mark.parametrize(
@@ -459,6 +542,7 @@ def test_solicitacao_ue_rejeita_usuario_nao_identificado() -> None:
     requisicao = Request(APIRequestFactory().post(URL_SOLICITACAO_UE))
     requisicao.user = AnonymousUser()
     view = SolicitacaoManutencaoViewSet()
+    view.request = requisicao
 
     with pytest.raises(NotAuthenticated, match="Usuário não identificado"):
         SolicitacaoManutencaoViewSet.solicitacao_ue(view, requisicao)
@@ -476,6 +560,22 @@ def test_documenta_criacao_da_solicitacao_no_schema() -> None:
     assert operacao["summary"] == "Cria uma solicitação de manutenção"
     assert operacao["parameters"][0]["name"] == "enviar"
     assert set(operacao["responses"]) == {"201", "400", "401", "500"}
+
+
+def test_documenta_edicao_da_solicitacao_no_schema() -> None:
+    """Expõe no OpenAPI a rota de edição e seu parâmetro de envio."""
+    resposta = APIClient().get("/api/v1/schema/?format=json")
+
+    assert resposta.status_code == status.HTTP_200_OK
+    operacao = resposta.json()["paths"][
+        "/api/v1/solicitacoes-manutencao/editar-solicitacao-ue/{uuid}/"
+    ]["put"]
+    assert operacao["operationId"] == "editarSolicitacaoManutencao"
+    assert operacao["summary"] == "Edita uma solicitação de manutenção"
+    assert any(
+        parametro["name"] == "enviar" for parametro in operacao["parameters"]
+    )
+    assert set(operacao["responses"]) == {"200", "400", "401", "404", "500"}
 
 
 def test_cria_solicitacao_com_servicos(
@@ -571,6 +671,154 @@ def test_cria_solicitacao_sem_servico_catalogado(
     assert resposta.status_code == status.HTTP_201_CREATED
     solicitacao = SolicitacaoManutencao.objects.get(codigo="0000001")
     assert solicitacao.servicos_manutencao.get().servico is None
+
+
+def test_edita_solicitacao_ue(
+    api_cliente: APIClient,
+    solicitacao_payload: dict[str, Any],
+    usuario_ue: Usuario,
+    historico_responsavel: HistoricoResponsavel,
+) -> None:
+    """Atualiza dados e serviços de uma solicitação existente."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ue)
+    resposta_criacao = _postar_solicitacao(
+        api_cliente, URL_SOLICITACAO_UE, solicitacao_payload
+    )
+    uuid = resposta_criacao.json()["uuid"]
+    payload_edicao = dict(solicitacao_payload)
+    payload_edicao["informacoes_adicionais"] = "Atualização necessária."
+    payload_edicao["servicos"] = [dict(solicitacao_payload["servicos"][0])]
+    payload_edicao["servicos"][0]["uuid"] = resposta_criacao.json()[
+        "servicos"
+    ][0]["uuid"]
+    payload_edicao["servicos"][0]["local_reparo"] = "Sala de aula"
+    payload_edicao["servicos"][0]["arquivos"] = [
+        {
+            "uuid": resposta_criacao.json()["servicos"][0]["arquivos"][0][
+                "uuid"
+            ],
+            "arquivo": SimpleUploadedFile(
+                "reparo.jpg", b"conteudo", content_type="image/jpeg"
+            ),
+        }
+    ]
+
+    resposta = _postar_solicitacao(
+        api_cliente,
+        URL_EDITAR_SOLICITACAO_UE.format(uuid),
+        payload_edicao,
+        metodo="put",
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK, resposta.json()
+    solicitacao = SolicitacaoManutencao.objects.get(uuid=uuid)
+    assert solicitacao.informacoes_adicionais == "Atualização necessária."
+    assert solicitacao.servicos_manutencao.count() == 1
+    assert solicitacao.servicos_manutencao.get().local_reparo == "Sala de aula"
+
+
+def test_edicao_retorna_erro_quando_servico_nao_pertence_a_solicitacao(
+    api_cliente: APIClient,
+    unidade_educacional_emef: Any,
+    usuario_ue: Usuario,
+    historico_responsavel: HistoricoResponsavel,
+) -> None:
+    """Converte ValidationError do serviço em resposta HTTP 400."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ue)
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000020",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ue,
+    )
+    payload = {
+        "tipo_atendimento": "comum",
+        "informacoes_adicionais": "",
+        "unidade_educacional": str(unidade_educacional_emef.uuid),
+        "servicos": [
+            {
+                "uuid": "00000000-0000-0000-0000-000000000001",
+                "servico_especifico": "Reparo",
+                "local_reparo": "Sala",
+                "descricao": "Descrição",
+                "arquivos": [
+                    {
+                        "uuid": "00000000-0000-0000-0000-000000000002",
+                        "arquivo": SimpleUploadedFile(
+                            "reparo.jpg",
+                            b"conteudo",
+                            content_type="image/jpeg",
+                        ),
+                    }
+                ],
+            }
+        ],
+    }
+
+    resposta = _postar_solicitacao(
+        api_cliente,
+        URL_EDITAR_SOLICITACAO_UE.format(solicitacao.uuid),
+        payload,
+        metodo="put",
+    )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json()["servicos"] == [
+        "Serviço não encontrado na solicitação."
+    ]
+
+
+def test_edicao_retorna_erro_quando_anexo_e_muito_grande(
+    api_cliente: APIClient,
+    unidade_educacional_emef: Any,
+    usuario_ue: Usuario,
+    historico_responsavel: HistoricoResponsavel,
+) -> None:
+    """Converte AnexoArquivoError em resposta HTTP 400."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ue)
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000021",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ue,
+    )
+    payload = {
+        "tipo_atendimento": "comum",
+        "informacoes_adicionais": "",
+        "unidade_educacional": str(unidade_educacional_emef.uuid),
+        "servicos": [
+            {
+                "servico_especifico": "Reparo",
+                "local_reparo": "Sala",
+                "descricao": "Descrição",
+                "arquivos": [
+                    {
+                        "arquivo": SimpleUploadedFile(
+                            "grande.jpg",
+                            b"x" * (2 * 1024 * 1024 + 1),
+                            content_type="image/jpeg",
+                        )
+                    }
+                ],
+            }
+        ],
+    }
+
+    resposta = _postar_solicitacao(
+        api_cliente,
+        URL_EDITAR_SOLICITACAO_UE.format(solicitacao.uuid),
+        payload,
+        metodo="put",
+    )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert resposta.json()["title"] == "Arquivo muito grande"
 
 
 def test_perfil_ue_pode_listar_servicos(api_cliente_perfil):
