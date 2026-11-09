@@ -45,6 +45,7 @@ _PROFISSIONAL_EXEMPLO_SAIDA: dict[str, object] = {
             "criado_em": "2026-09-17T10:00:00-03:00",
             "atualizado_por": None,
             "atualizado_em": "2026-09-17T10:00:00-03:00",
+            "cargo_alterado": False,
             "documentos": [
                 {
                     "uuid": "4a9f9f9f-1d0d-4eb4-bd5d-345678901cde",

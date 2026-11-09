@@ -145,3 +145,57 @@ def test_serializer_de_leitura_inclui_funcao_e_documento(
     assert documento["tipo"] == TipoArquivo.DOCUMENTO
     assert documento["tipo_mime"] == "application/pdf"
     assert documento["tamanho_bytes"] == len(b"conteudo")
+
+
+def _criar_funcao(cargo, usuario):
+    profissional = Profissional.objects.create(
+        nome="José",
+        cpf="12345678901",
+        rg="123456789",
+        criado_por=usuario,
+    )
+    return profissional, profissional.funcoes.create(
+        cargo=cargo, criado_por=usuario
+    )
+
+
+def test_serializer_cargo_nao_alterado_apos_vinculo(
+    cargo_profissional, usuario_ativo
+):
+    """Não sinaliza alteração quando o cargo não mudou após o vínculo."""
+    profissional, _ = _criar_funcao(cargo_profissional, usuario_ativo)
+
+    dados = ProfissionalSerializer(profissional).data
+
+    assert dados["funcoes"][0]["cargo_alterado"] is False
+
+
+def test_serializer_cargo_alterado_apos_vinculo(
+    cargo_profissional, usuario_ativo
+):
+    """Sinaliza alteração quando o cargo é editado após o vínculo."""
+    profissional, _ = _criar_funcao(cargo_profissional, usuario_ativo)
+
+    cargo_profissional.nome = "Eletricista Sênior"
+    cargo_profissional.save()
+
+    dados = ProfissionalSerializer(profissional).data
+
+    assert dados["funcoes"][0]["cargo_alterado"] is True
+
+
+def test_serializer_cargo_deixa_de_ser_alterado_ao_recriar_vinculo(
+    cargo_profissional, usuario_ativo
+):
+    """Remover e adicionar o cargo novamente limpa o aviso."""
+    profissional, funcao = _criar_funcao(cargo_profissional, usuario_ativo)
+    cargo_profissional.nome = "Eletricista Sênior"
+    cargo_profissional.save()
+    funcao.soft_delete(usuario=usuario_ativo)
+    profissional.funcoes.create(
+        cargo=cargo_profissional, criado_por=usuario_ativo
+    )
+
+    dados = ProfissionalSerializer(profissional).data
+
+    assert dados["funcoes"][0]["cargo_alterado"] is False
