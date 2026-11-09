@@ -67,70 +67,10 @@ Então('o sistema exclui o cargo', function () {
   cy.validar_exclusao_cargo()
 })
 
-Quando('edito o cadastro de cargo {string}', function () {
-  cy.editar_cargo()   
+Quando('clico para excluir o cadastro de cargo  de profissionais {string}', function () {
+  cy.nao_excluir_cargo()
 })
 
-Então('o sistema salva a edição do cargo', function () { 
-  cy.validar_edicao_cargo() 
-})
-
-Quando('apago o preenchimento no cadastro de cargo {string}', function () {
-  cy.editar_campos_cargo()  
-})
-
-Então('o sistema campos obrigatórios salva a edição do cargo', function () {
-  cy.validar_campos_obrigatorios_cargo() 
-})
-
-Quando('cancelo edição do cadastro de cargo {string}', function () {
-  cy.cancelar_edicao_cargo()   
-})
-
-Então('o sistema não edita o cargo retornando para listagem', function () {
-  cy.validar_cancelar_cadastro_cargo() 
-})
-
-Quando('insiro os mesmos dados do cargo {string}', function () { 
-  cy.editar_cargo_existente()
-})
-
-Quando('filtro o nome do cargo {string}', function () {
-  cy.filtrar_nome_cargo()  
-})
-
-Então('o sistema retorna o cargo', function () {
-  cy.validar_filtro_nome_cargo()  
-})
-
-Quando('filtro o status do cargo {string}', function () {
-  cy.filtrar_status_cargo()  
-})
-
-Então('o sistema retorna o cargo ativo', function () {
-  cy.validar_filtro_status_cargo()  
-})
-
-Quando('cancelo o filtro de cargo {string}', function () {
-  cy.limpar_filtro_cargo()  
-})
-
-Então('o sistema retorna todos cargos na listagem', function () {
-  cy.validar_filtro_vazio_cargo() 
-})
-
-Quando('clico no cadastro de cargo {string}', function () {
-  cy.consultar_detalhes_cargo()  
-})
-
-Então('o sistema exibe os detalhes do cargo', function () {
-  cy.validar_editar_cargo()  
-})
-
-Quando('filtro dados do cargo inexistente', function () {
-  cy.filtrar_cargo_inexistente()  
-})
-
-Então('o sistema informa que cargo não foi encontrado', function () {
-  cy.validar_filtro_cargo_inexistente()  
+Então('o sistema não exclui cargo vinculado', function () { 
+  cy.validar_cargo_nao_excluido()
 })

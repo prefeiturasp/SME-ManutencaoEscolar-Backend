@@ -19,6 +19,7 @@ class Cargos_Localizadores {
   // editar
   btn_buscar_cargo = () => 'button[class*="max-w-[165px]"]'
   btn_editar_cargo = () => 'button[aria-label="Editar Teste automação"]'
+  btn_editar_cargo_permanente = () => 'button[aria-label="Editar Pintor"]'
   btn_cancelar_detalhes_cargo = () => 'a[href="/cargos"]'
 
   // excluir

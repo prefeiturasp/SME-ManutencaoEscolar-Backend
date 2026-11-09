@@ -153,6 +153,32 @@ Cypress.Commands.add('acionar_exclusao_cargo', () => {
     .click()
 })
 
+Cypress.Commands.add('nao_excluir_cargo', () => {
+  cy.get(cargos_localizadores.campo_nome())
+    .should('be.visible')
+    .type('Pintor')
+
+  cy.get(cargos_localizadores.btn_buscar_cargo())
+    .should('be.visible')
+    .click()
+
+  cy.get(cargos_localizadores.btn_editar_cargo_permanente())
+    .should('be.visible')
+    .click()
+
+  cy.get(cargos_localizadores.btn_excluir_cargo())
+    .should('be.visible')
+    .click()
+  
+  cy.get(cargos_localizadores.btn_confirmar_exclusao())
+    .should('be.visible')
+    .click()
+})
+
+Cypress.Commands.add('validar_cargo_nao_excluido', () => {
+  cy.contains('Não é possível excluir o cargo')  
+})
+
 Cypress.Commands.add('excluir_cargo', () => {
   cy.get(cargos_localizadores.campo_nome())
     .should('be.visible')

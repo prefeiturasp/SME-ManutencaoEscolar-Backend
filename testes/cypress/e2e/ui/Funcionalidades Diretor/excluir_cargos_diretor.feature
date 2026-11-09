@@ -23,7 +23,16 @@ Funcionalidade: Exclusão de cargo
 
     Exemplos:
       | status | caso                     |
-      | ativo  | Fechar modal de exclusão |   
+      | ativo  | Fechar modal de exclusão | 
+
+  Esquema do Cenário: Validar: <caso>
+    E acesso a tela Cargos
+    Quando clico para excluir o cadastro de cargo  de profissionais "<status>"
+    Então o sistema não exclui cargo vinculado
+
+    Exemplos:
+      | status | caso                                  |
+      | ativo  | Não excluir vinculado a profissionais |  
 
   Esquema do Cenário: Validar: <caso>
     E acesso a tela Cargos
