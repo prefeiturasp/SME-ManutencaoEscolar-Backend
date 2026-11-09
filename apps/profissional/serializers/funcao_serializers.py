@@ -84,6 +84,30 @@ class FuncaoProfissionalSerializer(serializers.ModelSerializer):
     criado_em: serializers.DateTimeField = serializers.DateTimeField(
         read_only=True
     )
+    cargo_alterado: serializers.SerializerMethodField = (
+        serializers.SerializerMethodField()
+    )
+
+    def get_cargo_alterado(
+        self, funcao: FuncaoProfissional | dict[str, Any]
+    ) -> bool:
+        """Informa se o cargo foi alterado após o vínculo com o profissional.
+
+        A edição de um cargo (inclusive de seus documentos) sempre atualiza
+        ``atualizado_em`` do cargo. Já a data do vínculo é ``criado_em`` da
+        função, que só muda quando o cargo é removido e adicionado novamente.
+
+        Args:
+            funcao: Função profissional que está sendo serializada.
+
+        Returns:
+            True quando o cargo foi atualizado depois do vínculo.
+        """
+        if isinstance(funcao, dict):
+            cargo, vinculado_em = funcao["cargo"], funcao["criado_em"]
+        else:
+            cargo, vinculado_em = funcao.cargo, funcao.criado_em
+        return bool(cargo.atualizado_em > vinculado_em)
 
     class Meta:
         """Configuração do serializer de Função Profissional."""
@@ -98,5 +122,6 @@ class FuncaoProfissionalSerializer(serializers.ModelSerializer):
             "criado_em",
             "atualizado_por",
             "atualizado_em",
+            "cargo_alterado",
             "documentos",
         )
