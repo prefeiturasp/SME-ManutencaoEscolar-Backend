@@ -191,6 +191,7 @@ class ServicoManutencaoDetalhesSerializer(serializers.ModelSerializer):
 
         model = ServicoManutencao
         fields = (
+            "uuid",
             "servico_uuid",
             "nome_servico",
             "servico_especifico",
