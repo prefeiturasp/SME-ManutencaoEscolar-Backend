@@ -288,6 +288,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "sme_workflow_sdk": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
 
