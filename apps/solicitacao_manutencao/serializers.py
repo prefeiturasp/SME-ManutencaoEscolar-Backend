@@ -201,16 +201,6 @@ class ServicoManutencaoDetalhesSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
-    def validate_arquivos(
-        self, value: list[dict[str, object]]
-    ) -> list[dict[str, object]]:
-        """Exige ao menos um arquivo no serviço."""
-        if not value:
-            raise serializers.ValidationError(
-                "Informe ao menos um arquivo de comprovação."
-            )
-        return value
-
 
 class SolicitacaoManutencaoDetalheSerializer(serializers.ModelSerializer):
     """Serializa os dados completos de uma solicitação de manutenção."""

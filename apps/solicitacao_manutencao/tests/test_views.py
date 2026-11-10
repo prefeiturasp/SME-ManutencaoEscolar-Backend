@@ -8,18 +8,16 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.exceptions import NotAuthenticated, ValidationError
+from rest_framework.exceptions import NotAuthenticated
 from rest_framework.request import Request
 from rest_framework.test import APIClient, APIRequestFactory
 
 from apps.escola.models import HistoricoResponsavel
 from apps.solicitacao_manutencao.api.views import SolicitacaoManutencaoViewSet
 from apps.solicitacao_manutencao.models import (
-    ServicoManutencao,
     SolicitacaoManutencao,
 )
 from apps.solicitacao_manutencao.serializers import (
-    ServicoManutencaoDetalhesSerializer,
     SolicitacaoManutencaoCriarEditarSerializer,
     SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
@@ -343,31 +341,6 @@ def test_busca_solicitacao_inexistente_por_uuid(
     )
 
     assert resposta.status_code == status.HTTP_404_NOT_FOUND
-
-
-def test_detalhes_rejeitam_servico_sem_arquivo(
-    unidade_educacional_emef: Any,
-    usuario_ativo: Usuario,
-) -> None:
-    """Rejeita serviço sem anexos ao validar a saída de detalhes."""
-    solicitacao = SolicitacaoManutencao.objects.create(
-        codigo="0000022",
-        tipo_atendimento="comum",
-        unidade_educacional=unidade_educacional_emef,
-        criado_por=usuario_ativo,
-    )
-    ServicoManutencao.objects.create(
-        solicitacao_manutencao=solicitacao,
-        servico_especifico="Reparo",
-        local_reparo="Sala",
-        descricao="Descrição",
-    )
-    serializer_servico = ServicoManutencaoDetalhesSerializer()
-    with pytest.raises(ValidationError, match="Informe ao menos um arquivo"):
-        serializer_servico.validate_arquivos([])
-    assert serializer_servico.validate_arquivos([{"uuid": "arquivo"}]) == [
-        {"uuid": "arquivo"}
-    ]
 
 
 @pytest.mark.parametrize(
