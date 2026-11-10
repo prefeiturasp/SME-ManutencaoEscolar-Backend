@@ -1,7 +1,11 @@
 """Repositórios do domínio de solicitações de manutenção."""
 
+from collections.abc import Iterable
+from functools import partial
 from typing import Any, cast
+from uuid import UUID
 
+from django.db import transaction
 from django.db.models import QuerySet
 
 from apps.solicitacao_manutencao.models import (
@@ -25,22 +29,16 @@ class SolicitacaoManutencaoRepository:
         "fase",
     )
 
-    def buscar_por_usuario(
-        self,
-        usuario: Usuario | None,
-        uuid: str | None = None,
+    def listar_por_usuario(
+        self, usuario: Usuario | None
     ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
-        """Lista solicitações visíveis ou consulta uma pelo UUID.
+        """Lista solicitações visíveis ao usuário.
 
         Args:
             usuario: Usuário responsável pelas solicitações.
-            uuid: UUID opcional para limitar a consulta a uma solicitação.
-
         Returns:
-            Queryset de dicionários com campos resumidos ou detalhados quando
-            um UUID for informado.
+            Queryset de dicionários com dados resumidos.
         """
-        campos: tuple[str, ...] = self.campos_listagem
         filtros: dict[str, Any] = {
             "unidade_educacional__historico_responsaveis__ativo": True,
         }
@@ -54,18 +52,35 @@ class SolicitacaoManutencaoRepository:
             filtros[campo_registro_funcional] = usuario.username
             queryset = self.model.objects.filter(**filtros)
 
-        if uuid is not None:
-            queryset = queryset.filter(uuid=uuid)
-            campos += (
-                "id",
-                "informacoes_adicionais",
-                "unidade_educacional_id",
-                "solicitante",
-            )
-
         return cast(
             QuerySet[SolicitacaoManutencao, dict[str, Any]],
-            queryset.values(*campos),
+            queryset.values(*self.campos_listagem),
+        )
+
+    def get_detalhes_solicitacao(
+        self, usuario: Usuario | None, uuid: str
+    ) -> dict[str, Any] | None:
+        """Busca os detalhes de uma solicitação visível ao usuário.
+
+        Args:
+            usuario: Usuário responsável pela solicitação.
+            uuid: UUID da solicitação.
+
+        Returns:
+            Dicionário com os detalhes ou ``None`` se não for encontrada.
+        """
+        campos = self.campos_listagem + (
+            "id",
+            "informacoes_adicionais",
+            "unidade_educacional_id",
+            "solicitante",
+        )
+        return cast(
+            dict[str, Any] | None,
+            self.listar_por_usuario(usuario)
+            .filter(uuid=uuid)
+            .values(*campos)
+            .first(),
         )
 
     def criar(self, dados: dict[str, Any], usuario: Usuario) -> dict[str, Any]:
@@ -79,19 +94,30 @@ class SolicitacaoManutencaoRepository:
             Dicionário com os dados da solicitação criada.
         """
         solicitacao = self.model.objects.create(**dados, criado_por=usuario)
-        return {
-            "id": solicitacao.id,
-            "uuid": solicitacao.uuid,
-            "codigo": solicitacao.codigo,
-            "tipo_atendimento": solicitacao.tipo_atendimento,
-            "informacoes_adicionais": solicitacao.informacoes_adicionais,
-            "unidade_educacional": solicitacao.unidade_educacional,
-            "situacao": solicitacao.situacao,
-            "data_envio": solicitacao.data_envio,
-            "fase": solicitacao.fase,
-            "criado_por": solicitacao.criado_por,
-            "criado_em": solicitacao.criado_em,
-        }
+        return self._serializar(solicitacao)
+
+    def atualizar(
+        self,
+        solicitacao: dict[str, Any],
+        dados: dict[str, Any],
+        usuario: Usuario,
+    ) -> dict[str, Any]:
+        """Atualiza uma solicitação acessível pela UE.
+
+        Args:
+            solicitacao: Instância da solicitação a atualizar.
+            dados: Campos da solicitação já validados.
+            usuario: Usuário responsável pela atualização.
+
+        Returns:
+            Dados atualizados da solicitação.
+        """
+        dados_atualizacao = {**dados, "atualizado_por": usuario}
+        self.model.objects.filter(pk=solicitacao["id"]).update(
+            **dados_atualizacao
+        )
+        dados_atualizados = self.model.objects.get(pk=solicitacao["id"])
+        return self._serializar(dados_atualizados)
 
     def obter_ultimo_codigo(self) -> dict[str, str]:
         """Consulta o maior código de solicitação persistido.
@@ -104,6 +130,47 @@ class SolicitacaoManutencaoRepository:
             self.model.dm_objects.order_by("-codigo").values("codigo").first()
         )
         return {"codigo": resultado["codigo"]} if resultado else {}
+
+    def _serializar(
+        self, solicitacao: SolicitacaoManutencao | dict[str, Any]
+    ) -> dict[str, Any]:
+        """Serializa uma solicitação de manutenção.
+
+        Args:
+            solicitacao: Instância ou dados da solicitação.
+
+        Returns:
+            Dicionário com os dados da solicitação.
+        """
+        if isinstance(solicitacao, dict):
+            return {
+                "id": solicitacao["id"],
+                "uuid": str(solicitacao["uuid"]),
+                "codigo": solicitacao["codigo"],
+                "tipo_atendimento": solicitacao["tipo_atendimento"],
+                "informacoes_adicionais": solicitacao[
+                    "informacoes_adicionais"
+                ],
+                "unidade_educacional": solicitacao["unidade_educacional_id"],
+                "situacao": solicitacao["situacao"],
+                "data_envio": solicitacao["data_envio"],
+                "fase": solicitacao["fase"],
+                "criado_por": solicitacao["criado_por_id"],
+                "criado_em": solicitacao["criado_em"],
+            }
+        return {
+            "id": solicitacao.id,
+            "uuid": str(solicitacao.uuid),
+            "codigo": solicitacao.codigo,
+            "tipo_atendimento": solicitacao.tipo_atendimento,
+            "informacoes_adicionais": solicitacao.informacoes_adicionais,
+            "unidade_educacional": solicitacao.unidade_educacional,
+            "situacao": solicitacao.situacao,
+            "data_envio": solicitacao.data_envio,
+            "fase": solicitacao.fase,
+            "criado_por": solicitacao.criado_por,
+            "criado_em": solicitacao.criado_em,
+        }
 
 
 class ServicoManutencaoRepository:
@@ -128,14 +195,76 @@ class ServicoManutencaoRepository:
         Returns:
             Dicionário com os dados do serviço de manutenção criado.
         """
-        servico = self.model.objects.create(
+        servico = self.model(
+            **dados,
             solicitacao_manutencao_id=solicitacao_id,
             criado_por=usuario,
-            **dados,
         )
+        servico.full_clean()
+        servico.save()
+        return self._serializar(servico)
+
+    def listar_servicos_por_solicitacao(
+        self, solicitacao_id: int
+    ) -> list[dict[str, Any]]:
+        """Lista serviços ativos de uma solicitação.
+
+        Args:
+            solicitacao_id: Identificador da solicitação.
+
+        Returns:
+            Serviços serializados da solicitação.
+        """
+        return [
+            self._serializar(servico)
+            for servico in self.model.objects.filter(
+                solicitacao_manutencao_id=solicitacao_id
+            )
+        ]
+
+    def atualizar(
+        self,
+        servico: dict[str, Any],
+        dados: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Atualiza um serviço e retorna seus dados serializados.
+
+        Args:
+            servico: Serviço serializado a atualizar.
+            dados: Campos atualizados.
+
+        Returns:
+            Serviço atualizado em formato de dicionário.
+        """
+        instancia = self.model.objects.get(pk=servico["id"])
+        for campo, valor in dados.items():
+            setattr(instancia, campo, valor)
+        instancia.full_clean()
+        instancia.save()
+        return self._serializar(instancia)
+
+    def remover(self, servico_id: int, usuario: Usuario) -> None:
+        """Remove logicamente um serviço de manutenção.
+
+        Args:
+            servico_id: ID do serviço a ser removido.
+            usuario: Usuário responsável pela remoção.
+        """
+        instancia = self.model.objects.get(pk=servico_id)
+        instancia.soft_delete(usuario=usuario)
+
+    def _serializar(self, servico: ServicoManutencao) -> dict[str, Any]:
+        """Serializa um serviço de manutenção.
+
+        Args:
+            servico: Instância do serviço a ser serializado.
+
+        Returns:
+            Dicionário com os dados do serviço.
+        """
         return {
             "id": servico.id,
-            "uuid": servico.uuid,
+            "uuid": str(servico.uuid),
             "solicitacao_manutencao": servico.solicitacao_manutencao,
             "servico": servico.servico,
             "servico_especifico": servico.servico_especifico,
@@ -172,9 +301,38 @@ class ArquivoServicoManutencaoRepository:
             criado_por=usuario,
             **dados,
         )
+        return self.serializar(arquivo)
+
+    def listar_anexos_por_servico(
+        self, servico_id: int
+    ) -> list[dict[str, Any]]:
+        """Lista anexos de um serviço de manutenção.
+
+        Args:
+            servico_id: Identificador do serviço.
+
+        Returns:
+            Anexos serializados do serviço.
+        """
+        return [
+            self.serializar(arquivo)
+            for arquivo in FotoLocalReparo.objects.filter(
+                servico_manutencao_id=servico_id
+            )
+        ]
+
+    def serializar(self, arquivo: FotoLocalReparo) -> dict[str, Any]:
+        """Serializa um arquivo de serviço de manutenção.
+
+        Args:
+            arquivo: Instância do arquivo a ser serializado.
+
+        Returns:
+            Dicionário com os dados do arquivo.
+        """
         return {
             "id": arquivo.id,
-            "uuid": arquivo.uuid,
+            "uuid": str(arquivo.uuid),
             "servico_manutencao": arquivo.servico_manutencao,
             "nome_original": arquivo.nome_original,
             "arquivo": arquivo.arquivo,
@@ -184,3 +342,26 @@ class ArquivoServicoManutencaoRepository:
             "criado_por": arquivo.criado_por,
             "criado_em": arquivo.criado_em,
         }
+
+    @transaction.atomic
+    def excluir_nao_preservados(
+        self,
+        servico_id: int,
+        uuids_preservados: Iterable[str | UUID],
+    ) -> None:
+        """Exclui os registros e remove os arquivos após o commit.
+
+        Args:
+            servico_id: ID do serviço dono dos arquivos.
+            uuids_preservados: UUIDs dos arquivos que devem permanecer
+                ativos.
+
+        """
+        arquivos_nao_preservados = self.model.objects.filter(
+            servico_manutencao_id=servico_id
+        ).exclude(uuid__in=uuids_preservados)
+
+        for arquivo in arquivos_nao_preservados:
+            transaction.on_commit(partial(arquivo.arquivo.delete, save=False))
+
+        arquivos_nao_preservados.delete()

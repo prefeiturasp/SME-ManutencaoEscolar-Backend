@@ -1,6 +1,7 @@
 """Testes dos repositórios de solicitações de manutenção."""
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.escola.models import HistoricoResponsavel, Unidadeeducacional
 from apps.solicitacao_manutencao.models import (
@@ -42,7 +43,7 @@ def test_lista_solicitacoes_por_usuario(
         criado_por=usuario_inativo,
     )
 
-    solicitacoes = SolicitacaoManutencaoRepository().buscar_por_usuario(
+    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
         usuario_ue
     )
 
@@ -68,7 +69,7 @@ def test_lista_solicitacoes_por_usuario(
 
 def test_lista_solicitacoes_vazia_sem_usuario() -> None:
     """Retorna uma lista vazia quando nenhum usuário for informado."""
-    solicitacoes = SolicitacaoManutencaoRepository().buscar_por_usuario(None)
+    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(None)
 
     assert not solicitacoes.exists()
 
@@ -77,7 +78,7 @@ def test_lista_solicitacoes_vazia_para_usuario_sem_username(
     usuario_ativo: Usuario,
 ) -> None:
     """Não lista solicitações quando o usuário não tem registro funcional."""
-    solicitacoes = SolicitacaoManutencaoRepository().buscar_por_usuario(
+    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
         usuario_ativo
     )
 
@@ -100,26 +101,57 @@ def test_consulta_solicitacoes_detalhadas_com_dicionarios(
         criado_por=usuario_ue,
     )
 
-    resultados = list(
-        SolicitacaoManutencaoRepository().buscar_por_usuario(
-            usuario_ue, str(solicitacao.uuid)
-        )
+    resultados = SolicitacaoManutencaoRepository().get_detalhes_solicitacao(
+        usuario_ue, str(solicitacao.uuid)
     )
 
-    assert resultados == [
-        {
-            "id": solicitacao.id,
-            "uuid": solicitacao.uuid,
-            "codigo": "0000003",
-            "tipo_atendimento": "urgente",
-            "informacoes_adicionais": "Reparo prioritário.",
-            "unidade_educacional_id": unidade_educacional_emef.id,
-            "situacao": "nao_enviado_dre",
-            "solicitante": "ue",
-            "data_envio": None,
-            "fase": "solicitacao",
-        }
-    ]
+    assert resultados == {
+        "id": solicitacao.id,
+        "uuid": solicitacao.uuid,
+        "codigo": "0000003",
+        "tipo_atendimento": "urgente",
+        "informacoes_adicionais": "Reparo prioritário.",
+        "unidade_educacional_id": unidade_educacional_emef.id,
+        "situacao": "nao_enviado_dre",
+        "solicitante": "ue",
+        "data_envio": None,
+        "fase": "solicitacao",
+    }
+
+
+def test_serializa_solicitacao_recebida_como_dicionario(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+) -> None:
+    """Serializa IDs de relações quando a entrada já é um dicionário."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000010",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ativo,
+    )
+    dados = (
+        SolicitacaoManutencao.objects.filter(pk=solicitacao.pk)
+        .values(
+            "id",
+            "uuid",
+            "codigo",
+            "tipo_atendimento",
+            "informacoes_adicionais",
+            "unidade_educacional_id",
+            "situacao",
+            "data_envio",
+            "fase",
+            "criado_por_id",
+            "criado_em",
+        )
+        .get()
+    )
+
+    resultado = SolicitacaoManutencaoRepository()._serializar(dados)
+
+    assert resultado["uuid"] == str(solicitacao.uuid)
+    assert resultado["unidade_educacional"] == unidade_educacional_emef.id
 
 
 def test_nao_consulta_solicitacoes_de_outra_ue(
@@ -138,13 +170,14 @@ def test_nao_consulta_solicitacoes_de_outra_ue(
         criado_por=usuario_inativo,
     )
 
-    resultados = SolicitacaoManutencaoRepository().buscar_por_usuario(
+    resultados = SolicitacaoManutencaoRepository().get_detalhes_solicitacao(
         usuario_ue, str(solicitacao.uuid)
     )
 
     # A visibilidade depende do responsável ativo pela unidade, não de quem
     # cadastrou a solicitação.
-    assert resultados.filter(uuid=solicitacao.uuid).exists()
+    assert resultados is not None
+    assert resultados["uuid"] == solicitacao.uuid
 
 
 def test_nao_lista_solicitacoes_para_usuario_sem_registro_funcional(
@@ -173,7 +206,7 @@ def test_nao_lista_solicitacoes_para_usuario_sem_registro_funcional(
             criado_por=usuario_ativo,
         )
 
-    solicitacoes = SolicitacaoManutencaoRepository().buscar_por_usuario(
+    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
         usuario_dre
     )
 
@@ -289,6 +322,75 @@ def test_cria_arquivo_do_servico(
     assert arquivo["criado_em"] is not None
     assert FotoLocalReparo.objects.filter(pk=arquivo["id"]).exists()
     assert ServicoManutencao.objects.filter(pk=servico["id"]).exists()
+
+
+def test_remove_servico_logicamente(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+) -> None:
+    """Remove um serviço sem apagar seu registro do banco."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000011",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+    )
+    servico = ServicoManutencaoRepository().criar(
+        {
+            "servico_especifico": "Reparo hidráulico",
+            "local_reparo": "Cozinha",
+            "descricao": "Vazamento na pia",
+        },
+        solicitacao.id,
+        usuario_ativo,
+    )
+
+    ServicoManutencaoRepository().remover(servico["id"], usuario_ativo)
+
+    assert not ServicoManutencao.objects.filter(pk=servico["id"]).exists()
+    assert ServicoManutencao.dm_objects.filter(pk=servico["id"]).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_exclui_anexo_e_arquivo_apos_commit(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+) -> None:
+    """Exclui anexos não preservados e agenda a remoção do arquivo."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="0000012",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+    )
+    servico = ServicoManutencaoRepository().criar(
+        {
+            "servico_especifico": "Reparo hidráulico",
+            "local_reparo": "Cozinha",
+            "descricao": "Vazamento na pia",
+        },
+        solicitacao.id,
+        usuario_ativo,
+    )
+    anexo = ArquivoServicoManutencaoRepository().criar(
+        {
+            "nome_original": "excluir.jpg",
+            "arquivo": SimpleUploadedFile(
+                "excluir.jpg", b"imagem", content_type="image/jpeg"
+            ),
+            "tipo": "imagem",
+            "tipo_mime": "image/jpeg",
+            "tamanho_bytes": 6,
+        },
+        servico["id"],
+        usuario_ativo,
+    )
+    nome_arquivo = anexo["arquivo"].name
+
+    ArquivoServicoManutencaoRepository().excluir_nao_preservados(
+        servico["id"], []
+    )
+
+    assert not FotoLocalReparo.dm_objects.filter(pk=anexo["id"]).exists()
+    assert not anexo["arquivo"].storage.exists(nome_arquivo)
 
 
 def test_obtem_ultimo_codigo_incluindo_solicitacao_excluida(

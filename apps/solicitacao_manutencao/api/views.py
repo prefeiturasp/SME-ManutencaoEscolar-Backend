@@ -2,27 +2,29 @@
 
 from typing import Any
 
-from django.db.models import QuerySet
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotAuthenticated
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import ListModelMixin
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
+from rest_framework.serializers import ValidationError as DRFValidationError
 from rest_framework.viewsets import GenericViewSet
 
+from apps.core.exceptions import AnexoArquivoError
 from apps.solicitacao_manutencao.constants import (
     FaseSolicitacao,
     SituacaoSolicitacao,
     TipoAtendimento,
 )
 from apps.solicitacao_manutencao.filters import SolicitacaoManutencaoFilter
-from apps.solicitacao_manutencao.models import SolicitacaoManutencao
 from apps.solicitacao_manutencao.schemas import SOLICITACAO_MANUTENCAO_SCHEMA
 from apps.solicitacao_manutencao.serializers import (
-    SolicitacaoManutencaoCriarSerializer,
+    SolicitacaoManutencaoCriarEditarSerializer,
     SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
 )
@@ -36,15 +38,18 @@ from apps.usuarios.models import Usuario
 
 
 @SOLICITACAO_MANUTENCAO_SCHEMA
-class SolicitacaoManutencaoViewSet(
-    ListModelMixin, RetrieveModelMixin, GenericViewSet
-):
-    """Disponibiliza a criação e listagem de solicitações."""
+class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
+    """Disponibiliza a criação, edição e consulta de solicitações."""
 
-    http_method_names = ["get", "post", "options"]
+    http_method_names = ["get", "post", "put", "options"]
     filter_backends = [DjangoFilterBackend]
     filterset_class = SolicitacaoManutencaoFilter
     lookup_field = "uuid"
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.service = SolicitacaoManutencaoService()
+        self.solicitacao_service = SolicitacaoManutencaoUeService()
 
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer apropriado para a ação atual."""
@@ -52,7 +57,7 @@ class SolicitacaoManutencaoViewSet(
             return SolicitacaoManutencaoListSerializer
         if self.action == "retrieve":
             return SolicitacaoManutencaoDetalheSerializer
-        return SolicitacaoManutencaoCriarSerializer
+        return SolicitacaoManutencaoCriarEditarSerializer
 
     def _usuario_logado(self) -> Usuario | None:
         """Retorna o usuário autenticado, quando houver."""
@@ -61,19 +66,34 @@ class SolicitacaoManutencaoViewSet(
 
     def get_queryset(
         self,
-    ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
-        """Consulta solicitações.
+    ) -> Any:
+        """Retorna o queryset das solicitações visíveis ao usuário.
 
-        Retorna as solicitações visíveis para o usuário autenticado
-        ou uma específica pelo UUID.
+        Returns:
+            Queryset de solicitações visíveis para o usuário autenticado.
         """
-        service = SolicitacaoManutencaoService()
+        return self.service.listar_por_usuario(self._usuario_logado())
 
-        uuid = None
-        if self.action == "retrieve":
-            uuid = self.kwargs[self.lookup_url_kwarg or self.lookup_field]
+    def retrieve(self, request: Request, uuid: str) -> Response:
+        """Retorna os detalhes de uma solicitação visível pelo UUID.
 
-        return service.buscar_por_usuario(self._usuario_logado(), uuid)
+        Args:
+            request: Requisição de consulta.
+            uuid: UUID da solicitação.
+
+        Returns:
+            Resposta com os dados detalhados da solicitação.
+
+        Raises:
+            Http404: Se a solicitação não existir ou não estiver visível.
+        """
+        solicitacao = self.service.get_detalhes_solicitacao(
+            self._usuario_logado(), uuid
+        )
+        if solicitacao is None:
+            raise Http404("Solicitação não encontrada.")
+        serializer = self.get_serializer(solicitacao)
+        return Response(serializer.data)
 
     @action(detail=False, methods=["get"], url_path="situacoes")
     def situacoes(self, request: Request) -> Response:
@@ -142,18 +162,58 @@ class SolicitacaoManutencaoViewSet(
         Raises:
             NotAuthenticated: Se o usuário autenticado não for identificado.
         """
-        usuario = request.user
-        socitacao_service = SolicitacaoManutencaoUeService()
-        if not isinstance(usuario, Usuario):
+        usuario = self._usuario_logado()
+        if usuario is None:
             raise NotAuthenticated("Usuário não identificado.")
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         enviar = request.query_params.get("enviar") == "true"
-        serializer.instance = socitacao_service.criar(
+        serializer.instance = self.solicitacao_service.criar(
             serializer.validated_data,
             usuario,
             enviar=enviar,
         )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=False,
+        methods=["put"],
+        url_path=r"editar-solicitacao-ue/(?P<uuid>[^/.]+)",
+    )
+    def editar_solicitacao_ue(self, request: Request, uuid: str) -> Response:
+        """Atualiza uma solicitação de manutenção de uma UE.
+
+        Args:
+            request: Requisição com os dados atualizados.
+            uuid: UUID da solicitação a atualizar.
+
+        Returns:
+            Resposta com os dados atualizados da solicitação.
+
+        Raises:
+            NotAuthenticated: Se o usuário autenticado não for identificado.
+        """
+        try:
+            usuario = self._usuario_logado()
+            if usuario is None:
+                raise NotAuthenticated("Usuário não identificado.")
+            solicitacao = self.service.get_detalhes_solicitacao(usuario, uuid)
+            if solicitacao is None:
+                raise Http404("Solicitação não encontrada.")
+            serializer = self.get_serializer(solicitacao, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            enviar = request.query_params.get("enviar") == "true"
+            serializer.instance = self.solicitacao_service.atualizar(
+                solicitacao,
+                serializer.validated_data,
+                usuario,
+                enviar=enviar,
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except AnexoArquivoError as exc:
+            raise DRFValidationError(
+                {"title": exc.title, "detail": exc.detail}
+            ) from exc
+        except DjangoValidationError as exc:
+            raise DRFValidationError(exc.message_dict) from exc

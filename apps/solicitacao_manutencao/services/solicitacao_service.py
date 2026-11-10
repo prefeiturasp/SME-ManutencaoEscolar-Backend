@@ -4,7 +4,6 @@ from typing import Any
 
 from django.db.models import QuerySet
 
-from apps.solicitacao_manutencao.models import SolicitacaoManutencao
 from apps.solicitacao_manutencao.repository import (
     SolicitacaoManutencaoRepository,
 )
@@ -25,18 +24,28 @@ class SolicitacaoManutencaoService:
         """
         self.repository = repository or SolicitacaoManutencaoRepository()
 
-    def buscar_por_usuario(
-        self,
-        usuario: Usuario | None,
-        uuid: str | None = None,
-    ) -> QuerySet[SolicitacaoManutencao, dict[str, Any]]:
-        """Lista solicitações visíveis ou consulta uma pelo UUID.
+    def listar_por_usuario(
+        self, usuario: Usuario | None
+    ) -> QuerySet[Any, dict[str, Any]]:
+        """Lista solicitações visíveis ao usuário.
 
         Args:
             usuario: Usuário para o qual as solicitações serão listadas.
-            uuid: UUID opcional para consultar uma solicitação específica.
+        Returns:
+            Queryset de dicionários com dados resumidos.
+        """
+        return self.repository.listar_por_usuario(usuario)
+
+    def get_detalhes_solicitacao(
+        self, usuario: Usuario | None, uuid: str
+    ) -> dict[str, Any] | None:
+        """Retorna os detalhes de uma solicitação visível ao usuário.
+
+        Args:
+            usuario: Usuário responsável pela solicitação.
+            uuid: UUID da solicitação.
 
         Returns:
-            Queryset de dicionários com dados resumidos ou detalhados.
+            Dicionário com os detalhes ou ``None`` se não for encontrada.
         """
-        return self.repository.buscar_por_usuario(usuario, uuid)
+        return self.repository.get_detalhes_solicitacao(usuario, uuid)
