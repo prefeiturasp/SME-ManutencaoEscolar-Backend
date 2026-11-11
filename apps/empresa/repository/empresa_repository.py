@@ -1,7 +1,8 @@
 """Repositório: único ponto de acesso ao ORM para o domínio Empresa."""
 
-from typing import Any
+from typing import Any, cast
 
+from django.db.models import FileField
 from django.forms.models import model_to_dict
 
 from apps.empresa.models import Empresa
@@ -76,6 +77,15 @@ class EmpresaRepository:
         dados_empresa["id"] = empresa.id
         dados_empresa["uuid"] = str(empresa.uuid)
         return dados_empresa
+
+    def excluir_arquivo_logo(self, nome: str) -> None:
+        """Remove do storage o arquivo de uma logo que deixou de ser usada.
+
+        Args:
+            nome: Caminho do arquivo no storage.
+        """
+        campo = cast(FileField, self.model._meta.get_field("logo"))
+        campo.storage.delete(nome)
 
     def existe_cnpj_duplicado(
         self,

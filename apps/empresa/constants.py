@@ -1,8 +1,17 @@
 """Constantes e mensagens de erro para o domínio de empresas."""
 
+LOGO_EXTENSOES_PERMITIDAS = ("png", "jpg", "jpeg")
+LOGO_ASSINATURAS = (b"\x89PNG\r\n\x1a\n", b"\xff\xd8\xff")
+
 
 class EmpresaErrorMessages:
     """Mensagens de erro padronizadas para o domínio."""
+
+    LOGO_FORMATO_INVALIDO = "A logo deve ser um arquivo PNG, JPG ou JPEG."
+    LOGO_CONTEUDO_INVALIDO = (
+        "O conteúdo do arquivo não corresponde a uma imagem PNG, JPG ou JPEG."
+    )
+    LOGO_MUITO_GRANDE = "A logo não pode ultrapassar 2 MB."
 
     CNPJ_INVALIDO = "CNPJ inválido."
     CNPJ_JA_CADASTRADO_TITULO_CRIAR = "Não é possível criar a empresa"

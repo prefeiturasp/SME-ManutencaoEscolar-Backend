@@ -1,5 +1,8 @@
 """Serviços de Empresa."""
 
+import uuid
+from functools import partial
+from pathlib import Path
 from typing import Any
 
 from django.db import transaction
@@ -59,7 +62,8 @@ class EmpresaService:
             dados["cnpj"],
             titulo=EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_CRIAR,
         )
-        return self.criar_com_responsaveis({**dados, "criado_por": usuario})
+        dados = self._preparar_logo({**dados, "criado_por": usuario})
+        return self.criar_com_responsaveis(dados)
 
     def criar_com_responsaveis(self, dados: dict[str, Any]) -> dict[str, Any]:
         """Cria uma empresa e seus responsáveis técnicos em uma transação.
@@ -116,8 +120,9 @@ class EmpresaService:
         Returns:
             Dados serializados da empresa atualizada.
         """
-        dados = {**dados, "atualizado_por": usuario}
+        dados = self._preparar_logo({**dados, "atualizado_por": usuario})
         responsaveis_dados = dados.pop("responsaveis_tecnicos", None)
+        logo_anterior = empresa.logo.name if empresa.logo else None
 
         if "cnpj" in dados:
             self._validar_cnpj_duplicado(
@@ -130,6 +135,13 @@ class EmpresaService:
             empresa_atualizada = self.empresa_repository.atualizar(
                 empresa, dados
             )
+            if "logo" in dados and logo_anterior:
+                transaction.on_commit(
+                    partial(
+                        self.empresa_repository.excluir_arquivo_logo,
+                        logo_anterior,
+                    )
+                )
             empresa_atualizada["responsaveis_tecnicos"] = (
                 self.responsavel_tecnico_service.sincronizar(
                     empresa_id=empresa_atualizada["id"],
@@ -139,6 +151,24 @@ class EmpresaService:
             )
 
         return empresa_atualizada
+
+    @staticmethod
+    def _preparar_logo(dados: dict[str, Any]) -> dict[str, Any]:
+        """Renomeia a logo enviada com um nome único, preservando a extensão.
+
+        Evita colisões e o armazenamento do nome original do arquivo.
+
+        Args:
+            dados: Dados da empresa, podendo conter a chave ``logo``.
+
+        Returns:
+            Os mesmos dados, com a logo renomeada quando houver arquivo.
+        """
+        logo = dados.get("logo")
+        if logo is not None:
+            extensao = Path(logo.name).suffix.lower()
+            logo.name = f"{uuid.uuid4()}{extensao}"
+        return dados
 
     @transaction.atomic
     def deletar(
