@@ -4,9 +4,7 @@ from typing import Any, cast
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.db.models import Q
 
-from apps.escola.models import DiretoriaRegional
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.exceptions import (
     UsuarioNaoEncontradoError,
@@ -29,9 +27,6 @@ class UsuarioRepository:
         email = dados_usuario["email"]
         registro_funcional = dados_usuario["codigo_rf"]
         cpf = dados_usuario["cpf"]
-        diretoria_regional = cls._buscar_diretoria_regional(
-            dados_usuario.get("dre")
-        )
         username = registro_funcional or cpf
         if username is None:
             raise ValueError("É necessário fornecer registro_funcional ou cpf")
@@ -46,7 +41,6 @@ class UsuarioRepository:
                 "nome": nome,
                 "email": email,
                 "username": username,
-                "diretoria_regional": diretoria_regional,
             },
             **filtros,
         )
@@ -54,39 +48,15 @@ class UsuarioRepository:
         if not criado:
             usuario.nome = nome
             usuario.email = email
-            usuario.diretoria_regional = diretoria_regional
 
             usuario.save(
                 update_fields=[
                     "nome",
                     "email",
-                    "diretoria_regional",
                 ]
             )
 
         return cls._retorna_usuario_em_dicionario(usuario)
-
-    @staticmethod
-    def _buscar_diretoria_regional(
-        valor: Any,
-    ) -> DiretoriaRegional | None:
-        """Localiza a diretoria regional informada pelo EOL.
-
-        Args:
-            valor: Código, nome ou abreviação da DRE retornado pelo EOL.
-
-        Returns:
-            Diretoria regional correspondente ou ``None`` quando o EOL não
-            informa a DRE ou ela não está cadastrada.
-        """
-        texto = str(valor).strip() if valor is not None else ""
-        if not texto:
-            return None
-        return DiretoriaRegional.objects.filter(
-            Q(codigo=texto)
-            | Q(nome__iexact=texto)
-            | Q(abreviacao__iexact=texto)
-        ).first()
 
     @staticmethod
     def usuario_existe_por_id(usuario_id: int) -> bool:
