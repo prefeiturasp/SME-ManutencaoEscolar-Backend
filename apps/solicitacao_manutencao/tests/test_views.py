@@ -316,7 +316,7 @@ def test_filtros_de_solicitacao_por_novos_campos(
     ]
 
 
-def test_lista_retorna_rótulo_do_solicitante(
+def test_lista_retorna_rotulo_do_solicitante(
     api_cliente_perfil,
     unidade_educacional_emef: Any,
 ) -> None:
