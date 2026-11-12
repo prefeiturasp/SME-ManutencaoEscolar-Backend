@@ -26,8 +26,11 @@ _LOTE_NAO_ENCONTRADO = "Lote não encontrado"
 
 _ESCOLA_CONST = "ESCOLA EMEF ADMIN"
 
+_EXEMPLO_CODIGO_CONTRATO = "31/SME/2021-SME/COMPS"
+
 _LOTE_EXEMPLO_ENTRADA: dict[str, object] = {
     "codigo_cadastro": "LOTE-00123",
+    "codigo_contrato": _EXEMPLO_CODIGO_CONTRATO,
     "nome": "Lote de manutenção 2026",
     "status": True,
     "empresa": "f882ef71-1705-46cb-850b-c404650d95e5",
@@ -39,6 +42,7 @@ _LOTE_EXEMPLO_ENTRADA: dict[str, object] = {
 _LOTE_EXEMPLO_SAIDA: dict[str, object] = {
     "nome": "Lote de manutenção 2026",
     "codigo_cadastro": "LOTE-00123",
+    "codigo_contrato": _EXEMPLO_CODIGO_CONTRATO,
     "empresa": "eaa39861-5212-4817-9ba1-a81285985599",
     "periodo_inicial": "2026-08-01",
     "periodo_final": "2026-12-31",
@@ -48,6 +52,7 @@ _LOTE_EXEMPLO_SAIDA: dict[str, object] = {
 
 _LOTE_EXEMPLO_ATUALIZACAO: dict[str, object] = {
     "codigo_cadastro": "DRE GUAIANASES",
+    "codigo_contrato": _EXEMPLO_CODIGO_CONTRATO,
     "nome": "DRE GUAIANASES ATUALIZADO",
     "status": False,
     "empresa": "f882ef71-1705-46cb-850b-c404650d95e5",

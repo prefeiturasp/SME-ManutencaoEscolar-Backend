@@ -242,6 +242,7 @@ def lote_centro(
     """Fixture de lote."""
     lote = Lote.objects.create(
         codigo_cadastro="LOTE-001",
+        codigo_contrato="31/SME/2021-SME/COMPS",
         nome="Lote Centro",
         empresa=empresa,
         status=True,
