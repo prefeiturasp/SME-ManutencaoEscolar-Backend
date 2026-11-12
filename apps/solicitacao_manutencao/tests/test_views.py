@@ -18,6 +18,11 @@ from apps.escola.models import (
     Unidadeeducacional,
 )
 from apps.solicitacao_manutencao.api.views import SolicitacaoManutencaoViewSet
+from apps.solicitacao_manutencao.constants import (
+    FaseExecucao,
+    FaseVistoria,
+    SituacaoSolicitacao,
+)
 from apps.solicitacao_manutencao.filters import SolicitacaoManutencaoFilter
 from apps.solicitacao_manutencao.models import (
     ServicoManutencao,
@@ -109,15 +114,24 @@ def test_get_queryset_retorna_queryset_para_listagem(
 
 
 def test_lista_situacoes_da_solicitacao(api_cliente_perfil) -> None:
-    """Retorna os valores e rótulos das situações da solicitação."""
+    """Retorna as choices agrupadas nas três fases da solicitação."""
     resposta = api_cliente_perfil(PerfilAcesso.DRE).get(URL_SITUACOES)
 
     assert resposta.status_code == status.HTTP_200_OK
-    assert resposta.json()[0] == {
-        "value": "nao_enviado_dre",
-        "label": "Não enviada para a DRE",
+    assert resposta.json() == {
+        "solicitacao": [
+            {"value": choice.value, "label": choice.label}
+            for choice in SituacaoSolicitacao
+        ],
+        "vistoria": [
+            {"value": choice.value, "label": choice.label}
+            for choice in FaseVistoria
+        ],
+        "execucao": [
+            {"value": choice.value, "label": choice.label}
+            for choice in FaseExecucao
+        ],
     }
-    assert len(resposta.json()) == 9
 
 
 def test_lista_fases_da_solicitacao(api_cliente_perfil) -> None:

@@ -17,7 +17,9 @@ from rest_framework.viewsets import GenericViewSet
 
 from apps.core.exceptions import AnexoArquivoError
 from apps.solicitacao_manutencao.constants import (
+    FaseExecucao,
     FaseSolicitacao,
+    FaseVistoria,
     SituacaoSolicitacao,
     TipoAtendimento,
 )
@@ -109,10 +111,17 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
             Resposta com os valores e rótulos das situações.
         """
         return Response(
-            [
-                {"value": choice.value, "label": choice.label}
-                for choice in SituacaoSolicitacao
-            ],
+            {
+                choice.value: [
+                    {"value": sub_choice.value, "label": sub_choice.label}
+                    for sub_choice in enum_choices
+                ]
+                for choice, enum_choices in (
+                    (FaseSolicitacao.SOLICITACAO, SituacaoSolicitacao),
+                    (FaseSolicitacao.VISTORIA, FaseVistoria),
+                    (FaseSolicitacao.EXECUCAO, FaseExecucao),
+                )
+            },
             status=status.HTTP_200_OK,
         )
 

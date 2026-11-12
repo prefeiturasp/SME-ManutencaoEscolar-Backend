@@ -19,6 +19,14 @@ class PerfisSolicitacao(models.TextChoices):
     DRE = "dre", "DRE"
 
 
+class FaseSolicitacao(models.TextChoices):
+    """Define as fases de uma solicitação."""
+
+    SOLICITACAO = "solicitacao", "Solicitação"
+    VISTORIA = "vistoria", "Vistoria"
+    EXECUCAO = "execucao", "Execução"
+
+
 class SituacaoSolicitacao(models.TextChoices):
     """Define as situações de uma solicitação."""
 
@@ -45,9 +53,29 @@ class SituacaoSolicitacao(models.TextChoices):
     )
 
 
-class FaseSolicitacao(models.TextChoices):
-    """Define as fases de uma solicitação."""
+class FaseVistoria(models.TextChoices):
+    """Define as fases de vistoria de uma solicitação."""
 
-    SOLICITACAO = "solicitacao", "Solicitação"
-    VISTORIA = "vistoria", "Vistoria"
-    EXECUCAO = "execucao", "Execução"
+    VISTORIA_AGUARDANDO = (
+        "aguardando_vistoria",
+        "Vistoria aguardando agendamento",
+    )
+    VISTORIA_AGENDADA = "vistoria_agendada", "Vistoria agendada"
+    VISTORIA_ATRASADA = "vistoria_atrasada", "Vistoria atrasada"
+    VISTORIA_REALIZADA = "vistoria_realizada", "Vistoria realizada"
+    VISTORIA_APROVADA = "vistoria_aprovada", "Vistoria aprovada"
+    VISTORIA_EM_REVISAO = "vistoria_em_revisao", "Vistoria em revisão"
+
+
+class FaseExecucao(models.TextChoices):
+    """Define as fases de execução de uma solicitação."""
+
+    EXECUCAO_AGUARDANDO = (
+        "execucao_aguardando",
+        "Execução aguardando agendamento",
+    )
+    EXECUCAO_AGENDADA = "execucao_agendada", "Execução agendada"
+    EXECUCAO_EM_ANDAMENTO = "execucao_em_andamento", "Execução em andamento"
+    EXECUCAO_ATRASADA = "execucao_atrasada", "Execução atrasada"
+    EXECUCAO_REALIZADA = "execucao_realizada", "Execução realizada"
+    EXECUCAO_COM_ATESTE_UE = "execucao_com_ateste_ue", "Execução com ateste UE"
