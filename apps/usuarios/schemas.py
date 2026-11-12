@@ -53,7 +53,13 @@ ME = extend_schema(
                     },
                 },
                 "funcionalidades": ["RELATORIOS", "SOLICITACAO_MANUTENCAO"],
-                "diretoria_regional": "DRE Exemplo",
+                "diretoria_regional": {
+                    "id": 1,
+                    "codigo": "01",
+                    "nome": "Diretoria Regional Exemplo",
+                    "abreviacao": "DRE EX",
+                    "nome_curto": "DRE Exemplo",
+                },
                 "unidade_educacional": {
                     "id": 1,
                     "uuid": "5d6b0a0e-3f0b-4b53-8a55-0d7c1f3a9e21",

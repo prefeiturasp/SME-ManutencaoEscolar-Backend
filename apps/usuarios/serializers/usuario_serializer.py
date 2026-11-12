@@ -7,6 +7,9 @@ do usuário autenticado nas respostas da API.
 from rest_framework import serializers
 
 from apps.escola.models.unidade_educacional import Unidadeeducacional
+from apps.escola.serializers.diretoria_regional_serializers import (
+    DiretoriaRegionalSerializer,
+)
 from apps.escola.serializers.unidade_educacional_serializers import (
     DadosUnidadeEducacionalSerializer,
     DiretoriaRegionalUnidadeEducacionalSerializer,
@@ -100,9 +103,10 @@ class UsuarioResponseSerializer(serializers.Serializer):
         child=serializers.ChoiceField(choices=Funcionalidade.choices),
         help_text="Funcionalidades liberadas para o perfil do usuário.",
     )
-    diretoria_regional = serializers.CharField(
+    diretoria_regional = DiretoriaRegionalSerializer(
         allow_null=True,
-        help_text="Nome da DRE. Preenchido para os perfis UE e DRE.",
+        read_only=True,
+        help_text="Dados da DRE. Preenchido para os perfis UE e DRE.",
     )
     unidade_educacional = UnidadeEducacionalLoginSerializer(
         allow_null=True,
