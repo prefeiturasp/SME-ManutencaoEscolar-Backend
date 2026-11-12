@@ -13,12 +13,6 @@ pytestmark = pytest.mark.django_db
 
 
 class TestUsuarioService:
-    def test_serializar_diretoria_regional_nula(self):
-        """Retorna None quando a unidade não possui diretoria regional."""
-        resultado = UsuarioService._serializar_diretoria_regional(None)
-
-        assert resultado is None
-
     @patch(
         "apps.usuarios.services.usuario_service.UsuarioRepository."
         "atualizar_ou_criar"

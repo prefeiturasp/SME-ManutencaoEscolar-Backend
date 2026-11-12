@@ -1,4 +1,4 @@
-"""Modelos da aplicação Core."""
+"""Modelo de diretoria regional."""
 
 from django.db import models
 

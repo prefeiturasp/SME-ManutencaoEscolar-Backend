@@ -10,7 +10,9 @@ from apps.core.exceptions import (
 )
 from apps.core.repository.token_repository import TokenRepository
 from apps.core.services.email_service import EmailService
-from apps.escola.models import DiretoriaRegional
+from apps.escola.repository.diretoria_regional_repository import (
+    DiretoriaRegionalRepository,
+)
 from apps.escola.repository.responsavel_unidade_repository import (
     ResponsavelUnidadeRepository,
 )
@@ -131,24 +133,9 @@ class UsuarioService:
             return {"unidade_educacional": None, "diretoria_regional": None}
         return {
             "unidade_educacional": informacoes["unidade_educacional"],
-            "diretoria_regional": cls._serializar_diretoria_regional(
+            "diretoria_regional": DiretoriaRegionalRepository.serializar(
                 informacoes["unidade_educacional"].diretoria_regional
             ),
-        }
-
-    @staticmethod
-    def _serializar_diretoria_regional(
-        diretoria: DiretoriaRegional | None,
-    ) -> dict[str, Any] | None:
-        """Retorna os dados da DRE em formato serializável."""
-        if diretoria is None:
-            return None
-        return {
-            "id": diretoria.id,
-            "codigo": diretoria.codigo,
-            "nome": diretoria.nome,
-            "abreviacao": diretoria.abreviacao,
-            "nome_curto": diretoria.nome_curto,
         }
 
     @staticmethod
