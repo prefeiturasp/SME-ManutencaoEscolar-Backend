@@ -50,7 +50,13 @@ class TestFuncionalidadesPorPerfil:
                 PerfilAcesso.SME,
                 {Funcionalidade.CADASTROS, Funcionalidade.RELATORIOS},
             ),
-            (PerfilAcesso.DRE, {Funcionalidade.RELATORIOS}),
+            (
+                PerfilAcesso.DRE,
+                {
+                    Funcionalidade.RELATORIOS,
+                    Funcionalidade.SOLICITACAO_MANUTENCAO,
+                },
+            ),
             (
                 PerfilAcesso.UE,
                 {
@@ -72,13 +78,13 @@ class TestFuncionalidadesPorPerfil:
         }
         assert perfis_com_cadastros == {PerfilAcesso.SME}
 
-    def test_somente_ue_acessa_solicitacao_manutencao(self):
+    def test_ue_e_dre_acessam_solicitacao_manutencao(self):
         perfis_com_solicitacao = {
             perfil
             for perfil, funcionalidades in FUNCIONALIDADES_POR_PERFIL.items()
             if Funcionalidade.SOLICITACAO_MANUTENCAO in funcionalidades
         }
-        assert perfis_com_solicitacao == {PerfilAcesso.UE}
+        assert perfis_com_solicitacao == {PerfilAcesso.UE, PerfilAcesso.DRE}
 
     def test_todos_os_perfis_acessam_relatorios(self):
         assert all(
@@ -132,7 +138,10 @@ class TestPermissaoCadastrosNasViews:
         resposta = api_cliente_perfil(PerfilAcesso.SME).get(url)
         assert resposta.status_code == status.HTTP_200_OK
 
-    @pytest.mark.parametrize("perfil", PERFIS_SEM_CADASTROS)
+    @pytest.mark.parametrize(
+        "perfil",
+        [PerfilAcesso.UE, PerfilAcesso.EMPRESA, None],
+    )
     @pytest.mark.parametrize(
         "url",
         [url for url in URLS_CADASTROS if url != "/api/v1/servicos/"],
@@ -143,6 +152,24 @@ class TestPermissaoCadastrosNasViews:
         resposta = api_cliente_perfil(perfil).get(url)
         assert resposta.status_code == status.HTTP_403_FORBIDDEN
         assert resposta.data["detail"] == PermissaoCadastros.message
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            url
+            for url in URLS_CADASTROS
+            if url
+            not in (
+                "/api/v1/servicos/",
+                "/api/v1/unidades-educacionais/",
+            )
+        ],
+    )
+    def test_dre_nao_acessa_outros_cadastros(self, api_cliente_perfil, url):
+        """Mantém a exceção de leitura de unidades restrita a esse endpoint."""
+        resposta = api_cliente_perfil(PerfilAcesso.DRE).get(url)
+
+        assert resposta.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize("url", URLS_CADASTROS)
     def test_usuario_nao_autenticado_recebe_401(self, url):
@@ -158,6 +185,19 @@ class TestPermissaoCadastrosNasViews:
             status.HTTP_403_FORBIDDEN,
             status.HTTP_405_METHOD_NOT_ALLOWED,
         )
+
+    def test_perfil_dre_nao_pode_atualizar_unidade_educacional(
+        self, api_cliente_perfil, unidade_educacional_emef
+    ):
+        """DRE pode consultar unidades, mas não pode atualizá-las."""
+        cliente = api_cliente_perfil(PerfilAcesso.DRE)
+        resposta = cliente.put(
+            f"/api/v1/unidades-educacionais/{unidade_educacional_emef.uuid}/",
+            data={},
+            format="json",
+        )
+
+        assert resposta.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize("perfil", PERFIS_SEM_CADASTROS)
     @pytest.mark.parametrize("url", URLS_DE_APOIO)

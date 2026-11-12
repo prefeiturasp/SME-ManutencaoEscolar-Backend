@@ -34,6 +34,12 @@ class PermissaoCadastros(PermissaoFuncionalidade):
     funcionalidade = Funcionalidade.CADASTROS
 
 
+class PermissaoSolicitacoes(PermissaoFuncionalidade):
+    """Libera acesso às solicitações conforme a funcionalidade do perfil."""
+
+    funcionalidade = Funcionalidade.SOLICITACAO_MANUTENCAO
+
+
 class PermissaoPerfilUE(BasePermission):
     """Libera o acesso exclusivamente a usuários do perfil UE."""
 
