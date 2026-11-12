@@ -35,11 +35,14 @@ from apps.solicitacao_manutencao.services.ue_services import (
     SolicitacaoManutencaoUeService,
 )
 from apps.usuarios.models import Usuario
+from apps.usuarios.permissions import PermissaoSolicitacoes
 
 
 @SOLICITACAO_MANUTENCAO_SCHEMA
 class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
     """Disponibiliza a criação, edição e consulta de solicitações."""
+
+    permission_classes = [PermissaoSolicitacoes]
 
     http_method_names = ["get", "post", "put", "options"]
     filter_backends = [DjangoFilterBackend]

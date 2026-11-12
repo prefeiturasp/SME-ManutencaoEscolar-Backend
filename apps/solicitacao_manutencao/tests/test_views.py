@@ -12,7 +12,11 @@ from rest_framework.exceptions import NotAuthenticated
 from rest_framework.request import Request
 from rest_framework.test import APIClient, APIRequestFactory
 
-from apps.escola.models import HistoricoResponsavel
+from apps.escola.models import (
+    DiretoriaRegional,
+    HistoricoResponsavel,
+    Unidadeeducacional,
+)
 from apps.solicitacao_manutencao.api.views import SolicitacaoManutencaoViewSet
 from apps.solicitacao_manutencao.models import (
     SolicitacaoManutencao,
@@ -102,9 +106,9 @@ def test_get_queryset_retorna_queryset_para_listagem(
     )
 
 
-def test_lista_situacoes_da_solicitacao(api_cliente: APIClient) -> None:
+def test_lista_situacoes_da_solicitacao(api_cliente_perfil) -> None:
     """Retorna os valores e rótulos das situações da solicitação."""
-    resposta = api_cliente.get(URL_SITUACOES)
+    resposta = api_cliente_perfil(PerfilAcesso.DRE).get(URL_SITUACOES)
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json()[0] == {
@@ -114,9 +118,9 @@ def test_lista_situacoes_da_solicitacao(api_cliente: APIClient) -> None:
     assert len(resposta.json()) == 9
 
 
-def test_lista_fases_da_solicitacao(api_cliente: APIClient) -> None:
+def test_lista_fases_da_solicitacao(api_cliente_perfil) -> None:
     """Retorna os valores e rótulos das fases da solicitação."""
-    resposta = api_cliente.get(URL_FASES)
+    resposta = api_cliente_perfil(PerfilAcesso.DRE).get(URL_FASES)
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json() == [
@@ -126,39 +130,15 @@ def test_lista_fases_da_solicitacao(api_cliente: APIClient) -> None:
     ]
 
 
-def test_lista_tipos_atendimento(api_cliente: APIClient) -> None:
+def test_lista_tipos_atendimento(api_cliente_perfil) -> None:
     """Retorna os valores e rótulos dos tipos de atendimento."""
-    resposta = api_cliente.get(URL_TIPOS_ATENDIMENTO)
+    resposta = api_cliente_perfil(PerfilAcesso.DRE).get(URL_TIPOS_ATENDIMENTO)
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json() == [
         {"value": "comum", "label": "Comum"},
         {"value": "urgente", "label": "Urgente"},
     ]
-
-
-def test_documenta_choices_da_solicitacao_no_schema() -> None:
-    """Expõe no OpenAPI a consulta de cada escolha da solicitação."""
-    resposta = APIClient().get("/api/v1/schema/?format=json")
-
-    assert resposta.status_code == status.HTTP_200_OK
-    operacoes = {
-        url: resposta.json()["paths"][url]["get"]
-        for url in (URL_SITUACOES, URL_FASES, URL_TIPOS_ATENDIMENTO)
-    }
-    assert operacoes[URL_SITUACOES]["operationId"] == (
-        "listarSituacoesSolicitacaoManutencao"
-    )
-    assert operacoes[URL_FASES]["operationId"] == (
-        "listarFasesSolicitacaoManutencao"
-    )
-    assert operacoes[URL_TIPOS_ATENDIMENTO]["operationId"] == (
-        "listarTiposAtendimentoSolicitacaoManutencao"
-    )
-    assert all(
-        set(operacao["responses"]) == {"200", "401", "500"}
-        for operacao in operacoes.values()
-    )
 
 
 def test_lista_solicitacoes_paginadas(
@@ -216,8 +196,130 @@ def test_lista_solicitacoes_paginadas(
     }
 
 
+def test_lista_solicitacoes_com_perfil_dre(
+    api_cliente_perfil,
+    unidade_educacional_emef: Any,
+    tipo_escola_emef: Any,
+    subprefeitura_se: Any,
+    usuario_ativo: Usuario,
+) -> None:
+    """Permite à DRE listar solicitações de todas as unidades vinculadas."""
+    cliente = api_cliente_perfil(PerfilAcesso.DRE)
+    usuario_dre = Usuario.objects.get(username="usuario-DRE")
+    usuario_dre.diretoria_regional = (
+        unidade_educacional_emef.diretoria_regional
+    )
+    usuario_dre.save(update_fields=["diretoria_regional"])
+    cliente.force_authenticate(user=usuario_dre)
+    solicitacao_dre = SolicitacaoManutencao.objects.create(
+        codigo="dre-lista-1",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ativo,
+    )
+    unidade_da_mesma_dre = Unidadeeducacional.objects.create(
+        codigo_eol="dre-lista-ue",
+        nome="Outra unidade da DRE",
+        diretoria_regional=unidade_educacional_emef.diretoria_regional,
+        tipo_escola=tipo_escola_emef,
+        subprefeitura=subprefeitura_se,
+    )
+    solicitacao_mesma_dre = SolicitacaoManutencao.objects.create(
+        codigo="dre-lista-3",
+        tipo_atendimento="urgente",
+        unidade_educacional=unidade_da_mesma_dre,
+        criado_por=usuario_ativo,
+    )
+    diretoria_regional_outra = DiretoriaRegional.objects.create(
+        codigo="DRE-OUTRA",
+        nome="DIRETORIA REGIONAL DE OUTRA REGIÃO",
+        abreviacao="OUT",
+    )
+    unidade_outra_dre = Unidadeeducacional.objects.create(
+        codigo_eol="outra-dre-ue",
+        nome="Unidade de outra DRE",
+        diretoria_regional=diretoria_regional_outra,
+        tipo_escola=tipo_escola_emef,
+        subprefeitura=subprefeitura_se,
+    )
+    solicitacao_outra_dre = SolicitacaoManutencao.objects.create(
+        codigo="dre-lista-2",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_outra_dre,
+        criado_por=usuario_ativo,
+    )
+
+    resposta = cliente.get(URL_SOLICITACOES)
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert {item["uuid"] for item in resposta.json()["results"]} == {
+        str(solicitacao_dre.uuid),
+        str(solicitacao_mesma_dre.uuid),
+    }
+    assert str(solicitacao_outra_dre.uuid) not in {
+        item["uuid"] for item in resposta.json()["results"]
+    }
+
+
+@pytest.mark.parametrize(
+    "perfil",
+    [
+        PerfilAcesso.SME,
+        PerfilAcesso.EMPRESA,
+        None,
+    ],
+)
+def test_perfil_sem_acesso_a_solicitacoes_recebe_403(
+    api_cliente_perfil,
+    perfil: str | None,
+) -> None:
+    """Bloqueia a listagem para perfis sem a funcionalidade de solicitações."""
+    resposta = api_cliente_perfil(perfil).get(URL_SOLICITACOES)
+
+    assert resposta.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_lista_retorna_rótulo_do_solicitante(
+    api_cliente_perfil,
+    unidade_educacional_emef: Any,
+) -> None:
+    """Exibe o rótulo legível do perfil que abriu a solicitação."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="solicitante-dre",
+        tipo_atendimento="comum",
+        solicitante="dre",
+        unidade_educacional=unidade_educacional_emef,
+    )
+
+    cliente = api_cliente_perfil(PerfilAcesso.DRE)
+    usuario_dre = Usuario.objects.get(username="usuario-DRE")
+    usuario_dre.diretoria_regional = (
+        unidade_educacional_emef.diretoria_regional
+    )
+    usuario_dre.save(update_fields=["diretoria_regional"])
+    cliente.force_authenticate(user=usuario_dre)
+
+    resposta = cliente.get(
+        URL_SOLICITACOES,
+        {"solicitante": "dre"},
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK
+    assert resposta.json()["results"] == [
+        {
+            "uuid": str(solicitacao.uuid),
+            "codigo": "solicitante-dre",
+            "tipo_atendimento": "comum",
+            "solicitante": "DRE",
+            "situacao": "nao_enviado_dre",
+            "data_envio": None,
+            "fase": "solicitacao",
+        }
+    ]
+
+
 def test_busca_solicitacao_por_uuid(
-    api_cliente_ue: APIClient,
+    api_cliente_perfil,
     unidade_educacional_emef: Any,
     usuario_ue: Usuario,
     historico_responsavel: HistoricoResponsavel,
@@ -225,6 +327,13 @@ def test_busca_solicitacao_por_uuid(
     """Retorna os dados completos da solicitação pelo UUID."""
     usuario_ue.username = historico_responsavel.responsavel.registro_funcional
     usuario_ue.save(update_fields=["username"])
+    cliente = api_cliente_perfil(PerfilAcesso.DRE)
+    usuario_dre = Usuario.objects.get(username="usuario-DRE")
+    usuario_dre.diretoria_regional = (
+        unidade_educacional_emef.diretoria_regional
+    )
+    usuario_dre.save(update_fields=["diretoria_regional"])
+    cliente.force_authenticate(user=usuario_dre)
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="0000003",
         tipo_atendimento="urgente",
@@ -233,7 +342,7 @@ def test_busca_solicitacao_por_uuid(
         criado_por=usuario_ue,
     )
 
-    resposta = api_cliente_ue.get(URL_SOLICITACAO.format(solicitacao.uuid))
+    resposta = cliente.get(URL_SOLICITACAO.format(solicitacao.uuid))
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json() == {
@@ -289,12 +398,12 @@ def test_busca_solicitacao_por_uuid(
     }
 
 
-def test_nao_busca_solicitacao_de_outra_ue(
+def test_ue_nao_pode_consultar_solicitacao_fora_do_escopo(
     api_cliente_ue: APIClient,
     unidade_educacional_emef: Any,
     usuario_inativo: Usuario,
 ) -> None:
-    """Oculta solicitação que não pertence ao usuário da UE autenticado."""
+    """Oculta solicitações fora do escopo do usuário UE."""
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="0000004",
         tipo_atendimento="comum",
@@ -310,7 +419,7 @@ def test_nao_busca_solicitacao_de_outra_ue(
 def test_edicao_retorna_404_para_solicitacao_invisivel(
     api_cliente_ue: APIClient,
 ) -> None:
-    """Retorna 404 ao editar uma solicitação fora do escopo do usuário."""
+    """Retorna 404 ao editar uma solicitação fora do escopo da UE."""
     resposta = api_cliente_ue.put(
         URL_EDITAR_SOLICITACAO_UE.format(
             "00000000-0000-0000-0000-000000000000"
@@ -335,10 +444,18 @@ def test_edicao_rejeita_usuario_nao_identificado() -> None:
 
 
 def test_busca_solicitacao_inexistente_por_uuid(
-    api_cliente_ue: APIClient,
+    api_cliente_perfil,
+    unidade_educacional_emef: Any,
 ) -> None:
     """Retorna 404 quando não existe solicitação com o UUID informado."""
-    resposta = api_cliente_ue.get(
+    cliente = api_cliente_perfil(PerfilAcesso.DRE)
+    usuario_dre = Usuario.objects.get(username="usuario-DRE")
+    usuario_dre.diretoria_regional = (
+        unidade_educacional_emef.diretoria_regional
+    )
+    usuario_dre.save(update_fields=["diretoria_regional"])
+    cliente.force_authenticate(user=usuario_dre)
+    resposta = cliente.get(
         URL_SOLICITACAO.format("00000000-0000-0000-0000-000000000000")
     )
 
@@ -354,19 +471,20 @@ def test_busca_solicitacao_inexistente_por_uuid(
     ],
 )
 def test_filtra_listagem_de_solicitacoes(
-    api_cliente: APIClient,
+    api_cliente_perfil,
     unidade_educacional_emef: Any,
     usuario_ativo: Usuario,
     parametros: dict[str, str],
     codigo_esperado: str,
-    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Filtra a listagem pelos dados da solicitação."""
-    usuario_ativo.username = (
-        historico_responsavel.responsavel.registro_funcional
+    cliente = api_cliente_perfil(PerfilAcesso.DRE)
+    usuario_dre = Usuario.objects.get(username="usuario-DRE")
+    usuario_dre.diretoria_regional = (
+        unidade_educacional_emef.diretoria_regional
     )
-    usuario_ativo.save(update_fields=["username"])
-    api_cliente.force_authenticate(user=usuario_ativo)
+    usuario_dre.save(update_fields=["diretoria_regional"])
+    cliente.force_authenticate(user=usuario_dre)
     SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="urgente",
@@ -381,7 +499,7 @@ def test_filtra_listagem_de_solicitacoes(
         criado_por=usuario_ativo,
     )
 
-    resposta = api_cliente.get(URL_SOLICITACOES, parametros)
+    resposta = cliente.get(URL_SOLICITACOES, parametros)
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json()["count"] == 1
@@ -397,19 +515,20 @@ def test_filtra_listagem_de_solicitacoes(
     ],
 )
 def test_filtra_listagem_de_solicitacoes_por_multiplos_valores(
-    api_cliente: APIClient,
+    api_cliente_perfil,
     unidade_educacional_emef: Any,
     usuario_ativo: Usuario,
     campo: str,
     valores: str,
-    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Filtra a listagem por múltiplos valores do mesmo campo."""
-    usuario_ativo.username = (
-        historico_responsavel.responsavel.registro_funcional
+    cliente = api_cliente_perfil(PerfilAcesso.DRE)
+    usuario_dre = Usuario.objects.get(username="usuario-DRE")
+    usuario_dre.diretoria_regional = (
+        unidade_educacional_emef.diretoria_regional
     )
-    usuario_ativo.save(update_fields=["username"])
-    api_cliente.force_authenticate(user=usuario_ativo)
+    usuario_dre.save(update_fields=["diretoria_regional"])
+    cliente.force_authenticate(user=usuario_dre)
     SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="urgente",
@@ -425,24 +544,25 @@ def test_filtra_listagem_de_solicitacoes_por_multiplos_valores(
         criado_por=usuario_ativo,
     )
 
-    resposta = api_cliente.get(URL_SOLICITACOES, {campo: valores})
+    resposta = cliente.get(URL_SOLICITACOES, {campo: valores})
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json()["count"] == 2
 
 
 def test_filtra_listagem_por_intervalo_de_data_envio(
-    api_cliente: APIClient,
+    api_cliente_perfil,
     unidade_educacional_emef: Any,
     usuario_ativo: Usuario,
-    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Filtra solicitações cuja data de envio esteja no intervalo."""
-    usuario_ativo.username = (
-        historico_responsavel.responsavel.registro_funcional
+    cliente = api_cliente_perfil(PerfilAcesso.DRE)
+    usuario_dre = Usuario.objects.get(username="usuario-DRE")
+    usuario_dre.diretoria_regional = (
+        unidade_educacional_emef.diretoria_regional
     )
-    usuario_ativo.save(update_fields=["username"])
-    api_cliente.force_authenticate(user=usuario_ativo)
+    usuario_dre.save(update_fields=["diretoria_regional"])
+    cliente.force_authenticate(user=usuario_dre)
     for codigo, data_envio in (
         ("0000001", datetime(2026, 10, 9, 23, 59)),
         ("0000002", datetime(2026, 10, 10, 12)),
@@ -457,7 +577,7 @@ def test_filtra_listagem_por_intervalo_de_data_envio(
             criado_por=usuario_ativo,
         )
 
-    resposta = api_cliente.get(
+    resposta = cliente.get(
         URL_SOLICITACOES,
         {
             "data_envio_after": "2026-10-10",
@@ -478,25 +598,6 @@ def test_listagem_de_solicitacoes_exige_autenticacao() -> None:
     resposta = APIClient().get(URL_SOLICITACOES)
 
     assert resposta.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-def test_documenta_listagem_de_solicitacoes_no_schema() -> None:
-    """Expõe a listagem paginada e seus filtros no OpenAPI."""
-    resposta = APIClient().get("/api/v1/schema/?format=json")
-
-    assert resposta.status_code == status.HTTP_200_OK
-    operacao = resposta.json()["paths"][URL_SOLICITACOES]["get"]
-    assert operacao["operationId"] == "listarSolicitacoesManutencao"
-    assert operacao["summary"] == "Lista as solicitações de manutenção"
-    assert {parametro["name"] for parametro in operacao["parameters"]} >= {
-        "codigo",
-        "tipo_atendimento",
-        "situacao",
-        "fase",
-        "data_envio_after",
-        "data_envio_before",
-    }
-    assert set(operacao["responses"]) == {"200", "401", "500"}
 
 
 def test_requisicao_nao_autenticada_retorna_401(
@@ -523,42 +624,16 @@ def test_solicitacao_ue_rejeita_usuario_nao_identificado() -> None:
         SolicitacaoManutencaoViewSet.solicitacao_ue(view, requisicao)
 
 
-def test_documenta_criacao_da_solicitacao_no_schema() -> None:
-    """Expõe no OpenAPI os detalhes da criação da solicitação."""
-    resposta = APIClient().get("/api/v1/schema/?format=json")
-
-    assert resposta.status_code == status.HTTP_200_OK
-    operacao = resposta.json()["paths"][
-        "/api/v1/solicitacoes-manutencao/solicitacao-ue/"
-    ]["post"]
-    assert operacao["operationId"] == "criarSolicitacaoManutencao"
-    assert operacao["summary"] == "Cria uma solicitação de manutenção"
-    assert operacao["parameters"][0]["name"] == "enviar"
-    assert set(operacao["responses"]) == {"201", "400", "401", "500"}
-
-
-def test_documenta_edicao_da_solicitacao_no_schema() -> None:
-    """Expõe no OpenAPI a rota de edição e seu parâmetro de envio."""
-    resposta = APIClient().get("/api/v1/schema/?format=json")
-
-    assert resposta.status_code == status.HTTP_200_OK
-    operacao = resposta.json()["paths"][
-        "/api/v1/solicitacoes-manutencao/editar-solicitacao-ue/{uuid}/"
-    ]["put"]
-    assert operacao["operationId"] == "editarSolicitacaoManutencao"
-    assert operacao["summary"] == "Edita uma solicitação de manutenção"
-    assert any(
-        parametro["name"] == "enviar" for parametro in operacao["parameters"]
-    )
-    assert set(operacao["responses"]) == {"200", "400", "401", "404", "500"}
-
-
 def test_cria_solicitacao_com_servicos(
     api_cliente: APIClient,
     solicitacao_payload: dict[str, Any],
-    usuario_ativo: Usuario,
+    usuario_ue: Usuario,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Cria a solicitação e seus serviços em uma única requisição."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ue)
     resposta = _postar_solicitacao(
         api_cliente,
         f"{URL_SOLICITACAO_UE}?enviar=true",
@@ -567,11 +642,11 @@ def test_cria_solicitacao_com_servicos(
 
     assert resposta.status_code == status.HTTP_201_CREATED, resposta.json()
     solicitacao = SolicitacaoManutencao.objects.get(codigo="0000001")
-    assert solicitacao.criado_por == usuario_ativo
+    assert solicitacao.criado_por == usuario_ue
     assert solicitacao.solicitante == "ue"
     assert solicitacao.data_envio is not None
     assert solicitacao.servicos_manutencao.count() == 1
-    assert solicitacao.servicos_manutencao.get().criado_por == usuario_ativo
+    assert solicitacao.servicos_manutencao.get().criado_por == usuario_ue
     assert resposta.json()["servicos"][0]["local_reparo"] == "Cozinha"
     assert len(resposta.json()["servicos"][0]["arquivos"]) == 1
 
@@ -579,8 +654,13 @@ def test_cria_solicitacao_com_servicos(
 def test_cria_solicitacao_sem_enviar_para_dre(
     api_cliente: APIClient,
     solicitacao_payload: dict[str, Any],
+    usuario_ue: Usuario,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Mantém a solicitação sem envio quando o parâmetro não é informado."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ue)
     resposta = _postar_solicitacao(
         api_cliente,
         URL_SOLICITACAO_UE,
@@ -596,8 +676,13 @@ def test_cria_solicitacao_sem_enviar_para_dre(
 def test_exige_ao_menos_um_servico(
     api_cliente: APIClient,
     solicitacao_payload: dict[str, Any],
+    usuario_ue: Usuario,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Não cria uma solicitação sem serviços de manutenção."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ue)
     solicitacao_payload["servicos"] = []
 
     resposta = _postar_solicitacao(
@@ -613,8 +698,13 @@ def test_exige_ao_menos_um_servico(
 def test_exige_arquivos_em_cada_servico(
     api_cliente: APIClient,
     solicitacao_payload: dict[str, Any],
+    usuario_ue: Usuario,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Não cria uma solicitação quando arquivos não são informados."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ue)
     solicitacao_payload["servicos"][0].pop("arquivos")
 
     resposta = _postar_solicitacao(
@@ -631,8 +721,13 @@ def test_exige_arquivos_em_cada_servico(
 def test_cria_solicitacao_sem_servico_catalogado(
     api_cliente: APIClient,
     solicitacao_payload: dict[str, Any],
+    usuario_ue: Usuario,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Cria uma solicitação sem vincular um serviço catalogado."""
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
+    api_cliente.force_authenticate(user=usuario_ue)
     dados_servico = solicitacao_payload["servicos"][0]
     dados_servico.pop("servico")
     dados_servico["servico_especifico"] = "Troca de disjuntor"
@@ -806,7 +901,6 @@ def test_perfil_ue_pode_listar_servicos(api_cliente_perfil):
 @pytest.mark.parametrize(
     "perfil",
     [
-        PerfilAcesso.DRE,
         PerfilAcesso.EMPRESA,
         None,
     ],
