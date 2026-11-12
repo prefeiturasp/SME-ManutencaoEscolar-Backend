@@ -1,12 +1,11 @@
 """Serializers da aplicação Empresa."""
 
-from pathlib import Path
 from typing import Any
 
-from django.core.files.uploadedfile import UploadedFile
+from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 
-from apps.core.constants import TAMANHO_MAXIMO_ARQUIVO
+from apps.core.constants import EXTENSOES_IMAGENS
 from apps.core.exceptions import (
     CepInvalidoError,
     CnpjInvalidoError,
@@ -17,11 +16,7 @@ from apps.core.validacoes import (
     validar_formato_cnpj,
     validar_formato_link_rastreio,
 )
-from apps.empresa.constants import (
-    LOGO_ASSINATURAS,
-    LOGO_EXTENSOES_PERMITIDAS,
-    EmpresaErrorMessages,
-)
+from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.models import Empresa
 from apps.empresa.serializers.anexo_serializers import ArquivoUploadField
 from apps.empresa.serializers.responsavel_serializers import (
@@ -34,12 +29,14 @@ def obter_url_logo(empresa: Empresa | dict[str, Any]) -> str | None:
     """Retorna a URL da logo da empresa, quando houver.
 
     Args:
-        empresa: Instância da empresa ou seus dados serializados.
+        empresa: Instância da empresa ou seus dados já serializados.
 
     Returns:
         URL de acesso à logo ou ``None`` se a empresa não possuir logo.
     """
-    logo = empresa.get("logo") if isinstance(empresa, dict) else empresa.logo
+    if isinstance(empresa, dict):
+        return empresa.get("logo_url")
+    logo = getattr(empresa, "logo", None)
     return str(logo.url) if logo else None
 
 
@@ -99,9 +96,12 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
         allow_null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=EXTENSOES_IMAGENS)
+        ],
         help_text=(
-            "Imagem PNG, JPG ou JPEG de até 2 MB. Envie vazio/nulo na "
-            "edição para remover a logo atual."
+            "Imagem PNG, JPG ou JPEG de até 2 MB. Na edição, envie vazio ou "
+            "nulo para remover a logo atual."
         ),
     )
     logo_url = serializers.SerializerMethodField()
@@ -130,38 +130,6 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
             "logo_url",
             "responsaveis_tecnicos",
         )
-
-    def validate_logo(self, value: UploadedFile | None) -> UploadedFile | None:
-        """Valida extensão, tamanho e conteúdo da imagem da logo.
-
-        Args:
-            value: Arquivo enviado ou ``None`` para remover a logo.
-
-        Returns:
-            O arquivo validado ou ``None``.
-
-        Raises:
-            serializers.ValidationError: Se o formato, o tamanho ou o
-                conteúdo do arquivo forem inválidos.
-        """
-        if value is None:
-            return None
-        extensao = Path(value.name or "").suffix.lower().lstrip(".")
-        if extensao not in LOGO_EXTENSOES_PERMITIDAS:
-            raise serializers.ValidationError(
-                EmpresaErrorMessages.LOGO_FORMATO_INVALIDO
-            )
-        if (value.size or 0) > TAMANHO_MAXIMO_ARQUIVO:
-            raise serializers.ValidationError(
-                EmpresaErrorMessages.LOGO_MUITO_GRANDE
-            )
-        cabecalho = value.read(8)
-        value.seek(0)
-        if not cabecalho.startswith(LOGO_ASSINATURAS):
-            raise serializers.ValidationError(
-                EmpresaErrorMessages.LOGO_CONTEUDO_INVALIDO
-            )
-        return value
 
     def validate_cnpj(self, value: str) -> str:
         """Valida o formato do CNPJ informado."""

@@ -1,8 +1,5 @@
 """Serviços de Empresa."""
 
-import uuid
-from functools import partial
-from pathlib import Path
 from typing import Any
 
 from django.db import transaction
@@ -16,6 +13,7 @@ from apps.empresa.models import Empresa
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
+from apps.empresa.services.logo_service import LogoEmpresaService
 from apps.empresa.services.responsavel_service import ResponsavelTecnicoService
 from apps.lote.repository.lote_repository import LoteRepository
 from apps.usuarios.models import Usuario
@@ -28,6 +26,7 @@ class EmpresaService:
         self,
         empresa_repository: EmpresaRepository | None = None,
         responsavel_tecnico_service: ResponsavelTecnicoService | None = None,
+        logo_service: LogoEmpresaService | None = None,
     ) -> None:
         """Inicializa o serviço com os repositórios informados ou os padrões.
 
@@ -38,11 +37,15 @@ class EmpresaService:
             responsavel_tecnico_service: Serviço de responsáveis técnicos
                 a ser utilizado. Quando não informado, uma instância padrão
                 de `ResponsavelTecnicoService` é criada.
+            logo_service: Serviço da logo da empresa a ser utilizado.
+                Quando não informado, uma instância padrão de
+                `LogoEmpresaService` é criada.
         """
         self.empresa_repository = empresa_repository or EmpresaRepository()
         self.responsavel_tecnico_service = (
             responsavel_tecnico_service or ResponsavelTecnicoService()
         )
+        self.logo_service = logo_service or LogoEmpresaService()
 
     def criar(
         self, dados: dict[str, Any], usuario: Usuario | None = None
@@ -62,8 +65,7 @@ class EmpresaService:
             dados["cnpj"],
             titulo=EmpresaErrorMessages.CNPJ_JA_CADASTRADO_TITULO_CRIAR,
         )
-        dados = self._preparar_logo({**dados, "criado_por": usuario})
-        return self.criar_com_responsaveis(dados)
+        return self.criar_com_responsaveis({**dados, "criado_por": usuario})
 
     def criar_com_responsaveis(self, dados: dict[str, Any]) -> dict[str, Any]:
         """Cria uma empresa e seus responsáveis técnicos em uma transação.
@@ -73,15 +75,24 @@ class EmpresaService:
 
         Args:
             dados: Dados da empresa, incluindo a lista de responsáveis
-                técnicos em "responsaveis_tecnicos".
+                técnicos em "responsaveis_tecnicos" e, opcionalmente, a
+                imagem da logo em "logo".
 
         Returns:
-            Dados serializados da empresa criada.
+            Dados serializados da empresa criada, incluindo ``logo_url``.
         """
         responsaveis_dados = dados.pop("responsaveis_tecnicos")
+        logo = dados.pop("logo", None)
 
         with transaction.atomic():
             empresa = self.empresa_repository.criar({**dados})
+            empresa["logo_url"] = (
+                self.logo_service.sincronizar(
+                    empresa["id"], logo, dados["criado_por"]
+                )
+                if logo is not None
+                else None
+            )
 
             empresa["responsaveis_tecnicos"] = (
                 self.responsavel_tecnico_service.bulk_criar(
@@ -120,9 +131,10 @@ class EmpresaService:
         Returns:
             Dados serializados da empresa atualizada.
         """
-        dados = self._preparar_logo({**dados, "atualizado_por": usuario})
+        dados = {**dados, "atualizado_por": usuario}
         responsaveis_dados = dados.pop("responsaveis_tecnicos", None)
-        logo_anterior = empresa.logo.name if empresa.logo else None
+        atualizar_logo = "logo" in dados
+        logo = dados.pop("logo", None)
 
         if "cnpj" in dados:
             self._validar_cnpj_duplicado(
@@ -135,13 +147,13 @@ class EmpresaService:
             empresa_atualizada = self.empresa_repository.atualizar(
                 empresa, dados
             )
-            if "logo" in dados and logo_anterior:
-                transaction.on_commit(
-                    partial(
-                        self.empresa_repository.excluir_arquivo_logo,
-                        logo_anterior,
-                    )
+            empresa_atualizada["logo_url"] = (
+                self.logo_service.sincronizar(
+                    empresa_atualizada["id"], logo, usuario
                 )
+                if atualizar_logo
+                else self.logo_service.obter_url(empresa_atualizada["id"])
+            )
             empresa_atualizada["responsaveis_tecnicos"] = (
                 self.responsavel_tecnico_service.sincronizar(
                     empresa_id=empresa_atualizada["id"],
@@ -151,24 +163,6 @@ class EmpresaService:
             )
 
         return empresa_atualizada
-
-    @staticmethod
-    def _preparar_logo(dados: dict[str, Any]) -> dict[str, Any]:
-        """Renomeia a logo enviada com um nome único, preservando a extensão.
-
-        Evita colisões e o armazenamento do nome original do arquivo.
-
-        Args:
-            dados: Dados da empresa, podendo conter a chave ``logo``.
-
-        Returns:
-            Os mesmos dados, com a logo renomeada quando houver arquivo.
-        """
-        logo = dados.get("logo")
-        if logo is not None:
-            extensao = Path(logo.name).suffix.lower()
-            logo.name = f"{uuid.uuid4()}{extensao}"
-        return dados
 
     @transaction.atomic
     def deletar(

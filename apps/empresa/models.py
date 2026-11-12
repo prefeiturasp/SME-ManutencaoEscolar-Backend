@@ -1,6 +1,5 @@
 """Modelos da aplicação Empresa."""
 
-from django.core.validators import FileExtensionValidator
 from django.db import models
 
 from apps.core.constants import EstadoChoices
@@ -9,10 +8,6 @@ from apps.core.validacoes import (
     apenas_digitos_validator,
     cnpj_formato_validacao,
     link_formato_validacao,
-)
-from apps.empresa.constants import (
-    LOGO_EXTENSOES_PERMITIDAS,
-    EmpresaErrorMessages,
 )
 
 
@@ -41,17 +36,6 @@ class Empresa(BaseModel):
     complemento = models.CharField(max_length=255, blank=True, default="")
     cidade = models.CharField(max_length=100)
     estado = models.CharField(max_length=2, choices=EstadoChoices.choices)
-    logo = models.FileField(
-        upload_to="empresas/logos/",
-        blank=True,
-        null=True,
-        validators=[
-            FileExtensionValidator(
-                allowed_extensions=LOGO_EXTENSOES_PERMITIDAS,
-                message=EmpresaErrorMessages.LOGO_FORMATO_INVALIDO,
-            )
-        ],
-    )
 
     class Meta:
         verbose_name = "Empresa"
@@ -97,6 +81,25 @@ class ResponsavelTecnico(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.nome} - {self.get_tipo_display()}"
+
+
+class LogoEmpresa(AnexoMixin):
+    """Representa a logo de uma empresa (relação entre upload e empresa)."""
+
+    empresa = models.OneToOneField(
+        Empresa,
+        on_delete=models.CASCADE,
+        related_name="logo",
+    )
+    arquivo = models.FileField(upload_to="empresas/logos/")
+
+    class Meta:
+        verbose_name = "Logo da Empresa"
+        verbose_name_plural = "Logos das Empresas"
+        ordering = ["-id"]
+
+    def __str__(self) -> str:
+        return f"Logo de {self.empresa.nome}"
 
 
 class AnexoResponsavelTecnico(AnexoMixin):
