@@ -16,6 +16,7 @@ class PerfisSolicitacao(models.TextChoices):
     """Define os perfis de usuários solicitantes."""
 
     UE = "ue", "UE"
+    DRE = "dre", "DRE"
 
 
 class SituacaoSolicitacao(models.TextChoices):

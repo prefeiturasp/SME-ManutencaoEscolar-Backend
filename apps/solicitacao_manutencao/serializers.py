@@ -9,6 +9,7 @@ from apps.escola.serializers.unidade_educacional_serializers import (
     UnidadeEducacionalSerializer,
 )
 from apps.servico.models import Servico
+from apps.solicitacao_manutencao.constants import PerfisSolicitacao
 from apps.solicitacao_manutencao.models import (
     FotoLocalReparo,
     ServicoManutencao,
@@ -121,6 +122,12 @@ class ServicoManutencaoSerializer(serializers.ModelSerializer):
 class SolicitacaoManutencaoListSerializer(serializers.ModelSerializer):
     """Serializa uma solicitação de manutenção para listagem."""
 
+    solicitante = serializers.SerializerMethodField()
+
+    def get_solicitante(self, obj: dict[str, Any]) -> str:
+        """Retorna o rótulo do perfil que abriu a solicitação."""
+        return PerfisSolicitacao(obj["solicitante"]).label
+
     class Meta:
         """Configura os campos exibidos na listagem de solicitações."""
 
@@ -129,6 +136,7 @@ class SolicitacaoManutencaoListSerializer(serializers.ModelSerializer):
             "uuid",
             "codigo",
             "tipo_atendimento",
+            "solicitante",
             "situacao",
             "data_envio",
             "fase",
@@ -207,6 +215,9 @@ class SolicitacaoManutencaoDetalheSerializer(serializers.ModelSerializer):
 
     unidade_educacional = serializers.SerializerMethodField()
     servicos = serializers.SerializerMethodField()
+    solicitante = serializers.CharField(
+        source="get_solicitante_display", read_only=True
+    )
 
     def get_unidade_educacional(
         self, obj: dict[str, Any] | SolicitacaoManutencao
@@ -255,4 +266,5 @@ class SolicitacaoManutencaoDetalheSerializer(serializers.ModelSerializer):
             "data_envio",
             "fase",
             "servicos",
+            "solicitante",
         )

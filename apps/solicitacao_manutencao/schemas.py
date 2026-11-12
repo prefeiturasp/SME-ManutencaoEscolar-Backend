@@ -185,6 +185,7 @@ _SOLICITACAO_DETALHE_EXEMPLO: dict[str, Any] = {
         "responsaveis": [],
     },
     "situacao": "aguardando_analise_dre",
+    "solicitante": "UE",
     "data_envio": "2026-10-20T14:31:00-03:00",
     "fase": "solicitacao",
     "servicos": [

@@ -24,6 +24,7 @@ class SolicitacaoManutencaoRepository:
         "uuid",
         "codigo",
         "tipo_atendimento",
+        "solicitante",
         "situacao",
         "data_envio",
         "fase",
