@@ -282,8 +282,8 @@ def test_obter_url_logo_para_instancia_e_dicionario(empresa, usuario_ativo):
     """Cobre instância sem logo, com logo e dados já serializados."""
     assert obter_url_logo(empresa) is None
     assert obter_url_logo({"logo_url": None}) is None
-    assert obter_url_logo({"logo_url": "http://x/logo.png"}) == (
-        "http://x/logo.png"
+    assert obter_url_logo({"logo_url": "https://x/logo.png"}) == (
+        "https://x/logo.png"
     )
 
     LogoEmpresa.objects.create(
@@ -303,7 +303,7 @@ class TestLogoEmpresaService:
 
     def test_sincronizar_valida_pelo_core_e_substitui(self):
         repository = MagicMock()
-        repository.substituir.return_value = {"arquivo_url": "http://x/a.png"}
+        repository.substituir.return_value = {"arquivo_url": "https://x/a.png"}
         anexo_service = MagicMock()
         anexo_service.validar_e_preparar_anexo.return_value = {
             "tipo": TipoArquivo.IMAGEM
@@ -314,7 +314,7 @@ class TestLogoEmpresaService:
 
         url = service.sincronizar(1, arquivo, usuario)
 
-        assert url == "http://x/a.png"
+        assert url == "https://x/a.png"
         anexo_service.validar_e_preparar_anexo.assert_called_once_with(
             arquivo=arquivo, id_usuario=7
         )
@@ -361,10 +361,10 @@ class TestLogoEmpresaService:
 
     def test_obter_url_delega_ao_repositorio(self):
         repository = MagicMock()
-        repository.obter_url.return_value = "http://x/a.png"
+        repository.obter_url.return_value = "https://x/a.png"
 
         assert LogoEmpresaService(repository).obter_url(1) == (
-            "http://x/a.png"
+            "https://x/a.png"
         )
 
     def test_construtor_usa_dependencias_padrao(self):
