@@ -4,9 +4,6 @@
 class EmpresaErrorMessages:
     """Mensagens de erro padronizadas para o domínio."""
 
-    LOGO_FORMATO_INVALIDO_TITULO = "Tipo de arquivo não permitido"
-    LOGO_FORMATO_INVALIDO = "A logo deve ser uma imagem PNG, JPG ou JPEG."
-
     CNPJ_INVALIDO = "CNPJ inválido."
     CNPJ_JA_CADASTRADO_TITULO_CRIAR = "Não é possível criar a empresa"
     CNPJ_JA_CADASTRADO_TITULO_EDITAR = (

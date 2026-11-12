@@ -3,10 +3,7 @@
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 
-from apps.core.constants import TipoArquivo
-from apps.core.exceptions import AnexoArquivoError
 from apps.core.services.anexo_service import AnexoService
-from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.repository.logo_repository import LogoEmpresaRepository
 from apps.usuarios.models import Usuario
 
@@ -49,8 +46,8 @@ class LogoEmpresaService:
             URL da nova logo ou ``None`` quando a logo foi removida.
 
         Raises:
-            AnexoArquivoError: Se o arquivo for inválido (tamanho, extensão
-                ou não for uma imagem).
+            AnexoArquivoError: Se o arquivo for inválido (vazio, acima do
+                tamanho máximo ou com extensão não permitida).
             UsuarioNaoEncontradoError: Se o usuário não existir.
         """
         if logo is None:
@@ -61,12 +58,6 @@ class LogoEmpresaService:
             arquivo=logo,
             id_usuario=usuario.id if usuario is not None else None,
         )
-        if dados_anexo["tipo"] != TipoArquivo.IMAGEM:
-            raise AnexoArquivoError(
-                title=EmpresaErrorMessages.LOGO_FORMATO_INVALIDO_TITULO,
-                detail=EmpresaErrorMessages.LOGO_FORMATO_INVALIDO,
-            )
-
         nova_logo = self.repository.substituir(
             empresa_id, dados_anexo, usuario
         )

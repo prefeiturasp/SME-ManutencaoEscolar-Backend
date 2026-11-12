@@ -9,8 +9,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
 
 from apps.core.constants import TAMANHO_MAXIMO_ARQUIVO, TipoArquivo
-from apps.core.exceptions import AnexoArquivoError
-from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.models import Empresa, LogoEmpresa
 from apps.empresa.repository.logo_repository import LogoEmpresaRepository
 from apps.empresa.serializers.empresa_serializers import obter_url_logo
@@ -124,7 +122,7 @@ def test_rejeita_extensao_invalida(
 
 
 def test_rejeita_documento_pdf_como_logo(api_cliente, empresa_payload_valido):
-    """PDF é um tipo permitido no core, mas não é uma imagem."""
+    """PDF é aceito no core para anexos, mas a logo só admite imagens."""
     resposta = _post(
         api_cliente,
         empresa_payload_valido,
@@ -344,20 +342,6 @@ class TestLogoEmpresaService:
 
         assert service.sincronizar(1, None) is None
         repository.remover.assert_called_once_with(1)
-
-    def test_sincronizar_rejeita_arquivo_que_nao_e_imagem(self):
-        anexo_service = MagicMock()
-        anexo_service.validar_e_preparar_anexo.return_value = {
-            "tipo": TipoArquivo.DOCUMENTO
-        }
-        repository = MagicMock()
-        service = LogoEmpresaService(repository, anexo_service)
-
-        with pytest.raises(AnexoArquivoError) as erro:
-            service.sincronizar(1, MagicMock(), MagicMock(id=1))
-
-        assert erro.value.detail == EmpresaErrorMessages.LOGO_FORMATO_INVALIDO
-        repository.substituir.assert_not_called()
 
     def test_obter_url_delega_ao_repositorio(self):
         repository = MagicMock()
