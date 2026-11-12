@@ -220,6 +220,7 @@ class TestEmpresaService:
         assert resultado == {
             "id": 1,
             "nome": "Empresa",
+            "logo_url": None,
             "responsaveis_tecnicos": [
                 {"nome": responsavel_tecnico_payload_valido["nome"]}
             ],
@@ -316,6 +317,7 @@ class TestEmpresaService:
         assert resultado == {
             "id": 7,
             "nome": "Novo Nome",
+            "logo_url": None,
             "responsaveis_tecnicos": [{"tipo": "preposto"}],
         }
 

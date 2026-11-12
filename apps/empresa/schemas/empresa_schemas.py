@@ -62,6 +62,7 @@ _EMPRESA_EXEMPLO_SAIDA = {
     "id": 1,
     "uuid": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
     **_EMPRESA_EXEMPLO_BASE,
+    "logo_url": "https://minio.exemplo.com/empresas/logos/logo.png",
     "criado_por": _USUARIO_EXEMPLO,
     "criado_em": _DATA_HORA_EXEMPLO,
     "atualizado_por": _USUARIO_EXEMPLO,

@@ -2,8 +2,10 @@
 
 from typing import Any
 
+from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 
+from apps.core.constants import EXTENSOES_IMAGENS
 from apps.core.exceptions import (
     CepInvalidoError,
     CnpjInvalidoError,
@@ -16,14 +18,36 @@ from apps.core.validacoes import (
 )
 from apps.empresa.constants import EmpresaErrorMessages
 from apps.empresa.models import Empresa
+from apps.empresa.serializers.anexo_serializers import ArquivoUploadField
 from apps.empresa.serializers.responsavel_serializers import (
     ResponsavelTecnicoSerializer,
 )
 from apps.usuarios.models import Usuario
 
 
+def obter_url_logo(empresa: Empresa | dict[str, Any]) -> str | None:
+    """Retorna a URL da logo da empresa, quando houver.
+
+    Args:
+        empresa: Instância da empresa ou seus dados já serializados.
+
+    Returns:
+        URL de acesso à logo ou ``None`` se a empresa não possuir logo.
+    """
+    if isinstance(empresa, dict):
+        return empresa.get("logo_url")
+    logo = getattr(empresa, "logo", None)
+    return str(logo.url) if logo else None
+
+
 class EmpresaSerializer(serializers.ModelSerializer):
     """Serializa a empresa para listagem e detalhes."""
+
+    logo_url = serializers.SerializerMethodField()
+
+    def get_logo_url(self, empresa: Empresa) -> str | None:
+        """Retorna a URL de acesso à logo da empresa."""
+        return obter_url_logo(empresa)
 
     criado_por: serializers.SlugRelatedField[Usuario] = (
         serializers.SlugRelatedField(slug_field="nome", read_only=True)
@@ -53,6 +77,7 @@ class EmpresaSerializer(serializers.ModelSerializer):
             "complemento",
             "cidade",
             "estado",
+            "logo_url",
             "criado_por",
             "criado_em",
             "atualizado_por",
@@ -67,6 +92,23 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
     responsaveis_tecnicos: ResponsavelTecnicoSerializer = (
         ResponsavelTecnicoSerializer(many=True)
     )
+    logo = ArquivoUploadField(
+        write_only=True,
+        required=False,
+        allow_null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=EXTENSOES_IMAGENS)
+        ],
+        help_text=(
+            "Imagem PNG, JPG ou JPEG de até 2 MB. Na edição, envie vazio ou "
+            "nulo para remover a logo atual."
+        ),
+    )
+    logo_url = serializers.SerializerMethodField()
+
+    def get_logo_url(self, empresa: Empresa | dict[str, Any]) -> str | None:
+        """Retorna a URL de acesso à logo da empresa."""
+        return obter_url_logo(empresa)
 
     class Meta:
         """Configuração do serializer de empresa."""
@@ -84,6 +126,8 @@ class EmpresaCriarAtualizarSerializer(serializers.ModelSerializer):
             "complemento",
             "cidade",
             "estado",
+            "logo",
+            "logo_url",
             "responsaveis_tecnicos",
         )
 
