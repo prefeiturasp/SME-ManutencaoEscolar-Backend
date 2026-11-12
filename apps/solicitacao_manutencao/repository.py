@@ -24,6 +24,7 @@ class SolicitacaoManutencaoRepository:
         "uuid",
         "codigo",
         "tipo_atendimento",
+        "solicitante",
         "situacao",
         "data_envio",
         "fase",
@@ -39,18 +40,28 @@ class SolicitacaoManutencaoRepository:
         Returns:
             Queryset de dicionários com dados resumidos.
         """
-        filtros: dict[str, Any] = {
-            "unidade_educacional__historico_responsaveis__ativo": True,
-        }
-        if usuario is None or not usuario.username:
+        filtros: dict[str, Any] = {}
+        if usuario is None:
             queryset = self.model.objects.none()
-        else:
-            campo_registro_funcional = (
-                "unidade_educacional__historico_responsaveis__responsavel__"
-                "registro_funcional"
+        elif usuario.perfil == "DRE":
+            if usuario.diretoria_regional_id is None:
+                queryset = self.model.objects.none()
+            else:
+                filtros["unidade_educacional__diretoria_regional_id"] = (
+                    usuario.diretoria_regional_id
+                )
+                queryset = self.model.objects.filter(**filtros)
+        elif usuario.username:
+            filtros.update(
+                {
+                    "unidade_educacional__historico_responsaveis__ativo": True,
+                    "unidade_educacional__historico_responsaveis__responsavel__"
+                    "registro_funcional": usuario.username,
+                }
             )
-            filtros[campo_registro_funcional] = usuario.username
             queryset = self.model.objects.filter(**filtros)
+        else:
+            queryset = self.model.objects.none()
 
         return cast(
             QuerySet[SolicitacaoManutencao, dict[str, Any]],

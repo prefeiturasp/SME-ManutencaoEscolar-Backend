@@ -37,31 +37,6 @@ def _criar_usuario(username: str, **campos: object) -> Usuario:
     return Usuario.objects.create(**dados)
 
 
-def test_obtem_nome_da_diretoria_regional_do_usuario(
-    cargo_dre: CargoEOL, diretoria_regional_centro: DiretoriaRegional
-) -> None:
-    """Retorna o nome da DRE vinculada ao usuário."""
-    _criar_usuario(
-        "1000001",
-        cargo=cargo_dre,
-        diretoria_regional=diretoria_regional_centro,
-    )
-
-    nome = UsuarioRepository.obter_nome_diretoria_regional("1000001")
-
-    assert nome == diretoria_regional_centro.nome
-
-
-@pytest.mark.parametrize("username", ["1000002", "inexistente"])
-def test_nome_da_diretoria_regional_e_nulo_sem_vinculo(
-    cargo_dre: CargoEOL, username: str
-) -> None:
-    """Retorna nulo para usuário sem vínculo ou inexistente."""
-    _criar_usuario("1000002", cargo=cargo_dre)
-
-    assert UsuarioRepository.obter_nome_diretoria_regional(username) is None
-
-
 def test_me_retorna_a_dre_do_usuario_dre(
     cargo_dre: CargoEOL, diretoria_regional_centro: DiretoriaRegional
 ) -> None:
@@ -74,7 +49,25 @@ def test_me_retorna_a_dre_do_usuario_dre(
 
     resultado = UsuarioService.obter_usuario_autenticado("1000003")
 
-    assert resultado["diretoria_regional"] == diretoria_regional_centro.nome
+    assert resultado["diretoria_regional"] == {
+        "id": diretoria_regional_centro.id,
+        "codigo": diretoria_regional_centro.codigo,
+        "nome": diretoria_regional_centro.nome,
+        "abreviacao": diretoria_regional_centro.abreviacao,
+        "nome_curto": diretoria_regional_centro.nome_curto,
+    }
+
+
+def test_obter_diretoria_regional_retorna_nulo_sem_vinculo() -> None:
+    """Retorna ``None`` quando o usuário não tem DRE vinculada."""
+    _criar_usuario("1000004", diretoria_regional=None)
+
+    assert UsuarioRepository.obter_diretoria_regional("1000004") is None
+
+
+def test_obter_diretoria_regional_retorna_nulo_sem_usuario() -> None:
+    """Retorna ``None`` quando não encontra o usuário informado."""
+    assert UsuarioRepository.obter_diretoria_regional("inexistente") is None
 
 
 def test_lista_apenas_gestores_dre_elegiveis(

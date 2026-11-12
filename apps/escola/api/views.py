@@ -21,6 +21,7 @@ from apps.escola.models import (
     TipoEscola,
     Unidadeeducacional,
 )
+from apps.escola.permissions import PermissaoLeituraUnidadeEscolar
 from apps.escola.schemas import (
     DIRETORIA_REGIONAL,
     SUBPREFEITURA,
@@ -127,6 +128,12 @@ class UnidadeEducacionalViewSet(viewsets.ModelViewSet):
         if self.action == "update":
             return UnidadeEducacionalAtualizarSerializer
         return UnidadeEducacionalSerializer
+
+    def get_permissions(self) -> Any:
+        """Define as permissões de acordo com a ação executada."""
+        if self.action == "list":
+            return [PermissaoLeituraUnidadeEscolar()]
+        return super().get_permissions()
 
     def _usuario_logado(self) -> Usuario | None:
         """Retorna o usuário autenticado da requisição, se houver."""

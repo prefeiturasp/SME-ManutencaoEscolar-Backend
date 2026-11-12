@@ -295,6 +295,52 @@ def unidade_educacional_emef(
 
 
 @pytest.fixture
+def tipo_escola_cemei() -> TipoEscola:
+    """Cria um tipo de escola CEMEI."""
+    return TipoEscola.objects.create(codigo_eol=2, sigla="CEMEI")
+
+
+@pytest.fixture
+def diretoria_regional_ipiranga() -> DiretoriaRegional:
+    """Cria uma Diretoria Regional para os testes."""
+    return DiretoriaRegional.objects.create(
+        codigo="DRE02",
+        nome="DIRETORIA REGIONAL DE EDUCACAO IPIRANGA",
+        abreviacao="IP",
+    )
+
+
+@pytest.fixture
+def subprefeitura_pirituba(
+    diretoria_regional_ipiranga: DiretoriaRegional,
+) -> Subprefeitura:
+    """Cria uma Subprefeitura para os testes."""
+    subprefeitura = Subprefeitura.objects.create(
+        codigo_eol="SP02",
+        nome="Subprefeitura Pirituba",
+    )
+    subprefeitura.diretorias_regionais.add(diretoria_regional_ipiranga)
+    return subprefeitura
+
+
+@pytest.fixture
+def unidade_educacional_cemei(
+    diretoria_regional_ipiranga: DiretoriaRegional,
+    tipo_escola_cemei: TipoEscola,
+    subprefeitura_pirituba: Subprefeitura,
+) -> Unidadeeducacional:
+    """Cria uma unidade educacional do tipo CEMEI para testes."""
+    return Unidadeeducacional.objects.create(
+        codigo_eol="200002",
+        nome="CEMEI ESCOLA TESTE",
+        diretoria_regional=diretoria_regional_ipiranga,
+        tipo_escola=tipo_escola_cemei,
+        subprefeitura=subprefeitura_pirituba,
+        status=True,
+    )
+
+
+@pytest.fixture
 def responsavel_unidade() -> ResponsavelUnidade:
     """Cria um responsável de unidade para os testes."""
     return ResponsavelUnidade.objects.create(

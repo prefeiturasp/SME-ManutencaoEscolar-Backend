@@ -4,10 +4,18 @@ from django.db import models
 
 from apps.core.models.mixins import AnexoMixin, BaseModel
 from apps.solicitacao_manutencao.constants import (
+    FaseExecucao,
     FaseSolicitacao,
+    FaseVistoria,
     PerfisSolicitacao,
     SituacaoSolicitacao,
     TipoAtendimento,
+)
+
+SITUACAO_CHOICES = (
+    *SituacaoSolicitacao.choices,
+    *FaseVistoria.choices,
+    *FaseExecucao.choices,
 )
 
 
@@ -27,7 +35,7 @@ class SolicitacaoManutencao(BaseModel):
     )
     situacao = models.CharField(
         max_length=30,
-        choices=SituacaoSolicitacao.choices,
+        choices=SITUACAO_CHOICES,
         default=SituacaoSolicitacao.NAO_ENVIADO_DRE,
     )
     solicitante = models.CharField(

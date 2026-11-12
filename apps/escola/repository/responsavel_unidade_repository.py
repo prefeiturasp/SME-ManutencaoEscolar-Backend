@@ -207,10 +207,14 @@ class ResponsavelUnidadeRepository:
             Retorna None quando não existe vínculo ativo para o registro
             funcional informado.
         """
-        vinculo = HistoricoResponsavel.objects.filter(
-            responsavel__registro_funcional=registro_funcional,
-            ativo=True,
-        ).first()
+        vinculo = (
+            HistoricoResponsavel.objects.filter(
+                responsavel__registro_funcional=registro_funcional,
+                ativo=True,
+            )
+            .select_related("unidade_educacional__diretoria_regional")
+            .first()
+        )
 
         if vinculo is None:
             return None

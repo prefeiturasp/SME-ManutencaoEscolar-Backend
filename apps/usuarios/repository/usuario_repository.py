@@ -209,21 +209,35 @@ class UsuarioRepository:
         usuario.save(update_fields=["password"])
 
     @staticmethod
-    def obter_nome_diretoria_regional(username: str) -> str | None:
-        """Retorna o nome da diretoria regional vinculada ao usuário.
+    def obter_diretoria_regional(username: str) -> dict[str, Any] | None:
+        """Retorna os dados da diretoria regional vinculada ao usuário.
 
         Args:
             username: Registro funcional ou CPF do usuário.
 
         Returns:
-            Nome da diretoria regional ou ``None`` quando o usuário não possui
-            vínculo.
+            Dados da diretoria regional ou ``None`` quando não possui vínculo.
         """
-        return (
+        usuario = (
             Usuario.objects.filter(username=username)
-            .values_list("diretoria_regional__nome", flat=True)
+            .select_related("diretoria_regional")
             .first()
         )
+        if usuario is None:
+            return None
+
+        regional = usuario.diretoria_regional
+
+        if regional is None:
+            return None
+
+        return {
+            "id": regional.id,
+            "codigo": regional.codigo,
+            "nome": regional.nome,
+            "abreviacao": regional.abreviacao,
+            "nome_curto": regional.nome_curto,
+        }
 
     @staticmethod
     def listar_gestores_dre(

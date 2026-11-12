@@ -5,7 +5,11 @@ from typing import Any
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 
-from apps.usuarios.permissions import PermissaoCadastros, PermissaoPerfilUE
+from apps.usuarios.permissions import (
+    PermissaoCadastros,
+    PermissaoPerfilDRE,
+    PermissaoPerfilUE,
+)
 
 
 class PermissaoLeituraServico(BasePermission):
@@ -13,6 +17,8 @@ class PermissaoLeituraServico(BasePermission):
 
     def has_permission(self, request: Request, view: Any) -> bool:
         """Verifica se o usuário pode listar serviços."""
-        return PermissaoCadastros().has_permission(
-            request, view
-        ) or PermissaoPerfilUE().has_permission(request, view)
+        return (
+            PermissaoCadastros().has_permission(request, view)
+            or PermissaoPerfilUE().has_permission(request, view)
+            or PermissaoPerfilDRE().has_permission(request, view)
+        )

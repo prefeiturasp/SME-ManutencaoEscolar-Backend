@@ -10,6 +10,9 @@ from apps.core.exceptions import (
 )
 from apps.core.repository.token_repository import TokenRepository
 from apps.core.services.email_service import EmailService
+from apps.escola.repository.diretoria_regional_repository import (
+    DiretoriaRegionalRepository,
+)
 from apps.escola.repository.responsavel_unidade_repository import (
     ResponsavelUnidadeRepository,
 )
@@ -88,8 +91,8 @@ class UsuarioService:
         Complementa os dados do usuário com a unidade educacional e a
         diretoria regional, conforme o perfil de acesso:
 
-        - ``UE``: dados completos da unidade educacional e nome da DRE;
-        - ``DRE``: nome da diretoria regional, sem unidade educacional;
+        - ``UE``: dados completos da unidade educacional e da DRE;
+        - ``DRE``: dados da diretoria regional, sem unidade educacional;
         - ``SME`` e ``EMPRESA`` (ou sem perfil): ambos ``None``.
 
         Args:
@@ -118,9 +121,9 @@ class UsuarioService:
             )
         return {**usuario, **vinculo}
 
-    @staticmethod
-    def _vinculo_unidade_educacional(username: str) -> dict[str, Any]:
-        """Retorna a unidade educacional e o nome da DRE do diretor."""
+    @classmethod
+    def _vinculo_unidade_educacional(cls, username: str) -> dict[str, Any]:
+        """Retorna a unidade educacional e os dados da DRE do diretor."""
         informacoes = (
             ResponsavelUnidadeRepository.buscar_unidade_educacional_ativa(
                 username
@@ -130,18 +133,19 @@ class UsuarioService:
             return {"unidade_educacional": None, "diretoria_regional": None}
         return {
             "unidade_educacional": informacoes["unidade_educacional"],
-            "diretoria_regional": informacoes["diretoria_regional"],
+            "diretoria_regional": DiretoriaRegionalRepository.serializar(
+                informacoes["unidade_educacional"].diretoria_regional
+            ),
         }
 
     @staticmethod
-    def _obter_dre_do_usuario(username: str) -> str | None:
-        """Retorna o nome da DRE do usuário com perfil DRE.
+    def _obter_dre_do_usuario(username: str) -> dict[str, Any] | None:
+        """Retorna os dados da DRE do usuário com perfil DRE.
 
         Returns:
-            Nome da diretoria regional vinculada ao usuário ou ``None`` quando
-            o usuário ainda não possui vínculo.
+            Dados da diretoria regional ou ``None`` quando não há vínculo.
         """
-        return UsuarioRepository.obter_nome_diretoria_regional(username)
+        return UsuarioRepository.obter_diretoria_regional(username)
 
     @staticmethod
     def enviar_email_recuperacao_senha(usuario: dict) -> None:
