@@ -18,7 +18,9 @@ from apps.escola.models import (
     Unidadeeducacional,
 )
 from apps.solicitacao_manutencao.api.views import SolicitacaoManutencaoViewSet
+from apps.solicitacao_manutencao.filters import SolicitacaoManutencaoFilter
 from apps.solicitacao_manutencao.models import (
+    ServicoManutencao,
     SolicitacaoManutencao,
 )
 from apps.solicitacao_manutencao.serializers import (
@@ -277,6 +279,41 @@ def test_perfil_sem_acesso_a_solicitacoes_recebe_403(
     resposta = api_cliente_perfil(perfil).get(URL_SOLICITACOES)
 
     assert resposta.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_filtros_de_solicitacao_por_novos_campos(
+    unidade_educacional_emef: Any,
+    usuario_ativo: Usuario,
+    servico: Any,
+) -> None:
+    """Filtra solicitações por solicitante, unidade e serviço associados."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="filtro-novo",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ativo,
+    )
+    _ = ServicoManutencao.objects.create(
+        solicitacao_manutencao=solicitacao,
+        servico=servico,
+        local_reparo="Cozinha",
+        descricao="Reparo",
+        criado_por=usuario_ativo,
+    )
+
+    filtros = SolicitacaoManutencaoFilter(
+        data={
+            "solicitante": "ue",
+            "unidade_educacional": str(unidade_educacional_emef.uuid),
+            "servico": str(servico.uuid),
+        },
+        queryset=SolicitacaoManutencao.objects.all(),
+    )
+
+    assert filtros.is_valid()
+    assert list(filtros.qs.values_list("uuid", flat=True)) == [
+        solicitacao.uuid
+    ]
 
 
 def test_lista_retorna_rótulo_do_solicitante(

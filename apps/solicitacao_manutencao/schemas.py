@@ -113,6 +113,7 @@ _SOLICITACAO_EXEMPLO_SAIDA: dict[str, Any] = {
                     "arquivo": (
                         "http://localhost:9000/arquivos/2026/10/20/reparo.jpg"
                     ),
+                    "nome_original": "reparo.jpg",
                 }
             ],
         }
@@ -241,7 +242,9 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
         summary="Lista as solicitações de manutenção",
         description=(
             "Retorna a lista paginada de solicitações de manutenção "
-            "cadastradas."
+            "visíveis ao usuário autenticado. A DRE consulta as solicitações "
+            "das unidades sob sua responsabilidade; os demais perfis "
+            "autorizados consultam as solicitações vinculadas ao seu RF."
         ),
         operation_id="listarSolicitacoesManutencao",
         parameters=[
@@ -259,10 +262,37 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
             ),
             OpenApiParameter(name="fase", type=str),
             OpenApiParameter(name="situacao", type=str),
+            OpenApiParameter(
+                name="servico",
+                type=str,
+                description=(
+                    "Filtra pelos UUIDs dos serviços de manutenção, "
+                    "separados por vírgula."
+                ),
+            ),
+            OpenApiParameter(
+                name="solicitante",
+                type=str,
+                description=(
+                    "Filtra pelo perfil solicitante, utilizando os valores "
+                    "`ue` ou `dre`, separados por vírgula."
+                ),
+            ),
+            OpenApiParameter(
+                name="unidade_educacional",
+                type=str,
+                description=(
+                    "Filtra pelos UUIDs das unidades educacionais, "
+                    "separados por vírgula."
+                ),
+            ),
         ],
         responses={
             200: _SOLICITACOES_LISTAGEM_RESPONSE,
             401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            403: OpenApiResponse(
+                description="Perfil sem acesso às solicitações."
+            ),
             500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
     ),

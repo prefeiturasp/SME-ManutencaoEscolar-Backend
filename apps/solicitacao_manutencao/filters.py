@@ -19,6 +19,15 @@ class SolicitacaoManutencaoFilter(django_filters.FilterSet):
     situacao = CharInFilter(lookup_expr="in")
     fase = CharInFilter(lookup_expr="in")
     data_envio = django_filters.DateFromToRangeFilter()
+    servico = CharInFilter(
+        field_name="servicos_manutencao__servico__uuid",
+        lookup_expr="in",
+        distinct=True,
+    )
+    solicitante = CharInFilter(lookup_expr="in")
+    unidade_educacional = CharInFilter(
+        field_name="unidade_educacional__uuid", lookup_expr="in", distinct=True
+    )
 
     class Meta:
         """Configura os filtros de solicitação de manutenção."""
@@ -30,4 +39,7 @@ class SolicitacaoManutencaoFilter(django_filters.FilterSet):
             "situacao",
             "fase",
             "data_envio",
+            "servico",
+            "solicitante",
+            "unidade_educacional",
         )
