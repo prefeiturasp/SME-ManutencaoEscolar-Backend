@@ -43,6 +43,7 @@ class LoteSerializer(serializers.ModelSerializer):
             "id",
             "uuid",
             "codigo_cadastro",
+            "codigo_contrato",
             "nome",
             "status",
             "empresa",
@@ -93,6 +94,7 @@ class LoteCriarSerializer(serializers.ModelSerializer):
         fields = (
             "nome",
             "codigo_cadastro",
+            "codigo_contrato",
             "empresa",
             "periodo_inicial",
             "periodo_final",

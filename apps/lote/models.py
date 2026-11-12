@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import QuerySet
 
 from apps.core.models.mixins import BaseModel
+from apps.core.validacoes import codigo_contrato_formato_validacao
 from apps.escola.models.diretoria_regional import DiretoriaRegional
 
 
@@ -17,6 +18,11 @@ class Lote(BaseModel):
     nome = models.CharField(
         verbose_name="nome",
         max_length=255,
+    )
+    codigo_contrato = models.CharField(
+        verbose_name="código do contrato",
+        max_length=100,
+        validators=[codigo_contrato_formato_validacao],
     )
     status = models.BooleanField(
         verbose_name="status",
