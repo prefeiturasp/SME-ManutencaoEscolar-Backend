@@ -199,3 +199,30 @@ def test_serializer_cargo_deixa_de_ser_alterado_ao_recriar_vinculo(
     dados = ProfissionalSerializer(profissional).data
 
     assert dados["funcoes"][0]["cargo_alterado"] is False
+
+
+def test_serializer_documento_aceita_nome_do_documento_do_cargo():
+    """Aceita e expõe o nome do documento do cargo informado pelo cliente."""
+    arquivo = SimpleUploadedFile(
+        "senai.pdf", b"conteudo", content_type="application/pdf"
+    )
+    serializer = DocumentoFuncaoProfissionalSerializer(
+        data={"arquivo": arquivo, "nome_documento": "Senai"}
+    )
+
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["nome_documento"] == "Senai"
+    assert "nome_documento" in DocumentoFuncaoProfissionalSerializer().fields
+
+
+def test_serializer_documento_nome_do_cargo_e_opcional():
+    """Não exige o nome do documento do cargo."""
+    arquivo = SimpleUploadedFile(
+        "senai.pdf", b"conteudo", content_type="application/pdf"
+    )
+    serializer = DocumentoFuncaoProfissionalSerializer(
+        data={"arquivo": arquivo}
+    )
+
+    assert serializer.is_valid(), serializer.errors
+    assert "nome_documento" not in serializer.validated_data

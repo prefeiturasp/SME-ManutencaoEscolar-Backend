@@ -29,7 +29,12 @@ _PROFISSIONAL_EXEMPLO_ENTRADA: dict[str, object] = {
     "funcoes": [
         {
             "uuid_cargo": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
-            "documentos": [{"arquivo": "certificado-nr10.pdf"}],
+            "documentos": [
+                {
+                    "arquivo": "certificado-nr10.pdf",
+                    "nome_documento": "Certificado NR10",
+                }
+            ],
         }
     ],
 }
@@ -49,6 +54,7 @@ _PROFISSIONAL_EXEMPLO_SAIDA: dict[str, object] = {
             "documentos": [
                 {
                     "uuid": "4a9f9f9f-1d0d-4eb4-bd5d-345678901cde",
+                    "nome_documento": "Certificado NR10",
                     "nome_original": "certificado-nr10.pdf",
                     "arquivo": (
                         "https://arquivos.exemplo.com/"
