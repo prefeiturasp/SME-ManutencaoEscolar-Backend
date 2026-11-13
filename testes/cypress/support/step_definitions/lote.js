@@ -9,6 +9,7 @@ let uuidLote
 
 const lote = {
   "codigo_cadastro": "LOTE-TESTE",
+  "codigo_contrato": "CONTRATO-TESTE",
   "nome": "Teste automatizado", 
   "status": true,
   "empresa": null,
