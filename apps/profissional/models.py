@@ -84,6 +84,13 @@ class DocumentoFuncaoProfissional(AnexoMixin):
     arquivo = models.FileField(
         upload_to="profissionais/anexos_funcoes_profissionais/"
     )
+    nome_documento = models.CharField(
+        verbose_name="nome do documento",
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="Nome do documento do cargo que o arquivo comprova.",
+    )
 
     class Meta:
         verbose_name = "Documento da Função profissional"

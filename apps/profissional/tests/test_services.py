@@ -435,3 +435,115 @@ def test_service_atualizar_rejeita_rg_de_outro_profissional(
         )
 
     assert exc_info.value.duplicidade == {"cpf": False, "rg": True}
+
+
+def test_documento_service_grava_o_nome_do_documento_do_cargo(
+    cargo_profissional,
+    usuario_ativo,
+):
+    """Guarda a qual documento do cargo o arquivo anexado corresponde."""
+    profissional = criar_profissional()
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+    arquivo = SimpleUploadedFile(
+        "senai.pdf", b"conteudo", content_type="application/pdf"
+    )
+
+    resultado = DocumentoFuncaoProfissionalService().sincronizar(
+        funcao.id,
+        [{"arquivo": arquivo, "nome_documento": "Senai"}],
+        usuario_ativo,
+    )
+
+    documento = DocumentoFuncaoProfissional.objects.get(
+        funcao_profissional=funcao
+    )
+    assert documento.nome_documento == "Senai"
+    assert resultado[0]["nome_documento"] == "Senai"
+
+
+def test_documento_service_aceita_documento_sem_nome_do_cargo(
+    cargo_profissional,
+    usuario_ativo,
+):
+    """Mantém compatibilidade com clientes que não informam o nome."""
+    profissional = criar_profissional()
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+    arquivo = SimpleUploadedFile(
+        "nr10.pdf", b"conteudo", content_type="application/pdf"
+    )
+
+    DocumentoFuncaoProfissionalService().sincronizar(
+        funcao.id, [{"arquivo": arquivo}], usuario_ativo
+    )
+
+    documento = DocumentoFuncaoProfissional.objects.get(
+        funcao_profissional=funcao
+    )
+    assert documento.nome_documento == ""
+
+
+def test_documento_service_informa_se_a_funcao_possui_documentos(
+    cargo_profissional,
+):
+    """Retorna se existe ao menos um documento ativo na função."""
+    profissional = criar_profissional()
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+    servico = DocumentoFuncaoProfissionalService()
+
+    assert servico.possui_documentos(funcao.id) is False
+
+    criar_documento(funcao, "nr10.pdf")
+
+    assert servico.possui_documentos(funcao.id) is True
+
+
+def test_funcao_service_nao_exige_documento_de_funcao_existente_sem_documentos(
+    cargo_profissional,
+):
+    """Não força a atualização de uma função anterior à exigência."""
+    profissional = criar_profissional()
+    cargo_profissional.exige_documento = False
+    cargo_profissional.save(update_fields=["exige_documento"])
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+    cargo_profissional.exige_documento = True
+    cargo_profissional.save(update_fields=["exige_documento"])
+
+    resultado = FuncaoProfissionalService().sincronizar(
+        profissional.id,
+        [{"uuid": str(funcao.uuid), "cargo": cargo_profissional}],
+    )
+
+    assert resultado[0]["id"] == funcao.id
+    assert resultado[0]["documentos"] == []
+
+
+def test_funcao_service_exige_documento_de_funcao_existente_com_documentos(
+    cargo_profissional,
+):
+    """Impede esvaziar os documentos de uma função que já os possui."""
+    profissional = criar_profissional()
+    funcao = FuncaoProfissional.objects.create(
+        profissional=profissional, cargo=cargo_profissional
+    )
+    documento = criar_documento(funcao, "existente.pdf")
+
+    with pytest.raises(ValidationError) as exc_info:
+        FuncaoProfissionalService().sincronizar(
+            profissional.id,
+            [{"uuid": str(funcao.uuid), "cargo": cargo_profissional}],
+        )
+
+    assert exc_info.value.message_dict == {
+        "documentos": [
+            ProfissionalErrorMessages.DOCUMENTOS_FUNCAO_PROFISSIONAL_OBRIGATORIOS
+        ]
+    }
+    assert DocumentoFuncaoProfissional.objects.filter(pk=documento.pk).exists()

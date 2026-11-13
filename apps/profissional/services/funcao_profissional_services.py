@@ -79,7 +79,9 @@ class FuncaoProfissionalService:
             )
 
         for dados in dados_lista:
-            if dados["cargo"].exige_documento and not dados.get("documentos"):
+            if self._documentos_obrigatorios(
+                dados, existentes_uuids
+            ) and not dados.get("documentos"):
                 raise ValidationError(
                     {
                         "documentos": (
@@ -117,6 +119,33 @@ class FuncaoProfissionalService:
             funcao_serializada["documentos"] = documentos_criados
             funcoes.append(funcao_serializada)
         return funcoes
+
+    def _documentos_obrigatorios(
+        self,
+        dados: dict[str, Any],
+        existentes_uuids: dict[str, dict[str, Any]],
+    ) -> bool:
+        """Indica se a função precisa receber documentos.
+
+        Uma função já cadastrada sem documentos não é obrigada a recebê-los
+        quando o cargo passa a exigi-los depois do vínculo. A atualização é
+        opcional: o usuário remove e adiciona o cargo novamente para isso.
+
+        Args:
+            dados: Dados da função informada.
+            existentes_uuids: Funções atuais do profissional por ``uuid``.
+
+        Returns:
+            ``True`` quando os documentos são obrigatórios para a função.
+        """
+        if not dados["cargo"].exige_documento:
+            return False
+        uuid = dados.get("uuid")
+        if not uuid:
+            return True
+        return self.documento_service.possui_documentos(
+            existentes_uuids[str(uuid)]["id"]
+        )
 
     def remover_por_profissional(
         self,

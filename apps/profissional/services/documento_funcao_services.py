@@ -33,6 +33,17 @@ class DocumentoFuncaoProfissionalService:
         self.repository = repository or DocumentoFuncaoProfissionalRepository()
         self.anexo_service = anexo_service or AnexoService()
 
+    def possui_documentos(self, funcao_id: int) -> bool:
+        """Informa se a função já possui documentos anexados.
+
+        Args:
+            funcao_id: ID da função profissional.
+
+        Returns:
+            ``True`` quando a função tem ao menos um documento ativo.
+        """
+        return bool(self.repository.listar_por_funcao(funcao_id))
+
     def sincronizar(
         self,
         funcao_id: int,
@@ -83,6 +94,7 @@ class DocumentoFuncaoProfissionalService:
                 documento = self.repository.criar(
                     {
                         **dados,
+                        "nome_documento": documento.get("nome_documento", ""),
                         "funcao_profissional_id": funcao_id,
                         "criado_por": usuario,
                     }

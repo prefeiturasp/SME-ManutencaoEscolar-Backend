@@ -39,6 +39,7 @@ class DocumentoFuncaoProfissionalSerializer(serializers.ModelSerializer):
         model = DocumentoFuncaoProfissional
         fields = (
             "uuid",
+            "nome_documento",
             "nome_original",
             "arquivo",
             "tipo",
