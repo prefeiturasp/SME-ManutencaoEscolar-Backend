@@ -1,6 +1,7 @@
 """Modelos do domínio Profissional."""
 
 from django.db import models
+from django.db.models.functions import Lower
 
 from apps.cargo.models import Cargo
 from apps.core.models.mixins import AnexoMixin, BaseModel
@@ -73,6 +74,46 @@ class FuncaoProfissional(BaseModel):
         return f"{self.profissional.nome} - {self.cargo.nome}"
 
 
+class DocumentoExigidoFuncao(BaseModel):
+    """Documento que o cargo exigia quando foi vinculado ao profissional.
+
+    É uma cópia (snapshot) dos documentos do cargo no momento do vínculo.
+    Mudanças posteriores no cadastro do cargo não alteram estes registros;
+    eles só são recriados quando o cargo é vinculado novamente.
+    """
+
+    funcao_profissional = models.ForeignKey(
+        FuncaoProfissional,
+        on_delete=models.CASCADE,
+        related_name="documentos_exigidos",
+    )
+    nome = models.CharField(max_length=255)
+    ordem = models.PositiveSmallIntegerField(
+        help_text="Posição do documento no cargo no momento do vínculo."
+    )
+
+    class Meta:
+        verbose_name = "Documento exigido da Função profissional"
+        verbose_name_plural = "Documentos exigidos das Funções profissionais"
+        ordering = ["ordem", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["funcao_profissional", "ordem"],
+                condition=models.Q(deletado_em__isnull=True),
+                name="documento_exigido_funcao_ordem_unica",
+            ),
+            models.UniqueConstraint(
+                Lower("nome"),
+                "funcao_profissional",
+                condition=models.Q(deletado_em__isnull=True),
+                name="documento_exigido_funcao_nome_unico",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.nome} - {self.funcao_profissional}"
+
+
 class DocumentoFuncaoProfissional(AnexoMixin):
     """Representa um documento exigido para uma função profissional."""
 
@@ -84,12 +125,13 @@ class DocumentoFuncaoProfissional(AnexoMixin):
     arquivo = models.FileField(
         upload_to="profissionais/anexos_funcoes_profissionais/"
     )
-    nome_documento = models.CharField(
-        verbose_name="nome do documento",
-        max_length=255,
+    documento_exigido = models.ForeignKey(
+        DocumentoExigidoFuncao,
+        null=True,
         blank=True,
-        default="",
-        help_text="Nome do documento do cargo que o arquivo comprova.",
+        on_delete=models.SET_NULL,
+        related_name="anexos",
+        help_text="Documento exigido da função que este arquivo comprova.",
     )
 
     class Meta:

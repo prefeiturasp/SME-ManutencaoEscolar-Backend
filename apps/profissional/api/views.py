@@ -31,7 +31,9 @@ class ProfissionalViewSet(ModelViewSet):
     permission_classes = [PermissaoCadastros]
 
     queryset = Profissional.objects.prefetch_related(
-        "funcoes__cargo", "funcoes__documentos"
+        "funcoes__cargo",
+        "funcoes__documentos__documento_exigido",
+        "funcoes__documentos_exigidos",
     )
     lookup_field = "uuid"
     http_method_names = ["get", "post", "put", "delete", "options"]

@@ -51,10 +51,33 @@ _PROFISSIONAL_EXEMPLO_SAIDA: dict[str, object] = {
             "atualizado_por": None,
             "atualizado_em": "2026-09-17T10:00:00-03:00",
             "cargo_alterado": False,
+            "documentos_exigidos": [
+                {
+                    "uuid": "5b0a0a0a-2e1e-4fc5-8e5e-456789012def",
+                    "nome": "Certificado NR10",
+                    "ordem": 1,
+                    "documento": {
+                        "uuid": "4a9f9f9f-1d0d-4eb4-bd5d-345678901cde",
+                        "uuid_documento_exigido": (
+                            "5b0a0a0a-2e1e-4fc5-8e5e-456789012def"
+                        ),
+                        "nome_original": "certificado-nr10.pdf",
+                        "arquivo": (
+                            "https://arquivos.exemplo.com/"
+                            "profissionais/certificado-nr10.pdf"
+                        ),
+                        "tipo": "documento",
+                        "tipo_mime": "application/pdf",
+                        "tamanho_bytes": 102400,
+                    },
+                }
+            ],
             "documentos": [
                 {
                     "uuid": "4a9f9f9f-1d0d-4eb4-bd5d-345678901cde",
-                    "nome_documento": "Certificado NR10",
+                    "uuid_documento_exigido": (
+                        "5b0a0a0a-2e1e-4fc5-8e5e-456789012def"
+                    ),
                     "nome_original": "certificado-nr10.pdf",
                     "arquivo": (
                         "https://arquivos.exemplo.com/"
@@ -82,7 +105,12 @@ _PROFISSIONAL_EXEMPLO_ATUALIZACAO: dict[str, object] = {
         {
             "uuid": "3f8e8e8e-0c9c-4da3-ac4c-234567890bcd",
             "uuid_cargo": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
-            "documentos": [{"arquivo": "certificado-nr10-atualizado.pdf"}],
+            "documentos": [
+                {
+                    "arquivo": "certificado-nr10-atualizado.pdf",
+                    "nome_documento": "Certificado NR10",
+                }
+            ],
         }
     ],
 }
