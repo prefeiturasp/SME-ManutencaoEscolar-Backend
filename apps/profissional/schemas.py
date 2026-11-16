@@ -20,6 +20,8 @@ from apps.profissional.serializers.profissional_serializers import (
 _TAG_PROFISSIONAL = "Profissional"
 _CREDENCIAIS_INVALIDAS = "Credenciais inválidas"
 _ERRO_SERVIDOR = "Erro no servidor"
+_ARQUIVO_DOCUMENTO = "certificado-nr10.pdf"
+_NOME_DOCUMENTO = "Certificado NR10"
 
 _PROFISSIONAL_EXEMPLO_ENTRADA: dict[str, object] = {
     "nome": "José da Silva",
@@ -31,8 +33,8 @@ _PROFISSIONAL_EXEMPLO_ENTRADA: dict[str, object] = {
             "uuid_cargo": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
             "documentos": [
                 {
-                    "arquivo": "certificado-nr10.pdf",
-                    "nome_documento": "Certificado NR10",
+                    "arquivo": _ARQUIVO_DOCUMENTO,
+                    "nome_documento": _NOME_DOCUMENTO,
                 }
             ],
         }
@@ -51,14 +53,37 @@ _PROFISSIONAL_EXEMPLO_SAIDA: dict[str, object] = {
             "atualizado_por": None,
             "atualizado_em": "2026-09-17T10:00:00-03:00",
             "cargo_alterado": False,
+            "documentos_exigidos": [
+                {
+                    "uuid": "5b0a0a0a-2e1e-4fc5-8e5e-456789012def",
+                    "nome": _NOME_DOCUMENTO,
+                    "ordem": 1,
+                    "documento": {
+                        "uuid": "4a9f9f9f-1d0d-4eb4-bd5d-345678901cde",
+                        "uuid_documento_exigido": (
+                            "5b0a0a0a-2e1e-4fc5-8e5e-456789012def"
+                        ),
+                        "nome_original": _ARQUIVO_DOCUMENTO,
+                        "arquivo": (
+                            "https://arquivos.exemplo.com/"
+                            "profissionais/" + _ARQUIVO_DOCUMENTO
+                        ),
+                        "tipo": "documento",
+                        "tipo_mime": "application/pdf",
+                        "tamanho_bytes": 102400,
+                    },
+                }
+            ],
             "documentos": [
                 {
                     "uuid": "4a9f9f9f-1d0d-4eb4-bd5d-345678901cde",
-                    "nome_documento": "Certificado NR10",
-                    "nome_original": "certificado-nr10.pdf",
+                    "uuid_documento_exigido": (
+                        "5b0a0a0a-2e1e-4fc5-8e5e-456789012def"
+                    ),
+                    "nome_original": _ARQUIVO_DOCUMENTO,
                     "arquivo": (
                         "https://arquivos.exemplo.com/"
-                        "profissionais/certificado-nr10.pdf"
+                        "profissionais/" + _ARQUIVO_DOCUMENTO
                     ),
                     "tipo": "documento",
                     "tipo_mime": "application/pdf",
@@ -82,7 +107,12 @@ _PROFISSIONAL_EXEMPLO_ATUALIZACAO: dict[str, object] = {
         {
             "uuid": "3f8e8e8e-0c9c-4da3-ac4c-234567890bcd",
             "uuid_cargo": "2e7d7d7d-9b8b-4c92-9b3b-123456789abc",
-            "documentos": [{"arquivo": "certificado-nr10-atualizado.pdf"}],
+            "documentos": [
+                {
+                    "arquivo": "certificado-nr10-atualizado.pdf",
+                    "nome_documento": _NOME_DOCUMENTO,
+                }
+            ],
         }
     ],
 }

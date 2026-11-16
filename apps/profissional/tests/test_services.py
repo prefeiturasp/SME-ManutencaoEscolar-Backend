@@ -1,17 +1,23 @@
 """Testes dos serviços do domínio Profissional."""
 
+from uuid import uuid4
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from apps.cargo.models import Cargo
+from apps.cargo.models import Cargo, DocumentoCargo
 from apps.core.constants import TipoArquivo
 from apps.profissional.constants import ProfissionalErrorMessages
 from apps.profissional.exceptions import ProfissionalJaCadastradoError
 from apps.profissional.models import (
+    DocumentoExigidoFuncao,
     DocumentoFuncaoProfissional,
     FuncaoProfissional,
     Profissional,
+)
+from apps.profissional.repository.documento_exigido_repository import (
+    DocumentoExigidoFuncaoRepository,
 )
 from apps.profissional.services.documento_funcao_services import (
     DocumentoFuncaoProfissionalService,
@@ -437,53 +443,266 @@ def test_service_atualizar_rejeita_rg_de_outro_profissional(
     assert exc_info.value.duplicidade == {"cpf": False, "rg": True}
 
 
-def test_documento_service_grava_o_nome_do_documento_do_cargo(
-    cargo_profissional,
+def _cargo_com_documentos(*nomes: str) -> Cargo:
+    """Cria um cargo que exige documentos, na ordem informada."""
+    cargo = Cargo.objects.create(
+        nome=f"Cargo {uuid4().hex[:8]}", exige_documento=True
+    )
+    DocumentoCargo.objects.bulk_create(
+        [DocumentoCargo(cargo=cargo, nome=nome) for nome in nomes]
+    )
+    return cargo
+
+
+def _pdf(nome: str) -> SimpleUploadedFile:
+    """Cria um arquivo PDF em memória."""
+    return SimpleUploadedFile(
+        nome, b"conteudo", content_type="application/pdf"
+    )
+
+
+def _nova_funcao(cargo: Cargo, usuario) -> FuncaoProfissional:
+    """Vincula o cargo a um profissional e grava o snapshot."""
+    funcao = FuncaoProfissional.objects.create(
+        profissional=criar_profissional(), cargo=cargo
+    )
+    DocumentoExigidoFuncaoRepository().criar_documentos(
+        funcao.id,
+        DocumentoExigidoFuncaoRepository.nomes_documentos_cargo(cargo),
+        usuario,
+    )
+    return funcao
+
+
+def test_documento_service_vincula_arquivo_ao_documento_exigido_pelo_nome(
     usuario_ativo,
 ):
-    """Guarda a qual documento do cargo o arquivo anexado corresponde."""
-    profissional = criar_profissional()
-    funcao = FuncaoProfissional.objects.create(
-        profissional=profissional, cargo=cargo_profissional
-    )
-    arquivo = SimpleUploadedFile(
-        "senai.pdf", b"conteudo", content_type="application/pdf"
+    """Associa o arquivo ao documento exigido pelo nome, não pela posição."""
+    funcao = _nova_funcao(
+        _cargo_com_documentos("RG", "CPF", "Senai"), usuario_ativo
     )
 
     resultado = DocumentoFuncaoProfissionalService().sincronizar(
         funcao.id,
-        [{"arquivo": arquivo, "nome_documento": "Senai"}],
+        [
+            {"arquivo": _pdf("a.pdf"), "nome_documento": "senai"},
+            {"arquivo": _pdf("b.pdf"), "nome_documento": "  RG "},
+            {"arquivo": _pdf("c.pdf"), "nome_documento": "CPF"},
+        ],
         usuario_ativo,
+        funcao_nova=True,
     )
 
-    documento = DocumentoFuncaoProfissional.objects.get(
-        funcao_profissional=funcao
+    por_nome = {
+        d.documento_exigido.nome: d.nome_original
+        for d in DocumentoFuncaoProfissional.objects.filter(
+            funcao_profissional=funcao
+        ).select_related("documento_exigido")
+    }
+    assert por_nome == {"Senai": "a.pdf", "RG": "b.pdf", "CPF": "c.pdf"}
+    assert len(resultado) == 3
+
+
+def test_documento_service_preenche_vagas_livres_na_ordem(usuario_ativo):
+    """Arquivos sem nome ocupam, em ordem, os documentos ainda livres."""
+    funcao = _nova_funcao(_cargo_com_documentos("RG", "CPF"), usuario_ativo)
+
+    DocumentoFuncaoProfissionalService().sincronizar(
+        funcao.id,
+        [{"arquivo": _pdf("1.pdf")}, {"arquivo": _pdf("2.pdf")}],
+        usuario_ativo,
+        funcao_nova=True,
     )
-    assert documento.nome_documento == "Senai"
-    assert resultado[0]["nome_documento"] == "Senai"
+
+    nomes = [
+        d.documento_exigido.nome
+        for d in DocumentoFuncaoProfissional.objects.filter(
+            funcao_profissional=funcao
+        )
+        .select_related("documento_exigido")
+        .order_by("id")
+    ]
+    assert nomes == ["RG", "CPF"]
 
 
-def test_documento_service_aceita_documento_sem_nome_do_cargo(
+def test_documento_service_exige_todos_os_documentos_na_funcao_nova(
+    usuario_ativo,
+):
+    """Função nova precisa cobrir todos os documentos exigidos."""
+    funcao = _nova_funcao(_cargo_com_documentos("RG", "CPF"), usuario_ativo)
+
+    with pytest.raises(ValidationError):
+        DocumentoFuncaoProfissionalService().sincronizar(
+            funcao.id,
+            [{"arquivo": _pdf("1.pdf"), "nome_documento": "RG"}],
+            usuario_ativo,
+            funcao_nova=True,
+        )
+
+
+def test_documento_service_rejeita_nome_desconhecido(usuario_ativo):
+    """Nome que não pertence ao snapshot da função é recusado."""
+    funcao = _nova_funcao(_cargo_com_documentos("RG"), usuario_ativo)
+
+    with pytest.raises(ValidationError) as erro:
+        DocumentoFuncaoProfissionalService().sincronizar(
+            funcao.id,
+            [{"arquivo": _pdf("1.pdf"), "nome_documento": "CNH"}],
+            usuario_ativo,
+            funcao_nova=True,
+        )
+
+    assert ProfissionalErrorMessages.DOCUMENTO_NAO_PERTENCE_A_FUNCAO in str(
+        erro.value
+    )
+
+
+def test_documento_service_rejeita_documento_duplicado(usuario_ativo):
+    """Dois arquivos para o mesmo documento exigido são recusados."""
+    funcao = _nova_funcao(_cargo_com_documentos("RG", "CPF"), usuario_ativo)
+
+    with pytest.raises(ValidationError) as erro:
+        DocumentoFuncaoProfissionalService().sincronizar(
+            funcao.id,
+            [
+                {"arquivo": _pdf("1.pdf"), "nome_documento": "RG"},
+                {"arquivo": _pdf("2.pdf"), "nome_documento": "RG"},
+            ],
+            usuario_ativo,
+            funcao_nova=True,
+        )
+
+    assert ProfissionalErrorMessages.DOCUMENTO_FUNCAO_DUPLICADO in str(
+        erro.value
+    )
+
+
+def _funcao_com_anexos_no_mesmo_documento(usuario, remover_exigidos=False):
+    """Cria função com dois anexos ligados ao mesmo documento exigido."""
+    funcao = _nova_funcao(_cargo_com_documentos("RG"), usuario)
+    exigido = DocumentoExigidoFuncao.objects.get(funcao_profissional=funcao)
+    anexos = []
+    for nome in ("1.pdf", "2.pdf"):
+        anexo = DocumentoFuncaoProfissional(
+            funcao_profissional=funcao,
+            arquivo=_pdf(nome),
+            nome_original=nome,
+            documento_exigido=exigido,
+        )
+        anexo.save()
+        anexos.append({"uuid": anexo.uuid})
+    if remover_exigidos:
+        exigido.soft_delete(usuario=usuario)
+    return funcao, anexos
+
+
+@pytest.mark.parametrize("remover_exigidos", [False, True])
+def test_documento_service_rejeita_anexos_preservados_duplicados(
+    usuario_ativo, remover_exigidos
+):
+    """Dois anexos preservados no mesmo documento exigido são recusados."""
+    funcao, anexos = _funcao_com_anexos_no_mesmo_documento(
+        usuario_ativo, remover_exigidos
+    )
+
+    with pytest.raises(ValidationError) as erro:
+        DocumentoFuncaoProfissionalService().sincronizar(
+            funcao.id, anexos, usuario_ativo
+        )
+
+    assert ProfissionalErrorMessages.DOCUMENTO_FUNCAO_DUPLICADO in str(
+        erro.value
+    )
+
+
+def test_documento_exigido_funcao_str(usuario_ativo):
+    """Representa o documento exigido pelo nome e pela função."""
+    funcao = _nova_funcao(_cargo_com_documentos("RG"), usuario_ativo)
+
+    exigido = DocumentoExigidoFuncao.objects.get(funcao_profissional=funcao)
+
+    assert str(exigido).startswith("RG - ")
+
+
+def test_documento_service_aceita_documento_sem_documentos_exigidos(
     cargo_profissional,
     usuario_ativo,
 ):
-    """Mantém compatibilidade com clientes que não informam o nome."""
-    profissional = criar_profissional()
+    """Cargo sem documentos cadastrados continua aceitando anexos."""
     funcao = FuncaoProfissional.objects.create(
-        profissional=profissional, cargo=cargo_profissional
-    )
-    arquivo = SimpleUploadedFile(
-        "nr10.pdf", b"conteudo", content_type="application/pdf"
+        profissional=criar_profissional(), cargo=cargo_profissional
     )
 
     DocumentoFuncaoProfissionalService().sincronizar(
-        funcao.id, [{"arquivo": arquivo}], usuario_ativo
+        funcao.id, [{"arquivo": _pdf("nr10.pdf")}], usuario_ativo
     )
 
     documento = DocumentoFuncaoProfissional.objects.get(
         funcao_profissional=funcao
     )
-    assert documento.nome_documento == ""
+    assert documento.documento_exigido is None
+
+
+def test_funcao_mantem_documentos_exigidos_quando_cargo_muda(usuario_ativo):
+    """Alterar o cargo depois do vínculo não muda o que a função exige."""
+    cargo = _cargo_com_documentos("RG")
+    profissional = criar_profissional()
+    servico = FuncaoProfissionalService()
+    dados = {"cargo": cargo, "documentos": [{"arquivo": _pdf("rg.pdf")}]}
+
+    resultado = servico.sincronizar(profissional.id, [dados], usuario_ativo)
+    funcao_uuid = resultado[0]["uuid"]
+    DocumentoCargo.objects.create(cargo=cargo, nome="CPF")
+    cargo.save()
+
+    atualizado = servico.sincronizar(
+        profissional.id,
+        [
+            {
+                "uuid": funcao_uuid,
+                "cargo": cargo,
+                "documentos": [
+                    {"uuid": resultado[0]["documentos"][0]["uuid"]}
+                ],
+            }
+        ],
+        usuario_ativo,
+    )
+
+    assert [d["nome"] for d in atualizado[0]["documentos_exigidos"]] == ["RG"]
+
+
+def test_funcao_recria_documentos_exigidos_ao_trocar_o_cargo(usuario_ativo):
+    """Vincular outro cargo recria o snapshot com os novos documentos."""
+    cargo = _cargo_com_documentos("RG")
+    outro = _cargo_com_documentos("CNH", "CPF")
+    profissional = criar_profissional()
+    servico = FuncaoProfissionalService()
+    resultado = servico.sincronizar(
+        profissional.id,
+        [{"cargo": cargo, "documentos": [{"arquivo": _pdf("rg.pdf")}]}],
+        usuario_ativo,
+    )
+
+    atualizado = servico.sincronizar(
+        profissional.id,
+        [
+            {
+                "uuid": resultado[0]["uuid"],
+                "cargo": outro,
+                "documentos": [
+                    {"arquivo": _pdf("1.pdf"), "nome_documento": "CNH"},
+                    {"arquivo": _pdf("2.pdf"), "nome_documento": "CPF"},
+                ],
+            }
+        ],
+        usuario_ativo,
+    )
+
+    assert [d["nome"] for d in atualizado[0]["documentos_exigidos"]] == [
+        "CNH",
+        "CPF",
+    ]
 
 
 def test_documento_service_informa_se_a_funcao_possui_documentos(
