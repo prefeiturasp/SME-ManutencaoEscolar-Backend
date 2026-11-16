@@ -28,16 +28,18 @@ def criar_documentos_exigidos(apps, schema_editor):
     nome do arquivo anexado. O estado antigo de um cargo já alterado não pode
     ser recuperado, por isso nesses casos vale o nome do arquivo.
     """
-    Funcao = apps.get_model("profissional", "FuncaoProfissional")
-    Exigido = apps.get_model("profissional", "DocumentoExigidoFuncao")
-    Anexo = apps.get_model("profissional", "DocumentoFuncaoProfissional")
-    DocumentoCargo = apps.get_model("cargo", "DocumentoCargo")
+    funcao_modelo = apps.get_model("profissional", "FuncaoProfissional")
+    exigido_modelo = apps.get_model("profissional", "DocumentoExigidoFuncao")
+    anexo_modelo = apps.get_model(
+        "profissional", "DocumentoFuncaoProfissional"
+    )
+    documento_cargo_modelo = apps.get_model("cargo", "DocumentoCargo")
 
-    for funcao in Funcao.objects.filter(
+    for funcao in funcao_modelo.objects.filter(
         deletado_em__isnull=True
     ).select_related("cargo"):
         anexos = list(
-            Anexo.objects.filter(
+            anexo_modelo.objects.filter(
                 funcao_profissional=funcao, deletado_em__isnull=True
             ).order_by("id")
         )
@@ -45,7 +47,7 @@ def criar_documentos_exigidos(apps, schema_editor):
             continue
 
         nomes_cargo = list(
-            DocumentoCargo.objects.filter(
+            documento_cargo_modelo.objects.filter(
                 cargo=funcao.cargo, deletado_em__isnull=True
             )
             .order_by("nome", "id")
@@ -64,22 +66,26 @@ def criar_documentos_exigidos(apps, schema_editor):
                 nome = nomes_cargo[ordem - 1]
             else:
                 nome = anexo.nome_original
-            exigido = Exigido.objects.create(
+            exigido = exigido_modelo.objects.create(
                 funcao_profissional=funcao,
                 nome=_nome_unico(nome, usados),
                 ordem=ordem,
             )
-            Anexo.objects.filter(pk=anexo.pk).update(documento_exigido=exigido)
+            anexo_modelo.objects.filter(pk=anexo.pk).update(
+                documento_exigido=exigido
+            )
 
 
 def restaurar_nome_documento(apps, schema_editor):
     """Devolve o nome do documento exigido para o campo antigo do anexo."""
-    Anexo = apps.get_model("profissional", "DocumentoFuncaoProfissional")
+    anexo_modelo = apps.get_model(
+        "profissional", "DocumentoFuncaoProfissional"
+    )
 
-    for anexo in Anexo.objects.filter(
+    for anexo in anexo_modelo.objects.filter(
         documento_exigido__isnull=False
     ).select_related("documento_exigido"):
-        Anexo.objects.filter(pk=anexo.pk).update(
+        anexo_modelo.objects.filter(pk=anexo.pk).update(
             nome_documento=anexo.documento_exigido.nome
         )
 

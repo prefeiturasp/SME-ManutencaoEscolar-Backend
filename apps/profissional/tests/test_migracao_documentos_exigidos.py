@@ -22,18 +22,18 @@ def _preparar(apps, cargo_nome, cpf, anexos, cargo_docs, alterado):
     """Cria cargo, profissional, função e anexos no estado antigo."""
     from django.utils import timezone
 
-    Cargo = apps.get_model("cargo", "Cargo")
-    DocumentoCargo = apps.get_model("cargo", "DocumentoCargo")
-    Profissional = apps.get_model("profissional", "Profissional")
+    cargo_modelo = apps.get_model("cargo", "Cargo")
+    documento_cargo_modelo = apps.get_model("cargo", "DocumentoCargo")
+    profissional_modelo = apps.get_model("profissional", "Profissional")
     funcao_modelo = apps.get_model("profissional", "FuncaoProfissional")
     anexo_modelo = apps.get_model(
         "profissional", "DocumentoFuncaoProfissional"
     )
 
-    cargo = Cargo.objects.create(nome=cargo_nome, exige_documento=True)
+    cargo = cargo_modelo.objects.create(nome=cargo_nome, exige_documento=True)
     for nome in cargo_docs:
-        DocumentoCargo.objects.create(cargo=cargo, nome=nome)
-    profissional = Profissional.objects.create(
+        documento_cargo_modelo.objects.create(cargo=cargo, nome=nome)
+    profissional = profissional_modelo.objects.create(
         nome="José", cpf=cpf, rg=cpf[:9]
     )
     funcao = funcao_modelo.objects.create(
@@ -51,7 +51,7 @@ def _preparar(apps, cargo_nome, cpf, anexos, cargo_docs, alterado):
         if alterado
         else funcao.criado_em
     )
-    Cargo.objects.filter(pk=cargo.pk).update(atualizado_em=data)
+    cargo_modelo.objects.filter(pk=cargo.pk).update(atualizado_em=data)
     return funcao.pk
 
 
