@@ -11,6 +11,7 @@ router.trailing_slash = "/?"
 router.register(
     r"solicitacoes-manutencao",
     SolicitacaoManutencaoViewSet,
+    basename="solicitacao-manutencao",
 )
 
 urlpatterns = router.urls

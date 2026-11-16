@@ -3,6 +3,8 @@
 from typing import cast
 from unittest.mock import Mock, patch
 
+import pytest
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import QuerySet
 
@@ -120,3 +122,31 @@ def test_relacionamento_exclusivo_com_diretoria_regional() -> None:
     assert campo.remote_field.model is DiretoriaRegional
     assert campo.remote_field.on_delete is models.PROTECT
     assert campo.remote_field.related_name == "vinculo_lote"
+
+
+@pytest.mark.django_db
+def test_codigo_contrato_e_obrigatorio(empresa) -> None:
+    """O modelo rejeita lote sem código do contrato."""
+    lote = Lote(codigo_cadastro="LOTE-001", nome="Lote", empresa=empresa)
+
+    with pytest.raises(ValidationError) as erro:
+        lote.full_clean()
+
+    assert "codigo_contrato" in erro.value.message_dict
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("codigo", ["31/SME/2021-SME/COMPS", "ABC.123-4"])
+def test_codigo_contrato_aceita_formato_alfanumerico(empresa, codigo) -> None:
+    """Aceita o exemplo da história e variações com . / e -."""
+    lote = Lote(
+        codigo_cadastro="LOTE-001",
+        codigo_contrato=codigo,
+        nome="Lote",
+        empresa=empresa,
+    )
+
+    lote.full_clean()
+    lote.save()
+
+    assert Lote.objects.get(pk=lote.pk).codigo_contrato == codigo

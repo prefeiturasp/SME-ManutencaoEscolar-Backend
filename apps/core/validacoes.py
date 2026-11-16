@@ -27,6 +27,16 @@ cnpj_formato_validacao = RegexValidator(
     ),
 )
 
+CODIGO_CONTRATO_FORMATO_REGEX = re.compile(r"^[A-Za-z0-9/.\-]+$")
+
+codigo_contrato_formato_validacao = RegexValidator(
+    regex=CODIGO_CONTRATO_FORMATO_REGEX,
+    message=(
+        "Código do contrato inválido: use apenas letras, números e os "
+        'caracteres "/", "-" e ".". Exemplo: 31/SME/2021-SME/COMPS.'
+    ),
+)
+
 LINK_FORMATO_REGEX = re.compile(r"^https?://[^\s]+$")
 
 link_formato_validacao = RegexValidator(

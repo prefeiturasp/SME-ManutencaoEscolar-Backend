@@ -1,6 +1,6 @@
 """Repositorio do app usuarios."""
 
-from typing import Any
+from typing import Any, cast
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -207,3 +207,58 @@ class UsuarioRepository:
         usuario = cls._consulta_por_username(username)
         usuario.set_password(senha)
         usuario.save(update_fields=["password"])
+
+    @staticmethod
+    def obter_diretoria_regional(username: str) -> dict[str, Any] | None:
+        """Retorna os dados da diretoria regional vinculada ao usuário.
+
+        Args:
+            username: Registro funcional ou CPF do usuário.
+
+        Returns:
+            Dados da diretoria regional ou ``None`` quando não possui vínculo.
+        """
+        usuario = (
+            Usuario.objects.filter(username=username)
+            .select_related("diretoria_regional")
+            .first()
+        )
+        if usuario is None:
+            return None
+
+        regional = usuario.diretoria_regional
+
+        if regional is None:
+            return None
+
+        return {
+            "id": regional.id,
+            "codigo": regional.codigo,
+            "nome": regional.nome,
+            "abreviacao": regional.abreviacao,
+            "nome_curto": regional.nome_curto,
+        }
+
+    @staticmethod
+    def listar_gestores_dre(
+        diretoria_regional_id: int,
+    ) -> list[dict[str, Any]]:
+        """Lista os usuários DRE ativos com e-mail de uma diretoria regional.
+
+        Args:
+            diretoria_regional_id: ID da diretoria regional.
+
+        Returns:
+            Lista com ``nome``, ``email`` e ``registro_funcional`` dos
+            usuários com perfil DRE vinculados à diretoria regional.
+        """
+        gestores = (
+            Usuario.objects.filter(
+                is_active=True,
+                cargo__perfil=PerfilAcesso.DRE,
+                diretoria_regional_id=diretoria_regional_id,
+            )
+            .exclude(email__regex=r"^\s*$")
+            .values("nome", "email", "registro_funcional")
+        )
+        return cast(list[dict[str, Any]], list(gestores))

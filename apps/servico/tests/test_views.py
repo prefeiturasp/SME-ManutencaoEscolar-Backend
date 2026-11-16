@@ -465,6 +465,20 @@ class TestServicoViewSet:
 
         assert permissao.has_permission(view.request, view) is True
 
+    def test_deve_permitir_listagem_para_perfil_dre(self) -> None:
+        """Permite listar serviços ao perfil DRE sem acesso a cadastros."""
+        view, _service = self.criar_view_com_usuario()
+        view.action = "list"
+
+        usuario = view.request.user
+        usuario.is_authenticated = True
+        usuario.perfil = PerfilAcesso.DRE
+        usuario.tem_acesso.return_value = False
+
+        permissao = view.get_permissions()[0]
+
+        assert permissao.has_permission(view.request, view) is True
+
     def test_deve_negar_listagem_para_outro_perfil_sem_cadastros(
         self,
     ) -> None:
@@ -474,7 +488,7 @@ class TestServicoViewSet:
 
         usuario = view.request.user
         usuario.is_authenticated = True
-        usuario.perfil = PerfilAcesso.DRE
+        usuario.perfil = PerfilAcesso.EMPRESA
         usuario.tem_acesso.return_value = False
 
         permissao = view.get_permissions()[0]

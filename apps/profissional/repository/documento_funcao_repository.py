@@ -84,6 +84,7 @@ class DocumentoFuncaoProfissionalRepository:
         return {
             "id": documento.id,
             "uuid": str(documento.uuid),
+            "documento_exigido_id": documento.documento_exigido_id,
             "nome_original": documento.nome_original,
             "arquivo": documento.arquivo,
             "tipo": documento.tipo,

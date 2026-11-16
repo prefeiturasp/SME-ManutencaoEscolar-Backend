@@ -8,11 +8,9 @@ require('./commands_api/commands_autenticacao')
 require('./commands_ui/commands_login')
 require('./commands_ui/commands_empresas')
 require('./commands_ui/commands_servicos')
+require('./commands_ui/commands_cargos')
 
 // Evita falhas silenciosas caso algum comando seja removido ou renomeado
 Cypress.on('uncaught:exception', (err, runnable) => {
   return false
 })
-
-
-

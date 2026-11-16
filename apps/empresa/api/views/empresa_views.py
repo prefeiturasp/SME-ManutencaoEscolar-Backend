@@ -13,6 +13,7 @@ from rest_framework.serializers import (
 from rest_framework.serializers import ValidationError as DRFValidationError
 from rest_framework.viewsets import ModelViewSet
 
+from apps.core.exceptions import AnexoArquivoError
 from apps.empresa.exceptions import (
     EmpresaCnpjDuplicadoError,
     EmpresaJaPossuiCNPJError,
@@ -39,7 +40,7 @@ class EmpresaViewSet(ModelViewSet):
 
     permission_classes = [PermissaoCadastros]
 
-    queryset = Empresa.objects.all()
+    queryset = Empresa.objects.select_related("logo")
     lookup_field = "uuid"
     http_method_names = ["get", "post", "put", "delete"]
     filter_backends = [DjangoFilterBackend]
@@ -85,6 +86,10 @@ class EmpresaViewSet(ModelViewSet):
             ) from exc
         except EmpresaCnpjDuplicadoError as exc:
             raise DRFValidationError({"cnpj": str(exc)}) from exc
+        except AnexoArquivoError as exc:
+            raise DRFValidationError(
+                {"title": exc.title, "detail": exc.detail}
+            ) from exc
         except DjangoValidationError as exc:
             raise DRFValidationError(exc.message_dict) from exc
 
@@ -116,6 +121,10 @@ class EmpresaViewSet(ModelViewSet):
             ) from exc
         except EmpresaCnpjDuplicadoError as exc:
             raise DRFValidationError({"cnpj": str(exc)}) from exc
+        except AnexoArquivoError as exc:
+            raise DRFValidationError(
+                {"title": exc.title, "detail": exc.detail}
+            ) from exc
         except DjangoValidationError as exc:
             raise DRFValidationError(exc.message_dict) from exc
 

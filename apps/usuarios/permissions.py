@@ -34,6 +34,12 @@ class PermissaoCadastros(PermissaoFuncionalidade):
     funcionalidade = Funcionalidade.CADASTROS
 
 
+class PermissaoSolicitacoes(PermissaoFuncionalidade):
+    """Libera acesso às solicitações conforme a funcionalidade do perfil."""
+
+    funcionalidade = Funcionalidade.SOLICITACAO_MANUTENCAO
+
+
 class PermissaoPerfilUE(BasePermission):
     """Libera o acesso exclusivamente a usuários do perfil UE."""
 
@@ -47,4 +53,20 @@ class PermissaoPerfilUE(BasePermission):
             usuario
             and usuario.is_authenticated
             and usuario.perfil == PerfilAcesso.UE
+        )
+
+
+class PermissaoPerfilDRE(BasePermission):
+    """Libera o acesso exclusivamente a usuários do perfil DRE."""
+
+    message = "Acesso permitido somente para usuários do perfil DRE."
+
+    def has_permission(self, request: Request, view: Any) -> bool:
+        """Verifica se o usuário autenticado pertence ao perfil DRE."""
+        usuario = request.user
+
+        return bool(
+            usuario
+            and usuario.is_authenticated
+            and usuario.perfil == PerfilAcesso.DRE
         )

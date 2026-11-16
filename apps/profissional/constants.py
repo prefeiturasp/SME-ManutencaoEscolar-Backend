@@ -29,6 +29,13 @@ class ProfissionalErrorMessages:
     DOCUMENTOS_FUNCAO_PROFISSIONAL_OBRIGATORIOS = (
         "Documentos são obrigatórios para esta função profissional."
     )
+    DOCUMENTO_NAO_PERTENCE_A_FUNCAO = (
+        "O documento informado não faz parte dos documentos exigidos "
+        "desta função profissional."
+    )
+    DOCUMENTO_FUNCAO_DUPLICADO = (
+        "Informe apenas um arquivo para cada documento exigido."
+    )
     DOCUMENTO_FUNCAO_NAO_ENCONTRADO = (
         "Documento da função profissional não encontrado."
     )

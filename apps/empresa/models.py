@@ -83,6 +83,25 @@ class ResponsavelTecnico(BaseModel):
         return f"{self.nome} - {self.get_tipo_display()}"
 
 
+class LogoEmpresa(AnexoMixin):
+    """Representa a logo de uma empresa (relação entre upload e empresa)."""
+
+    empresa = models.OneToOneField(
+        Empresa,
+        on_delete=models.CASCADE,
+        related_name="logo",
+    )
+    arquivo = models.FileField(upload_to="empresas/logos/")
+
+    class Meta:
+        verbose_name = "Logo da Empresa"
+        verbose_name_plural = "Logos das Empresas"
+        ordering = ["-id"]
+
+    def __str__(self) -> str:
+        return f"Logo de {self.empresa.nome}"
+
+
 class AnexoResponsavelTecnico(AnexoMixin):
     """Representa o anexo de um responsável técnico de uma empresa."""
 

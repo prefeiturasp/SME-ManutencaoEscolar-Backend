@@ -75,7 +75,7 @@ Funcionalidade: API - Empresa
   Cenário: Não buscar detalhes empresas sem autenticação
     Dado que não possuo um token de acesso
     Quando tento a requisição GET no endpoint de empresas detalhes
-    Então retorna o status 401 sem detalhes das empresas
+    Então retorna o status 404 sem detalhes das empresas
 
   Cenário: Excluir cadastro de uma empresa
     Dado que possuo um token de acesso

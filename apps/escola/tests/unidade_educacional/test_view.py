@@ -21,6 +21,19 @@ class TestUnidadeEducacionalViewSet:
 
     url = "/api/v1/unidades-educacionais/"
 
+    def test_usuario_dre_pode_listar_unidades(
+        self,
+        api_cliente_perfil,
+        unidade_educacional_emef,
+    ):
+        """Libera a listagem de unidades para o perfil DRE."""
+        resposta = api_cliente_perfil("DRE").get(self.url)
+
+        assert resposta.status_code == status.HTTP_200_OK
+        assert str(unidade_educacional_emef.uuid) in {
+            item["uuid"] for item in resposta.data["results"]
+        }
+
     def test_deve_listar_unidades_educacionais(
         self,
         api_cliente,

@@ -99,6 +99,7 @@ class TestEmpresaSerializer:
             "complemento",
             "cidade",
             "estado",
+            "logo_url",
             "criado_por",
             "criado_em",
             "atualizado_por",

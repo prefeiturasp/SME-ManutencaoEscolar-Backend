@@ -2,9 +2,6 @@ from unittest.mock import Mock
 
 import pytest
 
-from apps.escola.models import TipoEscola
-from apps.escola.models.diretoria_regional import DiretoriaRegional
-from apps.escola.models.subprefeitura import Subprefeitura
 from apps.escola.models.unidade_educacional import (
     DadosUnidadeEducacional,
     Unidadeeducacional,
@@ -17,15 +14,6 @@ def obter_cargo_diretor():
     """Retorna o cargo EOL de Diretor de Escola."""
     return CargoEOL.objects.get(
         nome="DIRETOR DE ESCOLA",
-    )
-
-
-@pytest.fixture
-def tipo_escola_cemei():
-    """Cria um tipo de escola CEMEI."""
-    return TipoEscola.objects.create(
-        codigo_eol=2,
-        sigla="CEMEI",
     )
 
 
@@ -54,16 +42,6 @@ def resposta_api_tipos_escolas():
 
 
 @pytest.fixture
-def diretoria_regional_ipiranga():
-    """Cria uma Diretoria Regional para os testes."""
-    return DiretoriaRegional.objects.create(
-        codigo="DRE02",
-        nome="DIRETORIA REGIONAL DE EDUCACAO IPIRANGA",
-        abreviacao="IP",
-    )
-
-
-@pytest.fixture
 def resposta_api_subprefeituras():
     """Retorna uma resposta simulada da API de Subprefeituras."""
     resposta = Mock()
@@ -79,17 +57,6 @@ def resposta_api_subprefeituras():
         },
     ]
     return resposta
-
-
-@pytest.fixture
-def subprefeitura_pirituba(diretoria_regional_ipiranga):
-    """Cria uma Subprefeitura para os testes."""
-    subprefeitura = Subprefeitura.objects.create(
-        codigo_eol="SP02",
-        nome="Subprefeitura Pirituba",
-    )
-    subprefeitura.diretorias_regionais.add(diretoria_regional_ipiranga)
-    return subprefeitura
 
 
 @pytest.fixture
@@ -137,23 +104,6 @@ def unidade_educacional_inativa_emef(
         tipo_escola=tipo_escola_emef,
         subprefeitura=subprefeitura_se,
         status=False,
-    )
-
-
-@pytest.fixture
-def unidade_educacional_cemei(
-    diretoria_regional_ipiranga,
-    tipo_escola_cemei,
-    subprefeitura_pirituba,
-):
-    """Cria uma unidade educacional do tipo CEMEI para testes."""
-    return Unidadeeducacional.objects.create(
-        codigo_eol="200002",
-        nome="CEMEI ESCOLA TESTE",
-        diretoria_regional=diretoria_regional_ipiranga,
-        tipo_escola=tipo_escola_cemei,
-        subprefeitura=subprefeitura_pirituba,
-        status=True,
     )
 
 

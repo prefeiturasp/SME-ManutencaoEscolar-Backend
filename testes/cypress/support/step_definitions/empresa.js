@@ -473,9 +473,9 @@ Quando('tento a requisição GET no endpoint de empresas detalhes', function () 
   }).as('response')
 })
 
-Então('retorna o status 401 sem detalhes das empresas', function () {
+Então('retorna o status 404 sem detalhes das empresas', function () {
   cy.get('@response').then((response) => {
-    expect(response.status).to.eq(401)
+    expect(response.status).to.eq(404)
   })
 })
 

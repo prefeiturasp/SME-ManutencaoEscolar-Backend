@@ -128,6 +128,7 @@ class TestLoteRepository:
 
         dados = {
             "codigo_cadastro": "LOTE-002",
+            "codigo_contrato": "32/SME/2021-SME/COMPS",
             "nome": "Lote Novo",
             "status": True,
             "empresa": empresa,
@@ -144,6 +145,7 @@ class TestLoteRepository:
         lote = Lote.objects.get(pk=resultado["pk"])
 
         assert resultado["codigo_cadastro"] == "LOTE-002"
+        assert resultado["codigo_contrato"] == "32/SME/2021-SME/COMPS"
         assert resultado["nome"] == "Lote Novo"
         assert resultado["status"] is True
         assert resultado["empresa"] == empresa
@@ -176,6 +178,7 @@ class TestLoteRepository:
 
         dados = {
             "codigo_cadastro": "LOTE-003",
+            "codigo_contrato": "33/SME/2021-SME/COMPS",
             "nome": "Lote sem DRE",
             "status": True,
             "empresa": empresa,

@@ -13,6 +13,7 @@ from apps.empresa.models import Empresa
 from apps.empresa.repository.empresa_repository import (
     EmpresaRepository,
 )
+from apps.empresa.services.logo_service import LogoEmpresaService
 from apps.empresa.services.responsavel_service import ResponsavelTecnicoService
 from apps.lote.repository.lote_repository import LoteRepository
 from apps.usuarios.models import Usuario
@@ -25,6 +26,7 @@ class EmpresaService:
         self,
         empresa_repository: EmpresaRepository | None = None,
         responsavel_tecnico_service: ResponsavelTecnicoService | None = None,
+        logo_service: LogoEmpresaService | None = None,
     ) -> None:
         """Inicializa o serviço com os repositórios informados ou os padrões.
 
@@ -35,11 +37,15 @@ class EmpresaService:
             responsavel_tecnico_service: Serviço de responsáveis técnicos
                 a ser utilizado. Quando não informado, uma instância padrão
                 de `ResponsavelTecnicoService` é criada.
+            logo_service: Serviço da logo da empresa a ser utilizado.
+                Quando não informado, uma instância padrão de
+                `LogoEmpresaService` é criada.
         """
         self.empresa_repository = empresa_repository or EmpresaRepository()
         self.responsavel_tecnico_service = (
             responsavel_tecnico_service or ResponsavelTecnicoService()
         )
+        self.logo_service = logo_service or LogoEmpresaService()
 
     def criar(
         self, dados: dict[str, Any], usuario: Usuario | None = None
@@ -69,15 +75,24 @@ class EmpresaService:
 
         Args:
             dados: Dados da empresa, incluindo a lista de responsáveis
-                técnicos em "responsaveis_tecnicos".
+                técnicos em "responsaveis_tecnicos" e, opcionalmente, a
+                imagem da logo em "logo".
 
         Returns:
-            Dados serializados da empresa criada.
+            Dados serializados da empresa criada, incluindo ``logo_url``.
         """
         responsaveis_dados = dados.pop("responsaveis_tecnicos")
+        logo = dados.pop("logo", None)
 
         with transaction.atomic():
             empresa = self.empresa_repository.criar({**dados})
+            empresa["logo_url"] = (
+                self.logo_service.sincronizar(
+                    empresa["id"], logo, dados["criado_por"]
+                )
+                if logo is not None
+                else None
+            )
 
             empresa["responsaveis_tecnicos"] = (
                 self.responsavel_tecnico_service.bulk_criar(
@@ -118,6 +133,8 @@ class EmpresaService:
         """
         dados = {**dados, "atualizado_por": usuario}
         responsaveis_dados = dados.pop("responsaveis_tecnicos", None)
+        atualizar_logo = "logo" in dados
+        logo = dados.pop("logo", None)
 
         if "cnpj" in dados:
             self._validar_cnpj_duplicado(
@@ -129,6 +146,13 @@ class EmpresaService:
         with transaction.atomic():
             empresa_atualizada = self.empresa_repository.atualizar(
                 empresa, dados
+            )
+            empresa_atualizada["logo_url"] = (
+                self.logo_service.sincronizar(
+                    empresa_atualizada["id"], logo, usuario
+                )
+                if atualizar_logo
+                else self.logo_service.obter_url(empresa_atualizada["id"])
             )
             empresa_atualizada["responsaveis_tecnicos"] = (
                 self.responsavel_tecnico_service.sincronizar(

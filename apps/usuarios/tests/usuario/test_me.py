@@ -39,10 +39,17 @@ class TestObterUsuarioAutenticado:
         resultado = UsuarioService.obter_usuario_autenticado(rf)
 
         assert resultado["unidade_educacional"] == unidade_educacional_emef
-        assert (
-            resultado["diretoria_regional"]
-            == unidade_educacional_emef.diretoria_regional.nome
-        )
+        assert resultado["diretoria_regional"] == {
+            "id": unidade_educacional_emef.diretoria_regional.id,
+            "codigo": unidade_educacional_emef.diretoria_regional.codigo,
+            "nome": unidade_educacional_emef.diretoria_regional.nome,
+            "abreviacao": (
+                unidade_educacional_emef.diretoria_regional.abreviacao
+            ),
+            "nome_curto": (
+                unidade_educacional_emef.diretoria_regional.nome_curto
+            ),
+        }
         assert resultado["username"] == rf
 
     def test_ue_sem_vinculo_ativo_retorna_nulos(self):
@@ -54,26 +61,28 @@ class TestObterUsuarioAutenticado:
             chave: resultado[chave] for chave in SEM_VINCULO
         } == SEM_VINCULO
 
-    def test_dre_nao_retorna_unidade_educacional(self):
-        _criar_usuario("0000098", PerfilAcesso.DRE)
-
-        resultado = UsuarioService.obter_usuario_autenticado("0000098")
-
-        assert resultado["unidade_educacional"] is None
-        assert resultado["diretoria_regional"] is None
-
-    def test_dre_usa_a_dre_do_usuario(self, monkeypatch):
-        _criar_usuario("0000097", PerfilAcesso.DRE)
-        monkeypatch.setattr(
-            UsuarioService,
-            "_obter_dre_do_usuario",
-            staticmethod(lambda username: "DRE CENTRO"),
-        )
+    def test_dre_usa_a_dre_do_usuario(self, diretoria_regional_centro):
+        usuario = _criar_usuario("0000097", PerfilAcesso.DRE)
+        usuario.diretoria_regional = diretoria_regional_centro
+        usuario.save(update_fields=["diretoria_regional"])
 
         resultado = UsuarioService.obter_usuario_autenticado("0000097")
 
-        assert resultado["diretoria_regional"] == "DRE CENTRO"
+        assert resultado["diretoria_regional"] == {
+            "id": diretoria_regional_centro.id,
+            "codigo": diretoria_regional_centro.codigo,
+            "nome": diretoria_regional_centro.nome,
+            "abreviacao": diretoria_regional_centro.abreviacao,
+            "nome_curto": diretoria_regional_centro.nome_curto,
+        }
         assert resultado["unidade_educacional"] is None
+
+    def test_dre_sem_vinculo_retorna_nulo(self):
+        _criar_usuario("0000095", PerfilAcesso.DRE)
+
+        resultado = UsuarioService.obter_usuario_autenticado("0000095")
+
+        assert resultado["diretoria_regional"] is None
 
     @pytest.mark.parametrize(
         "perfil", [PerfilAcesso.SME, PerfilAcesso.EMPRESA, None]
@@ -108,8 +117,8 @@ class TestMeView:
         assert unidade["uuid"] == str(unidade_educacional_emef.uuid)
         assert unidade["nome"] == unidade_educacional_emef.nome
         assert unidade["codigo_eol"] == unidade_educacional_emef.codigo_eol
-        assert response.data["diretoria_regional"] == (
-            unidade_educacional_emef.diretoria_regional.nome
+        assert response.data["diretoria_regional"]["id"] == (
+            unidade_educacional_emef.diretoria_regional.id
         )
 
     @pytest.mark.parametrize(

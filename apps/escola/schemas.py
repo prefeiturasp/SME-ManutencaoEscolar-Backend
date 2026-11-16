@@ -122,7 +122,9 @@ UNIDADE_EDUCACIONAL = extend_schema_view(
             "Retorna as unidades educacionais cadastradas, "
             "permitindo filtrar por código eol, tipo de escola, "
             "Diretoria Regional, unidade educacional, "
-            "subprefeitura, lote e status."
+            "subprefeitura, lote e status. A listagem está disponível "
+            "para usuários com a funcionalidade Cadastros ou para usuários "
+            "do perfil DRE."
         ),
         parameters=[
             OpenApiParameter(

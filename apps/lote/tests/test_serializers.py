@@ -156,3 +156,92 @@ def test_retorna_nome_curto_da_diretoria_regional() -> None:
     resultado = serializer.data
 
     assert resultado["nome_curto"] == "DRE BUTANTA"
+
+
+CODIGO_CONTRATO_VALIDO = "31/SME/2021-SME/COMPS"
+
+
+def _dados_lote(empresa, **extra):
+    return {
+        "nome": "Lote Centro",
+        "codigo_cadastro": "LOTE-001",
+        "codigo_contrato": CODIGO_CONTRATO_VALIDO,
+        "empresa": str(empresa.uuid),
+        "diretorias_regionais": [],
+        "status": True,
+        **extra,
+    }
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "codigo",
+    [CODIGO_CONTRATO_VALIDO, "ABC123", "12.345/2026-A", "  31/SME/2021  "],
+)
+def test_aceita_codigo_contrato_valido(empresa, codigo) -> None:
+    """Deve aceitar letras, números e os separadores /, - e ."""
+    serializer = LoteCriarSerializer(
+        data=_dados_lote(empresa, codigo_contrato=codigo)
+    )
+
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["codigo_contrato"] == codigo.strip()
+
+
+@pytest.mark.django_db
+def test_exige_codigo_contrato(empresa) -> None:
+    """O código do contrato é obrigatório no cadastro."""
+    dados = _dados_lote(empresa)
+    del dados["codigo_contrato"]
+
+    serializer = LoteCriarSerializer(data=dados)
+
+    assert not serializer.is_valid()
+    assert "codigo_contrato" in serializer.errors
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("codigo", ["", "   ", None])
+def test_rejeita_codigo_contrato_vazio(empresa, codigo) -> None:
+    """Não aceita valor vazio, só espaços ou nulo."""
+    serializer = LoteCriarSerializer(
+        data=_dados_lote(empresa, codigo_contrato=codigo)
+    )
+
+    assert not serializer.is_valid()
+    assert "codigo_contrato" in serializer.errors
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "codigo", ["31 SME", "31_SME", "31/SME#1", "contrato ação", "<b>1</b>"]
+)
+def test_rejeita_codigo_contrato_com_caracteres_invalidos(
+    empresa, codigo
+) -> None:
+    """Rejeita espaços internos e caracteres fora do padrão permitido."""
+    serializer = LoteCriarSerializer(
+        data=_dados_lote(empresa, codigo_contrato=codigo)
+    )
+
+    assert not serializer.is_valid()
+    assert "Código do contrato inválido" in str(
+        serializer.errors["codigo_contrato"][0]
+    )
+
+
+@pytest.mark.django_db
+def test_rejeita_codigo_contrato_acima_de_100_caracteres(empresa) -> None:
+    """Respeita o tamanho máximo do campo."""
+    serializer = LoteCriarSerializer(
+        data=_dados_lote(empresa, codigo_contrato="A" * 101)
+    )
+
+    assert not serializer.is_valid()
+    assert "codigo_contrato" in serializer.errors
+
+
+def test_expoe_codigo_contrato_na_resposta() -> None:
+    """Deve incluir o código do contrato na serialização do lote."""
+    assert "codigo_contrato" in LoteSerializer.Meta.fields
+    assert "codigo_contrato" in LoteCriarSerializer.Meta.fields
