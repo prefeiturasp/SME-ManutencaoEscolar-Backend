@@ -66,7 +66,7 @@ def _nomes(apps, funcao_pk):
 
 
 def test_backfill_cobre_todos_os_cenarios():
-    """Usa o nome gravado, o cargo inalterado ou o nome do arquivo."""
+    """Usa o nome gravado, o nome atual do cargo ou o nome do arquivo."""
     antigo = _migrar(ANTES)
     com_nome = _preparar(
         antigo,
@@ -88,8 +88,16 @@ def test_backfill_cobre_todos_os_cenarios():
         antigo,
         "C",
         "33333333333",
+        [("parede.jpg", ""), ("piso.jpg", "")],
+        ["Pintura Técnica", "Belas Artes"],
+        True,
+    )
+    incompativel = _preparar(
+        antigo,
+        "F",
+        "66666666666",
         [("rg.pdf", ""), ("rg.pdf", "")],
-        ["RG", "CPF"],
+        ["RG", "CPF", "Senai"],
         True,
     )
     sem_anexo = _preparar(antigo, "D", "44444444444", [], [], False)
@@ -98,7 +106,8 @@ def test_backfill_cobre_todos_os_cenarios():
 
     assert _nomes(novo, com_nome) == ["Senai", "RG"]
     assert _nomes(novo, inalterado) == ["Alfa", "Zeta"]
-    assert _nomes(novo, alterado) == ["rg.pdf", "rg.pdf (2)"]
+    assert _nomes(novo, alterado) == ["Belas Artes", "Pintura Técnica"]
+    assert _nomes(novo, incompativel) == ["rg.pdf", "rg.pdf (2)"]
     assert _nomes(novo, sem_anexo) == []
     anexo_modelo = novo.get_model(
         "profissional", "DocumentoFuncaoProfissional"

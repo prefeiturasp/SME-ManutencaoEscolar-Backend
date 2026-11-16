@@ -23,10 +23,11 @@ def criar_documentos_exigidos(apps, schema_editor):
     """Cria os documentos exigidos das funções que já possuem anexos.
 
     O nome de cada documento vem, nesta ordem: do ``nome_documento`` gravado
-    no anexo; do documento do cargo na mesma posição, quando o cargo não foi
-    alterado depois do vínculo e tem o mesmo número de documentos; ou do
-    nome do arquivo anexado. O estado antigo de um cargo já alterado não pode
-    ser recuperado, por isso nesses casos vale o nome do arquivo.
+    no anexo; do documento atual do cargo na mesma posição, quando o cargo
+    tem o mesmo número de documentos que a função tem de anexos; ou do nome
+    do arquivo anexado. Se o cargo foi alterado depois do vínculo, o estado
+    antigo dele não pode ser recuperado: os nomes atuais são a melhor
+    aproximação e a ordem pode não coincidir com a original.
     """
     funcao_modelo = apps.get_model("profissional", "FuncaoProfissional")
     exigido_modelo = apps.get_model("profissional", "DocumentoExigidoFuncao")
@@ -53,16 +54,13 @@ def criar_documentos_exigidos(apps, schema_editor):
             .order_by("nome", "id")
             .values_list("nome", flat=True)
         )
-        cargo_inalterado = (
-            funcao.cargo.atualizado_em <= funcao.criado_em
-            and len(nomes_cargo) == len(anexos)
-        )
+        cargo_compativel = len(nomes_cargo) == len(anexos)
 
         usados = set()
         for ordem, anexo in enumerate(anexos, start=1):
             if anexo.nome_documento:
                 nome = anexo.nome_documento
-            elif cargo_inalterado:
+            elif cargo_compativel:
                 nome = nomes_cargo[ordem - 1]
             else:
                 nome = anexo.nome_original
