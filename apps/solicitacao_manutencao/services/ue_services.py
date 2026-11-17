@@ -5,6 +5,7 @@ from typing import Any
 from django.db import transaction
 from django.utils import timezone
 from sme_workflow_sdk import ContextoExecucao
+from sme_workflow_sdk.excecoes import TransicaoInvalidaError
 
 from apps.core.repository.workflow_repository import WorkflowRepository
 from apps.core.services.anexo_service import AnexoService
@@ -66,7 +67,7 @@ class SolicitacaoManutencaoUeService:
         dados: dict[str, Any],
         usuario: Usuario,
         enviar: bool = False,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         """Cria uma solicitação e seus serviços de forma atômica.
 
         Args:
@@ -95,6 +96,9 @@ class SolicitacaoManutencaoUeService:
                 dados={},
             ),
         )
+        if not resultado["sucesso"]:
+            raise TransicaoInvalidaError
+
         dados["situacao"] = SituacaoSolicitacao(resultado["proximo_estado"])
         solicitacao = self.repository.criar(
             dados=dados,
