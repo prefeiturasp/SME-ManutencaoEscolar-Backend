@@ -8,9 +8,9 @@ ENDPOINT_CARGOS_EOL = "/cargos"
 class PerfilAcesso(models.TextChoices):
     """Perfis de acesso disponíveis no sistema."""
 
-    UE = "UE", "Diretor Unidade Educarional"
+    UE = "UE", "Unidade Educacional"
     DRE = "DRE", "Diretoria Regional de Educação"
-    SME = "SME", "SME / GME"
+    SME = "SME", "GME/SME"
     EMPRESA = "EMPRESA", "Empresa"
 
 
