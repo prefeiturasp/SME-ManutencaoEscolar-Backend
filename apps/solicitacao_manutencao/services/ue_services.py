@@ -108,6 +108,7 @@ class SolicitacaoManutencaoUeService:
 
         return solicitacao
 
+    @transaction.atomic
     def atualizar(
         self,
         solicitacao: dict[str, Any],
@@ -150,18 +151,20 @@ class SolicitacaoManutencaoUeService:
         else:
             dados["situacao"] = SituacaoSolicitacao.NAO_ENVIADO_DRE
 
-        with transaction.atomic():
-            solicitacao_atualizada = self.repository.atualizar(
-                solicitacao, dados, usuario
+        solicitacao_atualizada = self.repository.atualizar(
+            solicitacao, dados, usuario
+        )
+
+        if servicos is not None:
+            solicitacao_atualizada["servicos"] = self._sincronizar_servicos(
+                solicitacao["id"], servicos, usuario
             )
-
-            if servicos is not None:
-                solicitacao_atualizada["servicos"] = (
-                    self._sincronizar_servicos(
-                        solicitacao["id"], servicos, usuario
-                    )
+        if enviar:
+            transaction.on_commit(
+                lambda: self.notificacao_service.notificar_envio_para_dre(
+                    solicitacao_atualizada, usuario
                 )
-
+            )
         return solicitacao_atualizada
 
     def _sincronizar_servicos(
