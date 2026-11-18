@@ -11,6 +11,7 @@ from apps.escola.serializers.unidade_educacional_serializers import (
 from apps.servico.models import Servico
 from apps.solicitacao_manutencao.constants import PerfisSolicitacao
 from apps.solicitacao_manutencao.models import (
+    AnaliseSolicitacao,
     FotoLocalReparo,
     ServicoManutencao,
     SolicitacaoManutencao,
@@ -179,6 +180,23 @@ class SolicitacaoManutencaoCriarEditarSerializer(serializers.ModelSerializer):
                 "Informe ao menos um serviço de manutenção."
             )
         return value
+
+
+class AnaliseSolicitacaoDreSerializer(serializers.ModelSerializer):
+    """Valida e serializa a análise de uma solicitação pelo perfil DRE."""
+
+    class Meta:
+        """Configura os campos da análise da DRE."""
+
+        model = AnaliseSolicitacao
+        fields = (
+            "uuid",
+            "perfil",
+            "decisao",
+            "observacoes",
+            "data_alteracao",
+        )
+        read_only_fields = ("uuid", "perfil")
 
 
 class ServicoManutencaoDetalhesSerializer(serializers.ModelSerializer):
