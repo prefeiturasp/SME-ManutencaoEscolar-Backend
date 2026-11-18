@@ -4,15 +4,27 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.escola.models import HistoricoResponsavel, Unidadeeducacional
+from apps.solicitacao_manutencao.constants import (
+    DecisaoAnaliseDre,
+    PerfisSolicitacao,
+    SituacaoSolicitacao,
+)
 from apps.solicitacao_manutencao.models import (
+    AnaliseSolicitacao,
     FotoLocalReparo,
     ServicoManutencao,
     SolicitacaoManutencao,
 )
-from apps.solicitacao_manutencao.repository import (
-    ArquivoServicoManutencaoRepository,
-    ServicoManutencaoRepository,
-    SolicitacaoManutencaoRepository,
+from apps.solicitacao_manutencao.repositories.dre_repository import (
+    SolicitacaoManutencaoDreRepository,
+)
+from apps.solicitacao_manutencao.repositories.solicitacao_repository import (
+    SolicitacaoManutencaoBaseRepository,
+)
+from apps.solicitacao_manutencao.repositories.ue_repository import (
+    ArquivoServicoManutencaoUeRepository,
+    ServicoManutencaoUeRepository,
+    SolicitacaoManutencaoUeRepository,
 )
 from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models import Usuario
@@ -43,7 +55,7 @@ def test_lista_solicitacoes_por_usuario(
         criado_por=usuario_inativo,
     )
 
-    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
+    solicitacoes = SolicitacaoManutencaoUeRepository().listar_por_usuario(
         usuario_ue
     )
 
@@ -76,7 +88,7 @@ def test_lista_solicitacoes_vazia_para_usuario_sem_perfil() -> None:
         nome="Usuário sem perfil",
     )
 
-    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
+    solicitacoes = SolicitacaoManutencaoUeRepository().listar_por_usuario(
         usuario
     )
 
@@ -85,7 +97,7 @@ def test_lista_solicitacoes_vazia_para_usuario_sem_perfil() -> None:
 
 def test_lista_solicitacoes_vazia_sem_usuario() -> None:
     """Retorna uma lista vazia quando nenhum usuário for informado."""
-    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(None)
+    solicitacoes = SolicitacaoManutencaoUeRepository().listar_por_usuario(None)
 
     assert not solicitacoes.exists()
 
@@ -97,7 +109,7 @@ def test_lista_solicitacoes_vazia_para_usuario_sem_username(
     usuario_ue.username = ""
     usuario_ue.save(update_fields=["username"])
 
-    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
+    solicitacoes = SolicitacaoManutencaoUeRepository().listar_por_usuario(
         usuario_ue
     )
 
@@ -120,7 +132,7 @@ def test_consulta_solicitacoes_detalhadas_com_dicionarios(
         criado_por=usuario_ue,
     )
 
-    resultados = SolicitacaoManutencaoRepository().get_detalhes_solicitacao(
+    resultados = SolicitacaoManutencaoUeRepository().get_detalhes_solicitacao(
         usuario_ue, str(solicitacao.uuid)
     )
 
@@ -149,7 +161,7 @@ def test_atualiza_solicitacao(
         unidade_educacional=unidade_educacional_emef,
     )
 
-    resultado = SolicitacaoManutencaoRepository().atualizar(
+    resultado = SolicitacaoManutencaoUeRepository().atualizar(
         {"id": solicitacao.id},
         {"informacoes_adicionais": "Atualizada"},
         usuario_ativo,
@@ -189,7 +201,7 @@ def test_serializa_solicitacao_recebida_como_dicionario(
         .get()
     )
 
-    resultado = SolicitacaoManutencaoRepository()._serializar(dados)
+    resultado = SolicitacaoManutencaoUeRepository()._serializar(dados)
 
     assert resultado["uuid"] == str(solicitacao.uuid)
     assert resultado["unidade_educacional"] == unidade_educacional_emef.id
@@ -211,7 +223,7 @@ def test_nao_consulta_solicitacoes_de_outra_ue(
         criado_por=usuario_inativo,
     )
 
-    resultados = SolicitacaoManutencaoRepository().get_detalhes_solicitacao(
+    resultados = SolicitacaoManutencaoUeRepository().get_detalhes_solicitacao(
         usuario_ue, str(solicitacao.uuid)
     )
 
@@ -219,39 +231,6 @@ def test_nao_consulta_solicitacoes_de_outra_ue(
     # cadastrou a solicitação.
     assert resultados is not None
     assert resultados["uuid"] == solicitacao.uuid
-
-
-def test_nao_lista_solicitacoes_para_usuario_sem_registro_funcional(
-    unidade_educacional_emef: Unidadeeducacional,
-    usuario_ativo: Usuario,
-) -> None:
-    """Não lista solicitações de usuário sem registro funcional."""
-    cargo_dre = CargoEOL.objects.create(
-        codigo="7777",
-        nome="Diretor regional",
-        perfil=PerfilAcesso.DRE,
-    )
-    usuario_dre = Usuario.objects.create(
-        username="12345678901",
-        nome="Usuário DRE",
-        cpf="12345678901",
-        email="dre@email.com",
-        cargo=cargo_dre,
-        is_active=True,
-    )
-    for codigo in ("0000001", "0000002"):
-        SolicitacaoManutencao.objects.create(
-            codigo=codigo,
-            tipo_atendimento="comum",
-            unidade_educacional=unidade_educacional_emef,
-            criado_por=usuario_ativo,
-        )
-
-    solicitacoes = SolicitacaoManutencaoRepository().listar_por_usuario(
-        usuario_dre
-    )
-
-    assert not solicitacoes.exists()
 
 
 def test_lista_solicitacoes_de_todas_as_unidades_da_dre(
@@ -276,6 +255,7 @@ def test_lista_solicitacoes_de_todas_as_unidades_da_dre(
             codigo=codigo,
             tipo_atendimento="comum",
             unidade_educacional=unidade,
+            situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
             criado_por=usuario_ativo,
         )
         for codigo, unidade in (
@@ -287,10 +267,17 @@ def test_lista_solicitacoes_de_todas_as_unidades_da_dre(
         codigo="outra-dre",
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_cemei,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
+        criado_por=usuario_ativo,
+    )
+    SolicitacaoManutencao.objects.create(
+        codigo="nao-enviada",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
         criado_por=usuario_ativo,
     )
 
-    resultados = SolicitacaoManutencaoRepository().listar_por_usuario(
+    resultados = SolicitacaoManutencaoDreRepository().listar_por_usuario(
         usuario_dre
     )
 
@@ -318,14 +305,99 @@ def test_dre_sem_diretoria_nao_lista_solicitacoes(
         codigo="dre-sem-vinculo",
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
         criado_por=usuario_ativo,
     )
 
-    resultados = SolicitacaoManutencaoRepository().listar_por_usuario(
+    resultados = SolicitacaoManutencaoDreRepository().listar_por_usuario(
         usuario_dre
     )
 
     assert not resultados.exists()
+
+
+def test_repositorio_base_exige_implementacao_da_listagem() -> None:
+    """Obriga as subclasses a implementarem a listagem por usuário."""
+    repositorio = SolicitacaoManutencaoBaseRepository()
+
+    with pytest.raises(NotImplementedError):
+        repositorio.listar_por_usuario(None)
+
+
+def test_dre_cria_analise_ao_atualizar_solicitacao(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+) -> None:
+    """Registra a análise da DRE e o responsável pela alteração."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="dre-analise-1",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
+    )
+
+    resultado = SolicitacaoManutencaoDreRepository().atualizar(
+        {"id": solicitacao.id},
+        {
+            "decisao": DecisaoAnaliseDre.APROVADA,
+            "observacoes": "Serviço necessário.",
+            "situacao": SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME,
+        },
+        usuario_ativo,
+    )
+
+    solicitacao.refresh_from_db()
+    analise = AnaliseSolicitacao.objects.get(
+        solicitacao_manutencao=solicitacao
+    )
+    assert resultado == {
+        "id": analise.id,
+        "uuid": str(analise.uuid),
+        "perfil": PerfisSolicitacao.DRE,
+        "decisao": DecisaoAnaliseDre.APROVADA,
+        "observacoes": "Serviço necessário.",
+        "data_alteracao": None,
+        "criado_por": usuario_ativo,
+        "criado_em": analise.criado_em,
+    }
+    assert (
+        solicitacao.situacao == SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME
+    )
+    assert solicitacao.atualizado_por == usuario_ativo
+
+
+def test_dre_atualiza_analise_existente(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+    usuario_ue: Usuario,
+) -> None:
+    """Atualiza a análise já registrada sem criar outra."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="dre-analise-2",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
+    )
+    repositorio = SolicitacaoManutencaoDreRepository()
+    criada = repositorio.atualizar(
+        {"id": solicitacao.id},
+        {"decisao": DecisaoAnaliseDre.APROVADA},
+        usuario_ativo,
+    )
+
+    atualizada = repositorio.atualizar(
+        {"id": solicitacao.id},
+        {"decisao": DecisaoAnaliseDre.REPROVADA},
+        usuario_ue,
+    )
+
+    analise = AnaliseSolicitacao.objects.get(
+        solicitacao_manutencao=solicitacao
+    )
+    assert atualizada["id"] == criada["id"]
+    assert atualizada["decisao"] == DecisaoAnaliseDre.REPROVADA
+    assert analise.criado_por == usuario_ativo
+    assert analise.atualizado_por == usuario_ue
 
 
 def test_cria_solicitacao(
@@ -333,7 +405,7 @@ def test_cria_solicitacao(
     usuario_ativo: Usuario,
 ) -> None:
     """Persiste uma solicitação de manutenção."""
-    solicitacao = SolicitacaoManutencaoRepository().criar(
+    solicitacao = SolicitacaoManutencaoUeRepository().criar(
         dados={
             "codigo": "0000001",
             "tipo_atendimento": "comum",
@@ -369,7 +441,7 @@ def test_cria_servico_da_solicitacao(
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
     )
-    servico = ServicoManutencaoRepository().criar(
+    servico = ServicoManutencaoUeRepository().criar(
         dados={
             "servico_especifico": "Reparo hidráulico",
             "local_reparo": "Cozinha",
@@ -404,7 +476,7 @@ def test_lista_e_atualiza_servico(
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
     )
-    repositorio = ServicoManutencaoRepository()
+    repositorio = ServicoManutencaoUeRepository()
     criado = repositorio.criar(
         {
             "servico_especifico": "Reparo hidráulico",
@@ -436,7 +508,7 @@ def test_cria_arquivo_do_servico(
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
     )
-    servico = ServicoManutencaoRepository().criar(
+    servico = ServicoManutencaoUeRepository().criar(
         dados={
             "servico_especifico": "Reparo hidráulico",
             "local_reparo": "Cozinha",
@@ -445,7 +517,7 @@ def test_cria_arquivo_do_servico(
         solicitacao_id=solicitacao.id,
         usuario=usuario_ativo,
     )
-    arquivo = ArquivoServicoManutencaoRepository().criar(
+    arquivo = ArquivoServicoManutencaoUeRepository().criar(
         dados={
             "nome_original": "reparo.jpg",
             "arquivo": "arquivos/reparo.jpg",
@@ -481,7 +553,7 @@ def test_lista_anexos_do_servico(
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
     )
-    servico = ServicoManutencaoRepository().criar(
+    servico = ServicoManutencaoUeRepository().criar(
         {
             "servico_especifico": "Reparo elétrico",
             "local_reparo": "Sala",
@@ -490,7 +562,7 @@ def test_lista_anexos_do_servico(
         solicitacao.id,
         usuario_ativo,
     )
-    repositorio = ArquivoServicoManutencaoRepository()
+    repositorio = ArquivoServicoManutencaoUeRepository()
     anexo = repositorio.criar(
         {
             "nome_original": "reparo.jpg",
@@ -518,7 +590,7 @@ def test_remove_servico_logicamente(
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
     )
-    servico = ServicoManutencaoRepository().criar(
+    servico = ServicoManutencaoUeRepository().criar(
         {
             "servico_especifico": "Reparo hidráulico",
             "local_reparo": "Cozinha",
@@ -528,7 +600,7 @@ def test_remove_servico_logicamente(
         usuario_ativo,
     )
 
-    ServicoManutencaoRepository().remover(servico["id"], usuario_ativo)
+    ServicoManutencaoUeRepository().remover(servico["id"], usuario_ativo)
 
     assert not ServicoManutencao.objects.filter(pk=servico["id"]).exists()
     assert ServicoManutencao.dm_objects.filter(pk=servico["id"]).exists()
@@ -545,7 +617,7 @@ def test_exclui_anexo_e_arquivo_apos_commit(
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
     )
-    servico = ServicoManutencaoRepository().criar(
+    servico = ServicoManutencaoUeRepository().criar(
         {
             "servico_especifico": "Reparo hidráulico",
             "local_reparo": "Cozinha",
@@ -554,7 +626,7 @@ def test_exclui_anexo_e_arquivo_apos_commit(
         solicitacao.id,
         usuario_ativo,
     )
-    anexo = ArquivoServicoManutencaoRepository().criar(
+    anexo = ArquivoServicoManutencaoUeRepository().criar(
         {
             "nome_original": "excluir.jpg",
             "arquivo": SimpleUploadedFile(
@@ -569,7 +641,7 @@ def test_exclui_anexo_e_arquivo_apos_commit(
     )
     nome_arquivo = anexo["arquivo"].name
 
-    ArquivoServicoManutencaoRepository().excluir_nao_preservados(
+    ArquivoServicoManutencaoUeRepository().excluir_nao_preservados(
         servico["id"], []
     )
 
@@ -593,13 +665,13 @@ def test_obtem_ultimo_codigo_incluindo_solicitacao_excluida(
     )
     ultima_solicitacao.soft_delete()
 
-    ultimo_codigo = SolicitacaoManutencaoRepository().obter_ultimo_codigo()
+    ultimo_codigo = SolicitacaoManutencaoUeRepository().obter_ultimo_codigo()
 
     assert ultimo_codigo == {"codigo": "0000002"}
 
 
 def test_obtem_ultimo_codigo_retorna_dict_vazio_sem_solicitacoes() -> None:
     """Retorna um dicionário vazio quando não houver solicitações."""
-    ultimo_codigo = SolicitacaoManutencaoRepository().obter_ultimo_codigo()
+    ultimo_codigo = SolicitacaoManutencaoUeRepository().obter_ultimo_codigo()
 
     assert ultimo_codigo == {}
