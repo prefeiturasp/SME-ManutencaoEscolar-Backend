@@ -4,6 +4,7 @@ from django.db import models
 
 from apps.core.models.mixins import AnexoMixin, BaseModel
 from apps.solicitacao_manutencao.constants import (
+    DecisaoAnaliseDre,
     FaseExecucao,
     FaseSolicitacao,
     FaseVistoria,
@@ -60,6 +61,24 @@ class SolicitacaoManutencao(BaseModel):
     def __str__(self) -> str:
         """Retorna o código da solicitação."""
         return f"{self.codigo} - {self.unidade_educacional}"
+
+
+class AnaliseSolicitacao(BaseModel):
+    """Representa a análise de uma solicitação por um perfil (DRE, SME/GME)."""
+
+    solicitacao_manutencao = models.OneToOneField(
+        SolicitacaoManutencao,
+        on_delete=models.CASCADE,
+        related_name="analise",
+    )
+    perfil = models.CharField(max_length=20, choices=PerfisSolicitacao.choices)
+    decisao = models.CharField(
+        max_length=30, choices=DecisaoAnaliseDre.choices
+    )
+    data_alteracao = models.DateTimeField(
+        blank=True, null=True, editable=False
+    )
+    observacoes = models.TextField(blank=True, default="")
 
 
 class ServicoManutencao(BaseModel):
