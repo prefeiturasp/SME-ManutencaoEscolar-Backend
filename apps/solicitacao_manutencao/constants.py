@@ -4,6 +4,10 @@ from django.db import models
 
 ROTA_VISUALIZAR_SOLICITACAO = "/solicitacao_manutencao/visualizar/{uuid}"
 
+MSG_SOLICITACAO_APROVADA_DRE = (
+    "A solicitação nº {codigo} foi aprovada e enviada para a GME/SME."
+)
+
 
 class TipoAtendimento(models.TextChoices):
     """Define os tipos de atendimento de uma solicitação."""
