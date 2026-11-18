@@ -9,23 +9,35 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.core.services.anexo_service import AnexoService
 from apps.escola.models import HistoricoResponsavel, Unidadeeducacional
-from apps.solicitacao_manutencao.constants import SituacaoSolicitacao
+from apps.solicitacao_manutencao.constants import (
+    MSG_SOLICITACAO_APROVADA_DRE,
+    DecisaoAnaliseDre,
+    SituacaoSolicitacao,
+)
 from apps.solicitacao_manutencao.models import (
+    AnaliseSolicitacao,
     FotoLocalReparo,
     SolicitacaoManutencao,
 )
-from apps.solicitacao_manutencao.repository import (
-    ArquivoServicoManutencaoRepository,
-    ServicoManutencaoRepository,
-    SolicitacaoManutencaoRepository,
+from apps.solicitacao_manutencao.repositories.ue_repository import (
+    ArquivoServicoManutencaoUeRepository,
+    ServicoManutencaoUeRepository,
+    SolicitacaoManutencaoUeRepository,
+)
+from apps.solicitacao_manutencao.services.dre_services import (
+    SolicitacaoManutencaoDreService,
 )
 from apps.solicitacao_manutencao.services.solicitacao_service import (
     SolicitacaoManutencaoService,
+    registrar_envio,
+    validar_situacao_editavel,
 )
 from apps.solicitacao_manutencao.services.ue_services import (
     SolicitacaoManutencaoUeService,
 )
+from apps.usuarios.constants import PerfilAcesso
 from apps.usuarios.models import Usuario
+from apps.usuarios.models.cargo_eol import CargoEOL
 
 pytestmark = pytest.mark.django_db
 
@@ -76,11 +88,52 @@ def test_lista_solicitacoes_visiveis_para_usuario(
     ]
 
 
+def test_lista_e_detalha_solicitacoes_para_usuario_dre(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+) -> None:
+    """Usa o repositório da DRE para usuários com perfil DRE."""
+    cargo_dre = CargoEOL.objects.create(
+        codigo="7780",
+        nome="Diretor regional",
+        perfil=PerfilAcesso.DRE,
+    )
+    usuario_dre = Usuario.objects.create(
+        username="usuario-dre-service",
+        nome="Usuário DRE",
+        cargo=cargo_dre,
+        diretoria_regional=unidade_educacional_emef.diretoria_regional,
+    )
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="dre-service",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
+        criado_por=usuario_ativo,
+    )
+    SolicitacaoManutencao.objects.create(
+        codigo="nao-enviada",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        criado_por=usuario_ativo,
+    )
+    service = SolicitacaoManutencaoService()
+
+    resultado = service.listar_por_usuario(usuario_dre)
+    detalhes = service.get_detalhes_solicitacao(
+        usuario_dre, str(solicitacao.uuid)
+    )
+
+    assert [item["codigo"] for item in resultado] == ["dre-service"]
+    assert detalhes is not None
+    assert detalhes["uuid"] == solicitacao.uuid
+
+
 def test_inicializar_com_dependencias_informadas() -> None:
     """Utiliza as dependências informadas na inicialização do serviço."""
-    repository = SolicitacaoManutencaoRepository()
-    servico_repository = ServicoManutencaoRepository()
-    arquivo_repository = ArquivoServicoManutencaoRepository()
+    repository = SolicitacaoManutencaoUeRepository()
+    servico_repository = ServicoManutencaoUeRepository()
+    arquivo_repository = ArquivoServicoManutencaoUeRepository()
     anexo_service = AnexoService()
 
     service = SolicitacaoManutencaoUeService(
@@ -139,7 +192,7 @@ def test_sincronizar_arquivos_preserva_arquivos_existentes_e_adiciona_novos(
         unidade_educacional=unidade_educacional_emef,
         criado_por=usuario_ativo,
     )
-    servico = ServicoManutencaoRepository().criar(
+    servico = ServicoManutencaoUeRepository().criar(
         {
             "servico_especifico": "Reparo hidráulico",
             "local_reparo": "Cozinha",
@@ -148,7 +201,7 @@ def test_sincronizar_arquivos_preserva_arquivos_existentes_e_adiciona_novos(
         solicitacao.id,
         usuario_ativo,
     )
-    arquivo_existente = ArquivoServicoManutencaoRepository().criar(
+    arquivo_existente = ArquivoServicoManutencaoUeRepository().criar(
         {
             "nome_original": "existente.jpg",
             "arquivo": SimpleUploadedFile(
@@ -246,8 +299,10 @@ def test_nao_atualiza_solicitacao_em_situacao_nao_editavel(
         criado_por=usuario_ativo,
     )
 
+    solicitacao_service = SolicitacaoManutencaoUeService()
+
     with pytest.raises(ValidationError, match="só pode ser editada"):
-        SolicitacaoManutencaoUeService().atualizar(
+        solicitacao_service.atualizar(
             {"id": solicitacao.id, "situacao": solicitacao.situacao},
             {"informacoes_adicionais": "Não deve ser salva"},
             usuario_ativo,
@@ -269,7 +324,7 @@ def test_sincroniza_servicos_removendo_existentes_e_criando_novos(
         unidade_educacional=unidade_educacional_emef,
         criado_por=usuario_ativo,
     )
-    existente = ServicoManutencaoRepository().criar(
+    existente = ServicoManutencaoUeRepository().criar(
         {
             "servico_especifico": "Serviço antigo",
             "local_reparo": "Cozinha",
@@ -294,7 +349,7 @@ def test_sincroniza_servicos_removendo_existentes_e_criando_novos(
 
     assert len(resultado) == 1
     assert resultado[0]["servico_especifico"] == "Serviço novo"
-    assert not ServicoManutencaoRepository.model.objects.filter(
+    assert not ServicoManutencaoUeRepository.model.objects.filter(
         pk=existente["id"]
     ).exists()
 
@@ -310,8 +365,10 @@ def test_rejeita_servico_que_nao_pertence_a_solicitacao(
         unidade_educacional=unidade_educacional_emef,
     )
 
+    solicitacao_service = SolicitacaoManutencaoUeService()
+
     with pytest.raises(ValidationError, match="Serviço não encontrado"):
-        SolicitacaoManutencaoUeService()._sincronizar_servicos(
+        solicitacao_service._sincronizar_servicos(
             solicitacao.id,
             [{"uuid": str(uuid4()), "arquivos": []}],
             usuario_ativo,
@@ -328,7 +385,7 @@ def test_rejeita_arquivo_que_nao_pertence_ao_servico(
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
     )
-    servico = ServicoManutencaoRepository().criar(
+    servico = ServicoManutencaoUeRepository().criar(
         {
             "servico_especifico": "Serviço",
             "local_reparo": "Sala",
@@ -338,8 +395,10 @@ def test_rejeita_arquivo_que_nao_pertence_ao_servico(
         usuario_ativo,
     )
 
+    solicitacao_service = SolicitacaoManutencaoUeService()
+
     with pytest.raises(ValidationError, match="Arquivo não encontrado"):
-        SolicitacaoManutencaoUeService()._sincronizar_arquivos(
+        solicitacao_service._sincronizar_arquivos(
             servico["id"], [{"uuid": str(uuid4())}], usuario_ativo
         )
 
@@ -374,3 +433,110 @@ def test_criar_solicitacoes_com_codigos_crescentes_de_sete_digitos(
 
     assert primeira_solicitacao["codigo"] == "0000001"
     assert segunda_solicitacao["codigo"] == "0000002"
+
+
+def test_validar_situacao_editavel_aceita_situacao_permitida() -> None:
+    """Não levanta erro quando a situação está entre as editáveis."""
+    validar_situacao_editavel(
+        {"situacao": SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE},
+        [SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE],
+    )
+
+
+def test_validar_situacao_editavel_rejeita_situacao_nao_permitida() -> None:
+    """Informa as situações editáveis ao rejeitar a edição."""
+    with pytest.raises(
+        ValidationError,
+        match="Não enviada para a DRE ou Necessidade de revisão \\(UE\\)",
+    ):
+        validar_situacao_editavel(
+            {"situacao": SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE},
+            [
+                SituacaoSolicitacao.NAO_ENVIADO_DRE,
+                SituacaoSolicitacao.NECESSIDADE_REVISAO_UE,
+            ],
+        )
+
+
+def test_registrar_envio_define_situacao_e_data_sem_alterar_original() -> None:
+    """Retorna novos dados com situação de destino e data de envio."""
+    dados = {"informacoes_adicionais": "Teste"}
+
+    resultado = registrar_envio(
+        dados, SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME
+    )
+
+    assert resultado["situacao"] == (
+        SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME
+    )
+    assert resultado["data_envio"] is not None
+    assert resultado["informacoes_adicionais"] == "Teste"
+    assert "situacao" not in dados
+
+
+@pytest.mark.parametrize(
+    ("enviar", "situacao_esperada"),
+    [
+        (False, SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE),
+        (True, SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME),
+    ],
+)
+def test_dre_registra_analise_da_solicitacao(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+    enviar: bool,
+    situacao_esperada: SituacaoSolicitacao,
+) -> None:
+    """Registra a análise e envia à GME/SME somente quando solicitado."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="dre-servico-1",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
+    )
+
+    resultado = SolicitacaoManutencaoDreService().atualizar(
+        {
+            "id": solicitacao.id,
+            "codigo": solicitacao.codigo,
+            "situacao": solicitacao.situacao,
+        },
+        {"decisao": DecisaoAnaliseDre.APROVADA},
+        usuario_ativo,
+        enviar=enviar,
+    )
+
+    solicitacao.refresh_from_db()
+    assert resultado["analise"]["decisao"] == DecisaoAnaliseDre.APROVADA
+    assert solicitacao.situacao == situacao_esperada
+    assert (solicitacao.data_envio is not None) is enviar
+    mensagem_esperada = (
+        MSG_SOLICITACAO_APROVADA_DRE.format(codigo=solicitacao.codigo)
+        if enviar
+        else None
+    )
+    assert resultado["mensagem"] == mensagem_esperada
+
+
+def test_dre_nao_analisa_solicitacao_fora_da_situacao_editavel(
+    unidade_educacional_emef: Unidadeeducacional,
+    usuario_ativo: Usuario,
+) -> None:
+    """Rejeita a análise de solicitação que não aguarda análise da DRE."""
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="dre-servico-2",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+    )
+    service = SolicitacaoManutencaoDreService()
+
+    with pytest.raises(ValidationError, match="Aguardando Análise da DRE"):
+        service.atualizar(
+            {"id": solicitacao.id, "situacao": solicitacao.situacao},
+            {"decisao": DecisaoAnaliseDre.APROVADA},
+            usuario_ativo,
+        )
+
+    assert not AnaliseSolicitacao.objects.filter(
+        solicitacao_manutencao=solicitacao
+    ).exists()

@@ -4,20 +4,23 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.utils import timezone
 
 from apps.core.services.anexo_service import AnexoService
 from apps.solicitacao_manutencao.constants import PerfisSolicitacao
 from apps.solicitacao_manutencao.models import (
     SituacaoSolicitacao,
 )
-from apps.solicitacao_manutencao.repository import (
-    ArquivoServicoManutencaoRepository,
-    ServicoManutencaoRepository,
-    SolicitacaoManutencaoRepository,
+from apps.solicitacao_manutencao.repositories.ue_repository import (
+    ArquivoServicoManutencaoUeRepository,
+    ServicoManutencaoUeRepository,
+    SolicitacaoManutencaoUeRepository,
 )
 from apps.solicitacao_manutencao.services.notificacao_service import (
     NotificacaoSolicitacaoService,
+)
+from apps.solicitacao_manutencao.services.solicitacao_service import (
+    registrar_envio,
+    validar_situacao_editavel,
 )
 from apps.usuarios.models import Usuario
 
@@ -27,9 +30,9 @@ class SolicitacaoManutencaoUeService:
 
     def __init__(
         self,
-        repository: SolicitacaoManutencaoRepository | None = None,
-        servico_repository: ServicoManutencaoRepository | None = None,
-        arquivo_repository: ArquivoServicoManutencaoRepository | None = None,
+        repository: SolicitacaoManutencaoUeRepository | None = None,
+        servico_repository: ServicoManutencaoUeRepository | None = None,
+        arquivo_repository: ArquivoServicoManutencaoUeRepository | None = None,
         anexo_service: AnexoService | None = None,
         notificacao_service: NotificacaoSolicitacaoService | None = None,
     ) -> None:
@@ -44,12 +47,12 @@ class SolicitacaoManutencaoUeService:
                 de arquivos.
             notificacao_service: Serviço de notificações por e-mail.
         """
-        self.repository = repository or SolicitacaoManutencaoRepository()
+        self.repository = repository or SolicitacaoManutencaoUeRepository()
         self.servico_repository = (
-            servico_repository or ServicoManutencaoRepository()
+            servico_repository or ServicoManutencaoUeRepository()
         )
         self.arquivo_repository = (
-            arquivo_repository or ArquivoServicoManutencaoRepository()
+            arquivo_repository or ArquivoServicoManutencaoUeRepository()
         )
         self.anexo_service = anexo_service or AnexoService()
         self.notificacao_service = (
@@ -85,8 +88,9 @@ class SolicitacaoManutencaoUeService:
         """
         dados_servicos = dados.pop("servicos")
         if enviar:
-            dados["situacao"] = SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE
-            dados["data_envio"] = timezone.now()
+            dados = registrar_envio(
+                dados, SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE
+            )
         else:
             dados["situacao"] = SituacaoSolicitacao.NAO_ENVIADO_DRE
         dados["codigo"] = self.gerar_codigo()
@@ -127,27 +131,21 @@ class SolicitacaoManutencaoUeService:
         Returns:
             Dados atualizados da solicitação com seus serviços.
         """
-        situacoes_editaveis = {
-            SituacaoSolicitacao.NAO_ENVIADO_DRE,
-            SituacaoSolicitacao.NECESSIDADE_REVISAO_UE,
-        }
-        if solicitacao["situacao"] not in situacoes_editaveis:
-            raise ValidationError(
-                {
-                    "situacao": (
-                        "A solicitação só pode ser editada nessa situação. "
-                        "Precisa estar com a situação: "
-                        "Não enviada para a DRE ou Necessidade de revisão."
-                    )
-                }
-            )
+        validar_situacao_editavel(
+            solicitacao,
+            [
+                SituacaoSolicitacao.NAO_ENVIADO_DRE,
+                SituacaoSolicitacao.NECESSIDADE_REVISAO_UE,
+            ],
+        )
 
         dados = {**dados, "atualizado_por": usuario}
         servicos = dados.pop("servicos", None)
 
         if enviar:
-            dados["situacao"] = SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE
-            dados["data_envio"] = timezone.now()
+            dados = registrar_envio(
+                dados, SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE
+            )
         else:
             dados["situacao"] = SituacaoSolicitacao.NAO_ENVIADO_DRE
 
