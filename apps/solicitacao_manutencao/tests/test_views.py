@@ -10,7 +10,11 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.request import Request
-from rest_framework.test import APIClient, APIRequestFactory
+from rest_framework.test import (
+    APIClient,
+    APIRequestFactory,
+    force_authenticate,
+)
 
 from apps.escola.models import (
     DiretoriaRegional,
@@ -25,22 +29,27 @@ from apps.solicitacao_manutencao.constants import (
 )
 from apps.solicitacao_manutencao.filters import SolicitacaoManutencaoFilter
 from apps.solicitacao_manutencao.models import (
+    AnaliseSolicitacao,
     ServicoManutencao,
     SolicitacaoManutencao,
 )
 from apps.solicitacao_manutencao.serializers import (
+    AnaliseSolicitacaoDreSerializer,
     SolicitacaoManutencaoCriarEditarSerializer,
     SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
 )
 from apps.usuarios.constants import PerfilAcesso
-from apps.usuarios.models import Usuario
+from apps.usuarios.models import CargoEOL, Usuario
 
 pytestmark = pytest.mark.django_db
 
 URL_SOLICITACAO_UE = "/api/v1/solicitacoes-manutencao/solicitacao-ue/"
 URL_EDITAR_SOLICITACAO_UE = (
     "/api/v1/solicitacoes-manutencao/editar-solicitacao-ue/{}/"
+)
+URL_EDITAR_SOLICITACAO_DRE = (
+    "/api/v1/solicitacoes-manutencao/editar-solicitacao-dre/{}/"
 )
 URL_SOLICITACOES = "/api/v1/solicitacoes-manutencao/"
 URL_SOLICITACAO = "/api/v1/solicitacoes-manutencao/{}/"
@@ -75,9 +84,12 @@ def _postar_solicitacao(
     return getattr(cliente, metodo)(url, dados, format="multipart")
 
 
-def test_seleciona_serializer_conforme_acao() -> None:
+def test_seleciona_serializer_conforme_acao(usuario_ue: Usuario) -> None:
     """Usa um serializer resumido somente na listagem."""
+    requisicao = APIRequestFactory().get(URL_SOLICITACOES)
+    force_authenticate(requisicao, user=usuario_ue)
     view = SolicitacaoManutencaoViewSet()
+    view.request = Request(requisicao)
     view.action = "list"
     assert view.get_serializer_class() is SolicitacaoManutencaoListSerializer
 
@@ -92,6 +104,37 @@ def test_seleciona_serializer_conforme_acao() -> None:
         view.get_serializer_class()
         is SolicitacaoManutencaoCriarEditarSerializer
     )
+
+    view.action = "retrieve"
+    assert (
+        view.get_serializer_class() is SolicitacaoManutencaoDetalheSerializer
+    )
+
+
+def test_seleciona_serializer_de_analise_para_perfil_dre() -> None:
+    """Seleciona o serializer pela ação, independentemente do perfil."""
+    cargo = CargoEOL.objects.create(
+        codigo="perfil-dre", nome="Cargo DRE", perfil=PerfilAcesso.DRE
+    )
+    usuario = Usuario.objects.create(
+        username="usuario-dre", nome="Usuário DRE", cargo=cargo, is_active=True
+    )
+    requisicao = APIRequestFactory().put(URL_SOLICITACOES)
+    force_authenticate(requisicao, user=usuario)
+    view = SolicitacaoManutencaoViewSet()
+    view.request = Request(requisicao)
+
+    view.action = "editar_solicitacao_dre"
+    assert view.get_serializer_class() is AnaliseSolicitacaoDreSerializer
+
+    view.action = "editar_solicitacao_ue"
+    assert (
+        view.get_serializer_class()
+        is SolicitacaoManutencaoCriarEditarSerializer
+    )
+
+    view.action = "list"
+    assert view.get_serializer_class() is SolicitacaoManutencaoListSerializer
 
     view.action = "retrieve"
     assert (
@@ -231,6 +274,7 @@ def test_lista_solicitacoes_com_perfil_dre(
         codigo="dre-lista-1",
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
         criado_por=usuario_ativo,
     )
     unidade_da_mesma_dre = Unidadeeducacional.objects.create(
@@ -244,6 +288,7 @@ def test_lista_solicitacoes_com_perfil_dre(
         codigo="dre-lista-3",
         tipo_atendimento="urgente",
         unidade_educacional=unidade_da_mesma_dre,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
         criado_por=usuario_ativo,
     )
     diretoria_regional_outra = DiretoriaRegional.objects.create(
@@ -262,6 +307,7 @@ def test_lista_solicitacoes_com_perfil_dre(
         codigo="dre-lista-2",
         tipo_atendimento="comum",
         unidade_educacional=unidade_outra_dre,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
         criado_por=usuario_ativo,
     )
 
@@ -340,6 +386,7 @@ def test_lista_retorna_rotulo_do_solicitante(
         tipo_atendimento="comum",
         solicitante="dre",
         unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
     )
 
     cliente = api_cliente_perfil(PerfilAcesso.DRE)
@@ -362,7 +409,7 @@ def test_lista_retorna_rotulo_do_solicitante(
             "codigo": "solicitante-dre",
             "tipo_atendimento": "comum",
             "solicitante": "DRE",
-            "situacao": "nao_enviado_dre",
+            "situacao": "aguardando_analise_dre",
             "data_envio": None,
             "fase": "solicitacao",
         }
@@ -390,6 +437,7 @@ def test_busca_solicitacao_por_uuid(
         tipo_atendimento="urgente",
         informacoes_adicionais="Reparo prioritário.",
         unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
         criado_por=usuario_ue,
     )
 
@@ -442,7 +490,7 @@ def test_busca_solicitacao_por_uuid(
                 }
             ],
         },
-        "situacao": "nao_enviado_dre",
+        "situacao": "aguardando_analise_dre",
         "data_envio": None,
         "fase": "solicitacao",
         "servicos": [],
@@ -522,20 +570,17 @@ def test_busca_solicitacao_inexistente_por_uuid(
     ],
 )
 def test_filtra_listagem_de_solicitacoes(
-    api_cliente_perfil,
+    api_cliente_ue: APIClient,
     unidade_educacional_emef: Any,
+    usuario_ue: Usuario,
     usuario_ativo: Usuario,
+    historico_responsavel: HistoricoResponsavel,
     parametros: dict[str, str],
     codigo_esperado: str,
 ) -> None:
     """Filtra a listagem pelos dados da solicitação."""
-    cliente = api_cliente_perfil(PerfilAcesso.DRE)
-    usuario_dre = Usuario.objects.get(username="usuario-DRE")
-    usuario_dre.diretoria_regional = (
-        unidade_educacional_emef.diretoria_regional
-    )
-    usuario_dre.save(update_fields=["diretoria_regional"])
-    cliente.force_authenticate(user=usuario_dre)
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
     SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="urgente",
@@ -550,7 +595,7 @@ def test_filtra_listagem_de_solicitacoes(
         criado_por=usuario_ativo,
     )
 
-    resposta = cliente.get(URL_SOLICITACOES, parametros)
+    resposta = api_cliente_ue.get(URL_SOLICITACOES, parametros)
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json()["count"] == 1
@@ -566,20 +611,17 @@ def test_filtra_listagem_de_solicitacoes(
     ],
 )
 def test_filtra_listagem_de_solicitacoes_por_multiplos_valores(
-    api_cliente_perfil,
+    api_cliente_ue: APIClient,
     unidade_educacional_emef: Any,
+    usuario_ue: Usuario,
     usuario_ativo: Usuario,
+    historico_responsavel: HistoricoResponsavel,
     campo: str,
     valores: str,
 ) -> None:
     """Filtra a listagem por múltiplos valores do mesmo campo."""
-    cliente = api_cliente_perfil(PerfilAcesso.DRE)
-    usuario_dre = Usuario.objects.get(username="usuario-DRE")
-    usuario_dre.diretoria_regional = (
-        unidade_educacional_emef.diretoria_regional
-    )
-    usuario_dre.save(update_fields=["diretoria_regional"])
-    cliente.force_authenticate(user=usuario_dre)
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
     SolicitacaoManutencao.objects.create(
         codigo="0000001",
         tipo_atendimento="urgente",
@@ -595,25 +637,22 @@ def test_filtra_listagem_de_solicitacoes_por_multiplos_valores(
         criado_por=usuario_ativo,
     )
 
-    resposta = cliente.get(URL_SOLICITACOES, {campo: valores})
+    resposta = api_cliente_ue.get(URL_SOLICITACOES, {campo: valores})
 
     assert resposta.status_code == status.HTTP_200_OK
     assert resposta.json()["count"] == 2
 
 
 def test_filtra_listagem_por_intervalo_de_data_envio(
-    api_cliente_perfil,
+    api_cliente_ue: APIClient,
     unidade_educacional_emef: Any,
+    usuario_ue: Usuario,
     usuario_ativo: Usuario,
+    historico_responsavel: HistoricoResponsavel,
 ) -> None:
     """Filtra solicitações cuja data de envio esteja no intervalo."""
-    cliente = api_cliente_perfil(PerfilAcesso.DRE)
-    usuario_dre = Usuario.objects.get(username="usuario-DRE")
-    usuario_dre.diretoria_regional = (
-        unidade_educacional_emef.diretoria_regional
-    )
-    usuario_dre.save(update_fields=["diretoria_regional"])
-    cliente.force_authenticate(user=usuario_dre)
+    usuario_ue.username = historico_responsavel.responsavel.registro_funcional
+    usuario_ue.save(update_fields=["username"])
     for codigo, data_envio in (
         ("0000001", datetime(2026, 10, 9, 23, 59)),
         ("0000002", datetime(2026, 10, 10, 12)),
@@ -628,7 +667,7 @@ def test_filtra_listagem_por_intervalo_de_data_envio(
             criado_por=usuario_ativo,
         )
 
-    resposta = cliente.get(
+    resposta = api_cliente_ue.get(
         URL_SOLICITACOES,
         {
             "data_envio_after": "2026-10-10",
@@ -940,6 +979,194 @@ def test_edicao_retorna_erro_quando_anexo_e_muito_grande(
 
     assert resposta.status_code == status.HTTP_400_BAD_REQUEST
     assert resposta.json()["title"] == "Arquivo muito grande"
+
+
+def _cliente_dre(api_cliente_perfil, unidade_educacional: Any) -> APIClient:
+    """Retorna um cliente DRE vinculado à diretoria da unidade."""
+    cliente = api_cliente_perfil(PerfilAcesso.DRE)
+    usuario_dre = Usuario.objects.get(username="usuario-DRE")
+    usuario_dre.diretoria_regional = unidade_educacional.diretoria_regional
+    usuario_dre.save(update_fields=["diretoria_regional"])
+    cliente.force_authenticate(user=usuario_dre)
+    return cliente
+
+
+@pytest.mark.parametrize(
+    ("query", "situacao_esperada", "mensagem_esperada"),
+    [
+        ("", SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE, None),
+        (
+            "?enviar=true",
+            SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME,
+            "A solicitação nº dre-edicao-1 foi aprovada e enviada "
+            "para a GME/SME.",
+        ),
+    ],
+)
+def test_dre_analisa_solicitacao(
+    api_cliente_perfil,
+    unidade_educacional_emef: Any,
+    query: str,
+    situacao_esperada: SituacaoSolicitacao,
+    mensagem_esperada: str | None,
+) -> None:
+    """Registra a análise da DRE e envia à GME/SME quando solicitado."""
+    cliente = _cliente_dre(api_cliente_perfil, unidade_educacional_emef)
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="dre-edicao-1",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
+    )
+
+    resposta = cliente.put(
+        URL_EDITAR_SOLICITACAO_DRE.format(solicitacao.uuid) + query,
+        {"decisao": "aprovada", "observacoes": "Serviço necessário."},
+        format="json",
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK, resposta.json()
+    analise = AnaliseSolicitacao.objects.get(
+        solicitacao_manutencao=solicitacao
+    )
+    assert resposta.json() == {
+        "dados": {
+            "uuid": str(analise.uuid),
+            "perfil": "dre",
+            "decisao": "aprovada",
+            "observacoes": "Serviço necessário.",
+            "data_alteracao": None,
+        },
+        "detail": mensagem_esperada,
+    }
+    solicitacao.refresh_from_db()
+    assert solicitacao.situacao == situacao_esperada
+
+
+def test_dre_envio_sem_aprovacao_nao_retorna_mensagem(
+    api_cliente_perfil,
+    unidade_educacional_emef: Any,
+) -> None:
+    """Não retorna mensagem de aprovação quando a decisão não é aprovada."""
+    cliente = _cliente_dre(api_cliente_perfil, unidade_educacional_emef)
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="dre-edicao-4",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
+    )
+
+    resposta = cliente.put(
+        URL_EDITAR_SOLICITACAO_DRE.format(solicitacao.uuid) + "?enviar=true",
+        {"decisao": "reprovada", "observacoes": "Não procede."},
+        format="json",
+    )
+
+    assert resposta.status_code == status.HTTP_200_OK, resposta.json()
+    assert resposta.json()["detail"] is None
+
+
+def test_dre_analise_rejeita_decisao_invalida(
+    api_cliente_perfil,
+    unidade_educacional_emef: Any,
+) -> None:
+    """Retorna 400 quando a decisão informada não é válida."""
+    cliente = _cliente_dre(api_cliente_perfil, unidade_educacional_emef)
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="dre-edicao-2",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
+    )
+
+    resposta = cliente.put(
+        URL_EDITAR_SOLICITACAO_DRE.format(solicitacao.uuid),
+        {"decisao": "invalida"},
+        format="json",
+    )
+
+    assert resposta.status_code == status.HTTP_400_BAD_REQUEST
+    assert "decisao" in resposta.json()
+    assert not AnaliseSolicitacao.objects.exists()
+
+
+def test_dre_analise_retorna_404_para_solicitacao_invisivel(
+    api_cliente_perfil,
+    unidade_educacional_emef: Any,
+) -> None:
+    """Retorna 404 para solicitação que não aguarda análise da DRE."""
+    cliente = _cliente_dre(api_cliente_perfil, unidade_educacional_emef)
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="dre-edicao-3",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+    )
+
+    resposta = cliente.put(
+        URL_EDITAR_SOLICITACAO_DRE.format(solicitacao.uuid),
+        {"decisao": "aprovada"},
+        format="json",
+    )
+
+    assert resposta.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_dre_analise_rejeita_usuario_nao_identificado() -> None:
+    """Rejeita a análise direta sem usuário autenticado identificado."""
+    view = SolicitacaoManutencaoViewSet()
+    view.request = Request(APIRequestFactory().put(URL_EDITAR_SOLICITACAO_DRE))
+    view.request.user = AnonymousUser()
+
+    with pytest.raises(NotAuthenticated, match="Usuário não identificado"):
+        view.editar_solicitacao_dre(
+            view.request, "00000000-0000-0000-0000-000000000000"
+        )
+
+
+@pytest.mark.parametrize(
+    ("metodo", "url"),
+    [
+        ("post", URL_SOLICITACAO_UE),
+        (
+            "put",
+            URL_EDITAR_SOLICITACAO_UE.format(
+                "00000000-0000-0000-0000-000000000000"
+            ),
+        ),
+    ],
+)
+def test_endpoints_ue_rejeitam_perfil_dre(
+    api_cliente_perfil, metodo: str, url: str
+) -> None:
+    """Retorna 403 quando o perfil DRE acessa endpoints exclusivos da UE."""
+    cliente = api_cliente_perfil(PerfilAcesso.DRE)
+
+    resposta = getattr(cliente, metodo)(url, {}, format="json")
+
+    assert resposta.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_endpoint_dre_rejeita_perfil_ue(
+    api_cliente_perfil,
+    unidade_educacional_emef: Any,
+) -> None:
+    """Retorna 403 quando o perfil UE acessa o endpoint de análise da DRE."""
+    cliente = api_cliente_perfil(PerfilAcesso.UE)
+    solicitacao = SolicitacaoManutencao.objects.create(
+        codigo="ue-analise-dre",
+        tipo_atendimento="comum",
+        unidade_educacional=unidade_educacional_emef,
+        situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
+    )
+
+    resposta = cliente.put(
+        URL_EDITAR_SOLICITACAO_DRE.format(solicitacao.uuid),
+        {"decisao": "aprovada"},
+        format="json",
+    )
+
+    assert resposta.status_code == status.HTTP_403_FORBIDDEN
+    assert not AnaliseSolicitacao.objects.exists()
 
 
 def test_perfil_ue_pode_listar_servicos(api_cliente_perfil):

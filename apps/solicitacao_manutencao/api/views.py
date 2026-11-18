@@ -26,9 +26,13 @@ from apps.solicitacao_manutencao.constants import (
 from apps.solicitacao_manutencao.filters import SolicitacaoManutencaoFilter
 from apps.solicitacao_manutencao.schemas import SOLICITACAO_MANUTENCAO_SCHEMA
 from apps.solicitacao_manutencao.serializers import (
+    AnaliseSolicitacaoDreSerializer,
     SolicitacaoManutencaoCriarEditarSerializer,
     SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
+)
+from apps.solicitacao_manutencao.services.dre_services import (
+    SolicitacaoManutencaoDreService,
 )
 from apps.solicitacao_manutencao.services.solicitacao_service import (
     SolicitacaoManutencaoService,
@@ -37,7 +41,14 @@ from apps.solicitacao_manutencao.services.ue_services import (
     SolicitacaoManutencaoUeService,
 )
 from apps.usuarios.models import Usuario
-from apps.usuarios.permissions import PermissaoSolicitacoes
+from apps.usuarios.permissions import (
+    PermissaoPerfilDRE,
+    PermissaoPerfilUE,
+    PermissaoSolicitacoes,
+)
+
+MSG_SOLICITACAO_NAO_ENCONTRADA = "Solicitação não encontrada."
+MSG_USUARIO_NAO_IDENTIFICADO = "Usuário não identificado."
 
 
 @SOLICITACAO_MANUTENCAO_SCHEMA
@@ -55,6 +66,7 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         super().__init__(**kwargs)
         self.service = SolicitacaoManutencaoService()
         self.solicitacao_service = SolicitacaoManutencaoUeService()
+        self.dre_service = SolicitacaoManutencaoDreService()
 
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer apropriado para a ação atual."""
@@ -62,6 +74,8 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
             return SolicitacaoManutencaoListSerializer
         if self.action == "retrieve":
             return SolicitacaoManutencaoDetalheSerializer
+        if self.action == "editar_solicitacao_dre":
+            return AnaliseSolicitacaoDreSerializer
         return SolicitacaoManutencaoCriarEditarSerializer
 
     def _usuario_logado(self) -> Usuario | None:
@@ -96,7 +110,7 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
             self._usuario_logado(), uuid
         )
         if solicitacao is None:
-            raise Http404("Solicitação não encontrada.")
+            raise Http404(MSG_SOLICITACAO_NAO_ENCONTRADA)
         serializer = self.get_serializer(solicitacao)
         return Response(serializer.data)
 
@@ -161,7 +175,12 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=False, methods=["post"], url_path="solicitacao-ue")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="solicitacao-ue",
+        permission_classes=[PermissaoSolicitacoes, PermissaoPerfilUE],
+    )
     def solicitacao_ue(self, request: Request) -> Response:
         """Cria uma solicitação de manutenção para uma UE.
 
@@ -176,7 +195,7 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         """
         usuario = self._usuario_logado()
         if usuario is None:
-            raise NotAuthenticated("Usuário não identificado.")
+            raise NotAuthenticated(MSG_USUARIO_NAO_IDENTIFICADO)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         enviar = request.query_params.get("enviar") == "true"
@@ -192,6 +211,7 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         detail=False,
         methods=["put"],
         url_path=r"editar-solicitacao-ue/(?P<uuid>[^/.]+)",
+        permission_classes=[PermissaoSolicitacoes, PermissaoPerfilUE],
     )
     def editar_solicitacao_ue(self, request: Request, uuid: str) -> Response:
         """Atualiza uma solicitação de manutenção de uma UE.
@@ -209,10 +229,10 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         try:
             usuario = self._usuario_logado()
             if usuario is None:
-                raise NotAuthenticated("Usuário não identificado.")
+                raise NotAuthenticated(MSG_USUARIO_NAO_IDENTIFICADO)
             solicitacao = self.service.get_detalhes_solicitacao(usuario, uuid)
             if solicitacao is None:
-                raise Http404("Solicitação não encontrada.")
+                raise Http404(MSG_SOLICITACAO_NAO_ENCONTRADA)
             serializer = self.get_serializer(solicitacao, data=request.data)
             serializer.is_valid(raise_exception=True)
             enviar = request.query_params.get("enviar") == "true"
@@ -229,3 +249,43 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
             ) from exc
         except DjangoValidationError as exc:
             raise DRFValidationError(exc.message_dict) from exc
+
+    @action(
+        detail=False,
+        methods=["put"],
+        url_path=r"editar-solicitacao-dre/(?P<uuid>[^/.]+)",
+        permission_classes=[PermissaoSolicitacoes, PermissaoPerfilDRE],
+    )
+    def editar_solicitacao_dre(self, request: Request, uuid: str) -> Response:
+        """Atualiza uma solicitação de manutenção por um perfil DRE.
+
+        Args:
+            request: Requisição com os dados atualizados.
+            uuid: UUID da solicitação a atualizar.
+
+        Returns:
+            Resposta com os dados atualizados da solicitação.
+
+        Raises:
+            NotAuthenticated: Se o usuário autenticado não for identificado.
+        """
+        usuario = self._usuario_logado()
+        if usuario is None:
+            raise NotAuthenticated(MSG_USUARIO_NAO_IDENTIFICADO)
+        solicitacao = self.service.get_detalhes_solicitacao(usuario, uuid)
+        if solicitacao is None:
+            raise Http404(MSG_SOLICITACAO_NAO_ENCONTRADA)
+        serializer = self.get_serializer(solicitacao, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        enviar = request.query_params.get("enviar") == "true"
+        resultado = self.dre_service.atualizar(
+            solicitacao,
+            serializer.validated_data,
+            usuario,
+            enviar=enviar,
+        )
+        serializer.instance = resultado["analise"]
+        return Response(
+            {"dados": serializer.data, "detail": resultado["mensagem"]},
+            status=status.HTTP_200_OK,
+        )
