@@ -27,6 +27,14 @@ class FaseSolicitacao(models.TextChoices):
     EXECUCAO = "execucao", "Execução"
 
 
+class DecisaoAnaliseDre(models.TextChoices):
+    """Define as decisões da DRE em relação a uma solicitação."""
+
+    APROVADA = "aprovada", "Aprovada (DRE)"
+    REPROVADA = "reprovada", "Reprovada (DRE)"
+    NECESSIDADE_REVISAO = "necessidade_revisao", "Necessidade de revisão (UE)"
+
+
 class SituacaoSolicitacao(models.TextChoices):
     """Define as situações de uma solicitação."""
 
