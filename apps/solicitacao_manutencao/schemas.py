@@ -14,6 +14,7 @@ from drf_spectacular.utils import (
 from rest_framework import serializers
 
 from apps.solicitacao_manutencao.serializers import (
+    AnaliseSolicitacaoDreSerializer,
     SolicitacaoManutencaoCriarEditarSerializer,
     SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
@@ -22,6 +23,10 @@ from apps.solicitacao_manutencao.serializers import (
 _TAG_SOLICITACAO = "Solicitação de manutenção"
 _CREDENCIAIS_INVALIDAS = "Credenciais inválidas."
 _ERRO_SERVIDOR = "Erro no servidor."
+_DADOS_INVALIDOS = "Dados inválidos."
+_SOLICITACAO_NAO_ENCONTRADA = "Solicitação não encontrada."
+_SOMENTE_PERFIL_UE = "Acesso permitido somente para usuários do perfil UE."
+_SOMENTE_PERFIL_DRE = "Acesso permitido somente para usuários do perfil DRE."
 _REPARO_PRIORITARIO = "Reparo prioritário."
 _DISJUNTOR_DESARMADO = "Disjuntor desarmando constantemente."
 
@@ -206,6 +211,29 @@ _SOLICITACAO_DETALHE_EXEMPLO: dict[str, Any] = {
     ],
 }
 
+_ANALISE_DRE_EXEMPLO_ENTRADA: dict[str, Any] = {
+    "decisao": "aprovada",
+    "observacoes": "Serviço necessário.",
+}
+
+_ANALISE_DRE_EXEMPLO_SAIDA: dict[str, Any] = {
+    "dados": {
+        "uuid": "9f4e4e4e-7c7c-4d4d-bfbf-890abcdef123",
+        "perfil": "dre",
+        **_ANALISE_DRE_EXEMPLO_ENTRADA,
+        "data_alteracao": None,
+    },
+    "detail": "A solicitação nº 123 foi aprovada e enviada para a GME/SME.",
+}
+
+_ANALISE_DRE_RESPOSTA_SERIALIZER = inline_serializer(
+    name="AnaliseSolicitacaoDreResposta",
+    fields={
+        "dados": AnaliseSolicitacaoDreSerializer(),
+        "detail": serializers.CharField(allow_null=True),
+    },
+)
+
 SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
     situacoes=extend_schema(
         tags=[_TAG_SOLICITACAO],
@@ -242,9 +270,10 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
         summary="Lista as solicitações de manutenção",
         description=(
             "Retorna a lista paginada de solicitações de manutenção "
-            "visíveis ao usuário autenticado. A DRE consulta as solicitações "
-            "das unidades sob sua responsabilidade; os demais perfis "
-            "autorizados consultam as solicitações vinculadas ao seu RF."
+            "visíveis ao usuário autenticado. A DRE consulta somente as "
+            "solicitações com situação `aguardando_analise_dre` das unidades "
+            "da sua diretoria regional; os demais perfis autorizados "
+            "consultam as solicitações vinculadas ao seu RF."
         ),
         operation_id="listarSolicitacoesManutencao",
         parameters=[
@@ -299,12 +328,15 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
     retrieve=extend_schema(
         tags=[_TAG_SOLICITACAO],
         summary="Busca uma solicitação de manutenção",
-        description="Retorna os dados de uma solicitação pelo UUID.",
+        description=(
+            "Retorna os dados de uma solicitação pelo UUID. A visibilidade "
+            "segue as mesmas regras da listagem para cada perfil."
+        ),
         operation_id="buscarSolicitacaoManutencao",
         responses={
             200: SolicitacaoManutencaoDetalheSerializer,
             401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
-            404: OpenApiResponse(description="Solicitação não encontrada."),
+            404: OpenApiResponse(description=_SOLICITACAO_NAO_ENCONTRADA),
             500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
@@ -340,8 +372,9 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
         request=SolicitacaoManutencaoCriarEditarSerializer,
         responses={
             201: SolicitacaoManutencaoCriarEditarSerializer,
-            400: OpenApiResponse(description="Dados inválidos."),
+            400: OpenApiResponse(description=_DADOS_INVALIDOS),
             401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            403: OpenApiResponse(description=_SOMENTE_PERFIL_UE),
             500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
@@ -383,9 +416,10 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
         request=SolicitacaoManutencaoCriarEditarSerializer,
         responses={
             200: _SOLICITACAO_EDICAO_RESPOSTA_SERIALIZER,
-            400: OpenApiResponse(description="Dados inválidos."),
+            400: OpenApiResponse(description=_DADOS_INVALIDOS),
             401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
-            404: OpenApiResponse(description="Solicitação não encontrada."),
+            403: OpenApiResponse(description=_SOMENTE_PERFIL_UE),
+            404: OpenApiResponse(description=_SOLICITACAO_NAO_ENCONTRADA),
             500: OpenApiResponse(description=_ERRO_SERVIDOR),
         },
         examples=[
@@ -394,6 +428,60 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
                 response_only=True,
                 status_codes=["200"],
                 value=_SOLICITACAO_EDICAO_EXEMPLO_SAIDA,
+            ),
+        ],
+    ),
+    editar_solicitacao_dre=extend_schema(
+        tags=[_TAG_SOLICITACAO],
+        summary="Registra a análise da DRE em uma solicitação",
+        description=(
+            "Registra ou atualiza a análise do perfil DRE para uma "
+            "solicitação com situação `aguardando_analise_dre` da sua "
+            "diretoria regional. Quando `enviar=true`, a solicitação é "
+            "enviada para análise da GME/SME (`aguardando_analise_gme_sme`); "
+            "caso contrário, permanece aguardando análise da DRE. Retorna os "
+            "dados da análise registrada em `dados` e, quando aprovada e "
+            "enviada, a confirmação para o usuário em `detail` (nos demais "
+            "casos, `detail` é `null`)."
+        ),
+        operation_id="analisarSolicitacaoManutencaoDre",
+        parameters=[
+            OpenApiParameter(
+                name="enviar",
+                type=bool,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description=(
+                    "Indica se a solicitação deve ser enviada para análise "
+                    "da GME/SME. O valor padrão é `false`."
+                ),
+            )
+        ],
+        request=AnaliseSolicitacaoDreSerializer,
+        responses={
+            200: _ANALISE_DRE_RESPOSTA_SERIALIZER,
+            400: OpenApiResponse(description=_DADOS_INVALIDOS),
+            401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
+            403: OpenApiResponse(description=_SOMENTE_PERFIL_DRE),
+            404: OpenApiResponse(
+                description=(
+                    "Solicitação não encontrada ou não aguardando análise "
+                    "da DRE."
+                )
+            ),
+            500: OpenApiResponse(description=_ERRO_SERVIDOR),
+        },
+        examples=[
+            OpenApiExample(
+                name="Análise da DRE",
+                request_only=True,
+                value=_ANALISE_DRE_EXEMPLO_ENTRADA,
+            ),
+            OpenApiExample(
+                name="Análise registrada",
+                response_only=True,
+                status_codes=["200"],
+                value=_ANALISE_DRE_EXEMPLO_SAIDA,
             ),
         ],
     ),
