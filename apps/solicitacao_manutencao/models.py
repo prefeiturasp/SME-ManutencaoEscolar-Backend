@@ -1,5 +1,6 @@
 """Modelos do domínio de solicitações de manutenção."""
 
+from django.conf import settings
 from django.db import models
 
 from apps.core.models.mixins import AnexoMixin, BaseModel
@@ -60,6 +61,28 @@ class SolicitacaoManutencao(BaseModel):
     def __str__(self) -> str:
         """Retorna o código da solicitação."""
         return f"{self.codigo} - {self.unidade_educacional}"
+
+
+class HistoricoAnaliseSolicitacao(BaseModel):
+    """Representa o histórico de análises de uma solicitação."""
+
+    solicitacao_manutencao = models.ForeignKey(
+        SolicitacaoManutencao,
+        on_delete=models.CASCADE,
+        related_name="analises_solicitacao",
+    )
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="analises_solicitacao",
+    )
+    decisao = models.CharField(
+        max_length=30, choices=SituacaoSolicitacao.choices
+    )
+    data_alteracao = models.DateTimeField(
+        blank=True, null=True, editable=False
+    )
+    observacoes = models.TextField(blank=True, default="")
 
 
 class ServicoManutencao(BaseModel):

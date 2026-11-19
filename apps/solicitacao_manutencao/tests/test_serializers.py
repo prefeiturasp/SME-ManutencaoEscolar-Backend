@@ -5,8 +5,13 @@ from typing import Any
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from apps.solicitacao_manutencao.constants import (
+    MSG_DECISAO_DRE_DEVE_SER_APROVADA,
+    SituacaoSolicitacao,
+)
 from apps.solicitacao_manutencao.serializers import (
     FotoLocalReparoSerializer,
+    HistoricoAnaliseSolicitacaoSerializer,
     ServicoManutencaoSerializer,
     SolicitacaoManutencaoCriarEditarSerializer,
 )
@@ -97,10 +102,9 @@ def test_servico_vazio_e_convertido_para_none(
     solicitacao_payload: dict[str, Any],
 ) -> None:
     """Converte o serviço catalogado vazio para None."""
-    solicitacao_payload["servicos"][0]["servico"] = ""
-    solicitacao_payload["servicos"][0]["servico_especifico"] = (
-        "Troca de disjuntor"
-    )
+    servico = solicitacao_payload["servicos"][0]
+    servico["servico"] = ""
+    servico["servico_especifico"] = "Troca de disjuntor"
     serializer = SolicitacaoManutencaoCriarEditarSerializer(
         data=solicitacao_payload
     )
@@ -127,3 +131,49 @@ def test_valida_servico_catalogado_sem_servico_especifico(
     )
 
     assert serializer.is_valid(), serializer.errors
+
+
+def test_analise_dre_valida_decisao_e_observacoes() -> None:
+    """Aceita uma análise da DRE com decisão válida e observações."""
+    serializer = HistoricoAnaliseSolicitacaoSerializer(
+        data={
+            "decisao": SituacaoSolicitacao.APROVADA_DRE,
+            "observacoes": "Solicitação aprovada.",
+        }
+    )
+
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data == {
+        "decisao": SituacaoSolicitacao.APROVADA_DRE,
+        "observacoes": "Solicitação aprovada.",
+    }
+
+
+def test_analise_dre_rejeita_decisao_invalida() -> None:
+    """Rejeita uma análise da DRE com decisão fora das opções."""
+    serializer = HistoricoAnaliseSolicitacaoSerializer(
+        data={"decisao": "invalida"}
+    )
+
+    assert not serializer.is_valid()
+    assert "decisao" in serializer.errors
+
+
+def test_analise_dre_rejeita_decisao_diferente_de_aprovada() -> None:
+    """Rejeita uma análise da DRE cuja decisão não é de aprovação."""
+    serializer = HistoricoAnaliseSolicitacaoSerializer(
+        data={"decisao": SituacaoSolicitacao.REPROVADA_DRE}
+    )
+
+    assert not serializer.is_valid()
+    assert serializer.errors["decisao"] == [MSG_DECISAO_DRE_DEVE_SER_APROVADA]
+
+
+def test_analise_dre_exige_decisao() -> None:
+    """Rejeita uma análise da DRE sem decisão."""
+    serializer = HistoricoAnaliseSolicitacaoSerializer(
+        data={"observacoes": "Teste"}
+    )
+
+    assert not serializer.is_valid()
+    assert "decisao" in serializer.errors
