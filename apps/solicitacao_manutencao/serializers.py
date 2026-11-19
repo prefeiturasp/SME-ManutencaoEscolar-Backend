@@ -9,10 +9,14 @@ from apps.escola.serializers.unidade_educacional_serializers import (
     UnidadeEducacionalSerializer,
 )
 from apps.servico.models import Servico
-from apps.solicitacao_manutencao.constants import PerfisSolicitacao
+from apps.solicitacao_manutencao.constants import (
+    MSG_DECISAO_DRE_DEVE_SER_APROVADA,
+    PerfisSolicitacao,
+    SituacaoSolicitacao,
+)
 from apps.solicitacao_manutencao.models import (
-    AnaliseSolicitacao,
     FotoLocalReparo,
+    HistoricoAnaliseSolicitacao,
     ServicoManutencao,
     SolicitacaoManutencao,
 )
@@ -182,21 +186,32 @@ class SolicitacaoManutencaoCriarEditarSerializer(serializers.ModelSerializer):
         return value
 
 
-class AnaliseSolicitacaoDreSerializer(serializers.ModelSerializer):
+class HistoricoAnaliseSolicitacaoSerializer(serializers.ModelSerializer):
     """Valida e serializa a análise de uma solicitação pelo perfil DRE."""
+
+    usuario = serializers.IntegerField(read_only=True)
+    decisao = serializers.ChoiceField(
+        choices=[
+            (
+                SituacaoSolicitacao.APROVADA_DRE.value,
+                SituacaoSolicitacao.APROVADA_DRE.label,
+            )
+        ],
+        error_messages={"invalid_choice": MSG_DECISAO_DRE_DEVE_SER_APROVADA},
+    )
 
     class Meta:
         """Configura os campos da análise da DRE."""
 
-        model = AnaliseSolicitacao
+        model = HistoricoAnaliseSolicitacao
         fields = (
             "uuid",
-            "perfil",
+            "usuario",
             "decisao",
             "observacoes",
             "data_alteracao",
         )
-        read_only_fields = ("uuid", "perfil")
+        read_only_fields = ("uuid", "usuario")
 
 
 class ServicoManutencaoDetalhesSerializer(serializers.ModelSerializer):
