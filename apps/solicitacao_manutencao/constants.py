@@ -7,6 +7,9 @@ ROTA_VISUALIZAR_SOLICITACAO = "/solicitacao_manutencao/visualizar/{uuid}"
 MSG_SOLICITACAO_APROVADA_DRE = (
     "A solicitação nº {codigo} foi aprovada e enviada para a GME/SME."
 )
+MSG_DECISAO_DRE_DEVE_SER_APROVADA = (
+    "A decisão informada deve ser de aprovação da DRE."
+)
 
 
 class TipoAtendimento(models.TextChoices):
@@ -29,14 +32,6 @@ class FaseSolicitacao(models.TextChoices):
     SOLICITACAO = "solicitacao", "Solicitação"
     VISTORIA = "vistoria", "Vistoria"
     EXECUCAO = "execucao", "Execução"
-
-
-class DecisaoAnaliseDre(models.TextChoices):
-    """Define as decisões da DRE em relação a uma solicitação."""
-
-    APROVADA = "aprovada", "Aprovada (DRE)"
-    REPROVADA = "reprovada", "Reprovada (DRE)"
-    NECESSIDADE_REVISAO = "necessidade_revisao", "Necessidade de revisão (UE)"
 
 
 class SituacaoSolicitacao(models.TextChoices):

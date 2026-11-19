@@ -1,10 +1,10 @@
 """Modelos do domínio de solicitações de manutenção."""
 
+from django.conf import settings
 from django.db import models
 
 from apps.core.models.mixins import AnexoMixin, BaseModel
 from apps.solicitacao_manutencao.constants import (
-    DecisaoAnaliseDre,
     FaseExecucao,
     FaseSolicitacao,
     FaseVistoria,
@@ -63,17 +63,21 @@ class SolicitacaoManutencao(BaseModel):
         return f"{self.codigo} - {self.unidade_educacional}"
 
 
-class AnaliseSolicitacao(BaseModel):
-    """Representa a análise de uma solicitação por um perfil (DRE, SME/GME)."""
+class HistoricoAnaliseSolicitacao(BaseModel):
+    """Representa o histórico de análises de uma solicitação."""
 
-    solicitacao_manutencao = models.OneToOneField(
+    solicitacao_manutencao = models.ForeignKey(
         SolicitacaoManutencao,
         on_delete=models.CASCADE,
-        related_name="analise",
+        related_name="analises_solicitacao",
     )
-    perfil = models.CharField(max_length=20, choices=PerfisSolicitacao.choices)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="analises_solicitacao",
+    )
     decisao = models.CharField(
-        max_length=30, choices=DecisaoAnaliseDre.choices
+        max_length=30, choices=SituacaoSolicitacao.choices
     )
     data_alteracao = models.DateTimeField(
         blank=True, null=True, editable=False
