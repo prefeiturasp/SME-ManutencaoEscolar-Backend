@@ -26,13 +26,10 @@ from apps.solicitacao_manutencao.constants import (
 from apps.solicitacao_manutencao.filters import SolicitacaoManutencaoFilter
 from apps.solicitacao_manutencao.schemas import SOLICITACAO_MANUTENCAO_SCHEMA
 from apps.solicitacao_manutencao.serializers import (
-    AnaliseSolicitacaoDreSerializer,
+    HistoricoAnaliseSolicitacaoSerializer,
     SolicitacaoManutencaoCriarEditarSerializer,
     SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
-)
-from apps.solicitacao_manutencao.services.dre_services import (
-    SolicitacaoManutencaoDreService,
 )
 from apps.solicitacao_manutencao.services.solicitacao_service import (
     SolicitacaoManutencaoService,
@@ -65,8 +62,7 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.service = SolicitacaoManutencaoService()
-        self.solicitacao_service = SolicitacaoManutencaoUeService()
-        self.dre_service = SolicitacaoManutencaoDreService()
+        self.ue_service = SolicitacaoManutencaoUeService()
 
     def get_serializer_class(self) -> type[BaseSerializer]:
         """Retorna o serializer apropriado para a ação atual."""
@@ -74,8 +70,8 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
             return SolicitacaoManutencaoListSerializer
         if self.action == "retrieve":
             return SolicitacaoManutencaoDetalheSerializer
-        if self.action == "editar_solicitacao_dre":
-            return AnaliseSolicitacaoDreSerializer
+        if self.action == "aprovar_solicitacao_pela_dre":
+            return HistoricoAnaliseSolicitacaoSerializer
         return SolicitacaoManutencaoCriarEditarSerializer
 
     def _usuario_logado(self) -> Usuario | None:
@@ -181,7 +177,7 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         url_path="solicitacao-ue",
         permission_classes=[PermissaoSolicitacoes, PermissaoPerfilUE],
     )
-    def solicitacao_ue(self, request: Request) -> Response:
+    def unidade_cria_solicitacao(self, request: Request) -> Response:
         """Cria uma solicitação de manutenção para uma UE.
 
         Args:
@@ -199,7 +195,7 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         enviar = request.query_params.get("enviar") == "true"
-        serializer.instance = self.solicitacao_service.criar(
+        serializer.instance = self.ue_service.criar(
             serializer.validated_data,
             usuario,
             enviar=enviar,
@@ -213,8 +209,10 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         url_path=r"editar-solicitacao-ue/(?P<uuid>[^/.]+)",
         permission_classes=[PermissaoSolicitacoes, PermissaoPerfilUE],
     )
-    def editar_solicitacao_ue(self, request: Request, uuid: str) -> Response:
-        """Atualiza uma solicitação de manutenção de uma UE.
+    def unidade_edita_solicitacao(
+        self, request: Request, uuid: str
+    ) -> Response:
+        """Unidade Educacional atualiza uma solicitação de manutenção.
 
         Args:
             request: Requisição com os dados atualizados.
@@ -236,7 +234,7 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
             serializer = self.get_serializer(solicitacao, data=request.data)
             serializer.is_valid(raise_exception=True)
             enviar = request.query_params.get("enviar") == "true"
-            serializer.instance = self.solicitacao_service.atualizar(
+            serializer.instance = self.ue_service.atualizar(
                 solicitacao,
                 serializer.validated_data,
                 usuario,
@@ -253,18 +251,20 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
     @action(
         detail=False,
         methods=["put"],
-        url_path=r"editar-solicitacao-dre/(?P<uuid>[^/.]+)",
+        url_path=r"aprovar-solicitacao-pela-dre/(?P<uuid>[^/.]+)",
         permission_classes=[PermissaoSolicitacoes, PermissaoPerfilDRE],
     )
-    def editar_solicitacao_dre(self, request: Request, uuid: str) -> Response:
-        """Atualiza uma solicitação de manutenção por um perfil DRE.
+    def aprovar_solicitacao_pela_dre(
+        self, request: Request, uuid: str
+    ) -> Response:
+        """Aprova uma solicitação pela DRE e a envia para a GME/SME.
 
         Args:
-            request: Requisição com os dados atualizados.
-            uuid: UUID da solicitação a atualizar.
+            request: Requisição com os dados da análise.
+            uuid: UUID da solicitação a aprovar.
 
         Returns:
-            Resposta com os dados atualizados da solicitação.
+            Resposta com os dados da análise e a mensagem de confirmação.
 
         Raises:
             NotAuthenticated: Se o usuário autenticado não for identificado.
@@ -275,15 +275,14 @@ class SolicitacaoManutencaoViewSet(ListModelMixin, GenericViewSet):
         solicitacao = self.service.get_detalhes_solicitacao(usuario, uuid)
         if solicitacao is None:
             raise Http404(MSG_SOLICITACAO_NAO_ENCONTRADA)
-        serializer = self.get_serializer(solicitacao, data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        enviar = request.query_params.get("enviar") == "true"
-        resultado = self.dre_service.atualizar(
-            solicitacao,
-            serializer.validated_data,
-            usuario,
-            enviar=enviar,
-        )
+        try:
+            resultado = self.ue_service.aprovar(
+                solicitacao, serializer.validated_data, usuario
+            )
+        except DjangoValidationError as exc:
+            raise DRFValidationError(exc.message_dict) from exc
         serializer.instance = resultado["analise"]
         return Response(
             {"dados": serializer.data, "detail": resultado["mensagem"]},

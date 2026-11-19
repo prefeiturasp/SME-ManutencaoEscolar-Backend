@@ -14,7 +14,7 @@ from drf_spectacular.utils import (
 from rest_framework import serializers
 
 from apps.solicitacao_manutencao.serializers import (
-    AnaliseSolicitacaoDreSerializer,
+    HistoricoAnaliseSolicitacaoSerializer,
     SolicitacaoManutencaoCriarEditarSerializer,
     SolicitacaoManutencaoDetalheSerializer,
     SolicitacaoManutencaoListSerializer,
@@ -212,14 +212,14 @@ _SOLICITACAO_DETALHE_EXEMPLO: dict[str, Any] = {
 }
 
 _ANALISE_DRE_EXEMPLO_ENTRADA: dict[str, Any] = {
-    "decisao": "aprovada",
+    "decisao": "aprovada_dre",
     "observacoes": "Serviço necessário.",
 }
 
 _ANALISE_DRE_EXEMPLO_SAIDA: dict[str, Any] = {
     "dados": {
         "uuid": "9f4e4e4e-7c7c-4d4d-bfbf-890abcdef123",
-        "perfil": "dre",
+        "usuario": 1,
         **_ANALISE_DRE_EXEMPLO_ENTRADA,
         "data_alteracao": None,
     },
@@ -227,10 +227,10 @@ _ANALISE_DRE_EXEMPLO_SAIDA: dict[str, Any] = {
 }
 
 _ANALISE_DRE_RESPOSTA_SERIALIZER = inline_serializer(
-    name="AnaliseSolicitacaoDreResposta",
+    name="HistoricoAnaliseSolicitacaoResposta",
     fields={
-        "dados": AnaliseSolicitacaoDreSerializer(),
-        "detail": serializers.CharField(allow_null=True),
+        "dados": HistoricoAnaliseSolicitacaoSerializer(),
+        "detail": serializers.CharField(),
     },
 )
 
@@ -348,7 +348,7 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
             )
         ],
     ),
-    solicitacao_ue=extend_schema(
+    unidade_cria_solicitacao=extend_schema(
         tags=[_TAG_SOLICITACAO],
         summary="Cria uma solicitação de manutenção",
         description=(
@@ -391,7 +391,7 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
             ),
         ],
     ),
-    editar_solicitacao_ue=extend_schema(
+    unidade_edita_solicitacao=extend_schema(
         tags=[_TAG_SOLICITACAO],
         summary="Edita uma solicitação de manutenção",
         description=(
@@ -431,36 +431,27 @@ SOLICITACAO_MANUTENCAO_SCHEMA = extend_schema_view(
             ),
         ],
     ),
-    editar_solicitacao_dre=extend_schema(
+    aprovar_solicitacao_pela_dre=extend_schema(
         tags=[_TAG_SOLICITACAO],
-        summary="Registra a análise da DRE em uma solicitação",
+        summary="Aprova uma solicitação pela DRE",
         description=(
-            "Registra ou atualiza a análise do perfil DRE para uma "
-            "solicitação com situação `aguardando_analise_dre` da sua "
-            "diretoria regional. Quando `enviar=true`, a solicitação é "
-            "enviada para análise da GME/SME (`aguardando_analise_gme_sme`); "
-            "caso contrário, permanece aguardando análise da DRE. Retorna os "
-            "dados da análise registrada em `dados` e, quando aprovada e "
-            "enviada, a confirmação para o usuário em `detail` (nos demais "
-            "casos, `detail` é `null`)."
+            "Registra a aprovação do perfil DRE para uma solicitação com "
+            "situação `aguardando_analise_dre` da sua diretoria regional e "
+            "a envia para análise da GME/SME (`aguardando_analise_gme_sme`). "
+            "A `decisao` informada deve ser `aprovada_dre`. Retorna os dados "
+            "da análise registrada em `dados` e a confirmação para o usuário "
+            "em `detail`."
         ),
-        operation_id="analisarSolicitacaoManutencaoDre",
-        parameters=[
-            OpenApiParameter(
-                name="enviar",
-                type=bool,
-                location=OpenApiParameter.QUERY,
-                required=False,
-                description=(
-                    "Indica se a solicitação deve ser enviada para análise "
-                    "da GME/SME. O valor padrão é `false`."
-                ),
-            )
-        ],
-        request=AnaliseSolicitacaoDreSerializer,
+        operation_id="aprovarSolicitacaoManutencaoPelaDre",
+        request=HistoricoAnaliseSolicitacaoSerializer,
         responses={
             200: _ANALISE_DRE_RESPOSTA_SERIALIZER,
-            400: OpenApiResponse(description=_DADOS_INVALIDOS),
+            400: OpenApiResponse(
+                description=(
+                    f"{_DADOS_INVALIDOS} Também retornado quando a decisão "
+                    "não é de aprovação."
+                )
+            ),
             401: OpenApiResponse(description=_CREDENCIAIS_INVALIDAS),
             403: OpenApiResponse(description=_SOMENTE_PERFIL_DRE),
             404: OpenApiResponse(
