@@ -5,7 +5,7 @@ class Cargos_Localizadores {
   menu_cargos = () => '[href="/cargos"]'
   btn_cadastrar_cargos = () => 'div.justify-between > .group\\/button'
   campo_nome = () => '#nome'  
-  select_documento = () => '#exige_documento' 
+  select_documento = () => '#status' 
   opcoes_documento = () => '[role="option"]'
   campo_nome_documento = () => '#novo_documento'  
   btn_cancelar = () => 'a[href="/cargos"]:contains("Cancelar")'
