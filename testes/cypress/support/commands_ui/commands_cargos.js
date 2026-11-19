@@ -26,7 +26,7 @@ Cypress.Commands.add('criar_cargo', () => {
     .should('be.visible')
     .type('Teste automação')
 
-  cy.get(cargos_localizadores.select_documento())
+  cy.get(cargos_localizadores.filtro_documento())
     .should('be.visible')
     .click()
 
@@ -67,7 +67,7 @@ Cypress.Commands.add('inserir_documento', () => {
     .should('be.visible')
     .type('Teste automação')
 
-  cy.get(cargos_localizadores.select_documento())
+  cy.get(cargos_localizadores.filtro_documento())
     .should('be.visible')
     .click()
 
@@ -220,12 +220,20 @@ Cypress.Commands.add('editar_cargo', () => {
 
   cy.url().should('include', '/cargos/').and('include', '/editar')
 
-  cy.get(cargos_localizadores.select_documento())
+  cy.get(cargos_localizadores.filtro_documento())
     .should('be.visible')
     .click()
 
   cy.get(cargos_localizadores.opcoes_documento())
-    .contains('Não')
+    .contains('Sim')
+    .should('be.visible')
+    .click()
+
+  cy.get(cargos_localizadores.campo_nome_documento())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(cargos_localizadores.campo_nome())
     .should('be.visible')
     .click()
 
@@ -305,7 +313,7 @@ Cypress.Commands.add('editar_campos_cargo', () => {
     .should('be.visible')
     .clear()
 
-  cy.get(cargos_localizadores.select_documento())
+  cy.get(cargos_localizadores.filtro_documento())
     .should('be.visible')
     .click()
 })
@@ -330,7 +338,7 @@ Cypress.Commands.add('validar_filtro_nome_cargo', () => {
 })
 
 Cypress.Commands.add('filtrar_documento_cargo', () => {
-  cy.get(cargos_localizadores.select_documento())
+  cy.get(cargos_localizadores.selecione_documento())
     .should('be.visible')
     .click()
 

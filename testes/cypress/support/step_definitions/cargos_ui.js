@@ -74,3 +74,74 @@ Quando('clico para excluir o cadastro de cargo  de profissionais {string}', func
 Então('o sistema não exclui cargo vinculado', function () { 
   cy.validar_cargo_nao_excluido()
 })
+Quando('edito o cadastro de cargo {string}', function () {
+  cy.editar_cargo()   
+})
+
+Então('o sistema salva a edição do cargo', function () { 
+  cy.validar_edicao_cargo() 
+})
+
+Quando('apago o preenchimento no cadastro de cargo {string}', function () {
+  cy.editar_campos_cargo()  
+})
+
+Então('o sistema informa campos obrigatórios ao salvar a edição do cargo', function () {
+  cy.validar_campos_obrigatorios_cargo() 
+})
+
+Quando('cancelo a edição do cadastro de cargo {string}', function () {
+  cy.cancelar_edicao_cargo()   
+})
+
+Então('o sistema não edita o cargo retornando para listagem', function () {
+  cy.validar_cancelar_cadastro_cargo() 
+})
+
+Quando('insiro os mesmos dados do cargo {string}', function () { 
+  cy.editar_cargo_existente()
+})
+
+Então('o sistema informa cargo existente ao tentar salvar', function () {
+  cy.validar_cadastro_cargo_duplicado() 
+})
+
+Quando('filtro o nome do cargo {string}', function () {
+  cy.filtrar_nome_cargo()  
+})
+
+Então('o sistema retorna o cargo', function () {
+  cy.validar_filtro_nome_cargo()  
+})
+
+Quando('filtro documento do cargo {string}', function () {
+  cy.filtrar_documento_cargo()  
+})
+
+Então('o sistema retorna o cargo não exigido', function () {
+  cy.validar_filtro_documento_cargo()  
+})
+
+Quando('cancelo o filtro de cargo {string}', function () {
+  cy.limpar_filtro_cargo()  
+})
+
+Então('o sistema retorna todos cargos na listagem', function () {
+  cy.validar_filtro_vazio_cargo() 
+})
+
+Quando('clico no cadastro de cargo {string}', function () {
+  cy.consultar_detalhes_cargo()  
+})
+
+Então('o sistema exibe os detalhes do cargo', function () {
+  cy.validar_editar_cargo()  
+})
+
+Quando('filtro dados do cargo inexistente', function () {
+  cy.filtrar_cargo_inexistente()  
+})
+
+Então('o sistema informa que cargo não foi encontrado', function () {
+  cy.validar_filtro_cargo_inexistente()  
+})
