@@ -6,9 +6,15 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from apps.core.services.anexo_service import AnexoService
-from apps.solicitacao_manutencao.constants import PerfisSolicitacao
+from apps.solicitacao_manutencao.constants import (
+    MSG_SOLICITACAO_APROVADA_DRE,
+    PerfisSolicitacao,
+)
 from apps.solicitacao_manutencao.models import (
     SituacaoSolicitacao,
+)
+from apps.solicitacao_manutencao.repositories.dre_repository import (
+    SolicitacaoManutencaoDreRepository,
 )
 from apps.solicitacao_manutencao.repositories.ue_repository import (
     ArquivoServicoManutencaoUeRepository,
@@ -35,6 +41,7 @@ class SolicitacaoManutencaoUeService:
         arquivo_repository: ArquivoServicoManutencaoUeRepository | None = None,
         anexo_service: AnexoService | None = None,
         notificacao_service: NotificacaoSolicitacaoService | None = None,
+        dre_repository: SolicitacaoManutencaoDreRepository | None = None,
     ) -> None:
         """Inicializa o serviço com suas dependências.
 
@@ -46,7 +53,11 @@ class SolicitacaoManutencaoUeService:
             anexo_service: Serviço de anexos para validação e preparação
                 de arquivos.
             notificacao_service: Serviço de notificações por e-mail.
+            dre_repository: Repositório de análises da DRE.
         """
+        self.dre_repository = (
+            dre_repository or SolicitacaoManutencaoDreRepository()
+        )
         self.repository = repository or SolicitacaoManutencaoUeRepository()
         self.servico_repository = (
             servico_repository or ServicoManutencaoUeRepository()
@@ -164,6 +175,38 @@ class SolicitacaoManutencaoUeService:
                 )
             )
         return solicitacao_atualizada
+
+    def aprovar(
+        self,
+        solicitacao: dict[str, Any],
+        dados: dict[str, Any],
+        usuario: Usuario,
+    ) -> dict[str, Any]:
+        """Aprova uma solicitação pela DRE e a envia para a GME/SME.
+
+        Args:
+            solicitacao: Solicitação a ser aprovada.
+            dados: Dados validados da análise.
+            usuario: Usuário responsável pela aprovação.
+
+        Returns:
+            Dicionário com os dados da análise registrada (`analise`) e a
+            mensagem de confirmação da aprovação (`mensagem`).
+
+        Raises:
+            ValidationError: Se a solicitação não aguardar análise da DRE.
+        """
+        validar_situacao_editavel(
+            solicitacao, [SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE]
+        )
+        dados = registrar_envio(
+            dados, SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME
+        )
+        analise = self.dre_repository.aprovar(solicitacao, dados, usuario)
+        mensagem = MSG_SOLICITACAO_APROVADA_DRE.format(
+            codigo=solicitacao["codigo"]
+        )
+        return {"analise": analise, "mensagem": mensagem}
 
     def _sincronizar_servicos(
         self,

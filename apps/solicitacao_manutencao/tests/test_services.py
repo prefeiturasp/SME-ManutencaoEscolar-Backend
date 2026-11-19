@@ -11,21 +11,17 @@ from apps.core.services.anexo_service import AnexoService
 from apps.escola.models import HistoricoResponsavel, Unidadeeducacional
 from apps.solicitacao_manutencao.constants import (
     MSG_SOLICITACAO_APROVADA_DRE,
-    DecisaoAnaliseDre,
     SituacaoSolicitacao,
 )
 from apps.solicitacao_manutencao.models import (
-    AnaliseSolicitacao,
     FotoLocalReparo,
+    HistoricoAnaliseSolicitacao,
     SolicitacaoManutencao,
 )
 from apps.solicitacao_manutencao.repositories.ue_repository import (
     ArquivoServicoManutencaoUeRepository,
     ServicoManutencaoUeRepository,
     SolicitacaoManutencaoUeRepository,
-)
-from apps.solicitacao_manutencao.services.dre_services import (
-    SolicitacaoManutencaoDreService,
 )
 from apps.solicitacao_manutencao.services.solicitacao_service import (
     SolicitacaoManutencaoService,
@@ -474,20 +470,11 @@ def test_registrar_envio_define_situacao_e_data_sem_alterar_original() -> None:
     assert "situacao" not in dados
 
 
-@pytest.mark.parametrize(
-    ("enviar", "situacao_esperada"),
-    [
-        (False, SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE),
-        (True, SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME),
-    ],
-)
-def test_dre_registra_analise_da_solicitacao(
+def test_aprovar_registra_analise_e_envia_para_gme_sme(
     unidade_educacional_emef: Unidadeeducacional,
     usuario_ativo: Usuario,
-    enviar: bool,
-    situacao_esperada: SituacaoSolicitacao,
 ) -> None:
-    """Registra a análise e envia à GME/SME somente quando solicitado."""
+    """Registra a aprovação da DRE e envia a solicitação à GME/SME."""
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="dre-servico-1",
         tipo_atendimento="comum",
@@ -495,27 +482,25 @@ def test_dre_registra_analise_da_solicitacao(
         situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
     )
 
-    resultado = SolicitacaoManutencaoDreService().atualizar(
+    resultado = SolicitacaoManutencaoUeService().aprovar(
         {
             "id": solicitacao.id,
             "codigo": solicitacao.codigo,
             "situacao": solicitacao.situacao,
         },
-        {"decisao": DecisaoAnaliseDre.APROVADA},
+        {"decisao": SituacaoSolicitacao.APROVADA_DRE},
         usuario_ativo,
-        enviar=enviar,
     )
 
     solicitacao.refresh_from_db()
-    assert resultado["analise"]["decisao"] == DecisaoAnaliseDre.APROVADA
-    assert solicitacao.situacao == situacao_esperada
-    assert (solicitacao.data_envio is not None) is enviar
-    mensagem_esperada = (
-        MSG_SOLICITACAO_APROVADA_DRE.format(codigo=solicitacao.codigo)
-        if enviar
-        else None
+    assert resultado["analise"]["decisao"] == SituacaoSolicitacao.APROVADA_DRE
+    assert solicitacao.situacao == (
+        SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME
     )
-    assert resultado["mensagem"] == mensagem_esperada
+    assert solicitacao.data_envio is not None
+    assert resultado["mensagem"] == MSG_SOLICITACAO_APROVADA_DRE.format(
+        codigo=solicitacao.codigo
+    )
 
 
 def test_dre_nao_analisa_solicitacao_fora_da_situacao_editavel(
@@ -528,15 +513,15 @@ def test_dre_nao_analisa_solicitacao_fora_da_situacao_editavel(
         tipo_atendimento="comum",
         unidade_educacional=unidade_educacional_emef,
     )
-    service = SolicitacaoManutencaoDreService()
+    service = SolicitacaoManutencaoUeService()
 
     with pytest.raises(ValidationError, match="Aguardando Análise da DRE"):
-        service.atualizar(
+        service.aprovar(
             {"id": solicitacao.id, "situacao": solicitacao.situacao},
-            {"decisao": DecisaoAnaliseDre.APROVADA},
+            {"decisao": SituacaoSolicitacao.APROVADA_DRE},
             usuario_ativo,
         )
 
-    assert not AnaliseSolicitacao.objects.filter(
+    assert not HistoricoAnaliseSolicitacao.objects.filter(
         solicitacao_manutencao=solicitacao
     ).exists()
