@@ -5,12 +5,9 @@ from typing import Any, cast
 from django.db import transaction
 from django.db.models import QuerySet
 
-from apps.solicitacao_manutencao.constants import (
-    PerfisSolicitacao,
-    SituacaoSolicitacao,
-)
+from apps.solicitacao_manutencao.constants import SituacaoSolicitacao
 from apps.solicitacao_manutencao.models import (
-    AnaliseSolicitacao,
+    HistoricoAnaliseSolicitacao,
     SolicitacaoManutencao,
 )
 from apps.solicitacao_manutencao.repositories.solicitacao_repository import (
@@ -20,7 +17,7 @@ from apps.usuarios.models import Usuario
 
 
 class SolicitacaoManutencaoDreRepository(SolicitacaoManutencaoBaseRepository):
-    """Gerencia a persistência de solicitações de manutenção da DRE."""
+    """Gerencia a persistência de solicitações de manutenção pela DRE."""
 
     campos_analise = ("decisao", "observacoes")
 
@@ -51,18 +48,18 @@ class SolicitacaoManutencaoDreRepository(SolicitacaoManutencaoBaseRepository):
         )
 
     @transaction.atomic
-    def atualizar(
+    def aprovar(
         self,
         solicitacao: dict[str, Any],
         dados: dict[str, Any],
         usuario: Usuario,
     ) -> dict[str, Any]:
-        """Atualiza uma solicitação e registra a análise da DRE.
+        """Aprova uma solicitação e registra a análise da DRE.
 
         Args:
-            solicitacao: Dados da solicitação a atualizar.
+            solicitacao: Dados da solicitação a aprovar.
             dados: Campos da solicitação e da análise já validados.
-            usuario: Usuário responsável pela atualização.
+            usuario: Usuário responsável pela aprovação.
 
         Returns:
             Dados da análise registrada.
@@ -78,18 +75,37 @@ class SolicitacaoManutencaoDreRepository(SolicitacaoManutencaoBaseRepository):
             if campo not in self.campos_analise
         }
         self._atualizar_campos(solicitacao, dados_solicitacao, usuario)
-        analise, _ = AnaliseSolicitacao.objects.update_or_create(
-            solicitacao_manutencao_id=solicitacao["id"],
-            defaults={**dados_analise, "atualizado_por": usuario},
-            create_defaults={
-                **dados_analise,
-                "perfil": PerfisSolicitacao.DRE,
-                "criado_por": usuario,
-            },
+        return self.criar_historico_analise(
+            solicitacao, dados_analise, usuario
         )
-        return self._serializar(analise)
 
-    def _serializar(self, analise: AnaliseSolicitacao) -> dict[str, Any]:
+    def criar_historico_analise(
+        self,
+        solicitacao: dict[str, Any],
+        dados_analise: dict[str, Any],
+        usuario: Usuario,
+    ) -> dict[str, Any]:
+        """Cria o histórico de análise da solicitação.
+
+        Args:
+            solicitacao: Dados da solicitação.
+            dados_analise: Dados da análise.
+            usuario: Usuário responsável pela criação do histórico.
+
+        Returns:
+            Dados do histórico de análise criado.
+        """
+        historico = HistoricoAnaliseSolicitacao.objects.create(
+            solicitacao_manutencao_id=solicitacao["id"],
+            **dados_analise,
+            usuario=usuario,
+            criado_por=usuario,
+        )
+        return self._serializar(historico)
+
+    def _serializar(
+        self, analise: HistoricoAnaliseSolicitacao
+    ) -> dict[str, Any]:
         """Serializa uma análise de solicitação.
 
         Args:
@@ -101,10 +117,9 @@ class SolicitacaoManutencaoDreRepository(SolicitacaoManutencaoBaseRepository):
         return {
             "id": analise.id,
             "uuid": str(analise.uuid),
-            "perfil": analise.perfil,
+            "usuario": analise.usuario_id,
             "decisao": analise.decisao,
             "observacoes": analise.observacoes,
             "data_alteracao": analise.data_alteracao,
-            "criado_por": analise.criado_por,
             "criado_em": analise.criado_em,
         }

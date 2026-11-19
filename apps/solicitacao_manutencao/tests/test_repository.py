@@ -5,13 +5,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.escola.models import HistoricoResponsavel, Unidadeeducacional
 from apps.solicitacao_manutencao.constants import (
-    DecisaoAnaliseDre,
-    PerfisSolicitacao,
     SituacaoSolicitacao,
 )
 from apps.solicitacao_manutencao.models import (
-    AnaliseSolicitacao,
     FotoLocalReparo,
+    HistoricoAnaliseSolicitacao,
     ServicoManutencao,
     SolicitacaoManutencao,
 )
@@ -324,7 +322,7 @@ def test_repositorio_base_exige_implementacao_da_listagem() -> None:
         repositorio.listar_por_usuario(None)
 
 
-def test_dre_cria_analise_ao_atualizar_solicitacao(
+def test_dre_cria_analise_ao_aprovar_solicitacao(
     unidade_educacional_emef: Unidadeeducacional,
     usuario_ativo: Usuario,
 ) -> None:
@@ -336,10 +334,10 @@ def test_dre_cria_analise_ao_atualizar_solicitacao(
         situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
     )
 
-    resultado = SolicitacaoManutencaoDreRepository().atualizar(
+    resultado = SolicitacaoManutencaoDreRepository().aprovar(
         {"id": solicitacao.id},
         {
-            "decisao": DecisaoAnaliseDre.APROVADA,
+            "decisao": SituacaoSolicitacao.APROVADA_DRE,
             "observacoes": "Serviço necessário.",
             "situacao": SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME,
         },
@@ -347,31 +345,31 @@ def test_dre_cria_analise_ao_atualizar_solicitacao(
     )
 
     solicitacao.refresh_from_db()
-    analise = AnaliseSolicitacao.objects.get(
+    analise = HistoricoAnaliseSolicitacao.objects.get(
         solicitacao_manutencao=solicitacao
     )
     assert resultado == {
         "id": analise.id,
         "uuid": str(analise.uuid),
-        "perfil": PerfisSolicitacao.DRE,
-        "decisao": DecisaoAnaliseDre.APROVADA,
+        "usuario": usuario_ativo.id,
+        "decisao": SituacaoSolicitacao.APROVADA_DRE,
         "observacoes": "Serviço necessário.",
         "data_alteracao": None,
-        "criado_por": usuario_ativo,
         "criado_em": analise.criado_em,
     }
+    assert analise.criado_por == usuario_ativo
     assert (
         solicitacao.situacao == SituacaoSolicitacao.AGUARDANDO_ANALISE_GME_SME
     )
     assert solicitacao.atualizado_por == usuario_ativo
 
 
-def test_dre_atualiza_analise_existente(
+def test_dre_registra_novo_historico_a_cada_analise(
     unidade_educacional_emef: Unidadeeducacional,
     usuario_ativo: Usuario,
     usuario_ue: Usuario,
 ) -> None:
-    """Atualiza a análise já registrada sem criar outra."""
+    """Cria um novo registro de histórico a cada análise da solicitação."""
     solicitacao = SolicitacaoManutencao.objects.create(
         codigo="dre-analise-2",
         tipo_atendimento="comum",
@@ -379,25 +377,28 @@ def test_dre_atualiza_analise_existente(
         situacao=SituacaoSolicitacao.AGUARDANDO_ANALISE_DRE,
     )
     repositorio = SolicitacaoManutencaoDreRepository()
-    criada = repositorio.atualizar(
+    primeira = repositorio.aprovar(
         {"id": solicitacao.id},
-        {"decisao": DecisaoAnaliseDre.APROVADA},
+        {"decisao": SituacaoSolicitacao.APROVADA_DRE},
         usuario_ativo,
     )
 
-    atualizada = repositorio.atualizar(
+    segunda = repositorio.aprovar(
         {"id": solicitacao.id},
-        {"decisao": DecisaoAnaliseDre.REPROVADA},
+        {"decisao": SituacaoSolicitacao.REPROVADA_DRE},
         usuario_ue,
     )
 
-    analise = AnaliseSolicitacao.objects.get(
+    historicos = HistoricoAnaliseSolicitacao.objects.filter(
         solicitacao_manutencao=solicitacao
-    )
-    assert atualizada["id"] == criada["id"]
-    assert atualizada["decisao"] == DecisaoAnaliseDre.REPROVADA
-    assert analise.criado_por == usuario_ativo
-    assert analise.atualizado_por == usuario_ue
+    ).order_by("id")
+    assert segunda["id"] != primeira["id"]
+    assert [
+        (historico.decisao, historico.usuario_id) for historico in historicos
+    ] == [
+        (SituacaoSolicitacao.APROVADA_DRE, usuario_ativo.id),
+        (SituacaoSolicitacao.REPROVADA_DRE, usuario_ue.id),
+    ]
 
 
 def test_cria_solicitacao(
