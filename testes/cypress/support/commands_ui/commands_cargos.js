@@ -225,7 +225,15 @@ Cypress.Commands.add('editar_cargo', () => {
     .click()
 
   cy.get(cargos_localizadores.opcoes_documento())
-    .contains('Não')
+    .contains('Sim')
+    .should('be.visible')
+    .click()
+
+  cy.get(cargos_localizadores.campo_nome_documento())
+    .should('be.visible')
+    .type('Teste automação')
+
+  cy.get(cargos_localizadores.campo_nome())
     .should('be.visible')
     .click()
 
